@@ -1,6 +1,19 @@
+/*
 
+Programed by: Gerald Coggins
+			  02/11/2016 -
+			  
+This is a project to make a rogue-like game from scratch. This program is my 
+first attempt to program anything major so it's a big learning experience for me.
+
+For this project I'll be following the video tutorial series Dunjun by Ginger Games
+found here: https://www.youtube.com/playlist?list=PL93bFkoCMJslJJb15oQddnmABNUl6iz8e
+
+*/
+ 
 //#include "../include/Dunjun/Common.hpp" "../" means back one directory form the folder the .exe is in
 #include <Dunjun/Common.hpp> // set iclude folder in RMB(Dunjun)>>properties>>C++>>General>>Include include;
+#include <Dunjun/ShaderProgram.hpp>
 
 #include <GL/glew.h>	// Download GLEW libraries online. Add them to /external. Add GLEW_STATIC to preprocessor
 #include <GLFW/glfw3.h> // Download GLFW libraries online. Add them to /external
@@ -13,38 +26,25 @@
 //#include <gl/GL.h> // Include openGL ADJUST FOR WINDOWS
 
 #include <iostream>
+#include <cmath>
+#include <string> // include to use strings
+#include <fstream> // include to open exteranl files
 //
-// 
-// Shader Buffer Source
-const char* vertexShaderText = {// create vertex shader
-	"#version 120\n" // define GLSL version
-	"\n"
-	"attribute vec2 position;" // vec2 means the vector has 2 values, here it's x and y
-	"void main()"
-	"{"
-	"gl_Position = vec4(position, 0.0, 1.0);"			  // vec4 means it has 4 values, x and y from position and z=0 and w=1
-											  //"gl_Position = vec4(position.x, position.y, 0.0, 1,0);" //This works the same as the above
-	"}"
-};
-
-
-const char* fragmentShaderText = {// create fragment shader
-	"#version 120\n" // define GLSL version
-	"\n"
-	//"uniform vec3 triangleColor;"
-	"void main()"
-	"{"
-	//"	gl_FragColor = vec4(triangleColor, 1.0);" // assign color
-	"gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);"
-	"}"
-};
-
-
-
+//
+//
 GLOBAL const int G_windowwidth = 854; // set global window width
 GLOBAL const int G_windowheight = 488; // set global window height
 
-void glfwHints() // use this when creating a window to define what version of glfw is used
+class ShaderProgram
+{
+public:
+	ShaderProgram();
+private:
+};
+
+
+
+INTERNAL void glfwHints() // use this when creating a window to define what version of glfw is used
 {
 	glfwWindowHint(GLFW_VERSION_MAJOR, 2);
 	glfwWindowHint(GLFW_VERSION_MINOR, 1);
@@ -64,16 +64,22 @@ int main(int argc, char** argv)
 		glfwTerminate(); // if it is terminate
 		return EXIT_FAILURE;
 	}
-	glfwMakeContextCurrent(window); // aet the context for the window
+	glfwMakeContextCurrent(window); // set the context for the window
 
 	glewInit();
+
+	glEnable(GL_CULL_FACE); // enable culling faces
+	glCullFace(GL_BACK); // specify to cull the back face
 
 	// Here is where you add vertice information
 	//
 	float vertices[] = { // define vertexes for a triangle
-		 0.0f,  0.5f, // 1st vertex in counter-clockwise order
-		-0.5f, -0.5f, // 2nd vertex in counter-clockwise order
-		 0.5f, -0.5f // 3rd vertex in counter-clockwise order
+	//   x		y		r	  g		b
+		 0.5f,  0.5f,	0.0f, 0.0f, 1.0f, // 0 vertex         1 ---- 0        
+		-0.5f,  0.5f,	1.0f, 1.0f, 1.0f, // 1 vertex           \             
+		 0.5f, -0.5f,	0.0f, 1.0f, 0.0f, // 2 vertex              \           
+		-0.5f, -0.5f,	1.0f, 0.0f, 0.0f, // 3 vertex         3 -----2       
+										  // for triangle strips organize vertexes in a backwards Z
 	};
 
 	// create a vertex buffer object to move vertex data to the graphics card
@@ -88,6 +94,25 @@ int main(int argc, char** argv)
 	   GL_STREAM_DRAW   / Redraws every frame (memory intensive)
 	 */
 
+	Dunjun::ShaderProgram shaderProgram;
+	shaderProgram.attachShaderFromFile(Dunjun::ShaderType::Vertex, "data/shaders/default_vert.glsl");
+	shaderProgram.attachShaderFromFile(Dunjun::ShaderType::Fragment, "data/shaders/default_frag.glsl");
+
+	shaderProgram.bindAttribLocation(0, "vertPostition");
+	shaderProgram.bindAttribLocation(1, "vertColor");
+
+	shaderProgram.link();
+	shaderProgram.use();
+
+
+	/*
+	std::string vertexShaderSource = stringfromfile("data/shaders/default_vert.glsl"); // load vertex shader from file
+	const char* vertexShaderText = vertexShaderSource.c_str();
+
+	std::string fragmentShaderSource = stringfromfile("data/shaders/default_frag.glsl"); // load fragment shader form file
+	const char* fragmentShaderText = fragmentShaderSource.c_str();
+
+	// start creating shaders
 	GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER); //load the vertex shader in memory
 	glShaderSource(vertexShader, 1, &vertexShaderText, nullptr); // assign vertex shader source to a shader (shader name, shader number, &shader source text, length)
 	glCompileShader(vertexShader); // make vertexShader program available
@@ -95,29 +120,25 @@ int main(int argc, char** argv)
 	GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER); // load the fragment shader into memory
 	glShaderSource(fragmentShader, 1, &fragmentShaderText, nullptr); // assign fragment shader source to a shader (shader name, shader number, &shader source text, length)
 	glCompileShader(fragmentShader); // make fragmentShader program available
-
+	
 	GLuint shaderProgram = glCreateProgram(); // make a program that uses vertexShader and fragmentShader together
 	glAttachShader(shaderProgram, vertexShader); // attach vertexShader
 	glAttachShader(shaderProgram, fragmentShader); // attach fragmentShader
 
-	glBindAttribLocation(shaderProgram, 0, "position"); // defines attribute vec2 position from vertexShaderText
-	//glBindFragDataLocation(shaderProgram, 0, "triangleColor");
+	glBindAttribLocation(shaderProgram, 0, "vertPosition"); // defines attribute vec2 vertPosition from vertexShaderText
+	glBindAttribLocation(shaderProgram, 1, "vertColor"); // defines attribute vec3 vertColor from vertexShaderText
 
 	// any modification to the attached programs must be done before linking
 	glLinkProgram(shaderProgram); // link vertexShader and fragmentShader together
-	glUseProgram(shaderProgram); // use the program
 
-	//Get the location of triangle color
-	//GLint uniColor = glGetUniformLocation(shaderProgram, "triangleColor");
+	glUseProgram(shaderProgram); // use the program
+	*/
 
 	bool running = true;
 	bool fullscreen = false; // sets fullscreen to be off by default
 	while(running) // create a loop that works until the window closes
 	{
-		// set the triangle color
-		//glUniform3f(uniColor, 1.0, 0.0, 0.0);
-
-		glClearColor(0.0f, 0.0f, 0.0f, 1.0f); // set the default color (R,G,B,A)
+		glClearColor(0.3f, 0.6f, 0.9f, 1.0f); // set the default color (R,G,B,A)
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the color buffer | out of the 3 main buffers
 								/* Error occured here "glfw3.dll is missing" 
 								    -copied glfw3.dll to Dunjun\Debug and it didn't work
@@ -131,16 +152,18 @@ int main(int argc, char** argv)
 		// Draw things GLEW
 		{	
 			// Speicify the layout of the vertex data
-			//GLint posAttrib = glGetAttribLocation(shaderProgram, "position");
-			//glEnableVertexAttribArray(posAttrib);
-			//glVertexAttribPointer(posAttrib, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
-			//glDrawArrays(GL_TRIANGLES, 0, 3); // (mode to draw in, first, total vertices)
-			//glDisableVertexAttribArray(posAttrib);
-			
-			glEnableVertexAttribArray(0); // enables attribute array[0] position from glBindAttribLocation(shaderProgram)
-			glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, nullptr); // pointer for attribute position (att position, size of vertices x/y/z, int type, normalized?, stride, pointer)
-			glDrawArrays(GL_TRIANGLES, 0, 3); // (mode to draw in, first, total vertices)
+			glEnableVertexAttribArray(0); // enables attribute array[0] vertPosition from glBindAttribLocation(shaderProgram)
+			glEnableVertexAttribArray(1); // enables attribute array[1] vertColor ''
+
+			glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), 0); // pointer for attribute position (att position, size of vertices x/y/z, int type, normalized?, stride, pointer)
+			glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (const GLvoid*)(2*sizeof(float)));
+			// stride says how many floats there are per vertex
+			// const void *pointer says how far offset the information starts
+
+			glDrawArrays(GL_TRIANGLE_STRIP, 0, 4); // (mode to draw in, first vertex, total vertices)
+
 			glDisableVertexAttribArray(0); // disables attribute array[0]
+			glDisableVertexAttribArray(1); // disables attribute array[1]
 		}
 
 					
@@ -151,6 +174,7 @@ int main(int argc, char** argv)
 			glfwGetKey(window, GLFW_KEY_ESCAPE)) // checks if the escape key is pressed in window
 			running = false;
 
+		/* COMMENTED OUT BECAUSE IT CAUSES A CRASH
 		if (glfwGetKey(window, GLFW_KEY_F11)) // press F11 to toggle between default and fullscreen
 		{
 			fullscreen = !fullscreen; // toggles true/false boolean for fullscreen
@@ -174,7 +198,7 @@ int main(int argc, char** argv)
 			window = newwindow;
 			glfwMakeContextCurrent(window);
 		}
-
+		*/
 	}
 
 	glfwDestroyWindow(window); // closes window named window
