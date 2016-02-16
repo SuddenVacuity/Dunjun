@@ -21,6 +21,9 @@ found here: https://www.youtube.com/playlist?list=PL93bFkoCMJslJJb15oQddnmABNUl6
 						// RMB(Dunjun)>>properties>>Linker>>General>Additional Library Directories |add| external\glfw-3.1.2.bin.WIN32\lib-vc2015
 						// RMB(Dunjun)>>properties>>Linker>>Input>>Additional Dependencies |add| opengl32.lib;glfw3.lib;glfw3dll.lib; 
 						// http://www.glfw.org/documentation.html
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb/stb_image.h>
+
 
 //#include <OpenGL/OpenGL.h> // Include openGL ADJUST FOR MAC
 //#include <gl/GL.h> // Include openGL ADJUST FOR WINDOWS
@@ -74,12 +77,12 @@ int main(int argc, char** argv)
 	// Here is where you add vertice information
 	//
 	float vertices[] = { // define vertexes for a triangle
-	//   x		y		r	  g		b
-		 0.5f,  0.5f,	0.0f, 0.0f, 1.0f, // 0 vertex         1 ---- 0        
-		-0.5f,  0.5f,	1.0f, 1.0f, 1.0f, // 1 vertex           \             
-		 0.5f, -0.5f,	0.0f, 1.0f, 0.0f, // 2 vertex              \           
-		-0.5f, -0.5f,	1.0f, 0.0f, 0.0f, // 3 vertex         3 -----2       
-										  // for triangle strips organize vertexes in a backwards Z
+	//   x		y		r	  g		b		s	  t
+		 0.5f,  0.5f,	0.0f, 0.0f, 1.0f,	1.0f, 1.0f,	// 0 vertex         1 ---- 0        
+		-0.5f,  0.5f,	1.0f, 1.0f, 1.0f,	0.0f, 1.0f,	// 1 vertex           \             
+		 0.5f, -0.5f,	0.0f, 1.0f, 0.0f,	1.0f, 0.0f,	// 2 vertex              \           
+		-0.5f, -0.5f,	1.0f, 0.0f, 0.0f,	0.0f, 0.0f	// 3 vertex         3 -----2       
+												 // for triangle strips organize vertexes in a backwards Z
 	};
 
 	// create a vertex buffer object to move vertex data to the graphics card
@@ -95,14 +98,52 @@ int main(int argc, char** argv)
 	 */
 
 	Dunjun::ShaderProgram shaderProgram;
-	shaderProgram.attachShaderFromFile(Dunjun::ShaderType::Vertex, "data/shaders/default_vert.glsl");
+	shaderProgram.attachShaderFromFile(Dunjun::ShaderType::Vertex, "data/shaders/default_vert.glsl"); // get the shaders form file
 	shaderProgram.attachShaderFromFile(Dunjun::ShaderType::Fragment, "data/shaders/default_frag.glsl");
 
-	shaderProgram.bindAttribLocation(0, "vertPostition");
-	shaderProgram.bindAttribLocation(1, "vertColor");
+	shaderProgram.bindAttribLocation(0, "vertPostition"); // bind the position of 1st attribute in shaders
+	shaderProgram.bindAttribLocation(1, "vertColor"); // bind the position of 2nd attribute in shaders
+	shaderProgram.bindAttribLocation(2, "vertTexCoord"); // bind the position of 3rd attribute in shaders
 
 	shaderProgram.link();
 	shaderProgram.use();
+
+	GLuint tex; // declare a texture
+	glGenTextures(1, &tex); // generate texture tex
+	glBindTexture(GL_TEXTURE_2D, tex); // bind the texture
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); // set the s axis (x) to repeat
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT); // set the t axis (y) to repeat
+	//glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL REPEAT); // set the r axis (z) to repeat
+	
+	/* set the border color for GL_CLAMP_TO_BORDER
+	float color[] = {1.0f, 0.0f, 0.0f, 1.0f}; // create float array with the color in it
+	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, color); // apply the color to the border
+	*/
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); // set the texture min filter type
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); // set the texture max filter type
+															// there are 3 types of texture filters
+															// GL_NEAREST	keeps it as close as possible pixel to pixel
+															// GL_LINEAR	blurs the pixels
+															// GL_MIPMAP	blurs the pixel differently
+
+	unsigned char* image; // declare the name of the texture image
+	int width, height, comp; // make variables for image
+	image = stbi_load("data/textures/dunjunText.jpg", &width, &height, &comp, 0); // load the file and assign variables
+
+
+
+	// create an array of pixels (checker board pattern)
+	float pixels[] = {
+		0,0,1,	1,0,0,
+		0,1,0,	1,1,0,
+	};
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image); // tell how to get the image from the pixels
+
+	glActiveTexture(GL_TEXTURE0); // activate the texture
+	shaderProgram.setUniform("uniTex", 0); // set uniform for GL_TEXTURE0 as uniTex
+
+	stbi_image_free(image); // free stb image import
 
 
 	/*
@@ -134,10 +175,20 @@ int main(int argc, char** argv)
 	glUseProgram(shaderProgram); // use the program
 	*/
 
+	//=================================================================================================
+	// OPENING THE MAIN WINDOW
+	//=================================================================================================
+	//=================================================================================================
 	bool running = true;
 	bool fullscreen = false; // sets fullscreen to be off by default
 	while(running) // create a loop that works until the window closes
 	{
+		{ // vbo viewport sizing hack
+			int width, height; // vars used to define the size of the viewport
+			glfwGetWindowSize(window, &width, &height);
+			glViewport(0, 0, width, height);
+		}
+
 		glClearColor(0.3f, 0.6f, 0.9f, 1.0f); // set the default color (R,G,B,A)
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the color buffer | out of the 3 main buffers
 								/* Error occured here "glfw3.dll is missing" 
@@ -154,9 +205,11 @@ int main(int argc, char** argv)
 			// Speicify the layout of the vertex data
 			glEnableVertexAttribArray(0); // enables attribute array[0] vertPosition from glBindAttribLocation(shaderProgram)
 			glEnableVertexAttribArray(1); // enables attribute array[1] vertColor ''
+			glEnableVertexAttribArray(2); // enable attribute [2] vertTexCoord
 
-			glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), 0); // pointer for attribute position (att position, size of vertices x/y/z, int type, normalized?, stride, pointer)
-			glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (const GLvoid*)(2*sizeof(float)));
+			glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (const GLvoid*)0); // pointer for attribute position (att position, size of vertices x/y/z, int type, normalized?, stride, pointer)
+			glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (const GLvoid*)(2 * sizeof(float)));
+			glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (const GLvoid*)(5 * sizeof(float)));
 			// stride says how many floats there are per vertex
 			// const void *pointer says how far offset the information starts
 
@@ -164,6 +217,7 @@ int main(int argc, char** argv)
 
 			glDisableVertexAttribArray(0); // disables attribute array[0]
 			glDisableVertexAttribArray(1); // disables attribute array[1]
+			glDisableVertexAttribArray(2); // disables attribute array[2]
 		}
 
 					

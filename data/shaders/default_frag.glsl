@@ -1,7 +1,12 @@
 #version 120
 
-varying vec3 fragColor;
+uniform sampler2D uniTex; // sampler for colors
+
+varying vec3 fragColor; // attribute for color from vert.glsl
+varying vec2 fragTexCoord; // attribute for texture coord from vert.glsl
+
 void main()
 {
-	gl_FragColor = vec4(fragColor, 1.0);
+	vec3 texColor = texture2D(uniTex, fragTexCoord).rgb; // get the color from texture coordinates to add to fragColor
+	gl_FragColor = vec4(texColor * fragColor, 1.0); // color for the shader
 }
