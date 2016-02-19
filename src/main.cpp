@@ -14,6 +14,7 @@ found here: https://www.youtube.com/playlist?list=PL93bFkoCMJslJJb15oQddnmABNUl6
 //#include "../include/Dunjun/Common.hpp" "../" means back one directory form the folder the .exe is in
 #include <Dunjun/Common.hpp> // set iclude folder in RMB(Dunjun)>>properties>>C++>>General>>Include include;
 #include <Dunjun/ShaderProgram.hpp>
+#include <Dunjun/Image.hpp>
 
 #include <GL/glew.h>	// Download GLEW libraries online. Add them to /external. Add GLEW_STATIC to preprocessor
 #include <GLFW/glfw3.h> // Download GLFW libraries online. Add them to /external
@@ -21,8 +22,7 @@ found here: https://www.youtube.com/playlist?list=PL93bFkoCMJslJJb15oQddnmABNUl6
 						// RMB(Dunjun)>>properties>>Linker>>General>Additional Library Directories |add| external\glfw-3.1.2.bin.WIN32\lib-vc2015
 						// RMB(Dunjun)>>properties>>Linker>>Input>>Additional Dependencies |add| opengl32.lib;glfw3.lib;glfw3dll.lib; 
 						// http://www.glfw.org/documentation.html
-#define STB_IMAGE_IMPLEMENTATION
-#include <stb/stb_image.h>
+
 
 
 //#include <OpenGL/OpenGL.h> // Include openGL ADJUST FOR MAC
@@ -127,10 +127,15 @@ int main(int argc, char** argv)
 															// GL_LINEAR	blurs the pixels
 															// GL_MIPMAP	blurs the pixel differently
 
+
+	Dunjun::Image image;
+	image.loadFromFile("data/textures/dunjunText.jpg");
+
+	/*
 	unsigned char* image; // declare the name of the texture image
 	int width, height, comp; // make variables for image
 	image = stbi_load("data/textures/dunjunText.jpg", &width, &height, &comp, 0); // load the file and assign variables
-
+	*/
 
 
 	// create an array of pixels (checker board pattern)
@@ -138,13 +143,10 @@ int main(int argc, char** argv)
 		0,0,1,	1,0,0,
 		0,1,0,	1,1,0,
 	};
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image); // tell how to get the image from the pixels
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, image.width(), image.height(), 0, GL_RGB, GL_UNSIGNED_BYTE, image.pixelPtr()); // tell how to get the image from the pixels
 
 	glActiveTexture(GL_TEXTURE0); // activate the texture
 	shaderProgram.setUniform("uniTex", 0); // set uniform for GL_TEXTURE0 as uniTex
-
-	stbi_image_free(image); // free stb image import
-
 
 	/*
 	std::string vertexShaderSource = stringfromfile("data/shaders/default_vert.glsl"); // load vertex shader from file

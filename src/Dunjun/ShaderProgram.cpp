@@ -99,7 +99,7 @@ namespace Dunjun
 		}
 
 
-		void ShaderProgram::bindAttribLocation(GLuint location, const char* name)
+		void ShaderProgram::bindAttribLocation(GLuint location, const GLchar* name)
 		{
 			glBindAttribLocation(m_object, location, name);
 		}
