@@ -28,11 +28,11 @@ namespace Dunjun
 
 
 		ShaderProgram::ShaderProgram()
-			: m_object(0)
+			: m_object(0) // set default values
 			, m_linked(false)
 			, m_errorLog()
 		{
-			m_object = glCreateProgram();
+			m_object = glCreateProgram(); // define m_object as shader the program
 		}
 
 		ShaderProgram::~ShaderProgram()
@@ -41,9 +41,10 @@ namespace Dunjun
 		}
 
 		// add shaders here
+		// get the shader type and file name for the shader
 		bool ShaderProgram::attachShaderFromFile(ShaderType type, const std::string& filename)
 		{
-			std::string source = stringFromFile(filename);
+			std::string source = stringFromFile(filename); // define source and the filename
 			return attachShaderFromMemory(type, source);
 		}
 		bool ShaderProgram::attachShaderFromMemory(ShaderType type, const std::string& source)
@@ -51,10 +52,10 @@ namespace Dunjun
 			const char* shaderSource = source.c_str();
 
 			GLuint shader;
-			if (type == ShaderType::Vertex)
-				shader = glCreateShader(GL_VERTEX_SHADER);
+			if (type == ShaderType::Vertex) // check the shader type
+				shader = glCreateShader(GL_VERTEX_SHADER); // create the shader
 			else if (type == ShaderType::Fragment)
-				shader = glCreateShader(GL_FRAGMENT_SHADER);
+				shader = glCreateShader(GL_FRAGMENT_SHADER); // create the shader
 
 			glShaderSource(shader, 1, &shaderSource, nullptr);
 			glCompileShader(shader);
@@ -66,7 +67,7 @@ namespace Dunjun
 
 		void ShaderProgram::use() const
 		{
-			if(!isInUse())
+			if(!isInUse()) // check that it's not in use already
 				glUseProgram(m_object);
 		}
 		bool ShaderProgram::isInUse() const

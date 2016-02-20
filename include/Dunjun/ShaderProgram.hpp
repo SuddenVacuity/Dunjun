@@ -2,9 +2,9 @@
 #define DUNJUN_SHADERPROGRAM_HPP
 
 #include <Dunjun/Common.hpp>
+#include <Dunjun/NonCopyable.hpp>
 
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
+#include <Dunjun/OpenGL.hpp>
 
 #include <string>
 
@@ -15,7 +15,7 @@ namespace Dunjun
 		Vertex,
 		Fragment,
 	};
-	class ShaderProgram
+	class ShaderProgram : public NonCopyable
 	{
 	public:
 		ShaderProgram(); // Progarm for the shader
@@ -45,8 +45,8 @@ namespace Dunjun
 		void setUniform(const GLchar* name, int x); // in case an interger is needed
 		void setUniform(const GLchar* name, bool x); // incase a bool is needed
 
-		inline GLuint object() const { return m_object; }
-		inline const std::string& errorLog() const {return m_errorLog; }
+		inline GLuint getObject() const { return m_object; }
+		inline const std::string& getErrorLog() const {return m_errorLog; }
 		;
 
 	private:

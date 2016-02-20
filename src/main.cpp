@@ -15,18 +15,10 @@ found here: https://www.youtube.com/playlist?list=PL93bFkoCMJslJJb15oQddnmABNUl6
 #include <Dunjun/Common.hpp> // set iclude folder in RMB(Dunjun)>>properties>>C++>>General>>Include include;
 #include <Dunjun/ShaderProgram.hpp>
 #include <Dunjun/Image.hpp>
+#include <Dunjun/OpenGL.hpp>
+#include <Dunjun/Texture.hpp>
 
-#include <GL/glew.h>	// Download GLEW libraries online. Add them to /external. Add GLEW_STATIC to preprocessor
-#include <GLFW/glfw3.h> // Download GLFW libraries online. Add them to /external
-						// RMB(Dunjun)>>properties>>C++>>>>General>>Include |add| external/glfw-3.1.2.bin.WIN32/include;
-						// RMB(Dunjun)>>properties>>Linker>>General>Additional Library Directories |add| external\glfw-3.1.2.bin.WIN32\lib-vc2015
-						// RMB(Dunjun)>>properties>>Linker>>Input>>Additional Dependencies |add| opengl32.lib;glfw3.lib;glfw3dll.lib; 
-						// http://www.glfw.org/documentation.html
-
-
-
-//#include <OpenGL/OpenGL.h> // Include openGL ADJUST FOR MAC
-//#include <gl/GL.h> // Include openGL ADJUST FOR WINDOWS
+#include <GLFW/glfw3.h>
 
 #include <iostream>
 #include <cmath>
@@ -78,10 +70,10 @@ int main(int argc, char** argv)
 	//
 	float vertices[] = { // define vertexes for a triangle
 	//   x		y		r	  g		b		s	  t
-		 0.5f,  0.5f,	0.0f, 0.0f, 1.0f,	1.0f, 1.0f,	// 0 vertex         1 ---- 0        
-		-0.5f,  0.5f,	1.0f, 1.0f, 1.0f,	0.0f, 1.0f,	// 1 vertex           \             
-		 0.5f, -0.5f,	0.0f, 1.0f, 0.0f,	1.0f, 0.0f,	// 2 vertex              \           
-		-0.5f, -0.5f,	1.0f, 0.0f, 0.0f,	0.0f, 0.0f	// 3 vertex         3 -----2       
+		 0.5f,  0.5f,	1.0f, 1.0f, 1.0f,	1.0f, 0.0f,	// 0 vertex         1 ---- 0        
+		-0.5f,  0.5f,	1.0f, 1.0f, 1.0f,	0.0f, 0.0f,	// 1 vertex           \             
+		 0.5f, -0.5f,	0.0f, 0.0f, 0.0f,	1.0f, 1.0f,	// 2 vertex              \           
+		-0.5f, -0.5f,	0.0f, 0.0f, 0.0f,	0.0f, 1.0f	// 3 vertex         3 -----2       
 												 // for triangle strips organize vertexes in a backwards Z
 	};
 
@@ -108,28 +100,34 @@ int main(int argc, char** argv)
 	shaderProgram.link();
 	shaderProgram.use();
 
+	/*  Old Texture Loader
 	GLuint tex; // declare a texture
 	glGenTextures(1, &tex); // generate texture tex
 	glBindTexture(GL_TEXTURE_2D, tex); // bind the texture
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); // set the s axis (x) to repeat
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT); // set the t axis (y) to repeat
 	//glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL REPEAT); // set the r axis (z) to repeat
-	
+	*/
 	/* set the border color for GL_CLAMP_TO_BORDER
 	float color[] = {1.0f, 0.0f, 0.0f, 1.0f}; // create float array with the color in it
 	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, color); // apply the color to the border
 	*/
-
+	/*
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); // set the texture min filter type
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); // set the texture max filter type
 															// there are 3 types of texture filters
 															// GL_NEAREST	keeps it as close as possible pixel to pixel
 															// GL_LINEAR	blurs the pixels
 															// GL_MIPMAP	blurs the pixel differently
+															*/
+	// Replaced by Dunjun::Texture
+	//Dunjun::Image image;
+	//image.loadFromFile("data/textures/dunjunText.jpg");
 
+	Dunjun::Texture tex;
+	tex.loadFromFile("data/textures/dunjunText.jpg");
+	tex.bind(0);
 
-	Dunjun::Image image;
-	image.loadFromFile("data/textures/dunjunText.jpg");
 
 	/*
 	unsigned char* image; // declare the name of the texture image
@@ -137,15 +135,17 @@ int main(int argc, char** argv)
 	image = stbi_load("data/textures/dunjunText.jpg", &width, &height, &comp, 0); // load the file and assign variables
 	*/
 
-
+	/*
 	// create an array of pixels (checker board pattern)
 	float pixels[] = {
 		0,0,1,	1,0,0,
 		0,1,0,	1,1,0,
 	};
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, image.width(), image.height(), 0, GL_RGB, GL_UNSIGNED_BYTE, image.pixelPtr()); // tell how to get the image from the pixels
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, image.getWidth(), image.getHeight(), 0, GL_RGB, GL_UNSIGNED_BYTE, image.getPixelPtr()); // tell how to get the image from the pixels
+	
 
 	glActiveTexture(GL_TEXTURE0); // activate the texture
+	*/
 	shaderProgram.setUniform("uniTex", 0); // set uniform for GL_TEXTURE0 as uniTex
 
 	/*

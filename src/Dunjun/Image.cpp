@@ -16,13 +16,13 @@ namespace Dunjun
 	{
 
 	}
-	Image::Image(uInt32 width, uInt32 height, Format format, const uInt8* pixels) // 1st half of the image
+	Image::Image(u32 width, u32 height, Format format, const u8* pixels) // 1st half of the image
 		: m_format((Format)0) // set default values for m_XXXXX files
 		, m_width(0)
 		, m_height (0)
 		, m_pixels (nullptr)
 	{
-		loadFromMemory(width, height, format, pixels); // sets variables to the m_XXXXX values
+		loadFromImage(width, height, format, pixels); // sets variables to the m_XXXXX values
 	}
 	Image::Image(const Image& other) // 2nd half of the image
 		: m_format((Format)0) // set default values for m_XXXXX files
@@ -30,11 +30,11 @@ namespace Dunjun
 		, m_height(0)
 		, m_pixels(nullptr)
 	{
-		loadFromMemory(other.m_width, other.m_height, other.m_format, other.m_pixels); // create varialbles other.m_XXXXX values
+		loadFromImage(other.m_width, other.m_height, other.m_format, other.m_pixels); // create varialbles other.m_XXXXX values
 	}
 	Image& Image::operator=(const Image& other) //
 	{
-		loadFromMemory(other.m_width, other.m_height, other.m_format, other.m_pixels); // return the other.m_XXXXX values
+		loadFromImage(other.m_width, other.m_height, other.m_format, other.m_pixels); // return the other.m_XXXXX values
 		return *this;
 	}
 	Image::~Image() // destructor
@@ -46,7 +46,7 @@ namespace Dunjun
 	bool Image::loadFromFile(const char* filename) // load info from a file
 	{
 		int width, height, format; // declair variables to receive
-		uInt8* pixels = stbi_load(filename, &width, &height, &format, 0); // load them using stb library
+		u8* pixels = stbi_load(filename, &width, &height, &format, 0); // load them using stb library
 
 			if (!pixels) // if there are no pixels error
 				{
@@ -54,7 +54,7 @@ namespace Dunjun
 					return false;
 				}
 	
-			loadFromMemory(width, height, (Format)format, pixels); // load info from file to memory
+			loadFromImage(width, height, (Format)format, pixels); // load info from file to memory
 
 			stbi_image_free(pixels); // free pixels using stb library
 
@@ -63,7 +63,7 @@ namespace Dunjun
 			return false;
 	
 	}
-	bool Image::loadFromMemory(uInt32 width, uInt32 height, Format format, const uInt8* pixels) // start organizing image info
+	bool Image::loadFromImage(u32 width, u32 height, Format format, const u8* pixels) // start organizing image info
 	{
 		if (width == 0) // width error
 		{
@@ -81,51 +81,52 @@ namespace Dunjun
 			return false;
 		}
 
+		// if no errors do this
 		else // move info to m_XXXXX
 			m_width = width;
 			m_height = height;
 			m_format = format;
 
-			Size imageSize = width * height * format; // find total number of pixels in the image
+			std::size_t imageSize = width * height * format; // find total number of pixels in the image
 
 			if (m_pixels) // delete any pixels that exist already
 				delete[] m_pixels;
 
-			m_pixels = new uInt8[imageSize]; // define m_pixels as total number of pixels
+			m_pixels = new u8[imageSize]; // define m_pixels as total number of pixels
 
 			if (pixels != nullptr)
-				std::memcpy(m_pixels, pixels, imageSize);
+				std::memcpy(m_pixels, pixels, imageSize); // copy image size from pixels to m_pixels
 
 		return true;
 	}
 
-	uInt8* Image::getPixel(uInt32 column, uInt32 row) const
+	u8* Image::getPixel(u32 column, u32 row) const
 	{
 		if (column >= m_width || row >= m_height)
-			return nullptr;
-		return m_pixels + (row * m_width + column) * m_format;
+			return nullptr; // end when image is done being read
+		return m_pixels + (row * m_width + column) * m_format; // get pixels info
 	}
-	void Image::setPixel(uInt32 column, uInt32 row, const uInt32* pixel)
+	void Image::setPixel(u32 column, u32 row, const u32* pixel)
 	{
 		if (column >= m_width || row >= m_height)
-			return;
+			return; // end when image is done being set
 
-		uInt8* p = getPixel(column, row);
-		std::memcpy(p, pixel, m_format);
+		u8* p = getPixel(column, row); // make temp variable for getPixel() values
+		std::memcpy(p, pixel, m_format); // does this have a use?
 	}
 
 	void Image::flipVertically()
 	{
-		Size pitch = m_width * m_format;
-		uInt32 halfrows = m_height / 2;
-		uInt8* rowBuffer = new uInt8[pitch];
+		std::size_t pitch = m_width * m_format; // get the size of the info to be flipped
+		u32 halfrows = m_height / 2; // divide the image into 2 halves, upper and lower
+		u8* rowBuffer = new u8[pitch]; // create a new pointer for the buffer the size of pitch
 
-		for (uInt32 i = 0; i < halfrows; i++)
+		for (u32 i = 0; i < halfrows; i++) // generate the image until all halfrows are done i is used as a counter
 		{
-			uInt8* row = m_pixels + (i * m_width) * m_format;
-			uInt8* oppositeRow = m_pixels + ((m_height - i - 1) * m_width) * m_format;
+			u8* row = m_pixels + (i * m_width) * m_format; // define row
+			u8* oppositeRow = m_pixels + ((m_height - i - 1) * m_width) * m_format;
 
-			std::memcpy(rowBuffer, row, pitch);
+			std::memcpy(rowBuffer, row, pitch); // moves info to rowBuffer from row. pitch is the amount of info
 			std::memcpy(row, oppositeRow, pitch);
 			std::memcpy(oppositeRow, rowBuffer, pitch);
 		}
