@@ -46,8 +46,8 @@ namespace Dunjun
 		void setUniform(const GLchar* name, bool x); // incase a bool is needed
 
 		inline GLuint getObject() const { return m_object; }
-		inline const std::string& getErrorLog() const {return m_errorLog; }
-		;
+		inline const std::string& getErrorLog() const { return m_errorLog; }
+		
 
 	private:
 		GLuint m_object; // the file

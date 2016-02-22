@@ -1,6 +1,15 @@
 #include <Dunjun/ShaderProgram.hpp>
 
 #include <fstream>
+#include <iostream>
+#include <stdexcept>
+#include <memory>
+#include <functional>
+#include <stack>
+
+#define GLOBAL static
+#define INTERNAL static
+#define LOCAL_PERSIST static
 
 namespace Dunjun
 {
@@ -37,7 +46,8 @@ namespace Dunjun
 
 		ShaderProgram::~ShaderProgram()
 		{
-			glDeleteProgram(m_object);
+			if (m_object)
+				glDeleteProgram(m_object);
 		}
 
 		// add shaders here
@@ -49,6 +59,10 @@ namespace Dunjun
 		}
 		bool ShaderProgram::attachShaderFromMemory(ShaderType type, const std::string& source)
 		{
+			// check if m_object got compiled
+			if (!m_object)
+				m_object = glCreateProgram();
+
 			const char* shaderSource = source.c_str();
 
 			GLuint shader;
@@ -59,6 +73,30 @@ namespace Dunjun
 
 			glShaderSource(shader, 1, &shaderSource, nullptr);
 			glCompileShader(shader);
+
+			// check for compile error
+			GLint status; // declare var to check shader status
+			glGetShaderiv(shader, GL_COMPILE_STATUS, &status); // define status as the compile status
+			if (status == GL_FALSE)
+			{
+			std::string msg("Compile failure in shader:\n");
+
+				GLint infoLogLength;
+				glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &infoLogLength); // get shader information i for integer and v for vector
+				char* strInfoLog = new char[infoLogLength + 1];
+				glGetShaderInfoLog(shader, infoLogLength, nullptr, strInfoLog);
+
+				msg.append(strInfoLog); // append msg by adding strInfoLog
+				delete[] strInfoLog;
+
+				msg.append("\n");
+				m_errorLog.append(msg);
+
+				glDeleteShader(shader);
+
+
+				return false;
+			}
 
 			glAttachShader(m_object, shader);
 
@@ -85,9 +123,39 @@ namespace Dunjun
 
 		bool ShaderProgram::link()
 		{
+
+			// check if m_object got compiled
+			if (!m_object)
+				m_object = glCreateProgram();
+
+
 			if(!isLinked())
 			{
 				glLinkProgram(m_object);
+
+				GLint status; // check for link error
+				glGetProgramiv(m_object, GL_LINK_STATUS, &status);
+
+				if (status == GL_FALSE)
+				{
+					std::string msg("Shader program linking failure:\n");
+
+					GLint infoLogLength;
+					glGetProgramiv(m_object, GL_INFO_LOG_LENGTH, &infoLogLength);
+					char* strInfoLog = new char[infoLogLength +1];
+					glGetProgramInfoLog(m_object, infoLogLength, NULL, strInfoLog);
+					msg.append(strInfoLog);
+					delete[] strInfoLog;
+
+					msg.append("\n");
+					m_errorLog.append(msg);
+
+					glDeleteProgram(m_object);
+					m_object = 0;
+
+					m_linked = false;
+					return m_linked;
+				}
 
 				m_linked = true;
 			}

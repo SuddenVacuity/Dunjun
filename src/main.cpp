@@ -24,6 +24,7 @@ found here: https://www.youtube.com/playlist?list=PL93bFkoCMJslJJb15oQddnmABNUl6
 #include <cmath>
 #include <string> // include to use strings
 #include <fstream> // include to open exteranl files
+#include <sstream>
 //
 //
 //
@@ -37,12 +38,117 @@ public:
 private:
 };
 
+class Clock
+{
+public:
+	inline double getElapsedTime() const
+	{
+		return glfwGetTime() - m_startTime;
+	}
 
+	double restart()
+	{
+		double now = glfwGetTime();
+		double elapsed = now - m_startTime;
+		m_startTime = now;
+
+		return elapsed;
+	}
+
+private:
+	double m_startTime = glfwGetTime();
+};
+
+class TickCounter
+{
+public:
+	bool update(double frequency) // frequency is the time between tick rate updates
+	{
+		bool reset = false;
+		if (m_clock.getElapsedTime() >= frequency)
+		{
+			m_tickRate = m_tick / frequency;
+			m_tick = 0;
+			reset = true;
+			m_clock.restart();
+		}
+		m_tick++;
+		return reset;
+	}
+
+	inline std::size_t getTickRate() const { return m_tickRate; }
+
+private:
+	std::size_t m_tick = 0;
+	std::size_t m_tickRate = 0;
+	Clock m_clock;
+
+};
 
 INTERNAL void glfwHints() // use this when creating a window to define what version of glfw is used
 {
 	glfwWindowHint(GLFW_VERSION_MAJOR, 2);
 	glfwWindowHint(GLFW_VERSION_MINOR, 1);
+	glfwSwapInterval(1);
+}
+
+INTERNAL void render()
+{
+	glClearColor(0.3f, 0.6f, 0.9f, 1.0f); // set the default color (R,G,B,A)
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); 
+
+
+		// Speicify the layout of the vertex data
+		glEnableVertexAttribArray(0); // enables attribute array[0] vertPosition from glBindAttribLocation(shaderProgram)
+		glEnableVertexAttribArray(1); // enables attribute array[1] vertColor ''
+		glEnableVertexAttribArray(2); // enable attribute [2] vertTexCoord
+
+		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (const GLvoid*)0); // pointer for attribute position (att position, size of vertices x/y/z, int type, normalized?, stride, pointer)
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (const GLvoid*)(2 * sizeof(float)));
+		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (const GLvoid*)(5 * sizeof(float)));
+		// stride says how many floats there are per vertex
+		// const void *pointer says how far offset the information starts
+
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4); // (mode to draw in, first vertex, total vertices)
+
+		glDisableVertexAttribArray(0); // disables attribute array[0]
+		glDisableVertexAttribArray(1); // disables attribute array[1]
+		glDisableVertexAttribArray(2); // disables attribute array[2]
+
+}
+
+INTERNAL void handleInput(GLFWwindow* window, bool* running, bool* fullscreen)
+{
+	if (glfwWindowShouldClose(window) || // check if window should close
+		glfwGetKey(window, GLFW_KEY_ESCAPE)) // checks if the escape key is pressed in window
+		*running = false;
+
+	/*
+	if (glfwGetKey(window, GLFW_KEY_F11)) // press F11 to toggle between default and fullscreen
+	{
+		*fullscreen = !(*fullscreen); // toggles true/false boolean for fullscreen
+
+		GLFWwindow* newwindow;
+
+		glfwHints(); // define glfw version before opening a window
+		if (*fullscreen) // action to take if fullscreen is true
+		{
+			int count;												// declares mode count for monitor
+			const GLFWvidmode* modes = glfwGetVideoModes(glfwGetPrimaryMonitor(), &count); // creates GLFWvidmode array of monitor modes
+			newwindow = glfwCreateWindow(modes[count - 1].width,	// modes[count - 1].width gets the width from the last mode
+						modes[count - 1].height,								// modes[count - 1].height gets the height from the last mode
+						"Dunjun", glfwGetPrimaryMonitor(), window);				// and create the window
+		}
+		else // action to take if fullsscreen is not true
+		{
+			newwindow = glfwCreateWindow(G_windowwidth, G_windowheight, "Dunjun", nullptr, window);
+		}
+
+		glfwDestroyWindow(window); // destroys old window
+		window = newwindow;
+		glfwMakeContextCurrent(window);
+	}
+	*/
 }
 
 int main(int argc, char** argv)
@@ -90,14 +196,20 @@ int main(int argc, char** argv)
 	 */
 
 	Dunjun::ShaderProgram shaderProgram;
-	shaderProgram.attachShaderFromFile(Dunjun::ShaderType::Vertex, "data/shaders/default_vert.glsl"); // get the shaders form file
-	shaderProgram.attachShaderFromFile(Dunjun::ShaderType::Fragment, "data/shaders/default_frag.glsl");
+	if (!shaderProgram.attachShaderFromFile(Dunjun::ShaderType::Vertex, "data/shaders/default_vert.glsl")) // check if the file loaded
+		throw std::runtime_error(shaderProgram.getErrorLog());
+
+	if (!shaderProgram.attachShaderFromFile(Dunjun::ShaderType::Fragment, "data/shaders/default_frag.glsl")) // check if the file loaded
+		throw std::runtime_error(shaderProgram.getErrorLog());
+
 
 	shaderProgram.bindAttribLocation(0, "vertPostition"); // bind the position of 1st attribute in shaders
 	shaderProgram.bindAttribLocation(1, "vertColor"); // bind the position of 2nd attribute in shaders
 	shaderProgram.bindAttribLocation(2, "vertTexCoord"); // bind the position of 3rd attribute in shaders
 
-	shaderProgram.link();
+	if (!shaderProgram.link())
+		throw std::runtime_error(shaderProgram.getErrorLog());
+
 	shaderProgram.use();
 
 	/*  Old Texture Loader
@@ -183,6 +295,9 @@ int main(int argc, char** argv)
 	//=================================================================================================
 	bool running = true;
 	bool fullscreen = false; // sets fullscreen to be off by default
+
+	TickCounter tc;
+
 	while(running) // create a loop that works until the window closes
 	{
 		{ // vbo viewport sizing hack
@@ -191,72 +306,21 @@ int main(int argc, char** argv)
 			glViewport(0, 0, width, height);
 		}
 
-		glClearColor(0.3f, 0.6f, 0.9f, 1.0f); // set the default color (R,G,B,A)
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the color buffer | out of the 3 main buffers
-								/* Error occured here "glfw3.dll is missing" 
-								    -copied glfw3.dll to Dunjun\Debug and it didn't work
-								    -copied glfw3.dll to C:\Windows and it worked
-									-went to make the dll included in the project instead of in C:\Windows
-								    -tried RMB(Dunjun)>>properties>>Linker>>General>>Link Additional Dependencies |YES| and it still worked
-								    -Deleted glfw3.dll in C:\Windows and Dunjun\Debug || and it still worked
-								    -RMB(Dunjun)>>properties>>Linker>>Link Additional Dependencies |NO| and it still worked
-								   I have no idea what fixed it*/
-
-		// Draw things GLEW
-		{	
-			// Speicify the layout of the vertex data
-			glEnableVertexAttribArray(0); // enables attribute array[0] vertPosition from glBindAttribLocation(shaderProgram)
-			glEnableVertexAttribArray(1); // enables attribute array[1] vertColor ''
-			glEnableVertexAttribArray(2); // enable attribute [2] vertTexCoord
-
-			glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (const GLvoid*)0); // pointer for attribute position (att position, size of vertices x/y/z, int type, normalized?, stride, pointer)
-			glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (const GLvoid*)(2 * sizeof(float)));
-			glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (const GLvoid*)(5 * sizeof(float)));
-			// stride says how many floats there are per vertex
-			// const void *pointer says how far offset the information starts
-
-			glDrawArrays(GL_TRIANGLE_STRIP, 0, 4); // (mode to draw in, first vertex, total vertices)
-
-			glDisableVertexAttribArray(0); // disables attribute array[0]
-			glDisableVertexAttribArray(1); // disables attribute array[1]
-			glDisableVertexAttribArray(2); // disables attribute array[2]
+		if (tc.update(0.5))
+		{
+			// std::cout << tc.getTickRate() << std::endl;
+			std::stringstream ss;
+			ss << "Dunjun - ms/F: " << 1000.0 / tc.getTickRate(); // dynamic window title
+			glfwSetWindowTitle(window, ss.str().c_str());
 		}
 
+		render();
 					
 		glfwSwapBuffers(window); // switches information between the front buffer and the back buffer
 		glfwPollEvents(); // waits for input and considers that input lower priorty than interrupt input
 
-		if (glfwWindowShouldClose(window)|| // check if window should close
-			glfwGetKey(window, GLFW_KEY_ESCAPE)) // checks if the escape key is pressed in window
-			running = false;
-
-		/* COMMENTED OUT BECAUSE IT CAUSES A CRASH
-		if (glfwGetKey(window, GLFW_KEY_F11)) // press F11 to toggle between default and fullscreen
-		{
-			fullscreen = !fullscreen; // toggles true/false boolean for fullscreen
-			GLFWwindow* newwindow;
-
-			glfwHints(); // define glfw version before opening a window
-			if (fullscreen) // action to take if fullscreen is true
-			{
-				int count; // declares mode count for monitor
-				const GLFWvidmode* modes = glfwGetVideoModes(glfwGetPrimaryMonitor(), &count); // creates GLFWvidmode array of monitor modes
-				newwindow = glfwCreateWindow(modes[count - 1].width, // modes[count - 1].width gets the width from the last mode
-											 modes[count - 1].height, // modes[count - 1].height gets the height from the last mode
-											 "Dunjun", glfwGetPrimaryMonitor(), window);  // and create the window
-			}
-			else // action to take if fullsscreen is not true
-			{
-				newwindow = glfwCreateWindow(G_windowwidth, G_windowheight, "Dunjun", nullptr, window);
-			}
-
-			glfwDestroyWindow(window); // destroys old window
-			window = newwindow;
-			glfwMakeContextCurrent(window);
-		}
-		*/
+		handleInput(window, &running, &fullscreen);
 	}
-
 	glfwDestroyWindow(window); // closes window named window
 	glfwTerminate(); // terminates GLFW
 	return EXIT_SUCCESS;
