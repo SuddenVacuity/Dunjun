@@ -17,8 +17,12 @@ found here: https://www.youtube.com/playlist?list=PL93bFkoCMJslJJb15oQddnmABNUl6
 #include <Dunjun/Image.hpp>
 #include <Dunjun/OpenGL.hpp>
 #include <Dunjun/Texture.hpp>
+#include <Dunjun/TickCounter.hpp>
+#include <Dunjun/Math.hpp>
 
 #include <GLFW/glfw3.h>
+
+#include <stb/stb_easy_font.h>
 
 #include <iostream>
 #include <cmath>
@@ -31,59 +35,6 @@ found here: https://www.youtube.com/playlist?list=PL93bFkoCMJslJJb15oQddnmABNUl6
 GLOBAL const int G_windowwidth = 854; // set global window width
 GLOBAL const int G_windowheight = 488; // set global window height
 
-class ShaderProgram
-{
-public:
-	ShaderProgram();
-private:
-};
-
-class Clock
-{
-public:
-	inline double getElapsedTime() const
-	{
-		return glfwGetTime() - m_startTime;
-	}
-
-	double restart()
-	{
-		double now = glfwGetTime();
-		double elapsed = now - m_startTime;
-		m_startTime = now;
-
-		return elapsed;
-	}
-
-private:
-	double m_startTime = glfwGetTime();
-};
-
-class TickCounter
-{
-public:
-	bool update(double frequency) // frequency is the time between tick rate updates
-	{
-		bool reset = false;
-		if (m_clock.getElapsedTime() >= frequency)
-		{
-			m_tickRate = m_tick / frequency;
-			m_tick = 0;
-			reset = true;
-			m_clock.restart();
-		}
-		m_tick++;
-		return reset;
-	}
-
-	inline std::size_t getTickRate() const { return m_tickRate; }
-
-private:
-	std::size_t m_tick = 0;
-	std::size_t m_tickRate = 0;
-	Clock m_clock;
-
-};
 
 INTERNAL void glfwHints() // use this when creating a window to define what version of glfw is used
 {
@@ -91,7 +42,6 @@ INTERNAL void glfwHints() // use this when creating a window to define what vers
 	glfwWindowHint(GLFW_VERSION_MINOR, 1);
 	glfwSwapInterval(1);
 }
-
 INTERNAL void render()
 {
 	glClearColor(0.3f, 0.6f, 0.9f, 1.0f); // set the default color (R,G,B,A)
@@ -116,7 +66,6 @@ INTERNAL void render()
 		glDisableVertexAttribArray(2); // disables attribute array[2]
 
 }
-
 INTERNAL void handleInput(GLFWwindow* window, bool* running, bool* fullscreen)
 {
 	if (glfwWindowShouldClose(window) || // check if window should close
@@ -151,6 +100,32 @@ INTERNAL void handleInput(GLFWwindow* window, bool* running, bool* fullscreen)
 	*/
 }
 
+namespace Debug
+{
+	union Color
+	{
+		Dunjun::u8 rgba[4];
+		struct
+		{
+			Dunjun::u8 r, g, b, a;
+		};
+	};
+
+	struct stb_font_vertex
+	{
+		Dunjun::f32 x, y, z;
+		Color color;
+	};
+}
+
+struct Vertex
+{
+	Dunjun::Vector2 position;
+	Dunjun::Vector3 color;
+	Dunjun::Vector2 texCoord;
+};
+
+
 int main(int argc, char** argv)
 {
 	GLFWwindow* window;
@@ -174,12 +149,12 @@ int main(int argc, char** argv)
 
 	// Here is where you add vertice information
 	//
-	float vertices[] = { // define vertexes for a triangle
+	Vertex vertices[] = { // define vertexes for a triangle
 	//   x		y		r	  g		b		s	  t
-		 0.5f,  0.5f,	1.0f, 1.0f, 1.0f,	1.0f, 0.0f,	// 0 vertex         1 ---- 0        
-		-0.5f,  0.5f,	1.0f, 1.0f, 1.0f,	0.0f, 0.0f,	// 1 vertex           \             
-		 0.5f, -0.5f,	0.0f, 0.0f, 0.0f,	1.0f, 1.0f,	// 2 vertex              \           
-		-0.5f, -0.5f,	0.0f, 0.0f, 0.0f,	0.0f, 1.0f	// 3 vertex         3 -----2       
+		{{ 0.5f,  0.5f}, {1.0f, 1.0f, 1.0f}, {1.0f, 0.0f}},	// 0 vertex         1 ---- 0        
+		{{-0.5f,  0.5f}, {1.0f, 1.0f, 1.0f}, {0.0f, 0.0f}},	// 1 vertex           \             
+		{{ 0.5f, -0.5f}, {0.0f, 0.0f, 0.0f}, {1.0f, 1.0f}},	// 2 vertex              \           
+		{{-0.5f, -0.5f}, {0.0f, 0.0f, 0.0f}, {0.0f, 1.0f}},	// 3 vertex         3 -----2       
 												 // for triangle strips organize vertexes in a backwards Z
 	};
 
@@ -296,7 +271,7 @@ int main(int argc, char** argv)
 	bool running = true;
 	bool fullscreen = false; // sets fullscreen to be off by default
 
-	TickCounter tc;
+	Dunjun::TickCounter tc;
 
 	while(running) // create a loop that works until the window closes
 	{

@@ -18,6 +18,9 @@ namespace Dunjun
 
 	using f32 = float;
 	using f64 = double;
+
+	using b8 = bool;
+	using b32 = i32; // define this as 32 bit for it to be dword alignde
 }
 
 
