@@ -19,6 +19,7 @@ found here: https://www.youtube.com/playlist?list=PL93bFkoCMJslJJb15oQddnmABNUl6
 #include <Dunjun/Texture.hpp>
 #include <Dunjun/TickCounter.hpp>
 #include <Dunjun/Math.hpp>
+#include<Dunjun/Color.hpp>
 
 #include <GLFW/glfw3.h>
 
@@ -35,6 +36,12 @@ found here: https://www.youtube.com/playlist?list=PL93bFkoCMJslJJb15oQddnmABNUl6
 GLOBAL const int G_windowwidth = 854; // set global window width
 GLOBAL const int G_windowheight = 488; // set global window height
 
+struct Vertex // must come before render
+{
+	Dunjun::Vector2 position;
+	Dunjun::Color color;
+	Dunjun::Vector2 texCoord;
+};
 
 INTERNAL void glfwHints() // use this when creating a window to define what version of glfw is used
 {
@@ -53,9 +60,9 @@ INTERNAL void render()
 		glEnableVertexAttribArray(1); // enables attribute array[1] vertColor ''
 		glEnableVertexAttribArray(2); // enable attribute [2] vertTexCoord
 
-		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (const GLvoid*)0); // pointer for attribute position (att position, size of vertices x/y/z, int type, normalized?, stride, pointer)
-		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (const GLvoid*)(2 * sizeof(float)));
-		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (const GLvoid*)(5 * sizeof(float)));
+		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const GLvoid*)0); // pointer for attribute position (att position, size of vertices x/y/z, int type, normalized?, stride, pointer)
+		glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(Vertex), (const GLvoid*)sizeof(Dunjun::Vector2));
+		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const GLvoid*)(sizeof(Dunjun::Vector2) + sizeof(Dunjun::Color)));
 		// stride says how many floats there are per vertex
 		// const void *pointer says how far offset the information starts
 
@@ -116,14 +123,38 @@ namespace Debug
 		Dunjun::f32 x, y, z;
 		Color color;
 	};
-}
 
-struct Vertex
-{
-	Dunjun::Vector2 position;
-	Dunjun::Vector3 color;
-	Dunjun::Vector2 texCoord;
-};
+	// Text in the corner of the screen
+	INTERNAL void drawString(GLFWwindow* window,
+							 const std::string& text,
+							 float x, float y, Color color)
+	{
+		LOCAL_PERSIST stb_font_vertex buffer[6000]; // ~500 chars
+		int numQuads = stb_easy_font_print(
+			x, y, (char*)text.c_str(), nullptr, buffer, sizeof(buffer));
+
+		glPushMatrix();
+		{
+			glMatrixMode(GL_PROJECTION);
+			glLoadIdentity();
+			int width, height;
+			glfwGetWindowSize(window, &width, &height);
+			glOrtho(0.0f, (GLfloat)height, (GLfloat)width , 0.0f, -1.0f, 1.0f); // position of the text
+
+			glColor4ubv(color.rgba);
+			glBegin(GL_QUADS);
+			for (int i = 0; i < numQuads; i++)
+			{
+				glVertex2f(buffer[4 * i + 3].x, buffer[4 * i + 3].y);
+				glVertex2f(buffer[4 * i + 2].x, buffer[4 * i + 2].y);
+				glVertex2f(buffer[4 * i + 1].x, buffer[4 * i + 1].y);
+				glVertex2f(buffer[4 * i + 0].x, buffer[4 * i + 0].y);
+			}
+			glEnd();
+		}
+		glPopMatrix();
+	}
+} // namespace Debug
 
 
 int main(int argc, char** argv)
@@ -150,11 +181,11 @@ int main(int argc, char** argv)
 	// Here is where you add vertice information
 	//
 	Vertex vertices[] = { // define vertexes for a triangle
-	//   x		y		r	  g		b		s	  t
-		{{ 0.5f,  0.5f}, {1.0f, 1.0f, 1.0f}, {1.0f, 0.0f}},	// 0 vertex         1 ---- 0        
-		{{-0.5f,  0.5f}, {1.0f, 1.0f, 1.0f}, {0.0f, 0.0f}},	// 1 vertex           \             
-		{{ 0.5f, -0.5f}, {0.0f, 0.0f, 0.0f}, {1.0f, 1.0f}},	// 2 vertex              \           
-		{{-0.5f, -0.5f}, {0.0f, 0.0f, 0.0f}, {0.0f, 1.0f}},	// 3 vertex         3 -----2       
+	//     x	  y		  r	   g	b	 a		s	  t
+		{{ 0.5f,  0.5f}, {000, 255, 255, 255}, {1.0f, 0.0f}},	// 0 vertex         1 ---- 0        
+		{{-0.5f,  0.5f}, {255, 255, 000, 255}, {0.0f, 0.0f}},	// 1 vertex           \             
+		{{ 0.5f, -0.5f}, {000, 000, 255, 255}, {1.0f, 1.0f}},	// 2 vertex              \           
+		{{-0.5f, -0.5f}, {255, 000, 255, 255}, {0.0f, 1.0f}},	// 3 vertex         3 -----2       
 												 // for triangle strips organize vertexes in a backwards Z
 	};
 

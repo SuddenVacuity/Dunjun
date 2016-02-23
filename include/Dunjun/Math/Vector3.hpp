@@ -2,6 +2,9 @@
 #define  DUNJUN_MATH_VECTOR3_HPP
 
 #include <Dunjun/Types.hpp>
+#include <cmath>
+
+#include <Dunjun/Math/Vector2.hpp>
 
 namespace Dunjun
 {
@@ -32,8 +35,71 @@ namespace Dunjun
 		{
 		}
 
+		explicit Vector3(const Vector2& other, f32 z) // to add z component to xy format
+			:Vector3(other.x, other.y, z)
+
+		{
+		}
+
+		// operators
 		f32& operator[](size_t index) { return data[index]; }
 		const f32& operator[](size_t index) const { return data[index]; } // this lets you call informatino in v[0] = 1; format
+
+		Vector3 operator+(const Vector3& other) const // addition
+		{
+			return Vector3(x + other.x, y + other.y, z + other.z);
+		}
+
+		Vector3 operator-(const Vector3& other) const // subtraction
+		{
+			return Vector3(x - other.x, y - other.y, z - other.z);
+		}
+
+		Vector3 operator*(f32 scaler) const // scaler
+		{
+			return Vector3(scaler * x, scaler * y, scaler * z);
+		}
+
+		Vector3 operator/(f32 scaler) const // division scaler
+		{
+			return Vector3(x / scaler, y / scaler, z / scaler);
+		}
+
+		Vector3& operator+=(const Vector3& other) // addition
+		{
+			x += other.x;
+			y += other.y;
+			z += other.z;
+
+			return *this;
+		}
+
+		Vector3& operator-=(const Vector3& other) // subtraction
+		{
+			x -= other.x;
+			y -= other.y;
+			z -= other.z;
+
+			return *this;
+		}
+
+		Vector3& operator*=(f32 scaler) // scaler
+		{
+			x *= scaler;
+			y *= scaler;
+			z *= scaler;
+
+			return *this;
+		}
+
+		Vector3& operator/=(f32 scaler) // scaler
+		{
+			x /= scaler;
+			y /= scaler;
+			z /= scaler;
+
+			return *this;
+		}
 
 		union // call info as v.x = 1;
 		{
@@ -52,6 +118,38 @@ namespace Dunjun
 			};
 		};
 	};
+
+	inline Vector3& operator*(f32 scaler, const Vector3& vector) // scaler for the other side
+	{
+		return vector * scaler;
+	}
+
+	inline f32 dot(const Vector3& a, const Vector3& b) // dot product
+	{
+		return a.x * b.x + a.y * b.y + a.z * b.z;
+	}
+
+	inline Vector3 cross(const Vector3& a, const Vector3& b) // 
+	{
+		return Vector3(a.y * b.z - b.y * a.z,  // x
+					   a.z * b.x - b.x * a.y,  // y
+					   a.x * b.y - b.x * a.y); // z
+	}
+
+	inline f32 lengthSquared(const Vector3& a)
+	{
+		return dot(a, a);
+	}
+
+	inline f32 length(const Vector3& a)
+	{
+		return std::sqrtf(lengthSquared(a));
+	}
+
+	inline Vector3 normalized(const Vector3& a) // normalize
+	{
+		return a * (1.0f / length(a));
+	}
 }
 
 #endif
