@@ -2,6 +2,7 @@
 #define  DUNJUN_MATH_VECTOR2_HPP
 
 #include <Dunjun/Types.hpp>
+#include <iostream>
 #include <cmath>
 
 namespace Dunjun
@@ -33,6 +34,21 @@ namespace Dunjun
 		f32& operator[](size_t index) { return data[index]; }
 		const f32& operator[](size_t index) const { return data[index]; } // this lets you call informatino in v[0] = 1; format
 
+		bool operator==(const Vector2& other) const // comparison
+		{
+			for (size_t i = 0; i < 2; i++)
+			{
+				if (data[i] != other.data[i])
+					return false;
+			}
+			return true;
+		}
+
+		bool operator!=(const Vector2& other) const
+		{
+			return !operator==(other);
+		}
+
 		Vector2 operator+(const Vector2& other ) const // addition
 		{ return Vector2(x + other.x, y + other.y); }
 
@@ -42,6 +58,15 @@ namespace Dunjun
 		Vector2 operator*(f32 scaler) const // scaler
 		{
 			return Vector2( scaler * x, scaler * y);
+		}
+
+		// Hadamard Product
+		Vector2 operator*(const Vector2& other) const
+		{
+			Vector2 result;
+			for (size_t i = 0; i < 2; i++)
+				result[i] = data[i] * other.data[i];
+			return result;
 		}
 
 		Vector2 operator/(f32 scaler) const // division scaler
@@ -128,6 +153,11 @@ namespace Dunjun
 	inline Vector2 normalized(const Vector2& a) // normalize
 	{
 		return a * (1.0f / length(a));
+	}
+
+	inline std::ostream& operator<<(std::ostream& os, const Vector2& v)
+	{
+		return os << "Vector2(" << v[0] << ", " << v[1] << ")";
 	}
 
 }

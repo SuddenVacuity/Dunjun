@@ -178,6 +178,8 @@ int main(int argc, char** argv)
 	glEnable(GL_CULL_FACE); // enable culling faces
 	glCullFace(GL_BACK); // specify to cull the back face
 
+	Dunjun::Matrix4 m;
+
 	// Here is where you add vertice information
 	//
 	Vertex vertices[] = { // define vertexes for a triangle

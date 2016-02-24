@@ -45,6 +45,21 @@ namespace Dunjun
 		f32& operator[](size_t index) { return data[index]; }
 		const f32& operator[](size_t index) const { return data[index]; } // this lets you call informatino in v[0] = 1; format
 
+		bool operator==(const Vector3& other) const // comparison
+		{
+			for (size_t i = 0; i < 3; i++)
+			{
+				if (data[i] != other.data[i])
+					return false;
+			}
+			return true;
+		}
+
+		bool operator!=(const Vector3& other) const
+		{
+			return !operator==(other);
+		}
+
 		Vector3 operator+(const Vector3& other) const // addition
 		{
 			return Vector3(x + other.x, y + other.y, z + other.z);
@@ -58,6 +73,15 @@ namespace Dunjun
 		Vector3 operator*(f32 scaler) const // scaler
 		{
 			return Vector3(scaler * x, scaler * y, scaler * z);
+		}
+
+		// Hadamard Product
+		Vector3 operator*(const Vector3& other) const
+		{
+			Vector3 result;
+			for (size_t i = 0; i < 3; i++)
+				result[i] = data[i] * other.data[i];
+			return result;
 		}
 
 		Vector3 operator/(f32 scaler) const // division scaler
@@ -149,6 +173,11 @@ namespace Dunjun
 	inline Vector3 normalized(const Vector3& a) // normalize
 	{
 		return a * (1.0f / length(a));
+	}
+
+	inline std::ostream& operator<<(std::ostream& os, const Vector3& v)
+	{
+		return os << "Vector3(" << v[0] << ", " << v[1] << ", " << v[2] << ")";
 	}
 }
 

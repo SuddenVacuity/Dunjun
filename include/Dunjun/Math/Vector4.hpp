@@ -55,6 +55,21 @@ namespace Dunjun
 		f32& operator[](size_t index) { return data[index]; }
 		const f32& operator[](size_t index) const { return data[index]; } // this lets you call informatino in v[0] = 1; format
 
+		bool operator==(const Vector4& other) const // comparison
+		{
+			for (size_t i = 0; i < 4; i++)
+			{
+				if (data[i] != other.data[i])
+					return false;
+			}
+			return true;
+		}
+
+		bool operator!=(const Vector4& other) const
+		{
+			return !operator==(other);
+		}
+
 		Vector4 operator+(const Vector4& other) const // addition
 		{
 			return Vector4(x + other.x, y + other.y, z + other.z, w + other.w);
@@ -68,6 +83,15 @@ namespace Dunjun
 		Vector4 operator*(f32 scaler) const // scaler
 		{
 			return Vector4(scaler * x, scaler * y, scaler * z, scaler * w);
+		}
+
+		// Hadamard Product
+		Vector4 operator*(const Vector4& other) const
+		{
+			Vector4 result;
+			for (size_t i = 0; i < 4; i++)
+				result[i] = data[i] * other.data[i];
+			return result;
 		}
 
 		Vector4 operator/(f32 scaler) const // division scaler
@@ -166,7 +190,11 @@ namespace Dunjun
 	{
 		return a * (1.0f / length(a));
 	}
+
+	inline std::ostream& operator<<(std::ostream& os, const Vector4& v)
+	{
+		return os << "Vector4(" << v[0] << ", " << v[1] << ", " << v[2] << ", " << v[3] << ")";
+	}
 }
 
 #endif
-#pragma once

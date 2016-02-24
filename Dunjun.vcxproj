@@ -158,6 +158,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\Dunjun\Image.cpp" />
+    <ClCompile Include="src\Dunjun\Math\Matrix4.cpp" />
     <ClCompile Include="src\Dunjun\ShaderProgram.cpp" />
     <ClCompile Include="src\Dunjun\Texture.cpp" />
     <ClCompile Include="src\main.cpp" />
@@ -168,6 +169,7 @@
     <ClInclude Include="include\Dunjun\Common.hpp" />
     <ClInclude Include="include\Dunjun\Image.hpp" />
     <ClInclude Include="include\Dunjun\Math.hpp" />
+    <ClInclude Include="include\Dunjun\Math\Matrix4.hpp" />
     <ClInclude Include="include\Dunjun\Math\Vector2.hpp" />
     <ClInclude Include="include\Dunjun\Math\Vector3.hpp" />
     <ClInclude Include="include\Dunjun\Math\Vector4.hpp" />
