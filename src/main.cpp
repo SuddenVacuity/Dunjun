@@ -18,7 +18,6 @@ found here: https://www.youtube.com/playlist?list=PL93bFkoCMJslJJb15oQddnmABNUl6
 #include <Dunjun/OpenGL.hpp>
 #include <Dunjun/Texture.hpp>
 #include <Dunjun/TickCounter.hpp>
-#include <Dunjun/Math.hpp>
 #include<Dunjun/Color.hpp>
 
 #include <GLFW/glfw3.h>
@@ -157,6 +156,7 @@ namespace Debug
 } // namespace Debug
 
 
+
 int main(int argc, char** argv)
 {
 	GLFWwindow* window;
@@ -219,6 +219,13 @@ int main(int argc, char** argv)
 		throw std::runtime_error(shaderProgram.getErrorLog());
 
 	shaderProgram.use();
+
+	// matrix transformationsq
+	Dunjun::Matrix4 mat = Dunjun::translate({0.5f, 0.5f, 0.0f}) // translation { x, y, z }
+						* Dunjun::rotate(3.14f/3.0f, {0, 0, 1}) // rotation amount in radians { x, y, z axis to rotate on }
+						* Dunjun::scale({2.0f, 0.4f, 1.0f}); // scale { x, y, z }
+
+	shaderProgram.setUniform("uniModel", mat); // set uniModel to apply matrix transform functions
 
 	/*  Old Texture Loader
 	GLuint tex; // declare a texture
@@ -305,6 +312,17 @@ int main(int argc, char** argv)
 	bool fullscreen = false; // sets fullscreen to be off by default
 
 	Dunjun::TickCounter tc;
+
+	{ // check matrix
+		using namespace Dunjun;
+
+		Matrix4 m1(1);
+		Matrix4 m2(2);
+
+		std::cout << m1 + m2 << "\n";
+		std::cout << m1 * m2 << "\n";
+		std::cout << inverse(m2) << "\n";
+	}
 
 	while(running) // create a loop that works until the window closes
 	{

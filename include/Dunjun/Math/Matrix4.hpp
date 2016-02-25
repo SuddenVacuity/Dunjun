@@ -31,7 +31,7 @@ namespace Dunjun
 		{
 		}
 		
-
+		Matrix4(const Matrix4& other) = default;
 
 		Vector4& operator[](size_t index)
 		{
@@ -159,6 +159,7 @@ namespace Dunjun
 		for (size_t i = 0; i < 4; i++)
 			mat[i] = m[i] * scaler;
 		return mat;
+		// return m * scaler;
 	}
 
 	inline Matrix4 hadamardProduct(const Matrix4& a, const Matrix4& b)
@@ -175,7 +176,7 @@ namespace Dunjun
 		for(size_t i = 0; i < 4; i++)
 			os << "\n\t" << m[i];
 		os << "\n)";
-
+		
 		return os;
 	}
 

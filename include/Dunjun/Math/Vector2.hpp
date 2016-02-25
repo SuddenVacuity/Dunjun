@@ -30,6 +30,8 @@ namespace Dunjun
 		{
 		}
 
+		Vector2(const Vector2& other) = default; // copy constructor
+
 		// operators
 		f32& operator[](size_t index) { return data[index]; }
 		const f32& operator[](size_t index) const { return data[index]; } // this lets you call informatino in v[0] = 1; format
@@ -106,7 +108,7 @@ namespace Dunjun
 			return *this;
 		}
 
-// =====================================================
+		// =====================================================
 		union // call info as v.x = 1;
 		{
 			f32 data[2];

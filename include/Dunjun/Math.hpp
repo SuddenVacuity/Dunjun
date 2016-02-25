@@ -7,5 +7,7 @@
 
 #include <Dunjun/Math/Matrix4.hpp>
 
+#include <Dunjun/Math/Functions.hpp>
+
 
 #endif

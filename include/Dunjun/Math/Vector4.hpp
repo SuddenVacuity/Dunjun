@@ -51,6 +51,8 @@ namespace Dunjun
 		{
 		}
 
+		Vector4(const Vector4& other) = default; // copy constructor
+
 		// operators
 		f32& operator[](size_t index) { return data[index]; }
 		const f32& operator[](size_t index) const { return data[index]; } // this lets you call informatino in v[0] = 1; format
