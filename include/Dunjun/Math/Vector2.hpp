@@ -152,7 +152,7 @@ namespace Dunjun
 		return std::sqrtf(lengthSquared(a));
 	}
 
-	inline Vector2 normalized(const Vector2& a) // normalize
+	inline Vector2 normalize(const Vector2& a) // normalize
 	{
 		return a * (1.0f / length(a));
 	}

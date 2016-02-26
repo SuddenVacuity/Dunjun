@@ -35,6 +35,8 @@ found here: https://www.youtube.com/playlist?list=PL93bFkoCMJslJJb15oQddnmABNUl6
 GLOBAL const int G_windowwidth = 854; // set global window width
 GLOBAL const int G_windowheight = 488; // set global window height
 
+GLOBAL const Dunjun::f32 TAU = 6.28318530718;
+
 struct Vertex // must come before render
 {
 	Dunjun::Vector2 position;
@@ -46,7 +48,7 @@ INTERNAL void glfwHints() // use this when creating a window to define what vers
 {
 	glfwWindowHint(GLFW_VERSION_MAJOR, 2);
 	glfwWindowHint(GLFW_VERSION_MINOR, 1);
-	glfwSwapInterval(1);
+	glfwSwapInterval(1); // replace this with working vsync later
 }
 INTERNAL void render()
 {
@@ -74,7 +76,7 @@ INTERNAL void render()
 }
 INTERNAL void handleInput(GLFWwindow* window, bool* running, bool* fullscreen)
 {
-	if (glfwWindowShouldClose(window) || // check if window should close
+	if (glfwWindowShouldClose(window) || // check if window was closed
 		glfwGetKey(window, GLFW_KEY_ESCAPE)) // checks if the escape key is pressed in window
 		*running = false;
 
@@ -218,14 +220,6 @@ int main(int argc, char** argv)
 	if (!shaderProgram.link())
 		throw std::runtime_error(shaderProgram.getErrorLog());
 
-	shaderProgram.use();
-
-	// matrix transformationsq
-	Dunjun::Matrix4 mat = Dunjun::translate({0.5f, 0.5f, 0.0f}) // translation { x, y, z }
-						* Dunjun::rotate(3.14f/3.0f, {0, 0, 1}) // rotation amount in radians { x, y, z axis to rotate on }
-						* Dunjun::scale({2.0f, 0.4f, 1.0f}); // scale { x, y, z }
-
-	shaderProgram.setUniform("uniModel", mat); // set uniModel to apply matrix transform functions
 
 	/*  Old Texture Loader
 	GLuint tex; // declare a texture
@@ -251,9 +245,9 @@ int main(int argc, char** argv)
 	//Dunjun::Image image;
 	//image.loadFromFile("data/textures/dunjunText.jpg");
 
-	Dunjun::Texture tex;
-	tex.loadFromFile("data/textures/dunjunText.jpg");
-	tex.bind(0);
+	Dunjun::Texture tex; // declair a texture
+	tex.loadFromFile("data/textures/dunjunText.jpg"); // load texture from location
+	tex.bind(0); // bind to 
 
 
 	/*
@@ -313,7 +307,7 @@ int main(int argc, char** argv)
 
 	Dunjun::TickCounter tc;
 
-	{ // check matrix
+	{ // check matrix works
 		using namespace Dunjun;
 
 		Matrix4 m1(1);
@@ -326,17 +320,41 @@ int main(int argc, char** argv)
 
 	while(running) // create a loop that works until the window closes
 	{
-		{ // vbo viewport sizing hack
+		 // vbo viewport sizing hack
 			int width, height; // vars used to define the size of the viewport
 			glfwGetWindowSize(window, &width, &height);
 			glViewport(0, 0, width, height);
-		}
+		
+
+			shaderProgram.use();
+			{
+				using namespace Dunjun;
+				
+				// how the matrix moves
+				Matrix4 model = Dunjun::translate({ 0.0f, 0.0f, 0.0f }) // translation { x, y, z }
+								*Dunjun::rotate(Radian(glfwGetTime() * TAU), { 0, 1, 0 }) // rotation amount in radians { x, y, z axis to rotate on }
+								* Dunjun::scale({ 1.0f, 1.0f, 1.0f }); // scale { x, y, z }
+
+				// where the camera is
+				Matrix4 view = lookAt({ 1.0f, 2.0f, 2.0f } // {camera/eye position}
+									, { 0.0f, 1.5f, 0.0f } // {lookat direction 0,0,0 is center}
+									, { 0, 1, 0 }); // {up direction}
+
+				// field of view perspective(Radian(TAU / x.xf),... or perspective(Degree(x),... changes the fov|| Radians must be floats
+				Matrix4 proj = perspective(Degree(30.0f), (f32)width / (f32)height, 0.1f, 100.0f);
+				
+				Matrix4 camera = proj * view; // combine to make camera
+
+				shaderProgram.setUniform("uniCamera", camera); // set uniCamera to apply view functions
+				shaderProgram.setUniform("uniModel", model); // set uniModel to apply matrix transform functions
+			}
+
 
 		if (tc.update(0.5))
 		{
-			// std::cout << tc.getTickRate() << std::endl;
+			//std::cout << tc.getTickRate() << std::endl;
 			std::stringstream ss;
-			ss << "Dunjun - ms/F: " << 1000.0 / tc.getTickRate(); // dynamic window title
+			ss << "Dunjun - ms/F: " << 1000.0 / tc.getTickRate() << " - In need of vSync!"; // dynamic window title
 			glfwSetWindowTitle(window, ss.str().c_str());
 		}
 
