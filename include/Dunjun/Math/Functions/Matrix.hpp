@@ -36,8 +36,8 @@ namespace Dunjun
 		rot[1][2] = 0 + t[1] * axis[2] + s * axis[0];
 		rot[1][3] = 0;
 
-		rot[2][0] = 0 + t[2] * axis[0] + s * axis[1]; // z component
-		rot[2][1] = 0 + t[2] * axis[1] - s * axis[0];
+		rot[2][0] = 0 + t[2] * axis[0] - s * axis[1]; // z component
+		rot[2][1] = 0 + t[2] * axis[1] + s * axis[0];
 		rot[2][2] = c + t[2] * axis[2];
 		rot[2][3] = 0;
 

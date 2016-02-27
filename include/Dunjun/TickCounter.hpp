@@ -1,7 +1,7 @@
 #ifndef DUNJUN_TICKCOUNTER_HPP
 #define DUNJUN_TICKCOUNTER_HPP
 
-#include <Dunjun/CLock.hpp>
+#include <Dunjun/Clock.hpp>
 
 namespace Dunjun
 {

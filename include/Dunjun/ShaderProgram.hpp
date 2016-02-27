@@ -4,9 +4,11 @@
 #include <Dunjun/Common.hpp>
 #include <Dunjun/NonCopyable.hpp>
 #include <Dunjun/Math.hpp>
+//#include <Dunjun/Math/Matrix4.hpp>
 
 #include <Dunjun/OpenGL.hpp>
 
+#include <map>
 #include <string>
 
 namespace Dunjun
@@ -46,7 +48,7 @@ namespace Dunjun
 		void setUniform(const GLchar* name, i32 x); // in case an interger is needed
 		void setUniform(const GLchar* name, bool x); // incase a bool is needed
 
-		void setUniform(const GLchar* name, const Vector2& v); // set uniModel in vertex shader
+		void setUniform(const GLchar* name, const Vector2& v); // set u_model in vertex shader
 		void setUniform(const GLchar* name, const Vector3& v);
 		void setUniform(const GLchar* name, const Vector4& v);
 		void setUniform(const GLchar* name, const Matrix4& m);
@@ -59,6 +61,11 @@ namespace Dunjun
 		GLuint m_object; // the file
 		bool m_linked;
 		std::string m_errorLog;
+
+		std::map<const GLchar*, GLint> m_attribLocations;
+		std::map<const GLchar*, GLint> m_uniformLocations;
+
+
 	};
 }
 

@@ -18,7 +18,7 @@ found here: https://www.youtube.com/playlist?list=PL93bFkoCMJslJJb15oQddnmABNUl6
 #include <Dunjun/OpenGL.hpp>
 #include <Dunjun/Texture.hpp>
 #include <Dunjun/TickCounter.hpp>
-#include<Dunjun/Color.hpp>
+#include <Dunjun/Color.hpp>
 
 #include <GLFW/glfw3.h>
 
@@ -34,8 +34,6 @@ found here: https://www.youtube.com/playlist?list=PL93bFkoCMJslJJb15oQddnmABNUl6
 //
 GLOBAL const int G_windowwidth = 854; // set global window width
 GLOBAL const int G_windowheight = 488; // set global window height
-
-GLOBAL const Dunjun::f32 TAU = 6.28318530718;
 
 struct Vertex // must come before render
 {
@@ -57,9 +55,9 @@ INTERNAL void render()
 
 
 		// Speicify the layout of the vertex data
-		glEnableVertexAttribArray(0); // enables attribute array[0] vertPosition from glBindAttribLocation(shaderProgram)
-		glEnableVertexAttribArray(1); // enables attribute array[1] vertColor ''
-		glEnableVertexAttribArray(2); // enable attribute [2] vertTexCoord
+		glEnableVertexAttribArray(0); // enables attribute array[0] a_position from glBindAttribLocation(shaderProgram)
+		glEnableVertexAttribArray(1); // enables attribute array[1] a_color ''
+		glEnableVertexAttribArray(2); // enable attribute [2] a_texCoord
 
 		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const GLvoid*)0); // pointer for attribute position (att position, size of vertices x/y/z, int type, normalized?, stride, pointer)
 		glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(Vertex), (const GLvoid*)sizeof(Dunjun::Vector2));
@@ -79,6 +77,7 @@ INTERNAL void handleInput(GLFWwindow* window, bool* running, bool* fullscreen)
 	if (glfwWindowShouldClose(window) || // check if window was closed
 		glfwGetKey(window, GLFW_KEY_ESCAPE)) // checks if the escape key is pressed in window
 		*running = false;
+		
 
 	/*
 	if (glfwGetKey(window, GLFW_KEY_F11)) // press F11 to toggle between default and fullscreen
@@ -177,19 +176,20 @@ int main(int argc, char** argv)
 
 	glewInit();
 
-	glEnable(GL_CULL_FACE); // enable culling faces
-	glCullFace(GL_BACK); // specify to cull the back face
+	// Temporarily disable culling
+	//glEnable(GL_CULL_FACE); // enable culling faces
+	//glCullFace(GL_BACK); // specify to cull the back face
 
 	Dunjun::Matrix4 m;
 
 	// Here is where you add vertice information
 	//
 	Vertex vertices[] = { // define vertexes for a triangle
-	//     x	  y		  r	   g	b	 a		s	  t
-		{{ 0.5f,  0.5f}, {000, 255, 255, 255}, {1.0f, 0.0f}},	// 0 vertex         1 ---- 0        
-		{{-0.5f,  0.5f}, {255, 255, 000, 255}, {0.0f, 0.0f}},	// 1 vertex           \             
-		{{ 0.5f, -0.5f}, {000, 000, 255, 255}, {1.0f, 1.0f}},	// 2 vertex              \           
-		{{-0.5f, -0.5f}, {255, 000, 255, 255}, {0.0f, 1.0f}},	// 3 vertex         3 -----2       
+	//     x	  y		  r	    g	  b	    a		s	  t
+		{{ 0.5f,  0.5f}, {0x00, 0xFF, 0xFF, 0xFF}, {1.0f, 1.0f}},	// 0 vertex         1 ---- 0        
+		{{-0.5f,  0.5f}, {0xFF, 0xFF, 0x00, 0xFF}, {0.0f, 1.0f}},	// 1 vertex           \             
+		{{ 0.5f, -0.5f}, {0x00, 0x00, 0xFF, 0xFF}, {1.0f, 0.0f}},	// 2 vertex              \           
+		{{-0.5f, -0.5f}, {0xFF, 0x00, 0xFF, 0xFF}, {0.0f, 0.0f}},	// 3 vertex         3 -----2       
 												 // for triangle strips organize vertexes in a backwards Z
 	};
 
@@ -213,9 +213,9 @@ int main(int argc, char** argv)
 		throw std::runtime_error(shaderProgram.getErrorLog());
 
 
-	shaderProgram.bindAttribLocation(0, "vertPostition"); // bind the position of 1st attribute in shaders
-	shaderProgram.bindAttribLocation(1, "vertColor"); // bind the position of 2nd attribute in shaders
-	shaderProgram.bindAttribLocation(2, "vertTexCoord"); // bind the position of 3rd attribute in shaders
+	shaderProgram.bindAttribLocation(0, "a_position"); // bind the position of 1st attribute in shaders
+	shaderProgram.bindAttribLocation(1, "a_color"); // bind the position of 2nd attribute in shaders
+	shaderProgram.bindAttribLocation(2, "a_texCoord"); // bind the position of 3rd attribute in shaders
 
 	if (!shaderProgram.link())
 		throw std::runtime_error(shaderProgram.getErrorLog());
@@ -267,7 +267,7 @@ int main(int argc, char** argv)
 
 	glActiveTexture(GL_TEXTURE0); // activate the texture
 	*/
-	shaderProgram.setUniform("uniTex", 0); // set uniform for GL_TEXTURE0 as uniTex
+	shaderProgram.setUniform("u_tex", 0); // set uniform for GL_TEXTURE0 as u_tex
 
 	/*
 	std::string vertexShaderSource = stringfromfile("data/shaders/default_vert.glsl"); // load vertex shader from file
@@ -289,8 +289,8 @@ int main(int argc, char** argv)
 	glAttachShader(shaderProgram, vertexShader); // attach vertexShader
 	glAttachShader(shaderProgram, fragmentShader); // attach fragmentShader
 
-	glBindAttribLocation(shaderProgram, 0, "vertPosition"); // defines attribute vec2 vertPosition from vertexShaderText
-	glBindAttribLocation(shaderProgram, 1, "vertColor"); // defines attribute vec3 vertColor from vertexShaderText
+	glBindAttribLocation(shaderProgram, 0, "a_position"); // defines attribute vec2 a_position from vertexShaderText
+	glBindAttribLocation(shaderProgram, 1, "a_color"); // defines attribute vec3 a_color from vertexShaderText
 
 	// any modification to the attached programs must be done before linking
 	glLinkProgram(shaderProgram); // link vertexShader and fragmentShader together
@@ -332,21 +332,21 @@ int main(int argc, char** argv)
 				
 				// how the matrix moves
 				Matrix4 model = Dunjun::translate({ 0.0f, 0.0f, 0.0f }) // translation { x, y, z }
-								*Dunjun::rotate(Radian(glfwGetTime() * TAU), { 0, 1, 0 }) // rotation amount in radians { x, y, z axis to rotate on }
-								* Dunjun::scale({ 1.0f, 1.0f, 1.0f }); // scale { x, y, z }
+								* Dunjun::rotate(Degree(glfwGetTime() * 360.0f), { 0, 1, 0 }) // rotation amount in radians { x, y, z axis to rotate on }
+								* Dunjun::scale({ 2.0f, 1.0f, 1.0f }); // scale { x, y, z }
 
 				// where the camera is
-				Matrix4 view = lookAt({ 1.0f, 2.0f, 2.0f } // {camera/eye position}
-									, { 0.0f, 1.5f, 0.0f } // {lookat direction 0,0,0 is center}
-									, { 0, 1, 0 }); // {up direction}
+				Matrix4 view = lookAt({ 0.0f, 0.0f, 5.0f } // {camera/eye position x, y, z}
+									, { 0.0f, 0.0f, 0.0f } // {lookat target 0,0,0 is center x, y, z}
+									, { 0, 1, 0 }); // {up direction x, y, z}
 
 				// field of view perspective(Radian(TAU / x.xf),... or perspective(Degree(x),... changes the fov|| Radians must be floats
-				Matrix4 proj = perspective(Degree(30.0f), (f32)width / (f32)height, 0.1f, 100.0f);
+				Matrix4 proj = perspective(Degree(60.0f), (f32)width / (f32)height, 0.1f, 100.0f);
 				
 				Matrix4 camera = proj * view; // combine to make camera
 
-				shaderProgram.setUniform("uniCamera", camera); // set uniCamera to apply view functions
-				shaderProgram.setUniform("uniModel", model); // set uniModel to apply matrix transform functions
+				shaderProgram.setUniform("u_camera", camera); // set u_camera to apply view functions
+				shaderProgram.setUniform("u_model", model); // set u_model to apply matrix transform functions
 			}
 
 

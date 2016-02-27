@@ -158,7 +158,7 @@ namespace Dunjun
 	inline Vector3 cross(const Vector3& a, const Vector3& b) // 
 	{
 		return Vector3(a.y * b.z - b.y * a.z,  // x
-					   a.z * b.x - b.x * a.y,  // y
+					   a.z * b.x - b.z * a.x,  // y
 					   a.x * b.y - b.x * a.y); // z
 	}
 

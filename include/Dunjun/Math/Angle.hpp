@@ -3,6 +3,7 @@
 // this hpp defines angles and degrees
 
 #include <Dunjun/Types.hpp>
+#include <Dunjun/Math/Constants.hpp>
 #include <Dunjun/Math/Unit.hpp>
 
 #include <ostream>
@@ -32,11 +33,11 @@ namespace Dunjun
 		{
 		}
 
-		/*template <class U>
+		template <class U>
 		explicit Degree(Unit<Dunjun::Impl::Degree, U> value)
 			: Unit<Dunjun::Impl::Degree, f32>(value)
 		{
-		}*/
+		}
 
 		Degree(Unit<Radian, T> value);
 	};
@@ -58,36 +59,32 @@ namespace Dunjun
 		{
 		}
 
-		/*template <class U>
+		template <class U>
 		explicit Radian(Unit<Dunjun::Impl::Radian, U> value)
 			: Unit<Dunjun::Impl::Radian, f32>(value)
 		{
-		}*/
+		}
 
 		Radian(Unit<Degree, T> value);
 	};
 	
 	template <class T>
 	Degree<T>::Degree(Unit<Radian, T> value)
-		//FIXME: setup Constants
-		//: Unit<Dunjun::Impl::Degree, T>(T(360) * T(value) / Constants<T>::tau())
-		: Unit<Dunjun::Impl::Degree, T>(T(360) * T(value) / T(6.28318530718))
+		: Unit<Dunjun::Impl::Degree, T>(T(360) * T(value) / Constants<T>::tau())
 	{
 	}
 
 	template <class T>
 	Radian<T>::Radian(Unit<Degree, T> value)
-		//FIXME: setup Constants
-		//: Unit<Dunjun::Impl::Radian, T>(T(value) * Constants<T>::tau() / T(360))
-		: Unit<Dunjun::Impl::Radian, T>(T(value) * T(6.28318530718) / T(360))
+		: Unit<Dunjun::Impl::Radian, T>(T(value) * Constants<T>::tau() / T(360))
 	{
 	}
 	
 
 	} // namespace Impl
 
-	using Radian = Impl::Radian < f32 >;
-	using Degree = Impl::Degree < f32 >;
+	using Radian = Impl::Radian<f32>;
+	using Degree = Impl::Degree<f32>;
 
 
 } // namespace Dunjun
