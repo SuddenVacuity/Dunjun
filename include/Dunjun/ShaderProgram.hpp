@@ -46,6 +46,7 @@ namespace Dunjun
 		void setUniform(const GLchar* name, f32 x, f32 y, f32 z, f32 w);
 		void setUniform(const GLchar* name, u32 x);
 		void setUniform(const GLchar* name, i32 x); // in case an interger is needed
+
 		void setUniform(const GLchar* name, bool x); // incase a bool is needed
 
 		void setUniform(const GLchar* name, const Vector2& v); // set u_model in vertex shader

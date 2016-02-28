@@ -12,13 +12,15 @@ found here: https://www.youtube.com/playlist?list=PL93bFkoCMJslJJb15oQddnmABNUl6
 */
  
 //#include "../include/Dunjun/Common.hpp" "../" means back one directory form the folder the .exe is in
+
+
+#include <Dunjun/Color.hpp>
 #include <Dunjun/Common.hpp> // set iclude folder in RMB(Dunjun)>>properties>>C++>>General>>Include include;
-#include <Dunjun/ShaderProgram.hpp>
 #include <Dunjun/Image.hpp>
 #include <Dunjun/OpenGL.hpp>
+#include <Dunjun/ShaderProgram.hpp>
 #include <Dunjun/Texture.hpp>
 #include <Dunjun/TickCounter.hpp>
-#include <Dunjun/Color.hpp>
 
 #include <GLFW/glfw3.h>
 
@@ -26,14 +28,15 @@ found here: https://www.youtube.com/playlist?list=PL93bFkoCMJslJJb15oQddnmABNUl6
 
 #include <iostream>
 #include <cmath>
-#include <string> // include to use strings
 #include <fstream> // include to open exteranl files
 #include <sstream>
+#include <string> // include to use strings
+#include <vector>
 //
 //
 //
-GLOBAL const int G_windowwidth = 854; // set global window width
-GLOBAL const int G_windowheight = 488; // set global window height
+GLOBAL int g_windowWidth = 854; // set global window width
+GLOBAL int g_windowHeight = 488; // set global window height
 
 struct Vertex // must come before render
 {
@@ -42,36 +45,39 @@ struct Vertex // must come before render
 	Dunjun::Vector2 texCoord;
 };
 
+struct ModelAsset // includes the shader, the texture and the vbo's
+{ 
+	Dunjun::ShaderProgram* shaders;
+	Dunjun::Texture* texture;
+
+	// create a vertex buffer object to move vertex data to the graphics card
+	GLuint vbo; 
+	GLuint ibo;
+
+	GLenum drawType;
+	//GLint drawStart;
+	GLint drawCount;
+};
+
+struct ModelInstance // copies an asset to use
+{
+	ModelAsset* asset;
+	Dunjun::Matrix4 transform;
+
+};
+
+GLOBAL Dunjun::ShaderProgram* g_defaultShader;
+GLOBAL ModelAsset g_sprite;
+GLOBAL std::vector<ModelInstance> g_instances;
+GLOBAL Dunjun::Matrix4 g_cameraMatrix;
+
 INTERNAL void glfwHints() // use this when creating a window to define what version of glfw is used
 {
 	glfwWindowHint(GLFW_VERSION_MAJOR, 2);
 	glfwWindowHint(GLFW_VERSION_MINOR, 1);
 	glfwSwapInterval(1); // replace this with working vsync later
 }
-INTERNAL void render()
-{
-	glClearColor(0.3f, 0.6f, 0.9f, 1.0f); // set the default color (R,G,B,A)
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); 
 
-
-		// Speicify the layout of the vertex data
-		glEnableVertexAttribArray(0); // enables attribute array[0] a_position from glBindAttribLocation(shaderProgram)
-		glEnableVertexAttribArray(1); // enables attribute array[1] a_color ''
-		glEnableVertexAttribArray(2); // enable attribute [2] a_texCoord
-
-		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const GLvoid*)0); // pointer for attribute position (att position, size of vertices x/y/z, int type, normalized?, stride, pointer)
-		glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(Vertex), (const GLvoid*)sizeof(Dunjun::Vector2));
-		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const GLvoid*)(sizeof(Dunjun::Vector2) + sizeof(Dunjun::Color)));
-		// stride says how many floats there are per vertex
-		// const void *pointer says how far offset the information starts
-
-		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4); // (mode to draw in, first vertex, total vertices)
-
-		glDisableVertexAttribArray(0); // disables attribute array[0]
-		glDisableVertexAttribArray(1); // disables attribute array[1]
-		glDisableVertexAttribArray(2); // disables attribute array[2]
-
-}
 INTERNAL void handleInput(GLFWwindow* window, bool* running, bool* fullscreen)
 {
 	if (glfwWindowShouldClose(window) || // check if window was closed
@@ -105,6 +111,135 @@ INTERNAL void handleInput(GLFWwindow* window, bool* running, bool* fullscreen)
 		glfwMakeContextCurrent(window);
 	}
 	*/
+}
+
+INTERNAL void loadShaders()
+{
+	// Shader Program
+	g_defaultShader = new Dunjun::ShaderProgram();
+	if (!g_defaultShader->attachShaderFromFile(Dunjun::ShaderType::Vertex, "data/shaders/default_vert.glsl")) // check if the file loaded
+		throw std::runtime_error(g_defaultShader->getErrorLog());
+
+	if (!g_defaultShader->attachShaderFromFile(Dunjun::ShaderType::Fragment, "data/shaders/default_frag.glsl")) // check if the file loaded
+		throw std::runtime_error(g_defaultShader->getErrorLog());
+
+
+	g_defaultShader->bindAttribLocation(0, "a_position"); // bind the position of 1st attribute in shaders
+	g_defaultShader->bindAttribLocation(1, "a_color"); // bind the position of 2nd attribute in shaders
+	g_defaultShader->bindAttribLocation(2, "a_texCoord"); // bind the position of 3rd attribute in shaders
+
+	if (!g_defaultShader->link())
+		throw std::runtime_error(g_defaultShader->getErrorLog());
+
+}
+
+INTERNAL void loadSpriteAsset()
+{
+	using namespace Dunjun;
+
+	// Here is where you add vertice information
+	//
+	Vertex vertices[] = { // define vertexes for a triangle
+		 //  x	    y		 r	   g	 b	   a		s	  t
+		{ {  0.5f,  0.5f },{ 0x00, 0xFF, 0xFF, 0xFF },{ 1.0f, 1.0f } },	// 0 vertex         1 ---- 0        
+		{ { -0.5f,  0.5f },{ 0xFF, 0xFF, 0x00, 0xFF },{ 0.0f, 1.0f } },	// 1 vertex           \             
+		{ {  0.5f, -0.5f },{ 0x00, 0x00, 0xFF, 0xFF },{ 1.0f, 0.0f } },	// 2 vertex              \           
+		{ { -0.5f, -0.5f },{ 0xFF, 0x00, 0xFF, 0xFF },{ 0.0f, 0.0f } },	// 3 vertex         3 -----2       
+																		// for triangle strips organize vertexes in a backwards Z
+	};
+
+	//g_sprite.vbo;
+	glGenBuffers(1, &g_sprite.vbo); // make vbo an array with a single entry
+	glBindBuffer(GL_ARRAY_BUFFER, g_sprite.vbo); // bind the buffer
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW); // upload the data to the buffer
+				 /* Types of DRAW
+				   GL_STATIC DRAW   / Draws once and is repeated many times
+				   GL_DYNAMIC_DRAW  / Draw can be changed but repeats more often than it changes
+				   GL_STREAM_DRAW   / Redraws every frame (memory intensive)
+				*/
+
+	u32 indices[] = {0, 1, 2, 2, 3, 1}; // vertex draw order for GL_TRIANGLES
+
+	glGenBuffers(1, &g_sprite.ibo);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, g_sprite.ibo);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
+
+
+	g_sprite.shaders = g_defaultShader; // apply the default shader to sprite
+	g_sprite.texture = new Texture(); // apply new texture to sprite
+	g_sprite.texture->loadFromFile("data/textures/dunjunText.jpg");
+
+	g_sprite.drawType = GL_TRIANGLES;
+	// g_sprite.drawStart = 0;
+	g_sprite.drawCount = 6;
+}
+
+INTERNAL void loadInstances()
+{
+	using namespace Dunjun;
+
+	ModelInstance cat;
+	cat.asset = &g_sprite;
+	cat.transform = translate({2, 0, 0});
+	g_instances.push_back(cat);
+
+	ModelInstance dog;
+	dog.asset = &g_sprite;
+	dog.transform = translate({-2, 0, 0});
+	g_instances.push_back(dog);
+}
+
+INTERNAL void renderInstance(const ModelInstance& inst)
+{
+	ModelAsset* asset = inst.asset;
+	Dunjun::ShaderProgram* shaders = asset->shaders;
+
+	shaders->setUniform("u_camera", g_cameraMatrix); // set u_camera to apply view functions
+	shaders->setUniform("u_model", inst.transform); // set u_model to apply matrix transform functions
+	shaders->setUniform("u_tex", 0); // set texture position
+
+	asset->texture->bind(0);
+	glBindBuffer(GL_ARRAY_BUFFER, g_sprite.vbo); // bind the buffer
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, g_sprite.ibo); // bind the buffer
+
+	// Speicify the layout of the vertex data
+	glEnableVertexAttribArray(0); // enables attribute array[0] a_position from glBindAttribLocation(shaderProgram)
+	glEnableVertexAttribArray(1); // enables attribute array[1] a_color ''
+	glEnableVertexAttribArray(2); // enable attribute [2] a_texCoord
+
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const GLvoid*)0); // pointer for attribute position (att position, size of vertices x/y/z, int type, normalized?, stride, pointer)
+	glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(Vertex), (const GLvoid*)sizeof(Dunjun::Vector2));
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const GLvoid*)(sizeof(Dunjun::Vector2) + sizeof(Dunjun::Color)));
+	// stride says how many floats there are per vertex
+	// const void *pointer says how far offset the information starts
+
+	// get the draw info from ModelAsset asset
+	//glDrawArrays(asset->drawType, asset->drawStart, asset->drawCount); // (mode to draw in, first vertex, total vertices)
+	glDrawElements(asset->drawType, asset->drawCount, GL_UNSIGNED_INT, nullptr);
+
+	glDisableVertexAttribArray(0); // disables attribute array[0]
+	glDisableVertexAttribArray(1); // disables attribute array[1]
+	glDisableVertexAttribArray(2); // disables attribute array[2]
+}
+
+INTERNAL void render()
+{
+	Dunjun::ShaderProgram* currentShaders = nullptr;
+
+	for (const auto& inst : g_instances)
+	{
+		if (inst.asset->shaders != currentShaders) // swap to new shaders
+		{
+			currentShaders = inst.asset->shaders;
+			currentShaders->use();
+		}
+		renderInstance(inst);
+
+	}
+
+	if (currentShaders) // checkif currentshader is in use
+		currentShaders->stopUsing();
 }
 
 namespace Debug
@@ -157,7 +292,6 @@ namespace Debug
 } // namespace Debug
 
 
-
 int main(int argc, char** argv)
 {
 	GLFWwindow* window;
@@ -166,7 +300,7 @@ int main(int argc, char** argv)
 		return EXIT_FAILURE;
 
 	glfwHints(); // define glfw version before opening a window
-	window = glfwCreateWindow(G_windowwidth, G_windowheight, "Dunjun", nullptr, nullptr); // create a window and set its name and context
+	window = glfwCreateWindow(g_windowWidth, g_windowHeight, "Dunjun", nullptr, nullptr); // create a window and set its name and context
 	if (!window) // check if window is a null pointer
 	{
 		glfwTerminate(); // if it is terminate
@@ -180,46 +314,10 @@ int main(int argc, char** argv)
 	//glEnable(GL_CULL_FACE); // enable culling faces
 	//glCullFace(GL_BACK); // specify to cull the back face
 
-	Dunjun::Matrix4 m;
-
-	// Here is where you add vertice information
-	//
-	Vertex vertices[] = { // define vertexes for a triangle
-	//     x	  y		  r	    g	  b	    a		s	  t
-		{{ 0.5f,  0.5f}, {0x00, 0xFF, 0xFF, 0xFF}, {1.0f, 1.0f}},	// 0 vertex         1 ---- 0        
-		{{-0.5f,  0.5f}, {0xFF, 0xFF, 0x00, 0xFF}, {0.0f, 1.0f}},	// 1 vertex           \             
-		{{ 0.5f, -0.5f}, {0x00, 0x00, 0xFF, 0xFF}, {1.0f, 0.0f}},	// 2 vertex              \           
-		{{-0.5f, -0.5f}, {0xFF, 0x00, 0xFF, 0xFF}, {0.0f, 0.0f}},	// 3 vertex         3 -----2       
-												 // for triangle strips organize vertexes in a backwards Z
-	};
-
-	// create a vertex buffer object to move vertex data to the graphics card
-	GLuint vbo;
-	glGenBuffers(1, &vbo); // make vbo an array with a single entry
-
-	glBindBuffer(GL_ARRAY_BUFFER, vbo); // bind the buffer
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW); // upload the data to the buffer
-	/* Types of DRAW
-	   GL_STATIC DRAW   / Draws once and is repeated many times
-	   GL_DYNAMIC_DRAW  / Draw can be changed but repeats more often than it changes
-	   GL_STREAM_DRAW   / Redraws every frame (memory intensive)
-	 */
-
-	Dunjun::ShaderProgram shaderProgram;
-	if (!shaderProgram.attachShaderFromFile(Dunjun::ShaderType::Vertex, "data/shaders/default_vert.glsl")) // check if the file loaded
-		throw std::runtime_error(shaderProgram.getErrorLog());
-
-	if (!shaderProgram.attachShaderFromFile(Dunjun::ShaderType::Fragment, "data/shaders/default_frag.glsl")) // check if the file loaded
-		throw std::runtime_error(shaderProgram.getErrorLog());
-
-
-	shaderProgram.bindAttribLocation(0, "a_position"); // bind the position of 1st attribute in shaders
-	shaderProgram.bindAttribLocation(1, "a_color"); // bind the position of 2nd attribute in shaders
-	shaderProgram.bindAttribLocation(2, "a_texCoord"); // bind the position of 3rd attribute in shaders
-
-	if (!shaderProgram.link())
-		throw std::runtime_error(shaderProgram.getErrorLog());
-
+	// load internal render functions
+	loadShaders();
+	loadSpriteAsset();
+	loadInstances();
 
 	/*  Old Texture Loader
 	GLuint tex; // declare a texture
@@ -244,31 +342,6 @@ int main(int argc, char** argv)
 	// Replaced by Dunjun::Texture
 	//Dunjun::Image image;
 	//image.loadFromFile("data/textures/dunjunText.jpg");
-
-	Dunjun::Texture tex; // declair a texture
-	tex.loadFromFile("data/textures/dunjunText.jpg"); // load texture from location
-	tex.bind(0); // bind to 
-
-
-	/*
-	unsigned char* image; // declare the name of the texture image
-	int width, height, comp; // make variables for image
-	image = stbi_load("data/textures/dunjunText.jpg", &width, &height, &comp, 0); // load the file and assign variables
-	*/
-
-	/*
-	// create an array of pixels (checker board pattern)
-	float pixels[] = {
-		0,0,1,	1,0,0,
-		0,1,0,	1,1,0,
-	};
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, image.getWidth(), image.getHeight(), 0, GL_RGB, GL_UNSIGNED_BYTE, image.getPixelPtr()); // tell how to get the image from the pixels
-	
-
-	glActiveTexture(GL_TEXTURE0); // activate the texture
-	*/
-	shaderProgram.setUniform("u_tex", 0); // set uniform for GL_TEXTURE0 as u_tex
-
 	/*
 	std::string vertexShaderSource = stringfromfile("data/shaders/default_vert.glsl"); // load vertex shader from file
 	const char* vertexShaderText = vertexShaderSource.c_str();
@@ -306,49 +379,41 @@ int main(int argc, char** argv)
 	bool fullscreen = false; // sets fullscreen to be off by default
 
 	Dunjun::TickCounter tc;
-
-	{ // check matrix works
-		using namespace Dunjun;
-
-		Matrix4 m1(1);
-		Matrix4 m2(2);
-
-		std::cout << m1 + m2 << "\n";
-		std::cout << m1 * m2 << "\n";
-		std::cout << inverse(m2) << "\n";
-	}
+	Dunjun::Clock frameClock;
 
 	while(running) // create a loop that works until the window closes
 	{
-		 // vbo viewport sizing hack
-			int width, height; // vars used to define the size of the viewport
-			glfwGetWindowSize(window, &width, &height);
-			glViewport(0, 0, width, height);
-		
+		// vbo viewport sizing hack
+		int width, height; // vars used to define the size of the viewport
+		glfwGetWindowSize(window, &width, &height);
+		glViewport(0, 0, width, height);
+		g_windowWidth = width; // change these to keep aspect ratio
+		g_windowHeight = height; // ------/
 
-			shaderProgram.use();
-			{
-				using namespace Dunjun;
-				
-				// how the matrix moves
-				Matrix4 model = Dunjun::translate({ 0.0f, 0.0f, 0.0f }) // translation { x, y, z }
-								* Dunjun::rotate(Degree(glfwGetTime() * 360.0f), { 0, 1, 0 }) // rotation amount in radians { x, y, z axis to rotate on }
-								* Dunjun::scale({ 2.0f, 1.0f, 1.0f }); // scale { x, y, z }
 
-				// where the camera is
-				Matrix4 view = lookAt({ 0.0f, 0.0f, 5.0f } // {camera/eye position x, y, z}
-									, { 0.0f, 0.0f, 0.0f } // {lookat target 0,0,0 is center x, y, z}
-									, { 0, 1, 0 }); // {up direction x, y, z}
+		{
+			using namespace Dunjun;
+			// how the matrix moves
+			Matrix4 model
+				= translate({ 0.0f, 0.0f, 0.0f }) // translation { x, y, z }
+				* rotate(Degree(glfwGetTime() * 60.0f), { 0, 1, 0 }) // rotation amount in radians { x, y, z axis to rotate on }
+				* scale({ 2.0f, 1.0f, 1.0f }); // scale { x, y, z }
 
-				// field of view perspective(Radian(TAU / x.xf),... or perspective(Degree(x),... changes the fov|| Radians must be floats
-				Matrix4 proj = perspective(Degree(60.0f), (f32)width / (f32)height, 0.1f, 100.0f);
-				
-				Matrix4 camera = proj * view; // combine to make camera
+													   // where the camera is
+			Matrix4 view = lookAt({ 0.0f, 0.0f, 5.0f } // {camera/eye position x, y, z}
+								, { 0.0f, 0.0f, 0.0f } // {lookat target 0,0,0 is center x, y, z}
+								, { 0, 1, 0 }); // {up direction x, y, z}
 
-				shaderProgram.setUniform("u_camera", camera); // set u_camera to apply view functions
-				shaderProgram.setUniform("u_model", model); // set u_model to apply matrix transform functions
-			}
+							// field of view perspective(Radian(TAU / x.xf),... or perspective(Degree(x),... changes the fov|| Radians must be floats
+			Matrix4 proj = perspective(Degree(60.0f), (f32)g_windowWidth / (f32)g_windowHeight, 0.1f, 100.0f);
 
+			g_cameraMatrix = proj * view; // combine to make camera
+		}
+
+		glClearColor(0.3f, 0.6f, 0.9f, 1.0f); // set the default color (R,G,B,A)
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		render();
 
 		if (tc.update(0.5))
 		{
@@ -358,12 +423,19 @@ int main(int argc, char** argv)
 			glfwSetWindowTitle(window, ss.str().c_str());
 		}
 
-		render();
+		//Debug
+		//Debug::drawString(
+		//	window, titleStream.str(), 0, 0{{0xFF, 0xFF, 0xFF}});
 					
 		glfwSwapBuffers(window); // switches information between the front buffer and the back buffer
 		glfwPollEvents(); // waits for input and considers that input lower priorty than interrupt input
 
-		handleInput(window, &running, &fullscreen);
+		handleInput(window, &running, &fullscreen); // input handler
+
+		while (frameClock.getElapsedTime() < 1.0 / 240.0)
+			;
+		frameClock.restart();
+
 	}
 	glfwDestroyWindow(window); // closes window named window
 	glfwTerminate(); // terminates GLFW

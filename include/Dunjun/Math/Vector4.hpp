@@ -54,10 +54,10 @@ namespace Dunjun
 		Vector4(const Vector4& other) = default; // copy constructor
 
 		// operators
-		f32& operator[](size_t index) { return data[index]; }
-		const f32& operator[](size_t index) const { return data[index]; } // this lets you call informatino in v[0] = 1; format
+		inline f32& operator[](size_t index) { return data[index]; }
+		inline const f32& operator[](size_t index) const { return data[index]; } // this lets you call informatino in v[0] = 1; format
 
-		bool operator==(const Vector4& other) const // comparison
+		inline bool operator==(const Vector4& other) const // comparison
 		{
 			for (size_t i = 0; i < 4; i++)
 			{
@@ -67,28 +67,30 @@ namespace Dunjun
 			return true;
 		}
 
-		bool operator!=(const Vector4& other) const
+		inline bool operator!=(const Vector4& other) const
 		{
 			return !operator==(other);
 		}
 
-		Vector4 operator+(const Vector4& other) const // addition
+		inline Vector4 operator-() const { return{ -x, -y, z, w }; }
+
+		inline Vector4 operator+(const Vector4& other) const // addition
 		{
 			return Vector4(x + other.x, y + other.y, z + other.z, w + other.w);
 		}
 
-		Vector4 operator-(const Vector4& other) const // subtraction
+		inline Vector4 operator-(const Vector4& other) const // subtraction
 		{
 			return Vector4(x - other.x, y - other.y, z - other.z, w - other.w);
 		}
 
-		Vector4 operator*(f32 scaler) const // scaler
+		inline Vector4 operator*(f32 scaler) const // scaler
 		{
 			return Vector4(scaler * x, scaler * y, scaler * z, scaler * w);
 		}
 
 		// Hadamard Product
-		Vector4 operator*(const Vector4& other) const
+		inline Vector4 operator*(const Vector4& other) const
 		{
 			Vector4 result;
 			for (size_t i = 0; i < 4; i++)
@@ -96,12 +98,12 @@ namespace Dunjun
 			return result;
 		}
 
-		Vector4 operator/(f32 scaler) const // division scaler
+		inline Vector4 operator/(f32 scaler) const // division scaler
 		{
 			return Vector4(x / scaler, y / scaler, z / scaler, w / scaler);
 		}
 
-		Vector4& operator+=(const Vector4& other) // addition
+		inline Vector4& operator+=(const Vector4& other) // addition
 		{
 			x += other.x;
 			y += other.y;
@@ -111,7 +113,7 @@ namespace Dunjun
 			return *this;
 		}
 
-		Vector4& operator-=(const Vector4& other) // subtraction
+		inline Vector4& operator-=(const Vector4& other) // subtraction
 		{
 			x -= other.x;
 			y -= other.y;
@@ -121,7 +123,7 @@ namespace Dunjun
 			return *this;
 		}
 
-		Vector4& operator*=(f32 scaler) // scaler
+		inline Vector4& operator*=(f32 scaler) // scaler
 		{
 			x *= scaler;
 			y *= scaler;
@@ -131,7 +133,7 @@ namespace Dunjun
 			return *this;
 		}
 
-		Vector4& operator/=(f32 scaler) // scaler
+		inline Vector4& operator/=(f32 scaler) // scaler
 		{
 			x /= scaler;
 			y /= scaler;

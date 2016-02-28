@@ -4,18 +4,23 @@
 
 namespace Dunjun
 {
-	INTERNAL GLenum getInternalFormat(Image::Format format, bool srgb)
+	INTERNAL GLenum getInternalFormat(ImageFormat format, bool srgb)
 	{
 		switch (format)
 		{
-		case Image::Format_Greyscale:
+		case ImageFormat::Greyscale:
 			return GL_LUMINANCE;
-		case Image::Format_GreyscaleAlpha:
+		case ImageFormat::GreyscaleAlpha:
 			return GL_LUMINANCE_ALPHA;
-		case Image::Format_RGB:
+		case ImageFormat::RGB:
 			return (srgb ? GL_SRGB : GL_RGB);
-		case Image::Format_RGBAlpha:
+		case ImageFormat::RGBA:
 			return (srgb ? GL_SRGB_ALPHA : GL_RGBA);
+
+		default:
+		case ImageFormat::None:
+			throw std::runtime_error("Non-valid ImageFormat.");
+			return 0;
 		}
 	}
 

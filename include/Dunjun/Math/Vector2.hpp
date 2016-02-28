@@ -33,10 +33,10 @@ namespace Dunjun
 		Vector2(const Vector2& other) = default; // copy constructor
 
 		// operators
-		f32& operator[](size_t index) { return data[index]; }
-		const f32& operator[](size_t index) const { return data[index]; } // this lets you call informatino in v[0] = 1; format
+		inline f32& operator[](size_t index) { return data[index]; }
+		inline const f32& operator[](size_t index) const { return data[index]; } // this lets you call informatino in v[0] = 1; format
 
-		bool operator==(const Vector2& other) const // comparison
+		inline bool operator==(const Vector2& other) const // comparison
 		{
 			for (size_t i = 0; i < 2; i++)
 			{
@@ -46,24 +46,26 @@ namespace Dunjun
 			return true;
 		}
 
-		bool operator!=(const Vector2& other) const
+		inline bool operator!=(const Vector2& other) const
 		{
 			return !operator==(other);
 		}
 
-		Vector2 operator+(const Vector2& other ) const // addition
+		inline Vector2 operator-() const { return { -x, -y}; }
+
+		inline Vector2 operator+(const Vector2& other ) const // addition
 		{ return Vector2(x + other.x, y + other.y); }
 
-		Vector2 operator-(const Vector2& other) const // subtraction
+		inline Vector2 operator-(const Vector2& other) const // subtraction
 		{return Vector2( x - other.x, y - other.y );}
 
-		Vector2 operator*(f32 scaler) const // scaler
+		inline Vector2 operator*(f32 scaler) const // scaler
 		{
 			return Vector2( scaler * x, scaler * y);
 		}
 
 		// Hadamard Product
-		Vector2 operator*(const Vector2& other) const
+		inline Vector2 operator*(const Vector2& other) const
 		{
 			Vector2 result;
 			for (size_t i = 0; i < 2; i++)
@@ -71,12 +73,12 @@ namespace Dunjun
 			return result;
 		}
 
-		Vector2 operator/(f32 scaler) const // division scaler
+		inline Vector2 operator/(f32 scaler) const // division scaler
 		{
 			return Vector2(x / scaler, y / scaler);
 		}
 
-		Vector2& operator+=(const Vector2& other) // addition
+		inline Vector2& operator+=(const Vector2& other) // addition
 		{
 			x += other.x;
 			y += other.y;
@@ -84,7 +86,7 @@ namespace Dunjun
 			return *this;
 		}
 
-		Vector2& operator-=(const Vector2& other) // subtraction
+		inline Vector2& operator-=(const Vector2& other) // subtraction
 		{
 			x -= other.x;
 			y -= other.y;
@@ -92,7 +94,7 @@ namespace Dunjun
 			return *this;
 		}
 
-		Vector2& operator*=(f32 scaler) // scaler
+		inline Vector2& operator*=(f32 scaler) // scaler
 		{
 			x *= scaler;
 			y *= scaler;
@@ -100,7 +102,7 @@ namespace Dunjun
 			return *this;
 		}
 
-		Vector2& operator/=(f32 scaler) // scaler
+		inline Vector2& operator/=(f32 scaler) // scaler
 		{
 			x /= scaler;
 			y /= scaler;

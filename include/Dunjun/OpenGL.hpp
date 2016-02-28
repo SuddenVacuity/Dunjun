@@ -17,17 +17,17 @@
 
 
 // check the operating system of the machine
-#if defined(_WIN32) || defined(_WIN64) || defined (__WIN32__) || defined(__WINDOWS__)
+//#if defined(_WIN32) || defined(_WIN64) || defined (__WIN32__) || defined(__WINDOWS__)
 
-#include <GL/gl.h>
+//#include <GL/gl.h>
 
-#elif defined(__APPLE__) && defined(__MACH__)
+#if defined(__APPLE__) && defined(__MACH__)
 
 #include <OpeenGL/GL.h>
 
-#elif defined(__unix__)
+//#elif defined(__unix__)
 
-#include <GL/GL.h>
+//#include <GL/GL.h>
 
 #else
 

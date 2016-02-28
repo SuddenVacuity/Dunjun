@@ -9,15 +9,15 @@
 namespace Dunjun
 {
 	Image::Image()
-		: m_format((Format)0) // set default values for m_XXXXX files
+		: m_format((ImageFormat)0) // set default values for m_XXXXX files
 		, m_width(0)
 		, m_height (0)
 		, m_pixels (nullptr)
 	{
 
 	}
-	Image::Image(u32 width, u32 height, Format format, const u8* pixels) // 1st half of the image
-		: m_format((Format)0) // set default values for m_XXXXX files
+	Image::Image(u32 width, u32 height, ImageFormat format, const u8* pixels) // 1st half of the image
+		: m_format((ImageFormat)0) // set default values for m_XXXXX files
 		, m_width(0)
 		, m_height (0)
 		, m_pixels (nullptr)
@@ -25,7 +25,7 @@ namespace Dunjun
 		loadFromImage(width, height, format, pixels); // sets variables to the m_XXXXX values
 	}
 	Image::Image(const Image& other) // 2nd half of the image
-		: m_format((Format)0) // set default values for m_XXXXX files
+		: m_format((ImageFormat)0) // set default values for m_XXXXX files
 		, m_width(0)
 		, m_height(0)
 		, m_pixels(nullptr)
@@ -54,7 +54,7 @@ namespace Dunjun
 					return false;
 				}
 	
-			loadFromImage(width, height, (Format)format, pixels); // load info from file to memory
+			loadFromImage(width, height, (ImageFormat)format, pixels); // load info from file to memory
 
 			stbi_image_free(pixels); // free pixels using stb library
 
@@ -63,7 +63,7 @@ namespace Dunjun
 			return false;
 	
 	}
-	bool Image::loadFromImage(u32 width, u32 height, Format format, const u8* pixels) // start organizing image info
+	bool Image::loadFromImage(u32 width, u32 height, ImageFormat format, const u8* pixels) // start organizing image info
 	{
 		if (width == 0) // width error
 		{
