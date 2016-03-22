@@ -1,7 +1,7 @@
 #ifndef  DUNJUN_MATH_VECTOR2_HPP
 #define  DUNJUN_MATH_VECTOR2_HPP
 
-#include <Dunjun/Types.hpp>
+#include <Dunjun/Math/Angle.hpp>
 #include <iostream>
 #include <cmath>
 
@@ -19,7 +19,7 @@ namespace Dunjun
 			, y(xy)
 		{
 		}
-		Vector2(f32 x, f32 y) // explicit means you must write Vector2 to get the info
+		Vector2(f32 x, f32 y)
 			: x(x)
 			, y(y)
 			{
@@ -51,7 +51,8 @@ namespace Dunjun
 			return !operator==(other);
 		}
 
-		inline Vector2 operator-() const { return { -x, -y}; }
+		inline Vector2 operator-() const 
+		{ return { -x, -y}; }
 
 		inline Vector2 operator+(const Vector2& other ) const // addition
 		{ return Vector2(x + other.x, y + other.y); }

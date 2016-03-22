@@ -3,9 +3,7 @@
 
 // this file is a wrapper for textures
 
-#include <Dunjun/NonCopyable.hpp>
 #include <Dunjun/Image.hpp>
-#include <Dunjun/OpenGL.hpp>
 
 namespace Dunjun
 {

@@ -1,7 +1,6 @@
 #ifndef  DUNJUN_MATH_VECTOR3_HPP
 #define  DUNJUN_MATH_VECTOR3_HPP
 
-#include <Dunjun/Types.hpp>
 #include <cmath>
 
 #include <Dunjun/Math/Vector2.hpp>
@@ -62,7 +61,7 @@ namespace Dunjun
 			return !operator==(other);
 		}
 
-		inline Vector3 operator-() const { return { -x, -y, z }; }
+		inline Vector3 operator-() const { return { -x, -y, -z }; }
 
 		inline Vector3 operator+(const Vector3& other) const // addition
 		{
@@ -147,7 +146,7 @@ namespace Dunjun
 		};
 	};
 
-	inline Vector3& operator*(f32 scaler, const Vector3& vector) // scaler for the other side
+	inline Vector3 operator*(f32 scaler, const Vector3& vector) // scaler for the other side
 	{
 		return vector * scaler;
 	}

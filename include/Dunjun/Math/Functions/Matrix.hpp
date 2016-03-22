@@ -1,9 +1,7 @@
 #ifndef DUNJUN_MATH_FUNCTIONS_MATRIX_HPP
 #define DUNJUN_MATH_FUNCTIONS_MATRIX_HPP
 
-#include <Dunjun/Math/Vector3.hpp>
 #include <Dunjun/Math/Matrix4.hpp>
-#include <Dunjun/Math/Angle.hpp>
 
 #include <cmath>
 

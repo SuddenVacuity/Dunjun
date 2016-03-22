@@ -2,8 +2,6 @@
 #define DUNJUN_MATH_ANGLE_HPP
 // this hpp defines angles and degrees
 
-#include <Dunjun/Types.hpp>
-#include <Dunjun/Math/Constants.hpp>
 #include <Dunjun/Math/Unit.hpp>
 
 #include <ostream>

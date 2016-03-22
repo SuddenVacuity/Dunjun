@@ -1,6 +1,8 @@
 #ifndef DUNJUN_MATH_UNIT_HPP
 #define DUNJUN_MATH_UNIT_HPP
 
+#include <Dunjun/Math/Constants.hpp>
+
 #include <cmath>
 #include <chrono>
 

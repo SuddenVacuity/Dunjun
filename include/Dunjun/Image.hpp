@@ -6,7 +6,7 @@
 
 // Define functions are variables to be used in Image.cpp and main.cpp
 
-#include <Dunjun/Types.hpp>
+#include <Dunjun/TickCounter.hpp>
 
 
 namespace Dunjun

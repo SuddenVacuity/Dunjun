@@ -1,6 +1,7 @@
 #ifndef DUNJUN_OPENGL_HPP
 #define DUNJUN_OPENGL_HPP
 
+#include <Dunjun/NonCopyable.hpp>
 // this hpp file includes open glew for various operating systems
 
 #ifndef GLFW_STATIC
@@ -23,7 +24,7 @@
 
 #if defined(__APPLE__) && defined(__MACH__)
 
-#include <OpeenGL/GL.h>
+#include <OpenGL/GL.h>
 
 //#elif defined(__unix__)
 

@@ -1,12 +1,7 @@
 #ifndef DUNJUN_SHADERPROGRAM_HPP
 #define DUNJUN_SHADERPROGRAM_HPP
 
-#include <Dunjun/Common.hpp>
-#include <Dunjun/NonCopyable.hpp>
-#include <Dunjun/Math.hpp>
-//#include <Dunjun/Math/Matrix4.hpp>
-
-#include <Dunjun/OpenGL.hpp>
+#include <Dunjun/Color.hpp>
 
 #include <map>
 #include <string>

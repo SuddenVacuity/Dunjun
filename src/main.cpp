@@ -9,20 +9,20 @@ first attempt to program anything major so it's a big learning experience for me
 For this project I'll be following the video tutorial series Dunjun by Ginger Games
 found here: https://www.youtube.com/playlist?list=PL93bFkoCMJslJJb15oQddnmABNUl6iz8e
 
+==============================================================
+HEADER MAP
+==============================================================
+
+Types.hpp >> Common.hpp >> Constants.hpp >> Unit.hpp >> Angle.hpp >> Vector2.hpp >> Vector3.hpp >> Vector4.hpp >> Matrix4.hpp
+///<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<///
+>> Matrix.hpp >> Quaternion.hpp >> Functions.hpp >> Math.hpp >> NonCopyable.hpp >> OpenGL.hpp >> Clock.hpp >> TickCounter.hpp
+///<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<///
+>> Image.hpp >> Texture.hpp >> Color.hpp >> ShaderProgram.hpp >> main.cpp
+
 */
- 
-//#include "../include/Dunjun/Common.hpp" "../" means back one directory form the folder the .exe is in
 
 
-#include <Dunjun/Color.hpp>
-#include <Dunjun/Common.hpp> // set iclude folder in RMB(Dunjun)>>properties>>C++>>General>>Include include;
-#include <Dunjun/Image.hpp>
-#include <Dunjun/OpenGL.hpp>
 #include <Dunjun/ShaderProgram.hpp>
-#include <Dunjun/Texture.hpp>
-#include <Dunjun/TickCounter.hpp>
-
-#include <GLFW/glfw3.h>
 
 #include <stb/stb_easy_font.h>
 
@@ -113,6 +113,7 @@ INTERNAL void handleInput(GLFWwindow* window, bool* running, bool* fullscreen)
 	*/
 }
 
+// File path for shader files and define and bind attributes
 INTERNAL void loadShaders()
 {
 	// Shader Program
@@ -133,6 +134,7 @@ INTERNAL void loadShaders()
 
 }
 
+// vertex info, vbo and ibo
 INTERNAL void loadSpriteAsset()
 {
 	using namespace Dunjun;
@@ -175,6 +177,7 @@ INTERNAL void loadSpriteAsset()
 	g_sprite.drawCount = 6;
 }
 
+// create instances of vertex info
 INTERNAL void loadInstances()
 {
 	using namespace Dunjun;
@@ -190,6 +193,7 @@ INTERNAL void loadInstances()
 	g_instances.push_back(dog);
 }
 
+// shader info
 INTERNAL void renderInstance(const ModelInstance& inst)
 {
 	ModelAsset* asset = inst.asset;
@@ -240,6 +244,16 @@ INTERNAL void render()
 
 	if (currentShaders) // checkif currentshader is in use
 		currentShaders->stopUsing();
+}
+
+void renderUpdate(const ModelInstance& inst)
+{
+	ModelAsset* asset = inst.asset;
+	Dunjun::ShaderProgram* shaders = asset->shaders;
+
+	shaders->setUniform("u_camera", g_cameraMatrix); // set u_camera to apply view functions
+	shaders->setUniform("u_model", inst.transform); // set u_model to apply matrix transform functions
+
 }
 
 namespace Debug
@@ -294,6 +308,24 @@ namespace Debug
 
 int main(int argc, char** argv)
 {
+
+	{ // test quaternions
+		using namespace Dunjun;
+
+		Quaternion q;
+		Vector3 p;
+
+		q = angleAxis(Degree(45), Vector3(0,0,1));
+		p = {2,0,0};
+
+		std::cout << q << std::endl;
+		std::cout << p << std::endl;
+
+		std::cout << (q * Quaternion(p, 0) * conjugate(q)).xyz << std::endl;
+		std::cout << q * p << std::endl;
+	}
+
+
 	GLFWwindow* window;
 
 	if (!glfwInit()) // check if GLFW is initialized
@@ -370,12 +402,12 @@ int main(int argc, char** argv)
 
 	glUseProgram(shaderProgram); // use the program
 	*/
-
+														 
 	//=================================================================================================
-	// OPENING THE MAIN WINDOW
+	// OPENING THE MAIN WINDOW							 
 	//=================================================================================================
 	//=================================================================================================
-	bool running = true;
+	bool running = true;								 
 	bool fullscreen = false; // sets fullscreen to be off by default
 
 	Dunjun::TickCounter tc;
@@ -393,6 +425,9 @@ int main(int argc, char** argv)
 
 		{
 			using namespace Dunjun;
+
+
+			
 			// how the matrix moves
 			Matrix4 model
 				= translate({ 0.0f, 0.0f, 0.0f }) // translation { x, y, z }
@@ -408,6 +443,8 @@ int main(int argc, char** argv)
 			Matrix4 proj = perspective(Degree(60.0f), (f32)g_windowWidth / (f32)g_windowHeight, 0.1f, 100.0f);
 
 			g_cameraMatrix = proj * view; // combine to make camera
+
+			void renderUpdate(const ModelInstance& inst);
 		}
 
 		glClearColor(0.3f, 0.6f, 0.9f, 1.0f); // set the default color (R,G,B,A)
