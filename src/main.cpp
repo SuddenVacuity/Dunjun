@@ -7,16 +7,15 @@ This is a project to make a rogue-like game from scratch. This program is my
 first attempt to program anything major so it's a big learning experience for me.
 
 For this project I'll be following the video tutorial series Dunjun by Ginger Games
-found here: https://www.youtube.com/playlist?list=PL93bFkoCMJslJJb15oQddnmABNUl6iz8e
-
+found here: https://www.youtube.com/watch?v=fRUYl6_5m3o
 ==============================================================
 HEADER MAP
 ==============================================================
 
 Types.hpp >> Common.hpp >> Constants.hpp >> Unit.hpp >> Angle.hpp >> Vector2.hpp >> Vector3.hpp >> Vector4.hpp >> Matrix4.hpp
 ///<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<///
->> Matrix.hpp >> Quaternion.hpp >> Functions.hpp >> Math.hpp >> NonCopyable.hpp >> OpenGL.hpp >> Clock.hpp >> TickCounter.hpp
-///<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<///
+>> Matrix.hpp >> Quaternion.hpp >> Interpolation.hpp >> Functions.hpp >> Math.hpp >> NonCopyable.hpp >> OpenGL.hpp >> Clock.hpp >> TickCounter.hpp
+///<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<///
 >> Image.hpp >> Texture.hpp >> Color.hpp >> ShaderProgram.hpp >> main.cpp
 
 */
@@ -321,7 +320,7 @@ int main(int argc, char** argv)
 		std::cout << q << std::endl;
 		std::cout << p << std::endl;
 
-		std::cout << (q * Quaternion(p, 0) * conjugate(q)).xyz << std::endl;
+		std::cout << (q * Quaternion(p, 0) * conjugate(q)).vector() << std::endl;
 		std::cout << q * p << std::endl;
 	}
 

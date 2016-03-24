@@ -10,35 +10,45 @@ namespace Dunjun
 	struct Quaternion
 	{
 		// GLS, vec4 = xyzw
-		Vector3 xyz = Vector3(0, 0, 0);
-		f32 w = 1.0f;
+		//Vector3 xyz = Vector3(0, 0, 0);
+		//f32 w = 1.0f;
+
 
 		Quaternion()
-			: xyz(0, 0, 0)
+			: x(0)
+			, y(0)
+			, z(0)
 			, w(1)
 		{
 		}
 
 		Quaternion(const Quaternion& q) = default;
 
-		/*explicit*/ Quaternion(const Vector3& v, f32 s)
-			: xyz(v)
+		Quaternion(f32 x, f32 y, f32 z, f32 w)
+			: x(x)
+			, y(y)
+			, z(z)
+			, w(w)
+		{
+		}
+
+
+		explicit Quaternion(const Vector3& v, f32 s)
+			: x(v.x)
+			, y(v.y)
+			, z(v.z)
 			, w(s)
 		{
 		}
 
 		f32 operator[](size_t index) const
 		{
-			if (index < 3)
-				return xyz[index];
-			return w;
+			return data[index];
 		}
 
 		f32& operator[](size_t index)
 		{
-			if (index < 3)
-				return xyz[index];
-			return w;
+			return data[index];
 		}
 
 		Quaternion operator-() const
@@ -46,7 +56,9 @@ namespace Dunjun
 			Quaternion c;
 
 			c.w = -w;
-			c.xyz = -xyz;
+			c.x = -x;
+			c.y = -y;
+			c.z = -z;
 
 			return c;
 		}
@@ -56,7 +68,9 @@ namespace Dunjun
 			Quaternion c;
 
 			c.w = w + b.w;
-			c.xyz = xyz + b.xyz;
+			c.x = x + b.x;
+			c.y = y + b.y;
+			c.z = z + b.z;
 
 			return c;
 		}
@@ -66,7 +80,9 @@ namespace Dunjun
 			Quaternion c;
 
 			c.w = w - b.w;
-			c.xyz = xyz - b.xyz;
+			c.x = x - b.x;
+			c.y = y - b.y;
+			c.z = z - b.z;
 
 			return c;
 		}
@@ -76,8 +92,10 @@ namespace Dunjun
 			const Quaternion& a = *this;
 			Quaternion c;
 
-			c.xyz = a.w * b.xyz + b.w * a.xyz + cross(a.xyz, b.xyz);
-			c.w = a.w * b.w - dot(a.xyz, b.xyz);
+			c.x = a.w * b.x + a.x * b.w + a.y * b.z - a.z * b.y;
+			c.y = a.w * b.y - a.x * b.z + a.y * b.w + a.z * b.x;
+			c.z = a.w * b.z + a.x * b.y - a.y * b.x + a.z * b.w;
+			c.w = a.w * b.w - a.x * b.x - a.y * b.y - a.z * b.z;
 
 			return c;
 		}
@@ -86,7 +104,9 @@ namespace Dunjun
 		{
 			Quaternion c = *this;
 
-			c.xyz *= s;
+			c.x *= s;
+			c.y *= s;
+			c.z *= s;
 			c.w *= s;
 
 			return c;
@@ -96,7 +116,9 @@ namespace Dunjun
 		{
 			Quaternion c = *this;
 
-			c.xyz /= s;
+			c.x /= s;
+			c.y /= s;
+			c.z /= s;
 			c.w /= s;
 
 			return c;
@@ -106,7 +128,7 @@ namespace Dunjun
 		{
 			for(size_t i = 0; i < 4; i++)
 			{
-				if(operator[](i) != b[i])
+				if(data[i] != b.data[i])
 					return false;
 			}
 			return true;
@@ -117,9 +139,16 @@ namespace Dunjun
 			return !operator==(b);
 		}
 
+		const Vector3 vector() const { return (const Vector3&)(data);
+		}
+		Vector3& vector() { return (Vector3&)(data); }
+
+		f32 scaler() const { return w; }
+		f32& scaler() { return w; }
+
 		f32 lengthSquared() const
 		{
-			return dot(xyz , xyz) + w * w;
+			return x * x + y * y + z * z + w * w;
 		}
 
 		f32 length() const
@@ -128,6 +157,15 @@ namespace Dunjun
 		}
 
 
+		union
+		{
+			f32 data[4];
+			struct
+			{
+				f32 x, y, z, w;
+			};
+			f32 xyz[3];
+		};
 
 	};
 
@@ -141,7 +179,18 @@ inline Quaternion operator*(f32 s, const Quaternion& q)
 
 inline f32 dot(const Quaternion& a, const Quaternion& b)
 {
-	return dot(a.xyz, b.xyz) + a.w * b.w;
+	return dot(a.vector(), b.vector()) + a.w * b.w;
+}
+
+inline Quaternion cross(const Quaternion& a, const Quaternion& b)
+{
+	return Quaternion(
+		a.w * b.x + a.x * b.w + a.y * b.z - a.z * b.y,
+		a.w * b.y + a.y * b.w + a.z * b.x - a.x * b.z,
+		a.w * b.z + a.z * b.w + a.x * b.y - a.y * b.x,
+		a.w * b.w - a.x * b.x - a.y * b.y - a.z * b.z
+		);
+
 }
 
 inline Quaternion normalize(const Quaternion& q)
@@ -151,7 +200,7 @@ inline Quaternion normalize(const Quaternion& q)
 
 inline Quaternion conjugate(const Quaternion& q)
 {
-	Quaternion c(-q.xyz, q.w);
+	Quaternion c(-q.vector(), q.w);
 	return c;
 }
 
@@ -164,13 +213,9 @@ inline Quaternion inverse(const Quaternion& q)
 inline Vector3 operator*(const Quaternion& q, const Vector3& v)
 {
 	// return q * quaternion(v, 0) * conjugate(q) // More expensive
-	Vector3 t = 2.0f * cross(q.xyz, v);
-	return (v + q.w * t + cross(q.xyz, t));
+	Vector3 t = 2.0f * cross(q.vector(), v);
+	return (v + q.w * t + cross(q.vector(), t));
 }
-
-
-
-
 
 
 inline std::ostream& operator<<(std::ostream& os, const Quaternion& q)
@@ -185,7 +230,6 @@ inline std::ostream& operator<<(std::ostream& os, const Quaternion& q)
 	os << ")";
 
 	return os;
-
 }
 
 
@@ -202,7 +246,7 @@ inline Vector3 axis(const Quaternion& q)
 
 	f32 invs2 = 1.0f / std::sqrt(s2); 
 
-	return q.xyz * invs2;
+	return q.vector() * invs2;
 }
 
 inline Quaternion angleAxis(const Radian& angle, const Vector3& axis)
@@ -213,7 +257,7 @@ inline Quaternion angleAxis(const Radian& angle, const Vector3& axis)
 
 	const f32 s = std::sin((f32)(0.5f * angle));
 
-	q.xyz = a * s;
+	q.vector() = a * s;
 	q.w = std::cos((f32)(0.5f * angle));
 
 	return q;
@@ -247,6 +291,37 @@ inline EulerAngles quaternionToEulerAngles(const Quaternion& q)
 {
 	return {pitch(q), yaw(q), roll(q)};
 }
+
+inline Matrix4 quaternionToMatrix4(const Quaternion& q)
+{
+	Matrix4 mat(1);
+	Quaternion a = normalize(q);
+
+	const f32 xx = a.x * a.x;
+	const f32 yy = a.y * a.y;
+	const f32 zz = a.z * a.z;
+	const f32 xy = a.x * a.y;
+	const f32 xz = a.x * a.z;
+	const f32 yz = a.y * a.z;
+	const f32 wx = a.w * a.x;
+	const f32 wy = a.w * a.y;
+	const f32 wz = a.w * a.z;
+
+	mat[0][0] = 1.0f - 2.0f * ( yy + zz );
+	mat[0][1] = 2.0f * ( xy + wz );
+	mat[0][2] = 2.0f * ( xz - wy );
+
+	mat[1][0] = 2.0f * ( xy - wz );
+	mat[1][1] = 1.0f - 2.0f * ( xx + zz );
+	mat[1][2] = 2.0f * ( yz + wx );
+			  
+	mat[2][0] = 2.0f * ( xz + wy );
+	mat[2][1] = 2.0f * ( yz - wx );
+	mat[2][2] = 1.0f - 2.0f * ( xx + yy );
+
+	return mat;
+}
+
 
 } // end Dunjun
 

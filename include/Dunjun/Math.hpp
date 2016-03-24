@@ -11,5 +11,4 @@
 
 #include <Dunjun/Math/Functions.hpp>
 
-
 #endif
