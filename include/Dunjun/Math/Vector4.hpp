@@ -98,6 +98,14 @@ namespace Dunjun
 			return result;
 		}
 
+		inline Vector4 operator/(const Vector4& other) const
+		{
+			Vector4 result;
+			for (size_t i = 0; i < 4; i++)
+				result[i] = data[i] / other.data[i];
+			return result;
+		}
+
 		inline Vector4 operator/(f32 scaler) const // division scaler
 		{
 			return Vector4(x / scaler, y / scaler, z / scaler, w / scaler);

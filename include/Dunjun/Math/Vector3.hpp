@@ -87,6 +87,15 @@ namespace Dunjun
 			return result;
 		}
 
+		inline Vector3 operator/(const Vector3& other) const
+		{
+			Vector3 result;
+			for (size_t i = 0; i < 3; i++)
+				result[i] = data[i] / other.data[i];
+			return result;
+		}
+
+
 		inline Vector3 operator/(f32 scaler) const // division scaler
 		{
 			return Vector3(x / scaler, y / scaler, z / scaler);

@@ -74,6 +74,14 @@ namespace Dunjun
 			return result;
 		}
 
+		inline Vector2 operator/(const Vector2& other) const
+		{
+			Vector2 result;
+			for (size_t i = 0; i < 2; i++)
+				result[i] = data[i] / other.data[i];
+			return result;
+		}
+
 		inline Vector2 operator/(f32 scaler) const // division scaler
 		{
 			return Vector2(x / scaler, y / scaler);

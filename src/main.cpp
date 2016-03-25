@@ -43,7 +43,6 @@ struct Vertex // must come before render
 	Dunjun::Color color;
 	Dunjun::Vector2 texCoord;
 };
-
 struct ModelAsset // includes the shader, the texture and the vbo's
 { 
 	Dunjun::ShaderProgram* shaders;
@@ -61,7 +60,8 @@ struct ModelAsset // includes the shader, the texture and the vbo's
 struct ModelInstance // copies an asset to use
 {
 	ModelAsset* asset;
-	Dunjun::Matrix4 transform;
+	Dunjun::Transform transform;
+	//Dunjun::Matrix4 transform;
 
 };
 
@@ -181,15 +181,26 @@ INTERNAL void loadInstances()
 {
 	using namespace Dunjun;
 
-	ModelInstance cat;
-	cat.asset = &g_sprite;
-	cat.transform = translate({2, 0, 0});
-	g_instances.push_back(cat);
+	ModelInstance a;
+	a.asset = &g_sprite;
+	a.transform.position = {0, 2, 0}; // translation
+	a.transform.scale = {1, 1, 1};
+	a.transform.orientation = angleAxis(Degree(60), {1, 0, 0}); // rotation
+	g_instances.push_back(a);
 
-	ModelInstance dog;
-	dog.asset = &g_sprite;
-	dog.transform = translate({-2, 0, 0});
-	g_instances.push_back(dog);
+	ModelInstance b;
+	b.asset = &g_sprite;
+	b.transform.position = { 3, 0, 0 };
+	b.transform.scale = { 2.0f, 2.0f, 1 };
+	b.transform.orientation = angleAxis(Degree(30), { 0, 1, 0 }); // rotation
+	g_instances.push_back(b);
+
+	ModelInstance c;
+	c.asset = &g_sprite;
+	c.transform.position = { -2, 0, 0 };
+	c.transform.scale = { 1.5f, 1, 1 };
+	c.transform.orientation = angleAxis(Degree(0), { 1, 0, 0 }); // rotation
+	g_instances.push_back(c);
 }
 
 // shader info
@@ -199,15 +210,16 @@ INTERNAL void renderInstance(const ModelInstance& inst)
 	Dunjun::ShaderProgram* shaders = asset->shaders;
 
 	shaders->setUniform("u_camera", g_cameraMatrix); // set u_camera to apply view functions
-	shaders->setUniform("u_model", inst.transform); // set u_model to apply matrix transform functions
-	shaders->setUniform("u_tex", 0); // set texture position
+	//shaders->setUniform("u_model", inst.transform); // set u_model to apply matrix transform functions
+	shaders->setUniform("u_transform", inst.transform); // set u_model to apply matrix transform functions
+	shaders->setUniform("u_tex", (Dunjun::u32)0); // set texture position
 
 	asset->texture->bind(0);
 	glBindBuffer(GL_ARRAY_BUFFER, g_sprite.vbo); // bind the buffer
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, g_sprite.ibo); // bind the buffer
 
 	// Speicify the layout of the vertex data
-	glEnableVertexAttribArray(0); // enables attribute array[0] a_position from glBindAttribLocation(shaderProgram)
+	glEnableVertexAttribArray(0); // enables attribute array[0] a_position
 	glEnableVertexAttribArray(1); // enables attribute array[1] a_color ''
 	glEnableVertexAttribArray(2); // enable attribute [2] a_texCoord
 
@@ -245,15 +257,15 @@ INTERNAL void render()
 		currentShaders->stopUsing();
 }
 
-void renderUpdate(const ModelInstance& inst)
-{
-	ModelAsset* asset = inst.asset;
-	Dunjun::ShaderProgram* shaders = asset->shaders;
-
-	shaders->setUniform("u_camera", g_cameraMatrix); // set u_camera to apply view functions
-	shaders->setUniform("u_model", inst.transform); // set u_model to apply matrix transform functions
-
-}
+//void renderUpdate(const ModelInstance& inst)
+//{
+//	ModelAsset* asset = inst.asset;
+//	Dunjun::ShaderProgram* shaders = asset->shaders;
+//	
+//	shaders->setUniform("u_camera", g_cameraMatrix); // set u_camera to apply view functions
+//	shaders->setUniform("u_model", inst.transform); // set u_model to apply matrix transform functions
+//
+//}
 
 namespace Debug
 {
@@ -349,58 +361,6 @@ int main(int argc, char** argv)
 	loadShaders();
 	loadSpriteAsset();
 	loadInstances();
-
-	/*  Old Texture Loader
-	GLuint tex; // declare a texture
-	glGenTextures(1, &tex); // generate texture tex
-	glBindTexture(GL_TEXTURE_2D, tex); // bind the texture
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); // set the s axis (x) to repeat
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT); // set the t axis (y) to repeat
-	//glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL REPEAT); // set the r axis (z) to repeat
-	*/
-	/* set the border color for GL_CLAMP_TO_BORDER
-	float color[] = {1.0f, 0.0f, 0.0f, 1.0f}; // create float array with the color in it
-	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, color); // apply the color to the border
-	*/
-	/*
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); // set the texture min filter type
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); // set the texture max filter type
-															// there are 3 types of texture filters
-															// GL_NEAREST	keeps it as close as possible pixel to pixel
-															// GL_LINEAR	blurs the pixels
-															// GL_MIPMAP	blurs the pixel differently
-															*/
-	// Replaced by Dunjun::Texture
-	//Dunjun::Image image;
-	//image.loadFromFile("data/textures/dunjunText.jpg");
-	/*
-	std::string vertexShaderSource = stringfromfile("data/shaders/default_vert.glsl"); // load vertex shader from file
-	const char* vertexShaderText = vertexShaderSource.c_str();
-
-	std::string fragmentShaderSource = stringfromfile("data/shaders/default_frag.glsl"); // load fragment shader form file
-	const char* fragmentShaderText = fragmentShaderSource.c_str();
-
-	// start creating shaders
-	GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER); //load the vertex shader in memory
-	glShaderSource(vertexShader, 1, &vertexShaderText, nullptr); // assign vertex shader source to a shader (shader name, shader number, &shader source text, length)
-	glCompileShader(vertexShader); // make vertexShader program available
-
-	GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER); // load the fragment shader into memory
-	glShaderSource(fragmentShader, 1, &fragmentShaderText, nullptr); // assign fragment shader source to a shader (shader name, shader number, &shader source text, length)
-	glCompileShader(fragmentShader); // make fragmentShader program available
-	
-	GLuint shaderProgram = glCreateProgram(); // make a program that uses vertexShader and fragmentShader together
-	glAttachShader(shaderProgram, vertexShader); // attach vertexShader
-	glAttachShader(shaderProgram, fragmentShader); // attach fragmentShader
-
-	glBindAttribLocation(shaderProgram, 0, "a_position"); // defines attribute vec2 a_position from vertexShaderText
-	glBindAttribLocation(shaderProgram, 1, "a_color"); // defines attribute vec3 a_color from vertexShaderText
-
-	// any modification to the attached programs must be done before linking
-	glLinkProgram(shaderProgram); // link vertexShader and fragmentShader together
-
-	glUseProgram(shaderProgram); // use the program
-	*/
 														 
 	//=================================================================================================
 	// OPENING THE MAIN WINDOW							 
