@@ -7,16 +7,9 @@ namespace Dunjun
 {
 	struct Transform
 	{
-		Vector3 position;
-		Quaternion orientation;
-		Vector3 scale;
-
-		Transform()
-			: position({0,0,0})
-			, orientation(Quaternion(0, 0, 0, 1))
-			, scale({1, 1, 1})
-		{
-		}
+		Vector3 position = {0, 0, 0};
+		Quaternion orientation = {0, 0, 0, 1};
+		Vector3 scale = {1, 1, 1};
 
 		// World Transform  = Parent * Local
 		Transform operator*(const Transform& ls) const
@@ -52,6 +45,11 @@ namespace Dunjun
 	{
 		const Transform i;
 		return i / t;
+	}
+
+	inline Matrix4 transformMatrix4(const Transform& t)
+	{
+		return translate(t.position) * quaternionToMatrix4(t.orientation) * scale(t.scale);
 	}
 
 } // end Dunjun

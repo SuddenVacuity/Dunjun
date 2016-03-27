@@ -304,11 +304,8 @@ namespace Dunjun
 		{
 			checkInUse();
 
-			setUniform(std::string(name + ".position"), t.position);
-
-			setUniform(std::string(name + ".orientation"), t.orientation);
-
-			setUniform(std::string(name + ".scale"), t.scale);
-
+			setUniform(name + ".position", t.position);
+			setUniform(name + ".orientation", t.orientation);
+			setUniform(name + ".scale", t.scale);
 		}
 } // end Dunjun

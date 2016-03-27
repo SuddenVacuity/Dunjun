@@ -61,7 +61,7 @@ namespace Dunjun
 			return !operator==(other);
 		}
 
-		inline Vector3 operator-() const { return { -x, -y, -z }; }
+		inline Vector3 operator-() const { return { -x, -y, z }; }
 
 		inline Vector3 operator+(const Vector3& other) const // addition
 		{

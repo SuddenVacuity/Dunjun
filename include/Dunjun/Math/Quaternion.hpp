@@ -139,8 +139,7 @@ namespace Dunjun
 			return !operator==(b);
 		}
 
-		const Vector3 vector() const { return (const Vector3&)(data);
-		}
+		const Vector3 vector() const { return (const Vector3&)(data);}
 		Vector3& vector() { return (Vector3&)(data); }
 
 		f32 scaler() const { return w; }
@@ -200,7 +199,7 @@ inline Quaternion normalize(const Quaternion& q)
 
 inline Quaternion conjugate(const Quaternion& q)
 {
-	Quaternion c(-q.vector(), q.w);
+	Quaternion c(-q.x, -q.y, -q.z, q.w);
 	return c;
 }
 
