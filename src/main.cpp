@@ -12,11 +12,12 @@ found here: https://www.youtube.com/watch?v=fRUYl6_5m3o
 HEADER MAP
 ==============================================================
 
-Types.hpp >> Common.hpp >> Constants.hpp >> Unit.hpp >> Angle.hpp >> Vector2.hpp >> Vector3.hpp >> Vector4.hpp >> Matrix4.hpp
-///<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<///
->> Matrix.hpp >> Quaternion.hpp >> Interpolation.hpp >> Functions.hpp >> Math.hpp >> NonCopyable.hpp >> OpenGL.hpp >> Clock.hpp >> TickCounter.hpp
-///<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<///
->> Image.hpp >> Texture.hpp >> Color.hpp >> ShaderProgram.hpp >> main.cpp
+Types.hpp >> ReadOnly.hpp >> Common.hpp >> Constants.hpp >> 
+Unit.hpp >> Angle.hpp >> Vector2.hpp >> Vector3.hpp >> Vector4.hpp >> 
+Matrix4.hpp >> Matrix.hpp >> Quaternion.hpp >> Interpolation.hpp >>
+Functions.hpp >> Math.hpp >> Transform.hpp >> NonCopyable.hpp >> 
+OpenGL.hpp >> Clock.hpp >> TickCounter.hpp >> Image.hpp >> Texture.hpp >> 
+Color.hpp >> Vertex.hpp >> ShaderProgram.hpp >> main.cpp
 
 */
 
@@ -66,7 +67,7 @@ struct ModelInstance // copies an asset to use
 GLOBAL Dunjun::ShaderProgram* g_defaultShader;
 GLOBAL ModelAsset g_sprite;
 GLOBAL std::vector<ModelInstance> g_instances;
-GLOBAL Dunjun::Matrix4 g_cameraMatrix;
+GLOBAL Dunjun::Camera g_camera;
 
 INTERNAL void glfwHints() // use this when creating a window to define what version of glfw is used
 {
@@ -123,10 +124,10 @@ INTERNAL void loadShaders()
 	// Shader Program
 	g_defaultShader = new Dunjun::ShaderProgram();
 	if (!g_defaultShader->attachShaderFromFile(Dunjun::ShaderType::Vertex, "data/shaders/default_vert.glsl")) // check if the file loaded
-		throw std::runtime_error(g_defaultShader->getErrorLog());
+		throw std::runtime_error(g_defaultShader->errorLog);
 
 	if (!g_defaultShader->attachShaderFromFile(Dunjun::ShaderType::Fragment, "data/shaders/default_frag.glsl")) // check if the file loaded
-		throw std::runtime_error(g_defaultShader->getErrorLog());
+		throw std::runtime_error(g_defaultShader->errorLog);
 
 
 	g_defaultShader->bindAttribLocation(0, "a_position"); // bind the position of 1st attribute in shaders
@@ -134,7 +135,7 @@ INTERNAL void loadShaders()
 	g_defaultShader->bindAttribLocation(2, "a_texCoord"); // bind the position of 3rd attribute in shaders
 
 	if (!g_defaultShader->link())
-		throw std::runtime_error(g_defaultShader->getErrorLog());
+		throw std::runtime_error(g_defaultShader->errorLog);
 
 }
 
@@ -183,6 +184,7 @@ INTERNAL void loadSpriteAsset()
 INTERNAL void loadInstances()
 {
 	// test multiple transforms
+	// FIXME parent cannot pass on 45 degree orientation
 	Transform parent;
 	parent.position = { 0, 0, 0 };
 	parent.orientation = angleAxis(Degree(90), {1, 0, 0});
@@ -190,9 +192,9 @@ INTERNAL void loadInstances()
 
 	ModelInstance a;
 	a.asset = &g_sprite;
-	a.transform.position = {0, 0, 0}; // translation
+	a.transform.position = {0, 2, 0}; // translation
 	a.transform.scale = {3, 3, 3};
-	a.transform.orientation = angleAxis(Degree(45), {0, 0, 1}); // rotation
+	a.transform.orientation = angleAxis(Degree(0), {0, 0, 1}); // rotation
 	g_instances.push_back(a);
 
 	ModelInstance b;
@@ -206,7 +208,7 @@ INTERNAL void loadInstances()
 	c.asset = &g_sprite;
 	c.transform.position = { 0, 0, 1 };
 	c.transform.scale = { 1, 1, 1 };
-	c.transform.orientation = angleAxis(Degree(45), { 0, 1, 0 }); // rotation
+	c.transform.orientation = angleAxis(Degree(0), { 0, 1, 0 }); // rotation
 	g_instances.push_back(c);
 
 	for (auto& inst : g_instances)
@@ -219,27 +221,21 @@ INTERNAL void loadInstances()
 	//std::cout << a.transform.scale << std::endl;
 }
 
-INTERNAL void update(float dt)
+INTERNAL void update(f32 dt)
 {
-	g_instances[0].transform.orientation = angleAxis(Degree(45) * dt, {1, 0, 0}) * g_instances[0].transform.orientation;
-
+	g_instances[0].transform.orientation = angleAxis(Degree(120) * dt, {1, 0, 0}) * g_instances[0].transform.orientation;
 
 	{
-		// how the matrix moves
-		Matrix4 model
-			= translate({ 0.0f, 0.0f, 0.0f }) // translation { x, y, z }
-			* rotate(Degree(glfwGetTime() * 60.0f), { 0, 1, 0 }) // rotation amount in radians { x, y, z axis to rotate on }
-			* scale({ 2.0f, 1.0f, 1.0f }); // scale { x, y, z }
+		Vector3& camPos = g_camera.transform.position;
 
-										   // where the camera is
-		Matrix4 view = lookAt({ 1.0f, 2.0f, 5.0f } // {camera/eye position x, y, z}
-			, { 0.0f, 0.0f, 0.0f } // {lookat target 0,0,0 is center x, y, z}
-		, { 0, 1, 0 }); // {up direction x, y, z}
+		camPos.x = 3.0f * std::cos(glfwGetTime());
+		camPos.y = 2.0f;
+		camPos.z = 3.0f * std::sin(glfwGetTime());
 
-						// field of view perspective(Radian(TAU / x.xf),... or perspective(Degree(x),... changes the fov|| Radians must be floats
-		Matrix4 proj = perspective(Degree(50.0f), (f32)g_windowWidth / (f32)g_windowHeight, 0.1f, 100.0f);
-
-		g_cameraMatrix = proj * view; // combine to make camera
+		g_camera.lookAt({0, 0, 0});
+		g_camera.projectionType = ProjectionType::Perspective;
+		g_camera.fieldOfView = Degree(50.0f);
+		g_camera.viewportAspectRatio = (f32)g_windowWidth / (f32)g_windowHeight;
 	}
 }
 
@@ -249,7 +245,7 @@ INTERNAL void renderInstance(const ModelInstance& inst)
 	ModelAsset* asset = inst.asset;
 	Dunjun::ShaderProgram* shaders = asset->shaders;
 
-	shaders->setUniform("u_camera", g_cameraMatrix); // set u_camera to apply view functions
+	shaders->setUniform("u_camera", g_camera.getMatrix()); // set u_camera to apply view functions
 	//shaders->setUniform("u_model", inst.transform); // set u_model to apply matrix transform functions
 	shaders->setUniform("u_transform", inst.transform); // set u_model to apply matrix transform functions
 	shaders->setUniform("u_tex", (Dunjun::u32)0); // set texture position
@@ -391,6 +387,8 @@ GLFWwindow* window;
 	// Temporarily disable culling
 	//glEnable(GL_CULL_FACE); // enable culling faces
 	//glCullFace(GL_BACK); // specify to cull the back face
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LEQUAL);
 
 	// load internal render functions
 	loadShaders();
@@ -412,13 +410,13 @@ GLFWwindow* window;
 
 	Dunjun::Clock deltaClock;
 
-	double accumulator = 0;
-	double prevTime = glfwGetTime();
+	f64 accumulator = 0;
+	f64 prevTime = glfwGetTime();
 
 	while(running) // create a loop that works until the window closes
 	{
-		double currentTime = glfwGetTime();
-		double dt = currentTime - prevTime;
+		f64 currentTime = glfwGetTime();
+		f64 dt = currentTime - prevTime;
 		prevTime = currentTime;
 		accumulator += dt;
 

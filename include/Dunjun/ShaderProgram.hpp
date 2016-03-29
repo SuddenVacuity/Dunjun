@@ -28,8 +28,6 @@ namespace Dunjun
 		void checkInUse() const;
 
 		bool link();
-		bool isLinked();
-
 
 		void bindAttribLocation(GLuint location, const std::string& name);
 
@@ -53,15 +51,12 @@ namespace Dunjun
 		void setUniform(const std::string& name, const Quaternion& t);
 		void setUniform(const std::string& name, const Transform& t);
 
-		inline GLuint getObject() const { return m_object; }
-		inline const std::string& getErrorLog() const { return m_errorLog; }
-		
+		//readonly       V the only class that can edit
+		ReadOnly<GLuint, ShaderProgram>  object; // the file
+		ReadOnly<bool, ShaderProgram> isLinked;
+		ReadOnly<std::string, ShaderProgram> errorLog;
 
 	private:
-		GLuint m_object; // the file
-		bool m_linked;
-		std::string m_errorLog;
-
 		std::map<std::string, GLint> m_attribLocations;
 		std::map<std::string, GLint> m_uniformLocations;
 

@@ -32,12 +32,6 @@ namespace Dunjun
 		bool loadFromFile(const char* filename); // get the name of the file to be loaded
 		bool loadFromImage(u32 width, u32 height, ImageFormat format, const u8* pixels); // load info from memory
 
-		// have the function return the values to m_XXXXX to be used in cpp file
-		inline u32 getWidth() const { return m_width; }
-		inline u32 getHeight() const { return m_height; }
-		inline ImageFormat getFormat() const { return m_format; }
-		inline u8* getPixelPtr() const { return m_pixels; }
-
 		u8* getPixel(u32 column, u32 row) const; // make function and vairables to get a pixel from a specific spot
 		void setPixel(u32 column, u32 row, const u32* pixel); // make function to set a pixel to a specific spot
 
@@ -49,12 +43,11 @@ namespace Dunjun
 //									uInt32 destCol, uInt32 destRow,
 //									uInt32 width, uInt32 height);
 
-	private:
 		// declair variables that will be used in cpp files
-		ImageFormat m_format; // image format
-		u32 m_width; // texture width
-		u32 m_height; // texture height
-		u8* m_pixels; // 8 bit pixel array
+		ReadOnly<ImageFormat, Image> format; // image format
+		ReadOnly<u32, Image> width; // texture width
+		ReadOnly<u32, Image> height; // texture height
+		ReadOnly<u8*, Image> pixels; // 8 bit pixel array
 	};
 }
 
