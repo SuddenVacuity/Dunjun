@@ -15,7 +15,7 @@ HEADER MAP
 Types.hpp >> ReadOnly.hpp >> Common.hpp >> Constants.hpp >> 
 Unit.hpp >> Angle.hpp >> Vector2.hpp >> Vector3.hpp >> Vector4.hpp >> 
 Matrix4.hpp >> Matrix.hpp >> Quaternion.hpp >> Interpolation.hpp >>
-Functions.hpp >> Math.hpp >> Transform.hpp >> NonCopyable.hpp >> 
+Functions.hpp >> Math.hpp >> Transform.hpp >> Camera.hpp >> NonCopyable.hpp >> 
 OpenGL.hpp >> Clock.hpp >> TickCounter.hpp >> Image.hpp >> Texture.hpp >> 
 Color.hpp >> Vertex.hpp >> ShaderProgram.hpp >> main.cpp
 
@@ -82,13 +82,16 @@ INTERNAL void resizeCallback(GLFWwindow* window, int width, int height)
 	g_windowHeight = height;
 }
 
-
 INTERNAL void handleInput(GLFWwindow* window, bool* running, bool* fullscreen)
 {
 	if (glfwWindowShouldClose(window) || // check if window was closed
 		glfwGetKey(window, GLFW_KEY_ESCAPE)) // checks if the escape key is pressed in window
 		*running = false;
 		
+	if(glfwGetKey(window, GLFW_KEY_H) == GLFW_PRESS)
+	{
+		std::cout << "H\n";
+	}
 
 	/*
 	if (glfwGetKey(window, GLFW_KEY_F11)) // press F11 to toggle between default and fullscreen
@@ -219,22 +222,81 @@ INTERNAL void loadInstances()
 	//std::cout << a.transform.position << std::endl;
 	//std::cout << a.transform.orientation << std::endl;
 	//std::cout << a.transform.scale << std::endl;
+
+	//Initialize camera
+	g_camera.transform.position = {2, 0, 7};
+
+	g_camera.lookAt({ 0, 0, 0 });
+	g_camera.projectionType = ProjectionType::Perspective;
+	g_camera.fieldOfView = Degree(50.0f);
 }
 
-INTERNAL void update(f32 dt)
+INTERNAL void update(GLFWwindow* window, f32 dt)
 {
 	g_instances[0].transform.orientation = angleAxis(Degree(120) * dt, {1, 0, 0}) * g_instances[0].transform.orientation;
 
 	{
+
+		// mouse input
+		f64 cursorX, cursorY;
+		glfwGetCursorPos(window, &cursorX, &cursorY);
+
+		const f32 mouseSensitivityX = 0.06f;
+		const f32 mouseSensitivityY = 0.09f;
+
+		g_camera.offsetOrientation(Radian(mouseSensitivityX * cursorX * dt), Radian(mouseSensitivityY * cursorY * dt));
+
+		glfwSetCursorPos(window, 0, 0);
+
+		// keyboard input
 		Vector3& camPos = g_camera.transform.position;
 
-		camPos.x = 3.0f * std::cos(glfwGetTime());
-		camPos.y = 2.0f;
-		camPos.z = 3.0f * std::sin(glfwGetTime());
+		f32 camVel = 8.0f;
+		Vector3 velocityDirection = {0, 0, 0};
 
-		g_camera.lookAt({0, 0, 0});
-		g_camera.projectionType = ProjectionType::Perspective;
-		g_camera.fieldOfView = Degree(50.0f);
+		if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
+		{
+			Vector3 f = g_camera.forward();
+			f.y = 0; // prevents y axis pos form being changed
+			f = normalize(f);
+			velocityDirection += f;
+		}
+		if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
+		{
+			Vector3 b = g_camera.backward();
+			b.y = 0; // prevents y axis pos form being changed
+			b = normalize(b);
+			velocityDirection += b;
+		}
+		if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
+		{
+			Vector3 l = g_camera.left();
+			l.y = 0; // prevents y axis pos form being changed
+			l = normalize(l);
+			velocityDirection += l;
+		}
+		if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
+		{
+			Vector3 r = g_camera.right();
+			r.y = 0; // prevents y axis pos form being changed
+			r = normalize(r);
+			velocityDirection += r;
+		}
+
+		if (glfwGetKey(window, GLFW_KEY_RIGHT_SHIFT) == GLFW_PRESS)
+		{
+			velocityDirection += {0, 1, 0};
+		}
+		if (glfwGetKey(window, GLFW_KEY_RIGHT_CONTROL) == GLFW_PRESS)
+		{
+			velocityDirection += {0, -1, 0};
+		}
+
+		if(length(velocityDirection) > 0)
+			velocityDirection = normalize(velocityDirection);
+
+		camPos += camVel * velocityDirection * dt;
+
 		g_camera.viewportAspectRatio = (f32)g_windowWidth / (f32)g_windowHeight;
 	}
 }
@@ -405,6 +467,9 @@ GLFWwindow* window;
 	bool running = true;								 
 	bool fullscreen = false; // sets fullscreen to be off by default
 
+	glfwSetCursorPos(window, 0, 0);
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
 	Dunjun::TickCounter tc;
 	Dunjun::Clock frameClock;
 
@@ -420,13 +485,15 @@ GLFWwindow* window;
 		prevTime = currentTime;
 		accumulator += dt;
 
-		handleInput(window, &running, &fullscreen); // input handler
 
 		// render update
 		while (accumulator >= TIME_STEP)
 		{
 			accumulator -= TIME_STEP;
-			update(TIME_STEP);
+			update(window, TIME_STEP);
+			
+			handleInput(window, &running, &fullscreen); // input handler
+
 		}
 
 		if (tc.update(0.5))
