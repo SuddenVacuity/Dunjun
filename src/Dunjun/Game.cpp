@@ -37,10 +37,10 @@ namespace Dunjun
 		int windowHeight = 480;
 	} // end anon namespace
 
-	GLOBAL Dunjun::ShaderProgram* g_defaultShader;
+	GLOBAL ShaderProgram* g_defaultShader;
 	GLOBAL ModelAsset g_sprite;
 	GLOBAL std::vector<ModelInstance> g_instances;
-	GLOBAL Dunjun::Camera g_camera;
+	GLOBAL Camera g_camera;
 
 	namespace Game
 	{
@@ -201,10 +201,73 @@ namespace Dunjun
 
 		INTERNAL void update(f32 dt)
 		{
+			f32 camVel = 8.0f; // multiplier for camera speed
+
 			g_instances[0].transform.orientation = angleAxis(Degree(120) * dt, { 1, 0, 0 }) * g_instances[0].transform.orientation;
 
-			{
+			//{ // game pad input
+			//	if(!g_gamePad1)
+			//		g_gamePad1 = new Gamepad(0);
+			//
+			//	g_gamePad1->update();
+			//	if(g_gamePad1->isConnected())
+			//	{
+			//		printf("Gamepad Connected.\n");
+			//		g_gamePad1->setVibration(0.0f, 0.0f);
+			//	}
+			//	else
+			//		printf("No Gamepad Connected.\n");
+			//}
+
+			{ // test gamepad input
+				if(Input::isGamepadPresent(Input::Gamepad_1))
+				{
+					Input::GamepadAxes axes = Input::getGamepadAxes(Input::Gamepad_1);
+
+					//std::cout << axes.leftThumbStick << std::endl;
+
+					const f32 lookSensitivityX = 1.5f;
+					const f32 lookSensitivityY = 2.0f;
+
+					Vector2 rts = axes.rightThumbStick; // right thumb stick
+
+					g_camera.offsetOrientation(Radian(lookSensitivityX * rts.x * dt), 
+											   Radian(lookSensitivityY * -rts.y * dt));
+
+					Vector2 lts = axes.leftThumbStick; // left thumb stick
+
+					Vector3 velocityDirection = { 0, 0, 0 };
+
+					if(length(lts) > 1.0f)
+						lts = normalize(lts);
+
+					velocityDirection.x += camVel * lts.x * dt;
+					velocityDirection.z -= camVel * lts.y * dt;
+
+					//Input::GamepadButtons buttons = Input::getGamepadButtons(Input::Gamepad_1);
+					//
+					//if (buttons[(size_t)Input::XboxButton::RightShoulder])
+					//	velocityDirection += {0, 1, 0};
+					//if (buttons[(size_t)Input::XboxButton::LeftShoulder])
+					//	velocityDirection += {0, -1, 0};
+
+					if(length(velocityDirection) > 1.0f)
+						velocityDirection = normalize(velocityDirection);
+
+					g_camera.transform.position += velocityDirection * dt;
+
+				}
+				else
+					std::cout << "Gamepad 1 is Not Connected." << std::endl;
+
+			}
+
+
+
+			{ // mouse and keyboard input
+				// mouse input
 				Vector2 curPos = Input::getCursorPosition();
+
 				const f32 mouseSensitivityX = 0.06f;
 				const f32 mouseSensitivityY = 0.09f;
 
@@ -215,7 +278,6 @@ namespace Dunjun
 				// keyboard input
 				Vector3& camPos = g_camera.transform.position;
 
-				f32 camVel = 8.0f;
 				Vector3 velocityDirection = { 0, 0, 0 };
 
 				if (Input::getKey(GLFW_KEY_UP))
@@ -248,13 +310,9 @@ namespace Dunjun
 				}
 
 				if (Input::getKey(GLFW_KEY_RIGHT_SHIFT))
-				{
 					velocityDirection += {0, 1, 0};
-				}
 				if (Input::getKey(GLFW_KEY_RIGHT_CONTROL))
-				{
 					velocityDirection += {0, -1, 0};
-				}
 
 				if (length(velocityDirection) > 0)
 					velocityDirection = normalize(velocityDirection);
@@ -404,7 +462,7 @@ namespace Dunjun
 				{
 					accumulator -= TIME_STEP;
 					update(TIME_STEP);
-
+					Input::updateGamepads();
 					handleInput(&running, &fullscreen); // input handler
 
 				}
