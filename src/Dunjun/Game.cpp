@@ -61,7 +61,7 @@ namespace Dunjun
 		INTERNAL void handleInput(bool* running, bool* fullscreen)
 		{
 			if (glfwWindowShouldClose(window) || // check if window was closed
-				Input::getKey(GLFW_KEY_ESCAPE)) // checks if the escape key is pressed in window
+				Input::isKeyPressed(Input::Key::Escape)) // checks if the escape key is pressed in window
 				*running = false;
 
 			/*
@@ -205,61 +205,90 @@ namespace Dunjun
 
 			g_instances[0].transform.orientation = angleAxis(Degree(120) * dt, { 1, 0, 0 }) * g_instances[0].transform.orientation;
 
-			//{ // game pad input
-			//	if(!g_gamePad1)
-			//		g_gamePad1 = new Gamepad(0);
-			//
-			//	g_gamePad1->update();
-			//	if(g_gamePad1->isConnected())
-			//	{
-			//		printf("Gamepad Connected.\n");
-			//		g_gamePad1->setVibration(0.0f, 0.0f);
-			//	}
-			//	else
-			//		printf("No Gamepad Connected.\n");
-			//}
+			{ // game pad input
+				Input::GamepadAxes axes = Input::getGamepadAxes(Input::Gamepad_1);
 
-			{ // test gamepad input
-				if(Input::isGamepadPresent(Input::Gamepad_1))
+				const f32 lookSensitivityX = 2.0f;
+				const f32 lookSensitivityY = 1.5f;
+				const f32 deadZone = 0.21f;
+
+				// camera rotation
+				Vector2 rts = axes.rightThumbStick;
+
+				if (std::abs(rts.x) < deadZone) // ignore anything in the deadZone
+					rts.x = 0;
+				if (std::abs(rts.y) < deadZone)
+					rts.y = 0;
+
+				g_camera.offsetOrientation(-lookSensitivityX * Radian(rts.x * dt)
+										  , lookSensitivityY * Radian(rts.y * dt));
+
+				// camera translation
+				Vector2 lts = axes.leftThumbStick;
+
+				if (std::abs(lts.x) < deadZone) // ignore anything in the deadZone
+					lts.x = 0;
+				if (std::abs(lts.y) < deadZone)
+					lts.y = 0;
+
+				if(length(lts) > 1.0f) // keep diagonals from being faster then straight x, y or z
+					lts = normalize(lts);
+
+				Vector3 velocityDirection = {0, 0, 0};
+
+				Vector3 forward = g_camera.forward();
+				forward.y = 0;
+				forward = normalize(forward);
+
+				velocityDirection += lts.x * g_camera.right();
+				velocityDirection += lts.y * forward;
+
+				Input::GamepadButtons buttons = Input::getGamepadButtons(Input::Gamepad_1);
+
+				if (buttons[(size_t)Input::XboxButton::RightShoulder])
+					velocityDirection.y += 1;
+				if (buttons[(size_t)Input::XboxButton::LeftShoulder])
+					velocityDirection.y -= 1;
+
+				if (buttons[(size_t)Input::XboxButton::DpadUp])
 				{
-					Input::GamepadAxes axes = Input::getGamepadAxes(Input::Gamepad_1);
-
-					//std::cout << axes.leftThumbStick << std::endl;
-
-					const f32 lookSensitivityX = 1.5f;
-					const f32 lookSensitivityY = 2.0f;
-
-					Vector2 rts = axes.rightThumbStick; // right thumb stick
-
-					g_camera.offsetOrientation(Radian(lookSensitivityX * rts.x * dt), 
-											   Radian(lookSensitivityY * -rts.y * dt));
-
-					Vector2 lts = axes.leftThumbStick; // left thumb stick
-
-					Vector3 velocityDirection = { 0, 0, 0 };
-
-					if(length(lts) > 1.0f)
-						lts = normalize(lts);
-
-					velocityDirection.x += camVel * lts.x * dt;
-					velocityDirection.z -= camVel * lts.y * dt;
-
-					//Input::GamepadButtons buttons = Input::getGamepadButtons(Input::Gamepad_1);
-					//
-					//if (buttons[(size_t)Input::XboxButton::RightShoulder])
-					//	velocityDirection += {0, 1, 0};
-					//if (buttons[(size_t)Input::XboxButton::LeftShoulder])
-					//	velocityDirection += {0, -1, 0};
-
-					if(length(velocityDirection) > 1.0f)
-						velocityDirection = normalize(velocityDirection);
-
-					g_camera.transform.position += velocityDirection * dt;
-
+					Vector3 f = g_camera.forward();
+					f.y = 0;
+					f = normalize(f);
+					velocityDirection += f;
 				}
-				else
-					std::cout << "Gamepad 1 is Not Connected." << std::endl;
+				if (buttons[(size_t)Input::XboxButton::DpadDown])
+				{
+					Vector3 b = g_camera.backward();
+					b.y = 0;
+					b = normalize(b);
+					velocityDirection += b;
+				}
+				if (buttons[(size_t)Input::XboxButton::DpadLeft])
+				{
+					Vector3 l = g_camera.left();
+					l.y = 0;
+					l = normalize(l);
+					velocityDirection += l;
+				}
+				if (buttons[(size_t)Input::XboxButton::DpadRight])
+				{
+					Vector3 r = g_camera.right();
+					r.y = 0;
+					r = normalize(r);
+					velocityDirection += r;
+				}
 
+				if(length(velocityDirection) > 1.0f)
+					velocityDirection = normalize(velocityDirection);
+
+				g_camera.transform.position += camVel * velocityDirection * dt;
+
+				// vibration test
+				if(Input::isGamepadButtonPressed(Input::Gamepad_1, Input::XboxButton::X))
+					Input::setGamepadVibration(Input::Gamepad_1, 0.5f, 0.5f);
+				else
+					Input::setGamepadVibration(Input::Gamepad_1, 0.0f, 0.0f);
 			}
 
 
@@ -271,7 +300,7 @@ namespace Dunjun
 				const f32 mouseSensitivityX = 0.06f;
 				const f32 mouseSensitivityY = 0.09f;
 
-				g_camera.offsetOrientation(Radian(mouseSensitivityX * curPos.x * dt), Radian(mouseSensitivityY * curPos.y * dt));
+				g_camera.offsetOrientation(-mouseSensitivityX * Radian(curPos.x * dt), -mouseSensitivityY * Radian(curPos.y * dt));
 
 				Input::setCursorPosition({0, 0});
 
@@ -280,38 +309,38 @@ namespace Dunjun
 
 				Vector3 velocityDirection = { 0, 0, 0 };
 
-				if (Input::getKey(GLFW_KEY_UP))
+				if (Input::isKeyPressed(Input::Key::Up))
 				{
 					Vector3 f = g_camera.forward();
 					f.y = 0; // prevents y axis pos form being changed
 					f = normalize(f);
 					velocityDirection += f;
 				}
-				if (Input::getKey(GLFW_KEY_DOWN))
+				if (Input::isKeyPressed(Input::Key::Down))
 				{
 					Vector3 b = g_camera.backward();
 					b.y = 0; // prevents y axis pos form being changed
 					b = normalize(b);
 					velocityDirection += b;
 				}
-				if (Input::getKey(GLFW_KEY_LEFT))
+				if (Input::isKeyPressed(Input::Key::Left))
 				{
 					Vector3 l = g_camera.left();
-					l.y = 0; // prevents y axis pos form being changed
+					l.y = 0; // prevents y axis pos from being changed
 					l = normalize(l);
 					velocityDirection += l;
 				}
-				if (Input::getKey(GLFW_KEY_RIGHT))
+				if (Input::isKeyPressed(Input::Key::Right))
 				{
 					Vector3 r = g_camera.right();
-					r.y = 0; // prevents y axis pos form being changed
+					r.y = 0; // prevents y axis pos from being changed
 					r = normalize(r);
 					velocityDirection += r;
 				}
 
-				if (Input::getKey(GLFW_KEY_RIGHT_SHIFT))
+				if (Input::isKeyPressed(Input::Key::RShift))
 					velocityDirection += {0, 1, 0};
-				if (Input::getKey(GLFW_KEY_RIGHT_CONTROL))
+				if (Input::isKeyPressed(Input::Key::RControl))
 					velocityDirection += {0, -1, 0};
 
 				if (length(velocityDirection) > 0)
@@ -320,6 +349,11 @@ namespace Dunjun
 				camPos += camVel * velocityDirection * dt;
 
 				g_camera.viewportAspectRatio = getWindowSize().x / getWindowSize().y;
+
+				// change fov with scroll wheel
+				// FIXME: view goes insane when scroll is used
+				// g_camera.fieldOfView = Radian(static_cast<f32>(g_camera.fieldOfView) + Input::getScrollOffset().y);
+
 			}
 		}
 
@@ -415,6 +449,11 @@ namespace Dunjun
 
 			glewInit();
 
+			Input::setUp();
+
+			Input::setCursorPosition({ 0, 0 });
+			Input::setCursorMode(Input::CursorMode::Disabled);
+
 			// Temporarily disable culling
 			//glEnable(GL_CULL_FACE); // enable culling faces
 			//glCullFace(GL_BACK); // specify to cull the back face
@@ -425,9 +464,6 @@ namespace Dunjun
 			loadShaders();
 			loadSpriteAsset();
 			loadInstances();
-
-			Input::setCursorPosition({ 0, 0 });
-			Input::setInputMode(Input::InputMode::Cursor, GLFW_CURSOR_DISABLED);
 		}
 
 		void run()
@@ -441,17 +477,17 @@ namespace Dunjun
 			bool running = true;
 			bool fullscreen = false; // sets fullscreen to be off by default
 
-			Dunjun::TickCounter tc;
-			Dunjun::Clock frameClock;
+			TickCounter tc;
+			Clock frameClock;
 
-			Dunjun::Clock deltaClock;
+			Clock deltaClock;
 
 			f64 accumulator = 0;
-			f64 prevTime = glfwGetTime();
+			f64 prevTime = Input::getTime();
 
 			while (running) // create a loop that works until the window closes
 			{
-				f64 currentTime = glfwGetTime();
+				f64 currentTime = Input::getTime();
 				f64 dt = currentTime - prevTime;
 				prevTime = currentTime;
 				accumulator += dt;
@@ -488,6 +524,7 @@ namespace Dunjun
 
 		void cleanUp()
 		{
+			Input::cleanup();
 			glfwDestroyWindow(window); // closes window named window
 			glfwTerminate(); // terminates GLFW
 		}
