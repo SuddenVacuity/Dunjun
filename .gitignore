@@ -281,3 +281,6 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
+XINPUT9_1_0.dll
+x360ce.ini
+x360ce.exe

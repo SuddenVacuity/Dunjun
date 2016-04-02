@@ -1,7 +1,7 @@
 #ifndef DUNJUN_MATH_FUNCTIONS_INTERPOLATION_HPP
 #define DUNJUN_MATH_FUNCTIONS_INTERPOLATION_HPP
 
-#include <Dunjun/Math/Quaternion.hpp>
+#include <Dunjun/Math/Functions/Matrix.hpp>
 
 namespace Dunjun
 {

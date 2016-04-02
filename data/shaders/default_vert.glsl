@@ -13,7 +13,7 @@ vec3 quaternionRotate(vec4 q, vec3 v)
 	return (v + q.w * t + cross(q.xyz, t));
 }
 
-attribute vec2 a_position; // vertex position
+attribute vec3 a_position; // vertex position
 attribute vec3 a_color; // vertex color
 attribute vec2 a_texCoord; // vertex texture coordinates
 
@@ -30,7 +30,7 @@ void main()
 	v_texCoord = a_texCoord.st;
 
 	// v' = proj * view * transform * v;
-	vec3 pos = vec3(a_position, 0.0);
+	vec3 pos = a_position;
 	pos = u_transform.scale * pos;
 	pos = quaternionRotate(u_transform.orientation, pos);
 	pos = u_transform.position + pos;

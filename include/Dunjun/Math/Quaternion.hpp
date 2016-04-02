@@ -1,7 +1,7 @@
 #ifndef DUNJUN_MATH_QUATERNION_HPP
 #define DUNJUN_MATH_QUATERNION_HPP
 
-#include <Dunjun/Math/Functions/Matrix.hpp>
+#include <Dunjun/Math/Matrix4.hpp>
 
 #include <ostream>
 

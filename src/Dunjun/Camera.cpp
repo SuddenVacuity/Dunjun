@@ -17,18 +17,7 @@ namespace Dunjun
 	// Functions
 	void Camera::lookAt(const Vector3& position, const Vector3& forward)
 	{
-		//const Vector3& pos = transform.position;
-
-		if(length(position - transform.position) < 0.001f)
-			return; // ignore as you can't look at where you are
-
-		// forward vector
-		Vector3 f = normalize(position - transform.position);
-		f32 cosTheta = dot(forward, f);
-
-		Radian angle(std::acos(cosTheta));
-		Vector3 axis = cross(forward, f);
-		transform.orientation = angleAxis(angle, axis);
+		transform.orientation = quaternionLookAt(transform.position, position, forward);
 	}
 
 	void Camera::offsetOrientation(const Radian& yaw, const Radian& pitch)

@@ -1,7 +1,7 @@
 #ifndef DUNJUN_MATH_FUNCTIONS_MATRIX_HPP
 #define DUNJUN_MATH_FUNCTIONS_MATRIX_HPP
 
-#include <Dunjun/Math/Matrix4.hpp>
+#include <Dunjun/Math/Quaternion.hpp>
 
 #include <cmath>
 
@@ -20,6 +20,8 @@ namespace Dunjun
 	Matrix4 perspective(const Radian& fovy, f32 aspect, f32 zNear, f32 zFar);
 	Matrix4 infinitePerspective(const Radian& fovy, f32 aspect, f32 zNear);
 
-	Matrix4 lookAt(const Vector3& eye, const Vector3& center, const Vector3& up);
+	Matrix4 matrix4LookAt(const Vector3& eye, const Vector3& center, const Vector3& up);
+	Quaternion quaternionLookAt(const Vector3& eye, const Vector3& center, const Vector3& forward);
+
 }
 #endif

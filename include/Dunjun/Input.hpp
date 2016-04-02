@@ -180,19 +180,6 @@ namespace Dunjun
 			Gamepad_MaxCount = 4,
 		};
 
-		enum class InputMode // for keyboard/mouse
-		{
-			Cursor,
-			StickyKeys,
-			StickyMouseButtons,
-		};
-
-		enum ButtonState // for keyboard and mouse
-		{
-			Release = 0,
-			Press = 1,
-		};
-
 		using GamepadButtons = std::vector<b8>;
 
 		enum class CursorMode
