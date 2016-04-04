@@ -149,7 +149,7 @@ namespace Dunjun
 																					   GL_STREAM_DRAW   / Redraws every frame (memory intensive)
 																					   */
 
-			u32 indices[] = { 0, 1, 2, 2, 3, 1 }; // vertex draw order for GL_TRIANGLES
+			u32 indices[] = { 0, 1, 2, 1, 3, 2 }; // vertex draw order for GL_TRIANGLES
 
 			glGenBuffers(1, &g_sprite.ibo);
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, g_sprite.ibo);
@@ -173,11 +173,11 @@ namespace Dunjun
 			//
 			Vertex vertices[] = { // define vertexes for a triangle
 				 //  x	    y	  z		   r	 g	   b	 a		  s	    t
-				{ {  0.5f, 0.0f,  0.5f},{ 0xFF, 0xFF, 0xFF, 0xFF },{ 1.0f, 1.0f } },	// 0 vertex         1 ---- 0        
-				{ { -0.5f, 0.0f,  0.5f},{ 0xFF, 0xFF, 0xFF, 0xFF },{ 0.0f, 1.0f } },	// 1 vertex           \             
-				{ {  0.5f, 0.0f, -0.5f},{ 0xFF, 0xFF, 0xFF, 0xFF },{ 1.0f, 0.0f } },	// 2 vertex              \           
-				{ { -0.5f, 0.0f, -0.5f},{ 0xFF, 0xFF, 0xFF, 0xFF },{ 0.0f, 0.0f } },	// 3 vertex         3 -----2       
-																						// for triangle strips organize vertexes in a backwards Z
+				{ { 0.5f, 0.0f, -0.5f },{ 0xFF, 0xFF, 0xFF, 0xFF },{ 1.0f, 1.0f } },
+				{ { -0.5f, 0.0f, -0.5f },{ 0xFF, 0xFF, 0xFF, 0xFF },{ 0.0f, 1.0f } },
+				{ {  0.5f, 0.0f,  0.5f},{ 0xFF, 0xFF, 0xFF, 0xFF },{ 1.0f, 0.0f } },	
+				{ { -0.5f, 0.0f,  0.5f},{ 0xFF, 0xFF, 0xFF, 0xFF },{ 0.0f, 0.0f } },	
+																						
 			};
 
 			//g_sprite.vbo;
@@ -185,12 +185,12 @@ namespace Dunjun
 			glBindBuffer(GL_ARRAY_BUFFER, g_floor.vbo); // bind the buffer
 			glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-			u32 indices[] = { 0, 1, 2, 2, 3, 1 }; // vertex draw order for GL_TRIANGLES
+			u32 indices[] = { 0, 1, 2, 1, 3, 2 }; // vertex draw order for GL_TRIANGLES
 
 			glGenBuffers(1, &g_floor.ibo);
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, g_floor.ibo);
 			glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
+			
 
 
 			g_floor.shaders = g_defaultShader; // apply the default shader to sprite
@@ -221,7 +221,7 @@ namespace Dunjun
 			glBindBuffer(GL_ARRAY_BUFFER, g_wall.vbo); // bind the buffer
 			glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-			u32 indices[] = { 0, 1, 2, 2, 3, 1 }; // vertex draw order for GL_TRIANGLES
+			u32 indices[] = { 0, 1, 2, 1, 3, 2 }; // vertex draw order for GL_TRIANGLES
 
 			glGenBuffers(1, &g_wall.ibo);
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, g_wall.ibo);
@@ -308,8 +308,7 @@ namespace Dunjun
 
 		INTERNAL void update(f32 dt)
 		{
-			g_camera.lookAt(g_instances[0].transform.position);
-
+			ModelInstance &player = g_instances[0];
 			//g_instances[0].transform.position.x = std::sin(3.0f * Input::getTime());
 			//g_instances[0].transform.position.z = std::cos(3.0f * Input::getTime());
 
@@ -325,106 +324,106 @@ namespace Dunjun
 
 			parent.orientation = angleAxis(Degree(360 * std::sin(glfwGetTime())) * dt / 5, { 1, 0, 0 }) * parent.orientation;
 			
-			g_instances[0].transform = g_instances[0].transform * parent;
+			player.transform = player.transform * parent;
 
-			std::cout << "Scale: " << g_instances[0].transform.scale << std::endl;
-			std::cout << "Oreintation: " << g_instances[0].transform.orientation << std::endl;
+			std::cout << "Scale: " << player.transform.scale << std::endl;
+			std::cout << "Oreintation: " << player.transform.orientation << std::endl;
 			std::cout << "\n";
 			}
 			else if (Input::isKeyPressed(Input::Key::R)) // test multipling transforms
 			{
-				g_instances[0].transform.position = { 0, 0, 0 }; // translation
-				g_instances[0].transform.scale = { 1, 1, 1 };
-				g_instances[0].transform.orientation = angleAxis(Degree(0), { 0, 0, 1 }); // rotation
+				player.transform.position = { 0, 0, 0 }; // translation
+				player.transform.scale = { 1, 1, 1 };
+				player.transform.orientation = angleAxis(Degree(0), { 0, 0, 1 }); // rotation
 			}
 
 			g_instances[2].transform.orientation = angleAxis(Degree(120) * dt, { 1, 0, 0 }) * g_instances[2].transform.orientation;
-		//
-		//	{ // game pad input
-		//		Input::GamepadAxes axes = Input::getGamepadAxes(Input::Gamepad_1);
-		//
-		//		const f32 lookSensitivityX = 2.0f;
-		//		const f32 lookSensitivityY = 1.5f;
-		//		const f32 deadZone = 0.21f;
-		//
-		//		// camera rotation
-		//		Vector2 rts = axes.rightThumbStick;
-		//
-		//		if (std::abs(rts.x) < deadZone) // ignore anything in the deadZone
-		//			rts.x = 0;
-		//		if (std::abs(rts.y) < deadZone)
-		//			rts.y = 0;
-		//
-		//		g_camera.offsetOrientation(-lookSensitivityX * Radian(rts.x * dt)
-		//								  , lookSensitivityY * Radian(rts.y * dt));
-		//
-		//		// camera translation
-		//		Vector2 lts = axes.leftThumbStick;
-		//
-		//		if (std::abs(lts.x) < deadZone) // ignore anything in the deadZone
-		//			lts.x = 0;
-		//		if (std::abs(lts.y) < deadZone)
-		//			lts.y = 0;
-		//
-		//		if(length(lts) > 1.0f) // keep diagonals from being faster then straight x, y or z
-		//			lts = normalize(lts);
-		//
-		//		Vector3 velocityDirection = {0, 0, 0};
-		//
-		//		Vector3 forward = g_camera.forward();
-		//		forward.y = 0;
-		//		forward = normalize(forward);
-		//
-		//		velocityDirection += lts.x * g_camera.right();
-		//		velocityDirection += lts.y * forward;
-		//
-		//		Input::GamepadButtons buttons = Input::getGamepadButtons(Input::Gamepad_1);
-		//
-		//		if (buttons[(size_t)Input::XboxButton::RightShoulder])
-		//			velocityDirection.y += 1;
-		//		if (buttons[(size_t)Input::XboxButton::LeftShoulder])
-		//			velocityDirection.y -= 1;
-		//
-		//		if (buttons[(size_t)Input::XboxButton::DpadUp])
-		//		{
-		//			Vector3 f = g_camera.forward();
-		//			f.y = 0;
-		//			f = normalize(f);
-		//			velocityDirection += f;
-		//		}
-		//		if (buttons[(size_t)Input::XboxButton::DpadDown])
-		//		{
-		//			Vector3 b = g_camera.backward();
-		//			b.y = 0;
-		//			b = normalize(b);
-		//			velocityDirection += b;
-		//		}
-		//		if (buttons[(size_t)Input::XboxButton::DpadLeft])
-		//		{
-		//			Vector3 l = g_camera.left();
-		//			l.y = 0;
-		//			l = normalize(l);
-		//			velocityDirection += l;
-		//		}
-		//		if (buttons[(size_t)Input::XboxButton::DpadRight])
-		//		{
-		//			Vector3 r = g_camera.right();
-		//			r.y = 0;
-		//			r = normalize(r);
-		//			velocityDirection += r;
-		//		}
-		//
-		//		if(length(velocityDirection) > 1.0f)
-		//			velocityDirection = normalize(velocityDirection);
-		//
-		//		g_camera.transform.position += camVel * velocityDirection * dt;
-		//
-		//		// vibration test
-		//		if(Input::isGamepadButtonPressed(Input::Gamepad_1, Input::XboxButton::X))
-		//			Input::setGamepadVibration(Input::Gamepad_1, 0.5f, 0.5f);
-		//		else
-		//			Input::setGamepadVibration(Input::Gamepad_1, 0.0f, 0.0f);
-		//	}
+		
+			{ // game pad input
+				Input::GamepadAxes axes = Input::getGamepadAxes(Input::Gamepad_1);
+		
+				const f32 lookSensitivityX = 2.0f;
+				const f32 lookSensitivityY = 1.5f;
+				const f32 deadZone = 0.21f;
+		
+				// camera rotation
+				Vector2 rts = axes.rightThumbStick;
+		
+				if (std::abs(rts.x) < deadZone) // ignore anything in the deadZone
+					rts.x = 0;
+				if (std::abs(rts.y) < deadZone)
+					rts.y = 0;
+		
+				g_camera.offsetOrientation(-lookSensitivityX * Radian(rts.x * dt)
+										  , lookSensitivityY * Radian(rts.y * dt));
+		
+				// camera translation
+				Vector2 lts = axes.leftThumbStick;
+		
+				if (std::abs(lts.x) < deadZone) // ignore anything in the deadZone
+					lts.x = 0;
+				if (std::abs(lts.y) < deadZone)
+					lts.y = 0;
+		
+				if(length(lts) > 1.0f) // keep diagonals from being faster then straight x, y or z
+					lts = normalize(lts);
+		
+				Vector3 velocityDirection = {0, 0, 0};
+		
+				Vector3 forward = g_camera.forward();
+				forward.y = 0;
+				forward = normalize(forward);
+		
+				velocityDirection += lts.x * g_camera.right();
+				velocityDirection += lts.y * forward;
+		
+				Input::GamepadButtons buttons = Input::getGamepadButtons(Input::Gamepad_1);
+		
+				if (buttons[(size_t)Input::XboxButton::RightShoulder])
+					velocityDirection.y += 1;
+				if (buttons[(size_t)Input::XboxButton::LeftShoulder])
+					velocityDirection.y -= 1;
+		
+				if (buttons[(size_t)Input::XboxButton::DpadUp])
+				{
+					Vector3 f = g_camera.forward();
+					f.y = 0;
+					f = normalize(f);
+					velocityDirection += f;
+				}
+				if (buttons[(size_t)Input::XboxButton::DpadDown])
+				{
+					Vector3 b = g_camera.backward();
+					b.y = 0;
+					b = normalize(b);
+					velocityDirection += b;
+				}
+				if (buttons[(size_t)Input::XboxButton::DpadLeft])
+				{
+					Vector3 l = g_camera.left();
+					l.y = 0;
+					l = normalize(l);
+					velocityDirection += l;
+				}
+				if (buttons[(size_t)Input::XboxButton::DpadRight])
+				{
+					Vector3 r = g_camera.right();
+					r.y = 0;
+					r = normalize(r);
+					velocityDirection += r;
+				}
+		
+				if(length(velocityDirection) > 1.0f)
+					velocityDirection = normalize(velocityDirection);
+		
+				g_camera.transform.position += camVel * velocityDirection * dt;
+		
+				// vibration test
+				if(Input::isGamepadButtonPressed(Input::Gamepad_1, Input::XboxButton::X))
+					Input::setGamepadVibration(Input::Gamepad_1, 0.5f, 0.5f);
+				else
+					Input::setGamepadVibration(Input::Gamepad_1, 0.0f, 0.0f);
+			}
 		//
 		//
 		//
@@ -460,22 +459,38 @@ namespace Dunjun
 		
 				if (length(velocityDirection) > 0)
 					velocityDirection = normalize(velocityDirection);
-
-				Vector3& charPos = g_instances[0].transform.position;
-				Quaternion& charOrient = g_instances[0].transform.orientation;
-
+				{
 				//camPos += camVel * velocityDirection * dt;
-				charPos += playerVel * velocityDirection * dt;
+				player.transform.position += playerVel * velocityDirection * dt;
 
-				// FIX ME: remove this
-				charOrient = quaternionLookAt(charPos, g_camera.transform.position, {0, 0, -1});
-		//
+#if 0 // BillBoard
+				Quaternion pRot = 
+							conjugate(quaternionLookAt(player.transform.position, 
+							g_camera.transform.position, {0, 1, 0}));
+
+				player.transform.orientation = pRot;
+#else // Billboard fixed Y axis
+				Vector3 f = player.transform.position - g_camera.transform.position;
+				
+				Radian a(std::atan(f.z / f.x));
+				a += Radian(Constants::TAU / 4);
+				if(f.x < 0) // prevent flipping
+					a += Radian(Constants::TAU / 2);
+
+				player.transform.orientation = angleAxis(-a, {0, 1, 0});
+
+#endif
+
+				}
+				//
 		//		// change fov with scroll wheel
 		//		// FIXME: view goes insane when scroll is used
 		//		// g_camera.fieldOfView = Radian(static_cast<f32>(g_camera.fieldOfView) + Input::getScrollOffset().y);
 		//
 		//	}
 
+				//g_camera.transform.position = player.transform.position + (Vector3{ 0, 2, 7 });
+				//g_camera.lookAt(player.transform.position, {0, 1, 0});
 				g_camera.viewportAspectRatio = getWindowSize().x / getWindowSize().y;
 		
 		}
@@ -492,10 +507,11 @@ namespace Dunjun
 			shaders->setUniform("u_tex", (Dunjun::u32)0); // set texture position
 
 			asset->texture->bind(0);
+
 			glBindBuffer(GL_ARRAY_BUFFER, inst.asset->vbo); // bind the buffer
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, inst.asset->ibo); // bind the buffer
 
-																 // Speicify the layout of the vertex data
+						 // Speicify the layout of the vertex data
 			glEnableVertexAttribArray(0); // enables attribute array[0] a_position
 			glEnableVertexAttribArray(1); // enables attribute array[1] a_color ''
 			glEnableVertexAttribArray(2); // enable attribute [2] a_texCoord
@@ -578,8 +594,8 @@ namespace Dunjun
 			//Input::setCursorMode(Input::CursorMode::Disabled);
 
 			// Temporarily disable culling
-			//glEnable(GL_CULL_FACE); // enable culling faces
-			//glCullFace(GL_BACK); // specify to cull the back face
+			glEnable(GL_CULL_FACE); // enable culling faces
+			glCullFace(GL_BACK); // specify to cull the back face
 			glEnable(GL_DEPTH_TEST);
 			glDepthFunc(GL_LEQUAL);
 

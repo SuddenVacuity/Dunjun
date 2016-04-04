@@ -1,7 +1,7 @@
 #ifndef DUNJUN_SHADERPROGRAM_HPP
 #define DUNJUN_SHADERPROGRAM_HPP
 
-#include <Dunjun/Vertex.hpp>
+#include <Dunjun/Mesh.hpp>
 
 #include <map>
 #include <string>

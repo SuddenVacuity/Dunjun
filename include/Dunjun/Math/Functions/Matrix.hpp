@@ -21,7 +21,7 @@ namespace Dunjun
 	Matrix4 infinitePerspective(const Radian& fovy, f32 aspect, f32 zNear);
 
 	Matrix4 matrix4LookAt(const Vector3& eye, const Vector3& center, const Vector3& up);
-	Quaternion quaternionLookAt(const Vector3& eye, const Vector3& center, const Vector3& forward);
+	Quaternion quaternionLookAt(const Vector3& eye, const Vector3& center, const Vector3& up);
 
 }
 #endif

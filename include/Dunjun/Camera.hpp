@@ -18,7 +18,7 @@ namespace Dunjun
 		Camera(const Camera& other) = default;
 		//const Camera& operator=(const Camera& other) = default;
 
-		void lookAt(const Vector3& position, const Vector3& forward = {0, 0, -1});
+		void lookAt(const Vector3& position, const Vector3& up = {0, 1, 0});
 
 		// positive values go counterclock-wise
 		void offsetOrientation(const Radian& yaw, const Radian& pitch);

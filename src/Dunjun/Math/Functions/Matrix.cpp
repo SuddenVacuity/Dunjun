@@ -141,20 +141,31 @@ namespace Dunjun
 	}
 
 
-	Quaternion quaternionLookAt(const Vector3& eye, const Vector3& center, const Vector3& forward)
+	Quaternion quaternionLookAt(const Vector3& eye, const Vector3& center, const Vector3& up)
 	{
 		//const Vector3& pos = transform.position;
 
 		if (length(center - eye) < 0.001f)
 			return Quaternion(); // ignore as you can't look at where you are
 
-					// forward vector
-		Vector3 f = normalize(center - eye);
-		f32 cosTheta = dot(forward, f);
+		const Vector3 f(normalize(center - eye));
+		const Vector3 s(normalize(cross(f, up)));
+		const Vector3 u(cross(s, f));
+		const Vector3 refUp(normalize(up));
 
-		Radian angle(std::acos(cosTheta));
-		Vector3 axis = cross(forward, f);
-		return angleAxis(angle, axis);
+		const f32 m = std::sqrt(2.0f + 2.0f * dot(u, refUp));
+
+		Vector3 v = (1.0f / m) * cross(u, refUp);
+
+		return Quaternion(v, 0.5f * m);
+
+		// forward vector
+		//Vector3 f = normalize(center - eye);
+		//f32 cosTheta = dot(forward, f);
+		//
+		//Radian angle(std::acos(cosTheta));
+		//Vector3 axis = cross(forward, f);
+		//return angleAxis(angle, axis);
 	}
 
 }

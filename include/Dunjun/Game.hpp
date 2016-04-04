@@ -2,7 +2,6 @@
 #define DUNJUN_GAME_HPP
 
 #include <Dunjun/ShaderProgram.hpp>
-#include <vector>
 
 namespace Dunjun
 {
