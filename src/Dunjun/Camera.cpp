@@ -61,15 +61,20 @@ namespace Dunjun
 	{
 		return getProjection() * getView();
 	}
+
 	Matrix4 Camera::getProjection() const
 	{
 		Matrix4 proj;
 
-		if(projectionType == ProjectionType::Perspective)
+		if (projectionType == ProjectionType::Perspective)
 		{
 			proj = perspective(fieldOfView, viewportAspectRatio, nearPlane, farPlane);
 		}
-		else if(projectionType == ProjectionType::Orthographic)
+		else if (projectionType == ProjectionType::InfinitePerspective)
+		{
+			proj = infinitePerspective(fieldOfView, viewportAspectRatio, nearPlane);
+		}
+		else if (projectionType == ProjectionType::Orthographic)
 		{
 			f32 distance = 0.5f * (farPlane - nearPlane);
 
@@ -78,9 +83,12 @@ namespace Dunjun
 						 -orthoScale, orthoScale, 
 						 -distance, distance);
 		}
+		else
+			std::runtime_error("No ProjectionType [-getProjcetion()-]\n");
 
 		return proj;
 	}
+
 	Matrix4 Camera::getView() const
 	{
 		Matrix4 view;

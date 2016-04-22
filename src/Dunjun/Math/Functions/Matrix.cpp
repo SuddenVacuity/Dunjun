@@ -61,8 +61,9 @@ namespace Dunjun
 		result[0][0] = 2.0f / (right - left);
 		result[1][1] = 2.0f / (top - bottom);
 		result[2][2] = -1.0f;
-		result[3][0] = -(right + left) / (right - left);
-		result[3][1] = -(top + bottom) / (top - bottom);
+		result[3][0] = -((right + left) / (right - left));
+		result[3][1] = -((top + bottom) / (top - bottom));
+		result[3][3] = 1;
 
 		return result;
 	}
@@ -70,12 +71,13 @@ namespace Dunjun
 	{
 		Matrix4 result;
 
-		result[0][0] = 2.0f * zNear / (right - left);
-		result[1][1] = 2.0f * zNear / (top - bottom);
+		result[0][0] = 2.0f / (right - left);
+		result[1][1] = 2.0f / (top - bottom);
 		result[2][2] = -2.0f / (zFar - zNear);
-		result[2][0] = -(right + left) / (right - left);
-		result[3][0] = -(top + bottom) / (top - bottom);
-		result[3][2] = -(zFar + zNear) / (zFar - zNear);
+		result[3][0] = -((right + left) / (right - left));
+		result[3][1] = -((top + bottom) / (top - bottom));
+		result[3][2] = -((zFar + zNear) / (zFar - zNear));
+		result[3][3] = 1;
 
 		return result;
 	}
@@ -84,15 +86,31 @@ namespace Dunjun
 	Matrix4 perspective(const Radian& fovy, f32 aspect, f32 zNear, f32 zFar)
 	{
 		assert(std::fabs(aspect - std::numeric_limits<f32>::epsilon()) > 0.0f); // make sure aspect ratio is greater than 0
-		
-		const f32 tanHalfFovy = std::tan(static_cast<f32>(fovy) / 2.0f);
 
 		Matrix4 result(0.0f);
-		result[0][0] = 1.0f / (aspect * tanHalfFovy);
-		result[1][1] = 1.0f / (tanHalfFovy);
-		result[2][2] = -(zFar + zNear) / (zFar - zNear);
+
+		const f32 range = std::tan(static_cast<f32>(fovy) / 2.0f);
+
+		result[0][0] = 1.0f / (aspect * range);
+		result[1][1] = 1.0f / (range);
+		result[2][2] = -((zFar + zNear) / (zFar - zNear));
 		result[2][3] = -1.0f;
 		result[3][2] = -2.0f * zFar * zNear / (zFar - zNear);
+
+		//const f32 left = -(f32)fovy;
+		//const f32 right = (f32)fovy;
+		//const f32 bottom = -1.0f;
+		//const f32 top = 1.0f;
+		//
+		//// from stack NOT WORKING (DEPTH DRAW ORDER IS BROKEN)
+		//result[0][0] = 2.0f * (1.0f / (right - left));
+		//result[1][1] = 2.0f * (1.0f / (top - bottom));
+		//result[2][2] = 2.0f * (1.0f / (zFar - zNear));
+		//result[3][3] = 1.0f;
+		//
+		//result[0][3] = -((right + left) * (1.0f / (right - left)));
+		//result[1][3] = -((top + bottom) * (1.0f / (top - bottom)));
+		//result[2][3] = -((zFar + zNear) * (1.0f / (zFar - zNear)));
 
 		return result;
 	}

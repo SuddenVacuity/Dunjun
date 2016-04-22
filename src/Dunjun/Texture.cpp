@@ -32,8 +32,8 @@ namespace Dunjun
 		glGenTextures(1, &object);
 	}
 	Texture::Texture(const Image& image,
-		GLint minMagFilter,
-		GLint wrapMode)
+		TextureFilter minMagFilter,
+		TextureWrapMode wrapMode)
 		: object(0)
 		, width(image.width)
 		, height(image.height)
@@ -43,8 +43,8 @@ namespace Dunjun
 	}
 
 	bool Texture::loadFromFile(const char* filename,
-		GLint minMagFilter,
-		GLint wrapMode)
+		TextureFilter minMagFilter,
+		TextureWrapMode wrapMode)
 	{
 		Image image;
 		if (!image.loadFromFile(filename))
@@ -55,8 +55,8 @@ namespace Dunjun
 	}
 
 	bool Texture::loadFromImage(const Image& image,
-		GLint minMagFilter,
-		GLint wrapMode)
+		TextureFilter minMagFilter,
+		TextureWrapMode wrapMode)
 	{
 		if ((const ImageFormat&)image.format == ImageFormat::None )
 			return false;
@@ -66,8 +66,8 @@ namespace Dunjun
 
 		glGenTextures(1, &object);
 		glBindTexture(GL_TEXTURE_2D, object);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrapMode); // set the s axis (x) to repeat
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapMode); // set the t axis (y) to repeat
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, static_cast<GLint>(wrapMode)); // set the s axis (x) to repeat
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, static_cast<GLint>(wrapMode)); // set the t axis (y) to repeat
 																	  //glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL REPEAT); // set the r axis (z) to repeat
 
 																	  /* set the border color for GL_CLAMP_TO_BORDER
@@ -75,8 +75,8 @@ namespace Dunjun
 																	  glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, color); // apply the color to the border
 																	  */
 
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, minMagFilter); // set the texture min filter type
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, minMagFilter); // set the texture max filter type
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, static_cast<GLint>(minMagFilter)); // set the texture min filter type
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, static_cast<GLint>(minMagFilter)); // set the texture max filter type
 																		  // there are 3 types of texture filters
 																		  // GL_NEAREST	keeps it as close as possible pixel to pixel
 																		  // GL_LINEAR	blurs the pixels

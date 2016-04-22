@@ -8,8 +8,8 @@ namespace Dunjun
 	enum class AttribLocation : u32
 	{
 		Position = 0,
-		Color = 1,
-		TexCoord = 2,
+		TexCoord = 1,
+		Color = 2,
 	};
 
 
@@ -34,9 +34,11 @@ namespace Dunjun
 			destroy();
 		}
 
-		void generate();
+		void addData(const Data& data);
 
-		void draw();
+		void generate() const;
+
+		void draw() const;
 
 		inline void destroy() const
 		{
@@ -46,9 +48,9 @@ namespace Dunjun
 
 
 	private:
-		b32 m_generated;
-
 		Data m_data;
+
+		mutable b32 m_generated;
 
 		GLuint m_vbo;
 		GLuint m_ibo;

@@ -8,8 +8,8 @@ namespace Dunjun
 	struct Vertex // must come before render
 	{
 		Vector3 position;
-		Color color;
 		Vector2 texCoord;
+		Color color;
 	};
 } // end Dunjun
 

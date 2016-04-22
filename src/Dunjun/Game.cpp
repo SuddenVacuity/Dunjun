@@ -5,26 +5,22 @@
 
 namespace Dunjun
 {
-	struct ModelAsset // includes the shader, the texture and the vbo's
+	struct Material
 	{
 		Dunjun::ShaderProgram* shaders;
 		Dunjun::Texture* texture;
+	};
 
-		// create a vertex buffer object to move vertex data to the graphics card
-		GLuint vbo;
-		GLuint ibo;
-
-		GLenum drawType;
-		//GLint drawStart;
-		GLint drawCount;
+	struct ModelAsset // includes the shader, the texture and the vbo's
+	{
+		const Material *material;
+		const Mesh *mesh;
 	};
 
 	struct ModelInstance // copies an asset to use
 	{
 		ModelAsset* asset;
 		Dunjun::Transform transform;
-		//Dunjun::Matrix4 transform;
-
 	};
 
 	namespace
@@ -39,10 +35,12 @@ namespace Dunjun
 
 	GLOBAL ShaderProgram* g_defaultShader;
 	GLOBAL ModelAsset g_sprite;
-	GLOBAL ModelAsset g_floor;
-	GLOBAL ModelAsset g_wall;
+	//GLOBAL ModelAsset g_floor;
+	//GLOBAL ModelAsset g_wall;
 	GLOBAL std::vector<ModelInstance> g_instances;
 	GLOBAL Camera g_camera;
+	GLOBAL std::map<std::string, Material> g_materials;
+	GLOBAL std::map<std::string, Mesh*> g_meshes;
 
 	namespace Game
 	{
@@ -106,13 +104,32 @@ namespace Dunjun
 				throw std::runtime_error(g_defaultShader->errorLog);
 
 
-			g_defaultShader->bindAttribLocation(0, "a_position"); // bind the position of 1st attribute in shaders
-			g_defaultShader->bindAttribLocation(1, "a_color"); // bind the position of 2nd attribute in shaders
-			g_defaultShader->bindAttribLocation(2, "a_texCoord"); // bind the position of 3rd attribute in shaders
+			g_defaultShader->bindAttribLocation((u32)AttribLocation::Position, "a_position"); // bind the position of 1st attribute in shaders
+			g_defaultShader->bindAttribLocation((u32)AttribLocation::TexCoord, "a_texCoord"); // bind the position of 3rd attribute in shaders
+			g_defaultShader->bindAttribLocation((u32)AttribLocation::Color, "a_color"); // bind the position of 2nd attribute in shaders
 
 			if (!g_defaultShader->link())
 				throw std::runtime_error(g_defaultShader->errorLog);
 
+		}
+
+		INTERNAL void loadMaterials()
+		{
+			g_materials["default"].shaders = g_defaultShader; // apply the default shader to sprite
+			g_materials["default"].texture = new Texture(); // apply new texture to sprite
+			g_materials["default"].texture->loadFromFile("data/textures/dunjunText.jpg"); // Path to the image
+
+			g_materials["dunjunText"].shaders = g_defaultShader; // apply the default shader to sprite
+			g_materials["dunjunText"].texture = new Texture(); // apply new texture to sprite
+			g_materials["dunjunText"].texture->loadFromFile("data/textures/dunjunText.jpg"); // Path to the image
+
+			g_materials["stone"].shaders = g_defaultShader; // apply the default shader to sprite
+			g_materials["stone"].texture = new Texture(); // apply new texture to sprite
+			g_materials["stone"].texture->loadFromFile("data/textures/stone.png", TextureFilter::Nearest); // Path to the image
+
+			g_materials["terrain"].shaders = g_defaultShader; // apply the default shader to sprite
+			g_materials["terrain"].texture = new Texture(); // apply new texture to sprite
+			g_materials["terrain"].texture->loadFromFile("data/textures/terrain.png", TextureFilter::Nearest); // Path to the image
 		}
 
 		/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -131,111 +148,231 @@ namespace Dunjun
 			// Here is where you add vertice information
 			//
 			Vertex vertices[] = { // define vertexes for a triangle
-								  //  x	    y	  z		   r	 g	   b	 a		  s	    t
-				{ { 0.5f,  0.5f, 0.0f },{ 0x00, 0xFF, 0xFF, 0xFF },{ 1.0f, 1.0f } },	// 0 vertex         1 ---- 0        
-				{ { -0.5f,  0.5f, 0.0f },{ 0xFF, 0xFF, 0x00, 0xFF },{ 0.0f, 1.0f } },	// 1 vertex           \             
-				{ { 0.5f, -0.5f, 0.0f },{ 0x00, 0x00, 0xFF, 0xFF },{ 1.0f, 0.0f } },	// 2 vertex              \           
-				{ { -0.5f, -0.5f, 0.0f },{ 0xFF, 0x00, 0xFF, 0xFF },{ 0.0f, 0.0f } },	// 3 vertex         3 -----2       
-																						// for triangle strips organize vertexes in a backwards Z
+				//  x	    y	  z		  s	    t	       r	 g	   b	 a				// for triangle strips organize vertexes in a backwards Z
+				{ { 0.5f,  0.5f, 0.0f },{ 1.0f, 1.0f },{ 0x00, 0xFF, 0xFF, 0xFF } },	// 0 vertex         1 ---- 0        
+				{ { -0.5f,  0.5f, 0.0f },{ 0.0f, 1.0f },{ 0xFF, 0xFF, 0x00, 0xFF } },	// 1 vertex           \             
+				{ { 0.5f, -0.5f, 0.0f },{ 1.0f, 0.0f },{ 0x00, 0x00, 0xFF, 0xFF }},	// 2 vertex              \           
+				{ { -0.5f, -0.5f, 0.0f },{ 0.0f, 0.0f },{ 0xFF, 0x00, 0xFF, 0xFF } },	// 3 vertex         3 -----2       
 			};
 
-			//g_sprite.vbo;
-			glGenBuffers(1, &g_sprite.vbo); // make vbo an array with a single entry
-			glBindBuffer(GL_ARRAY_BUFFER, g_sprite.vbo); // bind the buffer
-			glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW); // upload the data to the buffer
-																					   /* Types of DRAW
-																					   GL_STATIC DRAW   / Draws once and is repeated many times
-																					   GL_DYNAMIC_DRAW  / Draw can be changed but repeats more often than it changes
-																					   GL_STREAM_DRAW   / Redraws every frame (memory intensive)
-																					   */
-
 			u32 indices[] = { 0, 1, 2, 1, 3, 2 }; // vertex draw order for GL_TRIANGLES
+		
+			Mesh::Data meshData;
 
-			glGenBuffers(1, &g_sprite.ibo);
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, g_sprite.ibo);
-			glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+			int numVertex = sizeof(vertices) / sizeof(vertices[0]);
+			int numIndices = sizeof(indices) / sizeof(indices[0]);
 
+			for(int i = 0; i < numVertex; i++)
+				meshData.vertices.push_back(vertices[i]);
 
+			for(int i = 0; i <  numIndices; i++)
+				meshData.indices.push_back(indices[i]);
 
-			g_sprite.shaders = g_defaultShader; // apply the default shader to sprite
-			g_sprite.texture = new Texture(); // apply new texture to sprite
-			g_sprite.texture->loadFromFile("data/textures/dunjunText.jpg");
+			g_meshes["sprite"] = new Mesh(meshData); // NOTE: new Mesh remember to delete
 
-			g_sprite.drawType = GL_TRIANGLES;
-			// g_sprite.drawStart = 0;
-			g_sprite.drawCount = 6;
+			g_sprite.material = &g_materials["dunjunText"]; // apply material
+			g_sprite.mesh = g_meshes["sprite"];
 		}
 
-		// floor vertex info, vbo and ibo
-		INTERNAL void loadFloorAsset()
+		// generate world objects
+		INTERNAL void generateWorld()
 		{
-			// Here is where you add vertice information
-			//
-			Vertex vertices[] = { // define vertexes for a triangle
-				 //  x	    y	  z		   r	 g	   b	 a		  s	    t
-				{ { 0.5f, 0.0f, -0.5f },{ 0xFF, 0xFF, 0xFF, 0xFF },{ 1.0f, 1.0f } },
-				{ { -0.5f, 0.0f, -0.5f },{ 0xFF, 0xFF, 0xFF, 0xFF },{ 0.0f, 1.0f } },
-				{ {  0.5f, 0.0f,  0.5f},{ 0xFF, 0xFF, 0xFF, 0xFF },{ 1.0f, 0.0f } },	
-				{ { -0.5f, 0.0f,  0.5f},{ 0xFF, 0xFF, 0xFF, 0xFF },{ 0.0f, 0.0f } },	
-																						
-			};
-
-			//g_sprite.vbo;
-			glGenBuffers(1, &g_floor.vbo); // make vbo an array with a single entry
-			glBindBuffer(GL_ARRAY_BUFFER, g_floor.vbo); // bind the buffer
-			glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-			u32 indices[] = { 0, 1, 2, 1, 3, 2 }; // vertex draw order for GL_TRIANGLES
-
-			glGenBuffers(1, &g_floor.ibo);
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, g_floor.ibo);
-			glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+			Mesh::Data floorMD;
 			
+			// number of instances to create
+			int mapSizeX = 8;
+			int mapSizeY = 3;
+			int mapSizeZ = 7;
 
-
-			g_floor.shaders = g_defaultShader; // apply the default shader to sprite
-			g_floor.texture = new Texture(); // apply new texture to sprite
-			g_floor.texture->loadFromFile("data/textures/dunjunText.jpg");
-
-			g_floor.drawType = GL_TRIANGLES;
-			// g_sprite.drawStart = 0;
-			g_floor.drawCount = 6;
-		}
-
-		// walls vertex info, vbo and ibo
-		INTERNAL void loadWallAsset()
-		{
-			// Here is where you add vertice information
+			// size of image map
+			//f32 tileWidth = 1.0f / 16.0f;
+			//f32 tileHeight = 1.0f / 16.0f;
 			//
-			Vertex vertices[] = { // define vertexes for a triangle
-								  //  x	    y	  z		   r	 g	   b	 a		  s	    t
-				{ { 0.5f,  0.5f, 0.0f },{ 0x00, 0xFF, 0xFF, 0xFF },{ 1.0f, 1.0f } },	// 0 vertex         1 ---- 0        
-				{ { -0.5f,  0.5f, 0.0f },{ 0xFF, 0xFF, 0x00, 0xFF },{ 0.0f, 1.0f } },	// 1 vertex           \             
-				{ { 0.5f, -0.5f, 0.0f },{ 0x00, 0x00, 0xFF, 0xFF },{ 1.0f, 0.0f } },	// 2 vertex              \           
-				{ { -0.5f, -0.5f, 0.0f },{ 0xFF, 0x00, 0xFF, 0xFF },{ 0.0f, 0.0f } },	// 3 vertex         3 -----2       
-																						// for triangle strips organize vertexes in a backwards Z
-			};
+			//// location of texture in image
+			//int tileS = 0; // horizontal coordinate
+			//int tileT = 15; // vertical coordinate
+			//
+			//Vertex vertices[] = { // define vertexes for a square
+			//	//  x	    y	  z		  s	    t											r	   g	   b	 a	
+			//	{ { 0.5f, 0.0f, -0.5f },{ 1.0f, 1.0f },{ 0xFF, 0xFF, 0xFF, 0xFF } },
+			//	{ { -0.5f, 0.0f, -0.5f },{ 0.0f, 1.0f },{ 0xFF, 0xFF, 0xFF, 0xFF } },
+			//	{ { 0.5f, 0.0f,  0.5f },{ 1.0f, 0.0f },{ 0xFF, 0xFF, 0xFF, 0xFF } },
+			//	{ { -0.5f, 0.0f,  0.5f },{ 0.0f, 0.0f },{ 0xFF, 0xFF, 0xFF, 0xFF } },
+			//};
+			//
+			//u32 indices[] = { 0, 1, 2, 1, 3, 2 }; // vertex draw order for GL_TRIANGLES
+			//
+			//int numVertex = sizeof(vertices) / sizeof(vertices[0]);
+			//int numIndices = sizeof(indices) / sizeof(indices[0]);
 
-			//g_sprite.vbo;
-			glGenBuffers(1, &g_wall.vbo); // make vbo an array with a single entry
-			glBindBuffer(GL_ARRAY_BUFFER, g_wall.vbo); // bind the buffer
-			glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+			// create array of floor tiles
+			for (int i = 0; i < mapSizeX; i++)
+			{
+				for (int j = 0; j < mapSizeZ; j++)
+				{
+					// size of image map
+					f32 tileWidth = 1.0f / 16;
+					f32 tileHeight = 1.0f / 16;
 
-			u32 indices[] = { 0, 1, 2, 1, 3, 2 }; // vertex draw order for GL_TRIANGLES
+					// location of texture in image map
+					int tileS = 0; // horizontal coordinate
+					int tileT = 11; // vertical coordinate
 
-			glGenBuffers(1, &g_wall.ibo);
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, g_wall.ibo);
-			glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+					size_t index = floorMD.vertices.size();
+
+					floorMD.vertices.push_back({ { 0.5f + i, 0.0f, -0.5f + j },{ (tileS + 1)*tileWidth, (tileT + 1)*tileHeight },{ 0xFF, 0xFF, 0xFF, 0xFF } });
+					floorMD.vertices.push_back({ { -0.5f + i, 0.0f, -0.5f + j },{ tileS*tileWidth, (tileT + 1)*tileHeight },{ 0xFF, 0xFF, 0xFF, 0xFF } });
+					floorMD.vertices.push_back({ { 0.5f + i, 0.0f,  0.5f + j },{ (tileS + 1)*tileWidth, tileT*tileHeight },{ 0xFF, 0xFF, 0xFF, 0xFF } });
+					floorMD.vertices.push_back({ { -0.5f + i, 0.0f,  0.5f + j },{ tileS*tileWidth, tileT*tileHeight },{ 0xFF, 0xFF, 0xFF, 0xFF } });
+
+					floorMD.indices.push_back(index + 0);
+					floorMD.indices.push_back(index + 1);
+					floorMD.indices.push_back(index + 2);
+					floorMD.indices.push_back(index + 1);
+					floorMD.indices.push_back(index + 3);
+					floorMD.indices.push_back(index + 2);
 
 
+					//size_t index = floorMD.vertices.size();
+					//
+					//// individual tile
+					//for (int k = 0; k < numVertex; k++)
+					//{
+					//	Dunjun::Vertex v = vertices[k]; // create vertex to carry data
+					//
+					//	v.position.x = v.position.x + i; // add mapSize increments to create a tile grid
+					//	v.position.z = v.position.z + j; // add mapSize increments to create a tile grid
+					//
+					//	floorMD.vertices.push_back(v);
+					//}
+					//
+					//for (int l = 0; l < numIndices; l++)
+					//	floorMD.indices.push_back(index + indices[l]);
+				}
+			}
 
-			g_wall.shaders = g_defaultShader; // apply the default shader to sprite
-			g_wall.texture = new Texture(); // apply new texture to sprite
-			g_wall.texture->loadFromFile("data/textures/dunjunText.jpg");
+			// create array of wall tiles
+			// first for loop moves upward from one row to the next
+			for (int i = 0; i < mapSizeY; i++)
+			{
+				// create row of back wall tiles
+				for (int j = 0; j < mapSizeX; j++)
+				{
+					// size of image map
+					f32 tileWidth = 1.0f / 16;
+					f32 tileHeight = 1.0f / 16;
 
-			g_wall.drawType = GL_TRIANGLES;
-			// g_sprite.drawStart = 0;
-			g_wall.drawCount = 6;
+					// location of texture in image map
+					int tileS = 1 + rand() % 2; // horizontal coordinate
+					int tileT = 15; // vertical coordinate
+
+					size_t index = floorMD.vertices.size();
+
+					floorMD.vertices.push_back({ { 0.5f + j, 1.0f + i, -0.5f},{ (tileS + 1)*tileWidth, (tileT + 1)*tileHeight },{ 0xFF, 0xFF, 0xFF, 0xFF } });
+					floorMD.vertices.push_back({ { -0.5f + j, 1.0f + i, -0.5f},{ tileS*tileWidth, (tileT + 1)*tileHeight },{ 0xFF, 0xFF, 0xFF, 0xFF } });
+					floorMD.vertices.push_back({ { 0.5f + j, 0.0f + i,  -0.5f},{ (tileS + 1)*tileWidth, tileT*tileHeight },{ 0xFF, 0xFF, 0xFF, 0xFF } });
+					floorMD.vertices.push_back({ { -0.5f + j, 0.0f + i,  -0.5f},{ tileS*tileWidth, tileT*tileHeight },{ 0xFF, 0xFF, 0xFF, 0xFF } });
+
+					floorMD.indices.push_back(index + 0);
+					floorMD.indices.push_back(index + 1);
+					floorMD.indices.push_back(index + 2);
+					floorMD.indices.push_back(index + 1);
+					floorMD.indices.push_back(index + 3);
+					floorMD.indices.push_back(index + 2);
+
+				}
+
+			// create row of front wall tiles
+				for (int j = 0; j < mapSizeX; j++)
+				{
+					// size of image map
+					f32 tileWidth = 1.0f / 16;
+					f32 tileHeight = 1.0f / 16;
+
+					// location of texture in image map
+					int tileS = 1 + rand() % 2; // horizontal coordinate
+					int tileT = 15; // vertical coordinate
+
+					size_t index = floorMD.vertices.size();
+
+					floorMD.vertices.push_back({ { -0.5f + j, 1.0f + i, -0.5f + mapSizeZ },{ (tileS + 1)*tileWidth, (tileT + 1)*tileHeight },{ 0xFF, 0xFF, 0xFF, 0xFF } });
+					floorMD.vertices.push_back({ { 0.5f + j, 1.0f + i, -0.5f + mapSizeZ },{ tileS*tileWidth, (tileT + 1)*tileHeight },{ 0xFF, 0xFF, 0xFF, 0xFF } });
+					floorMD.vertices.push_back({ { -0.5f + j, 0.0f + i,  -0.5f + mapSizeZ },{ (tileS + 1)*tileWidth, tileT*tileHeight },{ 0xFF, 0xFF, 0xFF, 0xFF } });
+					floorMD.vertices.push_back({ { 0.5f + j, 0.0f + i,  -0.5f + mapSizeZ },{ tileS*tileWidth, tileT*tileHeight },{ 0xFF, 0xFF, 0xFF, 0xFF } });
+
+					floorMD.indices.push_back(index + 0);
+					floorMD.indices.push_back(index + 1);
+					floorMD.indices.push_back(index + 2);
+					floorMD.indices.push_back(index + 1);
+					floorMD.indices.push_back(index + 3);
+					floorMD.indices.push_back(index + 2);
+
+				}
+
+			// create row of left wall tiles
+				for (int j = 0; j < mapSizeZ; j++)
+				{
+					// size of image map
+					f32 tileWidth = 1.0f / 16;
+					f32 tileHeight = 1.0f / 16;
+
+					// location of texture in image map
+					int tileS = 1 + rand() % 2; // horizontal coordinate
+					int tileT = 15; // vertical coordinate
+
+					size_t index = floorMD.vertices.size();
+
+					floorMD.vertices.push_back({ { -0.5f, 1.0f + i, -0.5f + j },{ (tileS + 1)*tileWidth, (tileT + 1)*tileHeight },{ 0xFF, 0xFF, 0xFF, 0xFF } });
+					floorMD.vertices.push_back({ { -0.5f, 1.0f + i, 0.5f + j },{ tileS*tileWidth, (tileT + 1)*tileHeight },{ 0xFF, 0xFF, 0xFF, 0xFF } });
+					floorMD.vertices.push_back({ { -0.5f, 0.0f + i,  -0.5f + j },{ (tileS + 1)*tileWidth, tileT*tileHeight },{ 0xFF, 0xFF, 0xFF, 0xFF } });
+					floorMD.vertices.push_back({ { -0.5f, 0.0f + i,  0.5f + j },{ tileS*tileWidth, tileT*tileHeight },{ 0xFF, 0xFF, 0xFF, 0xFF } });
+
+					floorMD.indices.push_back(index + 0);
+					floorMD.indices.push_back(index + 1);
+					floorMD.indices.push_back(index + 2);
+					floorMD.indices.push_back(index + 1);
+					floorMD.indices.push_back(index + 3);
+					floorMD.indices.push_back(index + 2);
+
+				}
+
+			// create row of right wall tiles
+				for (int j = 0; j < mapSizeZ; j++)
+				{
+					// size of image map
+					f32 tileWidth = 1.0f / 16;
+					f32 tileHeight = 1.0f / 16;
+
+					// location of texture in image map
+					int tileS = 1 + rand() % 2; // horizontal coordinate
+					int tileT = 15; // vertical coordinate
+
+					size_t index = floorMD.vertices.size();
+
+					floorMD.vertices.push_back({ { -0.5f + mapSizeX, 1.0f + i, 0.5f + j },{ (tileS + 1)*tileWidth, (tileT + 1)*tileHeight },{ 0xFF, 0xFF, 0xFF, 0xFF } });
+					floorMD.vertices.push_back({ { -0.5f + mapSizeX, 1.0f + i, -0.5f + j },{ tileS*tileWidth, (tileT + 1)*tileHeight },{ 0xFF, 0xFF, 0xFF, 0xFF } });
+					floorMD.vertices.push_back({ { -0.5f + mapSizeX, 0.0f + i,  0.5f + j },{ (tileS + 1)*tileWidth, tileT*tileHeight },{ 0xFF, 0xFF, 0xFF, 0xFF } });
+					floorMD.vertices.push_back({ { -0.5f + mapSizeX, 0.0f + i,  -0.5f + j },{ tileS*tileWidth, tileT*tileHeight },{ 0xFF, 0xFF, 0xFF, 0xFF } });
+
+					floorMD.indices.push_back(index + 0);
+					floorMD.indices.push_back(index + 1);
+					floorMD.indices.push_back(index + 2);
+					floorMD.indices.push_back(index + 1);
+					floorMD.indices.push_back(index + 3);
+					floorMD.indices.push_back(index + 2);
+
+				}
+			} // end create walls
+
+
+			ModelInstance floorMI;
+
+			floorMI.asset = new ModelAsset();
+			floorMI.asset->mesh = new Mesh(floorMD);
+
+			floorMI.asset->material = &g_materials["terrain"]; // apply material
+
+			g_instances.push_back(floorMI);
 		}
 
 		/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -260,37 +397,12 @@ namespace Dunjun
 
 			ModelInstance a;
 			a.asset = &g_sprite;
-			a.transform.position = { 0, 0, 0 }; // translation
+			a.transform.position = { 0, 0.5, 0 }; // translation
 			a.transform.scale = { 1, 1, 1 };
-			//a.transform.orientation = angleAxis(Degree(0), { 0, 0, 1 }); // rotation
+			a.transform.orientation = angleAxis(Degree(0), { 1, 0, 0 }); // rotation
 			g_instances.push_back(a);
 
-			// create array of floor tiles
-			for(int i = -3; i < 4; i++)
-			{
-				for(int j = -3; j < 4; j++)
-				{
-					ModelInstance f;
-					f.asset = &g_floor;
-					f.transform.position = {(f32)i, -0.5, (f32)j};
-					//f.transform.orientation = angleAxis(Degree(0), { 1, 0, 0 }); // rotation
-					g_instances.push_back(f);
-				}
-			}
-
-			//ModelInstance b;
-			//b.asset = &g_sprite;
-			//b.transform.position = { 2, 0, 0 };
-			//b.transform.scale = { 1, 1, 1 };
-			//b.transform.orientation = angleAxis(Degree(0), { 1, 0, 0 }); // rotation
-			//g_instances.push_back(b);
-			//
-			//ModelInstance c;
-			//c.asset = &g_sprite;
-			//c.transform.position = { 0, 0, 1 };
-			//c.transform.scale = { 1, 1, 1 };
-			//c.transform.orientation = angleAxis(Degree(0), { 0, 1, 0 }); // rotation
-			//g_instances.push_back(c);
+			generateWorld();
 
 			//for (auto& inst : g_instances)
 			//{
@@ -299,11 +411,16 @@ namespace Dunjun
 			//}
 
 			//Initialize camera
-			g_camera.transform.position = { 0, 2, 6 };
+			g_camera.transform.position = { 0, 3, 10 };
 
 			g_camera.lookAt({ 0, 0, 0 });
+
 			g_camera.projectionType = ProjectionType::Perspective;
-			g_camera.fieldOfView = Degree(50.0f);
+
+			//g_camera.projectionType = ProjectionType::Orthographic;
+
+			g_camera.fieldOfView = Degree(50.0f); // for perspective view
+			g_camera.orthoScale = 4.0f; // for ortho view
 		}
 
 		INTERNAL void update(f32 dt)
@@ -337,7 +454,7 @@ namespace Dunjun
 				player.transform.orientation = angleAxis(Degree(0), { 0, 0, 1 }); // rotation
 			}
 
-			g_instances[2].transform.orientation = angleAxis(Degree(120) * dt, { 1, 0, 0 }) * g_instances[2].transform.orientation;
+			//g_instances[2].transform.orientation = angleAxis(Degree(120) * dt, { 1, 0, 0 }) * g_instances[2].transform.orientation;
 		
 			{ // game pad input
 				Input::GamepadAxes axes = Input::getGamepadAxes(Input::Gamepad_1);
@@ -423,6 +540,14 @@ namespace Dunjun
 					Input::setGamepadVibration(Input::Gamepad_1, 0.5f, 0.5f);
 				else
 					Input::setGamepadVibration(Input::Gamepad_1, 0.0f, 0.0f);
+
+				// camera swap
+				if (Input::isGamepadButtonPressed(Input::Gamepad_1, Input::XboxButton::B))
+					g_camera.projectionType = ProjectionType::Orthographic;
+				if (Input::isGamepadButtonPressed(Input::Gamepad_1, Input::XboxButton::A))
+					g_camera.projectionType = ProjectionType::Perspective;
+				if (Input::isGamepadButtonPressed(Input::Gamepad_1, Input::XboxButton::Y))
+					g_camera.projectionType = ProjectionType::InfinitePerspective;
 			}
 		//
 		//
@@ -469,15 +594,22 @@ namespace Dunjun
 							g_camera.transform.position, {0, 1, 0}));
 
 				player.transform.orientation = pRot;
-#else // Billboard fixed Y axis
+#elif 0 // Billboard fixed Y axis
 				Vector3 f = player.transform.position - g_camera.transform.position;
-				
+				f.y = 0;
+
+				if(f.x == 0 && f.z == 0)
+					player.transform.orientation = Quaternion();
+				else
+				{
 				Radian a(std::atan(f.z / f.x));
 				a += Radian(Constants::TAU / 4);
+
 				if(f.x < 0) // prevent flipping
 					a += Radian(Constants::TAU / 2);
 
 				player.transform.orientation = angleAxis(-a, {0, 1, 0});
+				}
 
 #endif
 
@@ -489,7 +621,7 @@ namespace Dunjun
 		//
 		//	}
 
-				//g_camera.transform.position = player.transform.position + (Vector3{ 0, 2, 7 });
+				//g_camera.transform.position.x = player.transform.position.x;
 				//g_camera.lookAt(player.transform.position, {0, 1, 0});
 				g_camera.viewportAspectRatio = getWindowSize().x / getWindowSize().y;
 		
@@ -499,36 +631,15 @@ namespace Dunjun
 		INTERNAL void renderInstance(const ModelInstance& inst)
 		{
 			ModelAsset* asset = inst.asset;
-			Dunjun::ShaderProgram* shaders = asset->shaders;
+			Dunjun::ShaderProgram* shaders = asset->material->shaders;
 
-			shaders->setUniform("u_camera", g_camera.getMatrix()); // set u_camera to apply view functions
-																   //shaders->setUniform("u_model", inst.transform); // set u_model to apply matrix transform functions
-			shaders->setUniform("u_transform", inst.transform); // set u_model to apply matrix transform functions
-			shaders->setUniform("u_tex", (Dunjun::u32)0); // set texture position
+			shaders->setUniform("u_camera", g_camera.getMatrix()); // shaderprogram.cpp
+			shaders->setUniform("u_transform", inst.transform); // shaderprogram.cpp
+			shaders->setUniform("u_tex", (Dunjun::u32)0); // shaderprogram.cpp
 
-			asset->texture->bind(0);
+			asset->material->texture->bind(0); // texture.cpp
 
-			glBindBuffer(GL_ARRAY_BUFFER, inst.asset->vbo); // bind the buffer
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, inst.asset->ibo); // bind the buffer
-
-						 // Speicify the layout of the vertex data
-			glEnableVertexAttribArray(0); // enables attribute array[0] a_position
-			glEnableVertexAttribArray(1); // enables attribute array[1] a_color ''
-			glEnableVertexAttribArray(2); // enable attribute [2] a_texCoord
-
-			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const GLvoid*)0); // pointer for attribute position (att position, size of vertices x/y/z, int type, normalized?, stride, pointer)
-			glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(Vertex), (const GLvoid*)sizeof(Dunjun::Vector3));
-			glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const GLvoid*)(sizeof(Dunjun::Vector3) + sizeof(Dunjun::Color)));
-			// stride says how many floats there are per vertex
-			// const void *pointer says how far offset the information starts
-
-			// get the draw info from ModelAsset asset
-			//glDrawArrays(asset->drawType, asset->drawStart, asset->drawCount); // (mode to draw in, first vertex, total vertices)
-			glDrawElements(asset->drawType, asset->drawCount, GL_UNSIGNED_INT, nullptr);
-
-			glDisableVertexAttribArray(0); // disables attribute array[0]
-			glDisableVertexAttribArray(1); // disables attribute array[1]
-			glDisableVertexAttribArray(2); // disables attribute array[2]
+			asset->mesh->draw(); // mesh.cpp
 		}
 
 		INTERNAL void render()
@@ -536,16 +647,16 @@ namespace Dunjun
 			// vars used to define the size of the viewport
 			glViewport(0, 0, windowWidth, windowHeight);
 
-			glClearColor(0.3f, 0.6f, 0.9f, 1.0f); // set the default color (R,G,B,A)
+			glClearColor(0.02f, 0.02f, 0.02f, 1.0f); // set the default color (R,G,B,A)
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 			Dunjun::ShaderProgram* currentShaders = nullptr;
 
 			for (const auto& inst : g_instances)
 			{
-				if (inst.asset->shaders != currentShaders) // swap to new shaders
+				if (inst.asset->material->shaders != currentShaders) // swap to new shaders
 				{
-					currentShaders = inst.asset->shaders;
+					currentShaders = inst.asset->material->shaders;
 					currentShaders->use();
 				}
 				renderInstance(inst);
@@ -593,18 +704,20 @@ namespace Dunjun
 			//Input::setCursorPosition({ 0, 0 });
 			//Input::setCursorMode(Input::CursorMode::Disabled);
 
-			// Temporarily disable culling
 			glEnable(GL_CULL_FACE); // enable culling faces
 			glCullFace(GL_BACK); // specify to cull the back face
+
 			glEnable(GL_DEPTH_TEST);
 			glDepthFunc(GL_LEQUAL);
 
 			// load internal render functions
 			loadShaders();
 
+			loadMaterials();
+
 			// load assets
 			loadSpriteAsset();
-			loadFloorAsset();
+			//loadFloorAsset();
 
 			// load instances
 			loadInstances();
@@ -652,7 +765,7 @@ namespace Dunjun
 					//std::cout << tc.getTickRate() << std::endl;
 					titleStream.str("");
 					titleStream.clear();
-					titleStream << "Dunjun - ms/F: " << 1000.0 / tc.getTickRate() << " - Your current speed"; // dynamic window title
+					titleStream << "Dunjun - F/S: ~" <<  tc.getTickRate() << " - Your current speed"; // dynamic window title
 					glfwSetWindowTitle(window, titleStream.str().c_str());
 				}
 
