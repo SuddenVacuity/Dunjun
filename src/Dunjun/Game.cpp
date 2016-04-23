@@ -174,15 +174,91 @@ namespace Dunjun
 			g_sprite.mesh = g_meshes["sprite"];
 		}
 
+		enum class TileSurfaceFace : u32
+		{
+			// directions tiles can face
+			Right = 0,
+			Left = 1,
+			Up = 2,
+			Down = 3,
+			Forward = 4,
+			Backward = 5,
+		};
+
+		INTERNAL void addTileSurface(Mesh::Data* data, const Vector3& position, TileSurfaceFace face, const Vector2& texPos)
+		{
+			// size of image map
+			const f32 tileWidth = 1.0f / 16;
+			const f32 tileHeight = 1.0f / 16;
+
+			size_t index = data->vertices.size();
+
+			//right/left vertices
+			if((u32)face < 2)
+			{
+				//vertex data				position (x, y, z}									texture coords {s, t}									vertex colors{r, g, b, a}
+				data->vertices.push_back({ { position.x, position.y + 1.0f, position.z + 1.0f },{ (texPos.x + 1)*tileWidth, (texPos.y + 1)*tileHeight },{ 0xFF, 0xFF, 0xFF, 0xFF } });
+				data->vertices.push_back({ { position.x, position.y + 1.0f, position.z + 0.0f },{ (texPos.x + 0)*tileWidth, (texPos.y + 1)*tileHeight },{ 0xFF, 0xFF, 0xFF, 0xFF } });
+				data->vertices.push_back({ { position.x, position.y + 0.0f, position.z + 1.0f },{ (texPos.x + 1)*tileWidth, (texPos.y + 0)*tileHeight },{ 0xFF, 0xFF, 0xFF, 0xFF } });
+				data->vertices.push_back({ { position.x, position.y + 0.0f, position.z + 0.0f },{ (texPos.x + 0)*tileWidth, (texPos.y + 0)*tileHeight },{ 0xFF, 0xFF, 0xFF, 0xFF } });
+			}
+
+			// up/down vertices
+			else if((u32)face < 4)
+			{
+				//vertex data				position (x, y, z}									texture coords {s, t}									vertex colors{r, g, b, a}
+				data->vertices.push_back({ { position.x + 1.0f, position.y, position.z + 0.0f},{ (texPos.x + 1)*tileWidth, (texPos.y + 1)*tileHeight },{ 0xFF, 0xFF, 0xFF, 0xFF } });
+				data->vertices.push_back({ { position.x + 0.0f, position.y, position.z + 0.0f},{ (texPos.x + 0)*tileWidth, (texPos.y + 1)*tileHeight },{ 0xFF, 0xFF, 0xFF, 0xFF } });
+				data->vertices.push_back({ { position.x + 1.0f, position.y, position.z + 1.0f},{ (texPos.x + 1)*tileWidth, (texPos.y + 0)*tileHeight },{ 0xFF, 0xFF, 0xFF, 0xFF } });
+				data->vertices.push_back({ { position.x + 0.0f, position.y, position.z + 1.0f},{ (texPos.x + 0)*tileWidth, (texPos.y + 0)*tileHeight },{ 0xFF, 0xFF, 0xFF, 0xFF } });
+			}
+
+			// forward/backward vertices
+			else if((u32)face< 6)
+			{
+				//vertex data				position (x, y, z}									texture coords {s, t}									vertex colors{r, g, b, a}
+				data->vertices.push_back({ { position.x + 1.0f, position.y + 1.0f, position.z },{ (texPos.x + 1)*tileWidth, (texPos.y + 1)*tileHeight },{ 0xFF, 0xFF, 0xFF, 0xFF } });
+				data->vertices.push_back({ { position.x + 0.0f, position.y + 1.0f, position.z },{ (texPos.x + 0)*tileWidth, (texPos.y + 1)*tileHeight },{ 0xFF, 0xFF, 0xFF, 0xFF } });
+				data->vertices.push_back({ { position.x + 1.0f, position.y + 0.0f, position.z },{ (texPos.x + 1)*tileWidth, (texPos.y + 0)*tileHeight },{ 0xFF, 0xFF, 0xFF, 0xFF } });
+				data->vertices.push_back({ { position.x + 0.0f, position.y + 0.0f, position.z },{ (texPos.x + 0)*tileWidth, (texPos.y + 0)*tileHeight },{ 0xFF, 0xFF, 0xFF, 0xFF } });
+			}
+			else
+				std::runtime_error(std::string("Invalid tile direction in function: addTileSurface()"));
+
+			// choose draw order based on direction
+			if((u32)face % 2 == 0)
+			{
+				data->indices.push_back(index + 0);
+				data->indices.push_back(index + 1);
+				data->indices.push_back(index + 2);
+				data->indices.push_back(index + 1);
+				data->indices.push_back(index + 3);
+				data->indices.push_back(index + 2);
+			}
+			else // (u32)face % 2 == 1
+			{
+				data->indices.push_back(index + 2);
+				data->indices.push_back(index + 3);
+				data->indices.push_back(index + 1);
+				data->indices.push_back(index + 2);
+				data->indices.push_back(index + 1);
+				data->indices.push_back(index + 0);
+			}
+		}
+
 		// generate world objects
 		INTERNAL void generateWorld()
 		{
 			Mesh::Data floorMD;
 			
 			// number of instances to create
-			int mapSizeX = 8;
+			int mapSizeX = 24;
 			int mapSizeY = 3;
-			int mapSizeZ = 7;
+			int mapSizeZ = 16;
+
+			// location of texture in image map
+			Vector2 lightWoodTile(0,11);
+			Vector2 mossyStoneTile(2, 15);
 
 			// size of image map
 			//f32 tileWidth = 1.0f / 16.0f;
@@ -210,28 +286,7 @@ namespace Dunjun
 			{
 				for (int j = 0; j < mapSizeZ; j++)
 				{
-					// size of image map
-					f32 tileWidth = 1.0f / 16;
-					f32 tileHeight = 1.0f / 16;
-
-					// location of texture in image map
-					int tileS = 0; // horizontal coordinate
-					int tileT = 11; // vertical coordinate
-
-					size_t index = floorMD.vertices.size();
-
-					floorMD.vertices.push_back({ { 0.5f + i, 0.0f, -0.5f + j },{ (tileS + 1)*tileWidth, (tileT + 1)*tileHeight },{ 0xFF, 0xFF, 0xFF, 0xFF } });
-					floorMD.vertices.push_back({ { -0.5f + i, 0.0f, -0.5f + j },{ tileS*tileWidth, (tileT + 1)*tileHeight },{ 0xFF, 0xFF, 0xFF, 0xFF } });
-					floorMD.vertices.push_back({ { 0.5f + i, 0.0f,  0.5f + j },{ (tileS + 1)*tileWidth, tileT*tileHeight },{ 0xFF, 0xFF, 0xFF, 0xFF } });
-					floorMD.vertices.push_back({ { -0.5f + i, 0.0f,  0.5f + j },{ tileS*tileWidth, tileT*tileHeight },{ 0xFF, 0xFF, 0xFF, 0xFF } });
-
-					floorMD.indices.push_back(index + 0);
-					floorMD.indices.push_back(index + 1);
-					floorMD.indices.push_back(index + 2);
-					floorMD.indices.push_back(index + 1);
-					floorMD.indices.push_back(index + 3);
-					floorMD.indices.push_back(index + 2);
-
+					addTileSurface(&floorMD, {(f32)i, 0, (f32)j}, TileSurfaceFace::Up, lightWoodTile);
 
 					//size_t index = floorMD.vertices.size();
 					//
@@ -258,109 +313,37 @@ namespace Dunjun
 				// create row of back wall tiles
 				for (int j = 0; j < mapSizeX; j++)
 				{
-					// size of image map
-					f32 tileWidth = 1.0f / 16;
-					f32 tileHeight = 1.0f / 16;
-
-					// location of texture in image map
-					int tileS = 1 + rand() % 2; // horizontal coordinate
-					int tileT = 15; // vertical coordinate
-
-					size_t index = floorMD.vertices.size();
-
-					floorMD.vertices.push_back({ { 0.5f + j, 1.0f + i, -0.5f},{ (tileS + 1)*tileWidth, (tileT + 1)*tileHeight },{ 0xFF, 0xFF, 0xFF, 0xFF } });
-					floorMD.vertices.push_back({ { -0.5f + j, 1.0f + i, -0.5f},{ tileS*tileWidth, (tileT + 1)*tileHeight },{ 0xFF, 0xFF, 0xFF, 0xFF } });
-					floorMD.vertices.push_back({ { 0.5f + j, 0.0f + i,  -0.5f},{ (tileS + 1)*tileWidth, tileT*tileHeight },{ 0xFF, 0xFF, 0xFF, 0xFF } });
-					floorMD.vertices.push_back({ { -0.5f + j, 0.0f + i,  -0.5f},{ tileS*tileWidth, tileT*tileHeight },{ 0xFF, 0xFF, 0xFF, 0xFF } });
-
-					floorMD.indices.push_back(index + 0);
-					floorMD.indices.push_back(index + 1);
-					floorMD.indices.push_back(index + 2);
-					floorMD.indices.push_back(index + 1);
-					floorMD.indices.push_back(index + 3);
-					floorMD.indices.push_back(index + 2);
-
+					int noMoss = rand()%2;
+					mossyStoneTile.x = mossyStoneTile.x - noMoss;
+					addTileSurface(&floorMD, { (f32)j, (f32)i, 0 }, TileSurfaceFace::Forward, mossyStoneTile);
+					mossyStoneTile.x = mossyStoneTile.x + noMoss;
 				}
 
 			// create row of front wall tiles
 				for (int j = 0; j < mapSizeX; j++)
 				{
-					// size of image map
-					f32 tileWidth = 1.0f / 16;
-					f32 tileHeight = 1.0f / 16;
-
-					// location of texture in image map
-					int tileS = 1 + rand() % 2; // horizontal coordinate
-					int tileT = 15; // vertical coordinate
-
-					size_t index = floorMD.vertices.size();
-
-					floorMD.vertices.push_back({ { -0.5f + j, 1.0f + i, -0.5f + mapSizeZ },{ (tileS + 1)*tileWidth, (tileT + 1)*tileHeight },{ 0xFF, 0xFF, 0xFF, 0xFF } });
-					floorMD.vertices.push_back({ { 0.5f + j, 1.0f + i, -0.5f + mapSizeZ },{ tileS*tileWidth, (tileT + 1)*tileHeight },{ 0xFF, 0xFF, 0xFF, 0xFF } });
-					floorMD.vertices.push_back({ { -0.5f + j, 0.0f + i,  -0.5f + mapSizeZ },{ (tileS + 1)*tileWidth, tileT*tileHeight },{ 0xFF, 0xFF, 0xFF, 0xFF } });
-					floorMD.vertices.push_back({ { 0.5f + j, 0.0f + i,  -0.5f + mapSizeZ },{ tileS*tileWidth, tileT*tileHeight },{ 0xFF, 0xFF, 0xFF, 0xFF } });
-
-					floorMD.indices.push_back(index + 0);
-					floorMD.indices.push_back(index + 1);
-					floorMD.indices.push_back(index + 2);
-					floorMD.indices.push_back(index + 1);
-					floorMD.indices.push_back(index + 3);
-					floorMD.indices.push_back(index + 2);
-
+					int noMoss = rand() % 2;
+					mossyStoneTile.x = mossyStoneTile.x - noMoss;
+					addTileSurface(&floorMD, { (f32)j, (f32)i, (f32)mapSizeZ }, TileSurfaceFace::Backward, mossyStoneTile);
+					mossyStoneTile.x = mossyStoneTile.x + noMoss;
 				}
 
 			// create row of left wall tiles
 				for (int j = 0; j < mapSizeZ; j++)
 				{
-					// size of image map
-					f32 tileWidth = 1.0f / 16;
-					f32 tileHeight = 1.0f / 16;
-
-					// location of texture in image map
-					int tileS = 1 + rand() % 2; // horizontal coordinate
-					int tileT = 15; // vertical coordinate
-
-					size_t index = floorMD.vertices.size();
-
-					floorMD.vertices.push_back({ { -0.5f, 1.0f + i, -0.5f + j },{ (tileS + 1)*tileWidth, (tileT + 1)*tileHeight },{ 0xFF, 0xFF, 0xFF, 0xFF } });
-					floorMD.vertices.push_back({ { -0.5f, 1.0f + i, 0.5f + j },{ tileS*tileWidth, (tileT + 1)*tileHeight },{ 0xFF, 0xFF, 0xFF, 0xFF } });
-					floorMD.vertices.push_back({ { -0.5f, 0.0f + i,  -0.5f + j },{ (tileS + 1)*tileWidth, tileT*tileHeight },{ 0xFF, 0xFF, 0xFF, 0xFF } });
-					floorMD.vertices.push_back({ { -0.5f, 0.0f + i,  0.5f + j },{ tileS*tileWidth, tileT*tileHeight },{ 0xFF, 0xFF, 0xFF, 0xFF } });
-
-					floorMD.indices.push_back(index + 0);
-					floorMD.indices.push_back(index + 1);
-					floorMD.indices.push_back(index + 2);
-					floorMD.indices.push_back(index + 1);
-					floorMD.indices.push_back(index + 3);
-					floorMD.indices.push_back(index + 2);
-
+					int noMoss = rand() % 2;
+					mossyStoneTile.x = mossyStoneTile.x - noMoss;
+					addTileSurface(&floorMD, { 0, (f32)i, (f32)j }, TileSurfaceFace::Left, mossyStoneTile);
+					mossyStoneTile.x = mossyStoneTile.x + noMoss;
 				}
 
 			// create row of right wall tiles
 				for (int j = 0; j < mapSizeZ; j++)
 				{
-					// size of image map
-					f32 tileWidth = 1.0f / 16;
-					f32 tileHeight = 1.0f / 16;
-
-					// location of texture in image map
-					int tileS = 1 + rand() % 2; // horizontal coordinate
-					int tileT = 15; // vertical coordinate
-
-					size_t index = floorMD.vertices.size();
-
-					floorMD.vertices.push_back({ { -0.5f + mapSizeX, 1.0f + i, 0.5f + j },{ (tileS + 1)*tileWidth, (tileT + 1)*tileHeight },{ 0xFF, 0xFF, 0xFF, 0xFF } });
-					floorMD.vertices.push_back({ { -0.5f + mapSizeX, 1.0f + i, -0.5f + j },{ tileS*tileWidth, (tileT + 1)*tileHeight },{ 0xFF, 0xFF, 0xFF, 0xFF } });
-					floorMD.vertices.push_back({ { -0.5f + mapSizeX, 0.0f + i,  0.5f + j },{ (tileS + 1)*tileWidth, tileT*tileHeight },{ 0xFF, 0xFF, 0xFF, 0xFF } });
-					floorMD.vertices.push_back({ { -0.5f + mapSizeX, 0.0f + i,  -0.5f + j },{ tileS*tileWidth, tileT*tileHeight },{ 0xFF, 0xFF, 0xFF, 0xFF } });
-
-					floorMD.indices.push_back(index + 0);
-					floorMD.indices.push_back(index + 1);
-					floorMD.indices.push_back(index + 2);
-					floorMD.indices.push_back(index + 1);
-					floorMD.indices.push_back(index + 3);
-					floorMD.indices.push_back(index + 2);
-
+					int noMoss = rand() % 2;
+					mossyStoneTile.x = mossyStoneTile.x - noMoss;
+					addTileSurface(&floorMD, { (f32)mapSizeX, (f32)i, (f32)j }, TileSurfaceFace::Right, mossyStoneTile);
+					mossyStoneTile.x = mossyStoneTile.x + noMoss;
 				}
 			} // end create walls
 
@@ -397,7 +380,7 @@ namespace Dunjun
 
 			ModelInstance a;
 			a.asset = &g_sprite;
-			a.transform.position = { 0, 0.5, 0 }; // translation
+			a.transform.position = { 4, 0.5, 4 }; // translation
 			a.transform.scale = { 1, 1, 1 };
 			a.transform.orientation = angleAxis(Degree(0), { 1, 0, 0 }); // rotation
 			g_instances.push_back(a);
@@ -411,9 +394,9 @@ namespace Dunjun
 			//}
 
 			//Initialize camera
-			g_camera.transform.position = { 0, 3, 10 };
-
 			g_camera.lookAt({ 0, 0, 0 });
+			g_camera.transform.position = { 4, 3, 10 };
+
 
 			g_camera.projectionType = ProjectionType::Perspective;
 
@@ -637,8 +620,6 @@ namespace Dunjun
 			shaders->setUniform("u_transform", inst.transform); // shaderprogram.cpp
 			shaders->setUniform("u_tex", (Dunjun::u32)0); // shaderprogram.cpp
 
-			asset->material->texture->bind(0); // texture.cpp
-
 			asset->mesh->draw(); // mesh.cpp
 		}
 
@@ -650,21 +631,32 @@ namespace Dunjun
 			glClearColor(0.02f, 0.02f, 0.02f, 1.0f); // set the default color (R,G,B,A)
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-			Dunjun::ShaderProgram* currentShaders = nullptr;
+			const Dunjun::ShaderProgram* currentShaders = nullptr;
+			const Texture* currentTexture = nullptr;
 
 			for (const auto& inst : g_instances)
 			{
 				if (inst.asset->material->shaders != currentShaders) // swap to new shaders
 				{
+					if (currentShaders) // checkif currentshader is in use
+						currentShaders->stopUsing();
+
 					currentShaders = inst.asset->material->shaders;
 					currentShaders->use();
 				}
+
+				if (inst.asset->material->texture != currentTexture) // swap to new shaders
+				{
+					currentTexture = inst.asset->material->texture;
+					Texture::bind(currentTexture, 0);
+				}
+
 				renderInstance(inst);
-
 			}
-
 			if (currentShaders) // checkif currentshader is in use
 				currentShaders->stopUsing();
+
+			Texture::bind(nullptr, 0); // unbind texture
 
 			glfwSwapBuffers(window); // switches information between the front buffer and the back buffer
 			glfwPollEvents(); // waits for input and considers that input lower priorty than interrupt input

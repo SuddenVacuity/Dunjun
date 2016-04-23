@@ -98,7 +98,7 @@ namespace Dunjun
 		glDeleteTextures(1, &object);
 	}
 
-	void Texture::bind(GLuint position)
+	void Texture::bind(const Texture* tex, GLuint position)
 	{
 		if (position> 31)
 		{
@@ -111,8 +111,30 @@ namespace Dunjun
 
 		glEnable(GL_TEXTURE_2D);
 
-		glBindTexture(GL_TEXTURE_2D, (object ? object : 0));
+		if (tex)
+			glBindTexture(GL_TEXTURE_2D, (tex->object ? tex->object : 0));
+		else
+			glBindTexture(GL_TEXTURE_2D, 0);
 
 		glDisable(GL_TEXTURE_2D);
 	}
+
+	//void Texture::unbindTexture(GLuint position)
+	//{
+	//	if (position> 31)
+	//	{
+	//		std::cerr << "Texture can only be bound to postions [0 ... 31].\n";
+	//		std::cerr << "Will bind to position 31." << std::endl;
+	//		position = 31;
+	//	}
+	//	glActiveTexture(GL_TEXTURE0 + position);
+	//	glClientActiveTexture(GL_TEXTURE0 + position);
+	//
+	//	glEnable(GL_TEXTURE_2D);
+	//
+	//	glBindTexture(GL_TEXTURE_2D, 0);
+	//
+	//	glDisable(GL_TEXTURE_2D);
+	//
+	//}
 } // End Namespace Dunjun

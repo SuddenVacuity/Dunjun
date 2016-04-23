@@ -42,7 +42,8 @@ namespace Dunjun
 
 		virtual ~Texture();
 
-		void bind(GLuint position);
+		GLOBAL void bind(const Texture* tex, GLuint position);
+		//GLOBAL void unbindTexture(GLuint position);
 		
 		ReadOnly<GLuint, Texture> object;
 		ReadOnly<GLsizei, Texture> width;
