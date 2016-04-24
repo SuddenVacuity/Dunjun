@@ -5,17 +5,6 @@
 
 namespace Dunjun
 {
-	struct Material
-	{
-		Dunjun::ShaderProgram* shaders;
-		Dunjun::Texture* texture;
-	};
-
-	struct ModelAsset // includes the shader, the texture and the vbo's
-	{
-		const Material *material;
-		const Mesh *mesh;
-	};
 
 	struct ModelInstance // copies an asset to use
 	{
@@ -41,6 +30,8 @@ namespace Dunjun
 	GLOBAL Camera g_camera;
 	GLOBAL std::map<std::string, Material> g_materials;
 	GLOBAL std::map<std::string, Mesh*> g_meshes;
+
+	GLOBAL Level g_level;
 
 	namespace Game
 	{
@@ -174,82 +165,10 @@ namespace Dunjun
 			g_sprite.mesh = g_meshes["sprite"];
 		}
 
-		enum class TileSurfaceFace : u32
-		{
-			// directions tiles can face
-			Right = 0,
-			Left = 1,
-			Up = 2,
-			Down = 3,
-			Forward = 4,
-			Backward = 5,
-		};
-
-		INTERNAL void addTileSurface(Mesh::Data* data, const Vector3& position, TileSurfaceFace face, const Vector2& texPos)
-		{
-			// size of image map
-			const f32 tileWidth = 1.0f / 16;
-			const f32 tileHeight = 1.0f / 16;
-
-			size_t index = data->vertices.size();
-
-			//right/left vertices
-			if((u32)face < 2)
-			{
-				//vertex data				position (x, y, z}									texture coords {s, t}									vertex colors{r, g, b, a}
-				data->vertices.push_back({ { position.x, position.y + 1.0f, position.z + 1.0f },{ (texPos.x + 1)*tileWidth, (texPos.y + 1)*tileHeight },{ 0xFF, 0xFF, 0xFF, 0xFF } });
-				data->vertices.push_back({ { position.x, position.y + 1.0f, position.z + 0.0f },{ (texPos.x + 0)*tileWidth, (texPos.y + 1)*tileHeight },{ 0xFF, 0xFF, 0xFF, 0xFF } });
-				data->vertices.push_back({ { position.x, position.y + 0.0f, position.z + 1.0f },{ (texPos.x + 1)*tileWidth, (texPos.y + 0)*tileHeight },{ 0xFF, 0xFF, 0xFF, 0xFF } });
-				data->vertices.push_back({ { position.x, position.y + 0.0f, position.z + 0.0f },{ (texPos.x + 0)*tileWidth, (texPos.y + 0)*tileHeight },{ 0xFF, 0xFF, 0xFF, 0xFF } });
-			}
-
-			// up/down vertices
-			else if((u32)face < 4)
-			{
-				//vertex data				position (x, y, z}									texture coords {s, t}									vertex colors{r, g, b, a}
-				data->vertices.push_back({ { position.x + 1.0f, position.y, position.z + 0.0f},{ (texPos.x + 1)*tileWidth, (texPos.y + 1)*tileHeight },{ 0xFF, 0xFF, 0xFF, 0xFF } });
-				data->vertices.push_back({ { position.x + 0.0f, position.y, position.z + 0.0f},{ (texPos.x + 0)*tileWidth, (texPos.y + 1)*tileHeight },{ 0xFF, 0xFF, 0xFF, 0xFF } });
-				data->vertices.push_back({ { position.x + 1.0f, position.y, position.z + 1.0f},{ (texPos.x + 1)*tileWidth, (texPos.y + 0)*tileHeight },{ 0xFF, 0xFF, 0xFF, 0xFF } });
-				data->vertices.push_back({ { position.x + 0.0f, position.y, position.z + 1.0f},{ (texPos.x + 0)*tileWidth, (texPos.y + 0)*tileHeight },{ 0xFF, 0xFF, 0xFF, 0xFF } });
-			}
-
-			// forward/backward vertices
-			else if((u32)face< 6)
-			{
-				//vertex data				position (x, y, z}									texture coords {s, t}									vertex colors{r, g, b, a}
-				data->vertices.push_back({ { position.x + 1.0f, position.y + 1.0f, position.z },{ (texPos.x + 1)*tileWidth, (texPos.y + 1)*tileHeight },{ 0xFF, 0xFF, 0xFF, 0xFF } });
-				data->vertices.push_back({ { position.x + 0.0f, position.y + 1.0f, position.z },{ (texPos.x + 0)*tileWidth, (texPos.y + 1)*tileHeight },{ 0xFF, 0xFF, 0xFF, 0xFF } });
-				data->vertices.push_back({ { position.x + 1.0f, position.y + 0.0f, position.z },{ (texPos.x + 1)*tileWidth, (texPos.y + 0)*tileHeight },{ 0xFF, 0xFF, 0xFF, 0xFF } });
-				data->vertices.push_back({ { position.x + 0.0f, position.y + 0.0f, position.z },{ (texPos.x + 0)*tileWidth, (texPos.y + 0)*tileHeight },{ 0xFF, 0xFF, 0xFF, 0xFF } });
-			}
-			else
-				std::runtime_error(std::string("Invalid tile direction in function: addTileSurface()"));
-
-			// choose draw order based on direction
-			if((u32)face % 2 == 0)
-			{
-				data->indices.push_back(index + 0);
-				data->indices.push_back(index + 1);
-				data->indices.push_back(index + 2);
-				data->indices.push_back(index + 1);
-				data->indices.push_back(index + 3);
-				data->indices.push_back(index + 2);
-			}
-			else // (u32)face % 2 == 1
-			{
-				data->indices.push_back(index + 2);
-				data->indices.push_back(index + 3);
-				data->indices.push_back(index + 1);
-				data->indices.push_back(index + 2);
-				data->indices.push_back(index + 1);
-				data->indices.push_back(index + 0);
-			}
-		}
-
 		// generate world objects
 		INTERNAL void generateWorld()
 		{
-			Mesh::Data floorMD;
+			g_level.material = &g_materials["terrain"];
 			
 			// number of instances to create
 			int mapSizeX = 24;
@@ -257,8 +176,11 @@ namespace Dunjun
 			int mapSizeZ = 16;
 
 			// location of texture in image map
-			Vector2 lightWoodTile(0,11);
-			Vector2 mossyStoneTile(2, 15);
+			Level::TileId lightWoodTile = { 0, 11 };
+
+			Level::RandomTileSet mossyStoneTiles;
+			for (u32 i = 1; i <= 2; i++)
+				mossyStoneTiles.emplace_back(Level::TileId{ i, 15 });
 
 			// size of image map
 			//f32 tileWidth = 1.0f / 16.0f;
@@ -285,25 +207,23 @@ namespace Dunjun
 			for (int i = 0; i < mapSizeX; i++)
 			{
 				for (int j = 0; j < mapSizeZ; j++)
-				{
-					addTileSurface(&floorMD, {(f32)i, 0, (f32)j}, TileSurfaceFace::Up, lightWoodTile);
+					g_level.addTileSurface({ (f32)i, 0, (f32)j }, Level::TileSurfaceFace::Up, lightWoodTile);
 
-					//size_t index = floorMD.vertices.size();
-					//
-					//// individual tile
-					//for (int k = 0; k < numVertex; k++)
-					//{
-					//	Dunjun::Vertex v = vertices[k]; // create vertex to carry data
-					//
-					//	v.position.x = v.position.x + i; // add mapSize increments to create a tile grid
-					//	v.position.z = v.position.z + j; // add mapSize increments to create a tile grid
-					//
-					//	floorMD.vertices.push_back(v);
-					//}
-					//
-					//for (int l = 0; l < numIndices; l++)
-					//	floorMD.indices.push_back(index + indices[l]);
-				}
+				//size_t index = floorMD.vertices.size();
+				//
+				//// individual tile
+				//for (int k = 0; k < numVertex; k++)
+				//{
+				//	Dunjun::Vertex v = vertices[k]; // create vertex to carry data
+				//
+				//	v.position.x = v.position.x + i; // add mapSize increments to create a tile grid
+				//	v.position.z = v.position.z + j; // add mapSize increments to create a tile grid
+				//
+				//	floorMD.vertices.push_back(v);
+				//}
+				//
+				//for (int l = 0; l < numIndices; l++)
+				//	floorMD.indices.push_back(index + indices[l]);
 			}
 
 			// create array of wall tiles
@@ -312,50 +232,22 @@ namespace Dunjun
 			{
 				// create row of back wall tiles
 				for (int j = 0; j < mapSizeX; j++)
-				{
-					int noMoss = rand()%2;
-					mossyStoneTile.x = mossyStoneTile.x - noMoss;
-					addTileSurface(&floorMD, { (f32)j, (f32)i, 0 }, TileSurfaceFace::Forward, mossyStoneTile);
-					mossyStoneTile.x = mossyStoneTile.x + noMoss;
-				}
+					g_level.addTileSurface({ (f32)j, (f32)i, 0 }, Level::TileSurfaceFace::Forward, mossyStoneTiles);
 
-			// create row of front wall tiles
+				// create row of front wall tiles
 				for (int j = 0; j < mapSizeX; j++)
-				{
-					int noMoss = rand() % 2;
-					mossyStoneTile.x = mossyStoneTile.x - noMoss;
-					addTileSurface(&floorMD, { (f32)j, (f32)i, (f32)mapSizeZ }, TileSurfaceFace::Backward, mossyStoneTile);
-					mossyStoneTile.x = mossyStoneTile.x + noMoss;
-				}
+					g_level.addTileSurface({ (f32)j, (f32)i, (f32)mapSizeZ }, Level::TileSurfaceFace::Backward, mossyStoneTiles);
 
-			// create row of left wall tiles
+				// create row of left wall tiles
 				for (int j = 0; j < mapSizeZ; j++)
-				{
-					int noMoss = rand() % 2;
-					mossyStoneTile.x = mossyStoneTile.x - noMoss;
-					addTileSurface(&floorMD, { 0, (f32)i, (f32)j }, TileSurfaceFace::Left, mossyStoneTile);
-					mossyStoneTile.x = mossyStoneTile.x + noMoss;
-				}
+					g_level.addTileSurface({ 0, (f32)i, (f32)j }, Level::TileSurfaceFace::Left, mossyStoneTiles);
 
-			// create row of right wall tiles
+				// create row of right wall tiles
 				for (int j = 0; j < mapSizeZ; j++)
-				{
-					int noMoss = rand() % 2;
-					mossyStoneTile.x = mossyStoneTile.x - noMoss;
-					addTileSurface(&floorMD, { (f32)mapSizeX, (f32)i, (f32)j }, TileSurfaceFace::Right, mossyStoneTile);
-					mossyStoneTile.x = mossyStoneTile.x + noMoss;
-				}
+					g_level.addTileSurface({ (f32)mapSizeX, (f32)i, (f32)j }, Level::TileSurfaceFace::Right, mossyStoneTiles);
 			} // end create walls
 
-
-			ModelInstance floorMI;
-
-			floorMI.asset = new ModelAsset();
-			floorMI.asset->mesh = new Mesh(floorMD);
-
-			floorMI.asset->material = &g_materials["terrain"]; // apply material
-
-			g_instances.push_back(floorMI);
+			g_level.generate();
 		}
 
 		/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -577,7 +469,7 @@ namespace Dunjun
 							g_camera.transform.position, {0, 1, 0}));
 
 				player.transform.orientation = pRot;
-#elif 0 // Billboard fixed Y axis
+#elif 1 // Billboard fixed Y axis
 				Vector3 f = player.transform.position - g_camera.transform.position;
 				f.y = 0;
 
@@ -605,7 +497,7 @@ namespace Dunjun
 		//	}
 
 				//g_camera.transform.position.x = player.transform.position.x;
-				//g_camera.lookAt(player.transform.position, {0, 1, 0});
+				g_camera.lookAt(player.transform.position, {0, 1, 0});
 				g_camera.viewportAspectRatio = getWindowSize().x / getWindowSize().y;
 		
 		}
@@ -623,6 +515,17 @@ namespace Dunjun
 			asset->mesh->draw(); // mesh.cpp
 		}
 
+		INTERNAL void renderLevel(const Level& level)
+		{
+			Dunjun::ShaderProgram* shaders = g_level.material->shaders;
+
+			shaders->setUniform("u_camera", g_camera.getMatrix()); // shaderprogram.cpp
+			shaders->setUniform("u_transform", level.transform); // shaderprogram.cpp
+			shaders->setUniform("u_tex", (Dunjun::u32)0); // shaderprogram.cpp
+
+			level.mesh->draw();
+		}
+
 		INTERNAL void render()
 		{
 			// vars used to define the size of the viewport
@@ -634,6 +537,7 @@ namespace Dunjun
 			const Dunjun::ShaderProgram* currentShaders = nullptr;
 			const Texture* currentTexture = nullptr;
 
+			// render instances
 			for (const auto& inst : g_instances)
 			{
 				if (inst.asset->material->shaders != currentShaders) // swap to new shaders
@@ -653,6 +557,28 @@ namespace Dunjun
 
 				renderInstance(inst);
 			}
+
+			// render level
+			for (const auto& inst : g_instances)
+			{
+				if (g_level.material->shaders != currentShaders) // swap to new shaders
+				{
+					if (currentShaders) // checkif currentshader is in use
+						currentShaders->stopUsing();
+
+					currentShaders = g_level.material->shaders;
+					currentShaders->use();
+				}
+
+				if (g_level.material->texture != currentTexture) // swap to new shaders
+				{
+					currentTexture = g_level.material->texture;
+					Texture::bind(currentTexture, 0);
+				}
+
+				renderLevel(g_level);
+			}
+
 			if (currentShaders) // checkif currentshader is in use
 				currentShaders->stopUsing();
 

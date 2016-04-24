@@ -1,7 +1,7 @@
 #ifndef DUNJUN_GAME_HPP
 #define DUNJUN_GAME_HPP
 
-#include <Dunjun/ShaderProgram.hpp>
+#include <Dunjun/Level.hpp>
 
 namespace Dunjun
 {
