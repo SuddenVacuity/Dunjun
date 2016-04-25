@@ -10,11 +10,6 @@ namespace Dunjun
 		void init();
 		void run();
 		void cleanUp();
-
-		GLFWwindow* getGlfwWindow();
-		Vector2 getWindowSize();
-
-
 	} // end Game
 } // end Dunjun
 

@@ -1,9 +1,7 @@
 #ifndef DUNJUN_CLOCK_HPP
 #define DUNJUN_CLOCK_HPP
 
-#include <Dunjun/OpenGL.hpp>
-
-#include <GLFW/glfw3.h>
+#include <Dunjun/Window.hpp>
 
 namespace Dunjun
 {

@@ -9,17 +9,13 @@ namespace Dunjun
 	struct ModelInstance // copies an asset to use
 	{
 		ModelAsset* asset;
-		Dunjun::Transform transform;
+		Transform transform;
 	};
 
 	namespace
 	{
-		const f32 TIME_STEP = 1.0f / 60.0f;
-
-		GLFWwindow* window;
-
-		int windowWidth = 854;
-		int windowHeight = 480;
+		GLOBAL const f32 TIME_STEP = 1.0f / 60.0f;
+		GLOBAL bool g_running = true;
 	} // end anon namespace
 
 	GLOBAL ShaderProgram* g_defaultShader;
@@ -35,54 +31,167 @@ namespace Dunjun
 
 	namespace Game
 	{
-		INTERNAL void glfwHints() // use this when creating a window to define what version of glfw is used
-		{
-			glfwDefaultWindowHints();
-			glfwWindowHint(GLFW_VERSION_MAJOR, 2);
-			glfwWindowHint(GLFW_VERSION_MINOR, 1);
-			glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
-		}
+		/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+		)				.
+		)					.
+		)
+		)				WINDOW HANDLING FUNCTIONS
+		)					.
+		)
+		)				.
+		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-		INTERNAL void resizeCallback(GLFWwindow* window, int width, int height)
-		{
-			windowWidth = width;
-			windowHeight = height;
-		}
 
-		INTERNAL void handleInput(bool* running, bool* fullscreen)
+		//GLFWwindow* getGlfwWindow()
+		//{
+		//	return Window::ptr;
+		//}
+	    //
+		//Vector2 getWindowSize()
+		//{
+		//	return Vector2(Window::width, Window::height);
+		//}
+		//
+		//Vector2 getFramebufferSize()
+		//{
+		//	int width;
+		//	int height;
+		//
+		//	glfwGetFramebufferSize(Window::ptr, &width, &height);
+		//
+		//	return Vector2(width, height);
+		//}
+		//
+		void glInit()
 		{
-			if (glfwWindowShouldClose(window) || // check if window was closed
+			glEnable(GL_CULL_FACE);
+			glCullFace(GL_BACK);
+			glEnable(GL_DEPTH_TEST);
+			glDepthFunc(GL_LESS);
+		}
+		//
+		//bool isWindowInFocus()
+		//{
+		//	return glfwGetWindowAttrib(Window::ptr, GLFW_FOCUSED);
+		//}
+		//
+		//bool isWindowIconified()
+		//{
+		//	return glfwGetWindowAttrib(Window::ptr, GLFW_ICONIFIED);
+		//}
+		//
+		//
+		//INTERNAL void resizeCallback(GLFWwindow* window, int width, int height)
+		//{
+		//	Window::width = width;
+		//	Window::height = height;
+		//}
+		//
+		//INTERNAL void framebufferSizeCallback(GLFWwindow* window, int width, int height)
+		//{
+		//	glViewport(0, 0, width, height);
+		//}
+		//
+		//INTERNAL void errorCallback(int error, const char* description)
+		//{
+		//	std::cerr << "[ERROR]";
+		//	std::cerr << "GLFW: " << description;
+		//	std::cerr << std::endl;
+		//}
+		//
+		//INTERNAL void windowRefreshCallback(GLFWwindow* window)
+		//{
+		//	Vector2 fbSize = getFramebufferSize();
+		//	glViewport(0, 0, fbSize.x, fbSize.y);
+		//
+		//	glfwMakeContextCurrent(window);
+		//	// glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		//
+		//	glfwSwapBuffers(window);
+		//}
+		//
+		//INTERNAL GLFWwindow* createWindow(GLFWmonitor* monitor)
+		//{
+		//	glfwDefaultWindowHints();
+		//	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2); // glfw version ex) 2.1
+		//	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1); // glfw version ex) 2.1
+		//	glfwWindowHint(GLFW_FOCUSED, true); // when window is created focus on it
+		//
+		//	if (monitor) // fullscreen
+		//	{
+		//		const GLFWvidmode* mode = glfwGetVideoMode(monitor);	// set variable to current monitor resolution
+		//
+		//		glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);	// set window context to match monitor
+		//		glfwWindowHint(GLFW_RED_BITS, mode->redBits);			// set window context to match monitor
+		//		glfwWindowHint(GLFW_GREEN_BITS, mode->greenBits);		// set window context to match monitor
+		//		glfwWindowHint(GLFW_BLUE_BITS, mode->blueBits);			// set window context to match monitor
+		//
+		//		glfwWindowHint(GLFW_RESIZABLE, false);					// prevent fullscreen window form being resizable
+		//
+		//		Window::width = mode->width;							// set window resolution to match monitor
+		//		Window::height = mode->height;							// set window resolution to match monitor
+		//	}
+		//	else // not full screen
+		//	{
+		//		glfwWindowHint(GLFW_RESIZABLE, true);
+		//
+		//		// default size
+		//		Window::width = 854;
+		//		Window::height = 480;
+		//	}
+		//
+		//	GLFWwindow* w = glfwCreateWindow(Window::width, Window::height, "Title: Dunjun!", monitor, Window::ptr);
+		//
+		//	// set GLFW specific Callbacks
+		//	glfwSetFramebufferSizeCallback(w, framebufferSizeCallback);
+		//	glfwSetWindowSizeCallback(w, resizeCallback);
+		//	glfwSetWindowRefreshCallback(w, windowRefreshCallback);
+		//
+		//	return w;
+		//}
+
+		/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+		)				.
+		)					.
+		)
+		)				.
+		)					.
+		)
+		)				.
+		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+
+		//
+		INTERNAL void handleInput()
+		{
+			if (glfwWindowShouldClose(Window::ptr) || // check if window was closed
 				Input::isKeyPressed(Input::Key::Escape)) // checks if the escape key is pressed in window
-				*running = false;
-
-			/*
-			if (Input::getKey(GLFW_KEY_F11)) // press F11 to toggle between default and fullscreen
+				g_running = false;
+		
+			if (Input::isKeyPressed(Input::Key::F11)) // press F11 to toggle between default and fullscreen
 			{
-			*fullscreen = !(*fullscreen); // toggles true/false boolean for fullscreen
+				Window::isFullscreen = !Window::isFullscreen; // toggles true/false boolean for fullscreen
+				if (Window::isFullscreen) // action to take if fullscreen is true
+				{
+					GLFWwindow* w = Window::createWindow(glfwGetPrimaryMonitor());
+					Window::destroyWindow();
+					Window::ptr = w;
+				}
+				else // action to take if fullsscreen is not true
+				{
+					GLFWwindow* w = Window::createWindow(nullptr);
+					Window::destroyWindow();
+					Window::ptr = w;
+				}
 
-			GLFWwindow* newwindow;
-
-			glfwHints(); // define glfw version before opening a window
-			if (*fullscreen) // action to take if fullscreen is true
-			{
-			int count;												// declares mode count for monitor
-			const GLFWvidmode* modes = glfwGetVideoModes(glfwGetPrimaryMonitor(), &count); // creates GLFWvidmode array of monitor modes
-			newwindow = glfwCreateWindow(modes[count - 1].width,	// modes[count - 1].width gets the width from the last mode
-			modes[count - 1].height,								// modes[count - 1].height gets the height from the last mode
-			"Dunjun", glfwGetPrimaryMonitor(), window);				// and create the window
+				Window::makeContextCurrent();
+		
+				//glfwDestroyWindow(Window::ptr); // destroys old window
+				Window::swapInterval(1);
+		
+				glInit();
 			}
-			else // action to take if fullsscreen is not true
-			{
-			newwindow = glfwCreateWindow(G_windowwidth, G_windowheight, "Dunjun", nullptr, window);
-			}
-
-			glfwDestroyWindow(window); // destroys old window
-			window = newwindow;
-			glfwMakeContextCurrent(window);
-			}
-			*/
 		}
-
+		//
 		// File path for shader files and define and bind attributes
 		INTERNAL void loadShaders()
 		{
@@ -286,8 +395,8 @@ namespace Dunjun
 			//}
 
 			//Initialize camera
-			g_camera.lookAt({ 0, 0, 0 });
 			g_camera.transform.position = { 4, 3, 10 };
+			g_camera.lookAt({ g_camera.transform.position.x, g_camera.transform.position.y, 0 });
 
 
 			g_camera.projectionType = ProjectionType::Perspective;
@@ -469,7 +578,7 @@ namespace Dunjun
 							g_camera.transform.position, {0, 1, 0}));
 
 				player.transform.orientation = pRot;
-#elif 1 // Billboard fixed Y axis
+#elif 0 // Billboard fixed Y axis
 				Vector3 f = player.transform.position - g_camera.transform.position;
 				f.y = 0;
 
@@ -485,22 +594,28 @@ namespace Dunjun
 
 				player.transform.orientation = angleAxis(-a, {0, 1, 0});
 				}
-
-#endif
+#endif // end billboard
 
 				}
-				//
-		//		// change fov with scroll wheel
-		//		// FIXME: view goes insane when scroll is used
-		//		// g_camera.fieldOfView = Radian(static_cast<f32>(g_camera.fieldOfView) + Input::getScrollOffset().y);
-		//
-		//	}
+
+				f32 aspectRatio = Window::getFramebufferSize().x / Window::getFramebufferSize().y;
+				if (aspectRatio && Window::getFramebufferSize().y > 0)
+					g_camera.viewportAspectRatio = aspectRatio;
 
 				//g_camera.transform.position.x = player.transform.position.x;
-				g_camera.lookAt(player.transform.position, {0, 1, 0});
-				g_camera.viewportAspectRatio = getWindowSize().x / getWindowSize().y;
-		
+				//g_camera.lookAt(player.transform.position, {0, 1, 0});
 		}
+
+		/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+		)				.
+		)					.
+		)
+		)				RENDER FUNCTIONS
+		)					.
+		)
+		)				.
+		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+
 
 		// shader info
 		INTERNAL void renderInstance(const ModelInstance& inst)
@@ -517,7 +632,7 @@ namespace Dunjun
 
 		INTERNAL void renderLevel(const Level& level)
 		{
-			Dunjun::ShaderProgram* shaders = g_level.material->shaders;
+			Dunjun::ShaderProgram* shaders = level.material->shaders;
 
 			shaders->setUniform("u_camera", g_camera.getMatrix()); // shaderprogram.cpp
 			shaders->setUniform("u_transform", level.transform); // shaderprogram.cpp
@@ -528,8 +643,11 @@ namespace Dunjun
 
 		INTERNAL void render()
 		{
-			// vars used to define the size of the viewport
-			glViewport(0, 0, windowWidth, windowHeight);
+			{
+				// vars used to define the size of the viewport
+				Vector2 fbSize = Window::getFramebufferSize();
+				glViewport(0, 0, fbSize.x, fbSize.y);
+			}
 
 			glClearColor(0.02f, 0.02f, 0.02f, 1.0f); // set the default color (R,G,B,A)
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -559,7 +677,6 @@ namespace Dunjun
 			}
 
 			// render level
-			for (const auto& inst : g_instances)
 			{
 				if (g_level.material->shaders != currentShaders) // swap to new shaders
 				{
@@ -569,6 +686,8 @@ namespace Dunjun
 					currentShaders = g_level.material->shaders;
 					currentShaders->use();
 				}
+
+
 
 				if (g_level.material->texture != currentTexture) // swap to new shaders
 				{
@@ -584,9 +703,7 @@ namespace Dunjun
 
 			Texture::bind(nullptr, 0); // unbind texture
 
-			glfwSwapBuffers(window); // switches information between the front buffer and the back buffer
-			glfwPollEvents(); // waits for input and considers that input lower priorty than interrupt input
-
+			Window::swapBuffers();; // switches information between the front buffer and the back buffer
 		}
 
 		/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -601,32 +718,28 @@ namespace Dunjun
 
 		void init()
 		{
-			if(!glfwInit())
+
+			if(!Window::init())
 				return;
 
-			glfwHints();
-			window = glfwCreateWindow(windowWidth, windowHeight, "Dunjun", nullptr, nullptr);
-
-			if(!window)
-			{
-				glfwTerminate();
-				return;
-			}
-			glfwSetWindowSizeCallback(window, resizeCallback);
-			glfwMakeContextCurrent(window); // set the context for the window
 
 			glewInit();
+
+			// Initial OpenGL settings
+			glInit();
+
+			//glfwSetErrorCallback(errorCallback);
 
 			Input::setUp();
 
 			//Input::setCursorPosition({ 0, 0 });
 			//Input::setCursorMode(Input::CursorMode::Disabled);
 
-			glEnable(GL_CULL_FACE); // enable culling faces
-			glCullFace(GL_BACK); // specify to cull the back face
-
-			glEnable(GL_DEPTH_TEST);
-			glDepthFunc(GL_LEQUAL);
+			//glEnable(GL_CULL_FACE); // enable culling faces
+			//glCullFace(GL_BACK); // specify to cull the back face
+			//
+			//glEnable(GL_DEPTH_TEST);
+			//glDepthFunc(GL_LEQUAL);
 
 			// load internal render functions
 			loadShaders();
@@ -649,8 +762,6 @@ namespace Dunjun
 			// OPENING THE MAIN WINDOW							 
 			//=================================================================================================
 			//=================================================================================================
-			bool running = true;
-			bool fullscreen = false; // sets fullscreen to be off by default
 
 			TickCounter tc;
 			Clock frameClock;
@@ -660,21 +771,29 @@ namespace Dunjun
 			f64 accumulator = 0;
 			f64 prevTime = Input::getTime();
 
-			while (running) // create a loop that works until the window closes
+			while (g_running) // create a loop that works until the window closes
 			{
+				//Window::pollEvents();
+
+				Window::makeContextCurrent();
+
 				f64 currentTime = Input::getTime();
 				f64 dt = currentTime - prevTime;
 				prevTime = currentTime;
 				accumulator += dt;
 
+				// limit accumulator size
+				if (accumulator > 1.2f)
+					accumulator = 1.2f;
 
 				// render update
 				while (accumulator >= TIME_STEP)
 				{
 					accumulator -= TIME_STEP;
-					update(TIME_STEP);
+					Window::pollEvents();
+					handleInput(); // input handler
 					Input::updateGamepads();
-					handleInput(&running, &fullscreen); // input handler
+					update(TIME_STEP);
 
 				}
 
@@ -684,7 +803,7 @@ namespace Dunjun
 					titleStream.str("");
 					titleStream.clear();
 					titleStream << "Dunjun - F/S: ~" <<  tc.getTickRate() << " - Your current speed"; // dynamic window title
-					glfwSetWindowTitle(window, titleStream.str().c_str());
+					Window::setTitle(titleStream.str().c_str());
 				}
 
 				render();
@@ -700,21 +819,8 @@ namespace Dunjun
 		void cleanUp()
 		{
 			Input::cleanup();
-			glfwDestroyWindow(window); // closes window named window
-			glfwTerminate(); // terminates GLFW
+			Window::cleanup();
 		}
-
-		GLFWwindow* getGlfwWindow()
-		{
-			return window;
-		}
-
-		Vector2 getWindowSize()
-		{
-			return Vector2(windowWidth, windowHeight);
-		}
-
-
 
 	} // end Game
 } // end Dunjun

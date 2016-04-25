@@ -100,7 +100,7 @@ namespace Dunjun
 
 	void Texture::bind(const Texture* tex, GLuint position)
 	{
-		if (position> 31)
+		if (position > 31)
 		{
 			std::cerr << "Texture can only be bound to postions [0 ... 31].\n";
 			std::cerr << "Will bind to position 31." << std::endl;
