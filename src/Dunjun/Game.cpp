@@ -41,27 +41,6 @@ namespace Dunjun
 		)				.
 		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-
-		//GLFWwindow* getGlfwWindow()
-		//{
-		//	return Window::ptr;
-		//}
-	    //
-		//Vector2 getWindowSize()
-		//{
-		//	return Vector2(Window::width, Window::height);
-		//}
-		//
-		//Vector2 getFramebufferSize()
-		//{
-		//	int width;
-		//	int height;
-		//
-		//	glfwGetFramebufferSize(Window::ptr, &width, &height);
-		//
-		//	return Vector2(width, height);
-		//}
-		//
 		void glInit()
 		{
 			glEnable(GL_CULL_FACE);
@@ -69,92 +48,12 @@ namespace Dunjun
 			glEnable(GL_DEPTH_TEST);
 			glDepthFunc(GL_LESS);
 		}
-		//
-		//bool isWindowInFocus()
-		//{
-		//	return glfwGetWindowAttrib(Window::ptr, GLFW_FOCUSED);
-		//}
-		//
-		//bool isWindowIconified()
-		//{
-		//	return glfwGetWindowAttrib(Window::ptr, GLFW_ICONIFIED);
-		//}
-		//
-		//
-		//INTERNAL void resizeCallback(GLFWwindow* window, int width, int height)
-		//{
-		//	Window::width = width;
-		//	Window::height = height;
-		//}
-		//
-		//INTERNAL void framebufferSizeCallback(GLFWwindow* window, int width, int height)
-		//{
-		//	glViewport(0, 0, width, height);
-		//}
-		//
-		//INTERNAL void errorCallback(int error, const char* description)
-		//{
-		//	std::cerr << "[ERROR]";
-		//	std::cerr << "GLFW: " << description;
-		//	std::cerr << std::endl;
-		//}
-		//
-		//INTERNAL void windowRefreshCallback(GLFWwindow* window)
-		//{
-		//	Vector2 fbSize = getFramebufferSize();
-		//	glViewport(0, 0, fbSize.x, fbSize.y);
-		//
-		//	glfwMakeContextCurrent(window);
-		//	// glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		//
-		//	glfwSwapBuffers(window);
-		//}
-		//
-		//INTERNAL GLFWwindow* createWindow(GLFWmonitor* monitor)
-		//{
-		//	glfwDefaultWindowHints();
-		//	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2); // glfw version ex) 2.1
-		//	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1); // glfw version ex) 2.1
-		//	glfwWindowHint(GLFW_FOCUSED, true); // when window is created focus on it
-		//
-		//	if (monitor) // fullscreen
-		//	{
-		//		const GLFWvidmode* mode = glfwGetVideoMode(monitor);	// set variable to current monitor resolution
-		//
-		//		glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);	// set window context to match monitor
-		//		glfwWindowHint(GLFW_RED_BITS, mode->redBits);			// set window context to match monitor
-		//		glfwWindowHint(GLFW_GREEN_BITS, mode->greenBits);		// set window context to match monitor
-		//		glfwWindowHint(GLFW_BLUE_BITS, mode->blueBits);			// set window context to match monitor
-		//
-		//		glfwWindowHint(GLFW_RESIZABLE, false);					// prevent fullscreen window form being resizable
-		//
-		//		Window::width = mode->width;							// set window resolution to match monitor
-		//		Window::height = mode->height;							// set window resolution to match monitor
-		//	}
-		//	else // not full screen
-		//	{
-		//		glfwWindowHint(GLFW_RESIZABLE, true);
-		//
-		//		// default size
-		//		Window::width = 854;
-		//		Window::height = 480;
-		//	}
-		//
-		//	GLFWwindow* w = glfwCreateWindow(Window::width, Window::height, "Title: Dunjun!", monitor, Window::ptr);
-		//
-		//	// set GLFW specific Callbacks
-		//	glfwSetFramebufferSizeCallback(w, framebufferSizeCallback);
-		//	glfwSetWindowSizeCallback(w, resizeCallback);
-		//	glfwSetWindowRefreshCallback(w, windowRefreshCallback);
-		//
-		//	return w;
-		//}
 
 		/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 		)				.
 		)					.
 		)
-		)				.
+		)				HANDLE INPUT
 		)					.
 		)
 		)				.
@@ -191,7 +90,18 @@ namespace Dunjun
 				glInit();
 			}
 		}
-		//
+
+		/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+		)				.
+		)					.
+		)
+		)				LOAD SHADERS AND MATERIALS
+		)					.
+		)
+		)				.
+		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+
+
 		// File path for shader files and define and bind attributes
 		INTERNAL void loadShaders()
 		{
@@ -234,7 +144,7 @@ namespace Dunjun
 
 		/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 		)				.
-		)					LOAD ASSETS
+		)					LOAD ASSETS AND GENERATE WORLD
 		)
 		)				.
 		)					.
@@ -279,17 +189,17 @@ namespace Dunjun
 		{
 			g_level.material = &g_materials["terrain"];
 			
-			// number of instances to create
-			int mapSizeX = 24;
-			int mapSizeY = 3;
-			int mapSizeZ = 16;
-
-			// location of texture in image map
-			Level::TileId lightWoodTile = { 0, 11 };
-
-			Level::RandomTileSet mossyStoneTiles;
-			for (u32 i = 1; i <= 2; i++)
-				mossyStoneTiles.emplace_back(Level::TileId{ i, 15 });
+			//// number of instances to create
+			//int mapSizeX = 24;
+			//int mapSizeY = 3;
+			//int mapSizeZ = 16;
+			//
+			//// location of texture in image map
+			//Level::TileId lightWoodTile = { 0, 11 };
+			//
+			//Level::RandomTileSet mossyStoneTiles;
+			//for (u32 i = 1; i <= 2; i++)
+			//	mossyStoneTiles.emplace_back(Level::TileId{ i, 15 });
 
 			// size of image map
 			//f32 tileWidth = 1.0f / 16.0f;
@@ -312,13 +222,13 @@ namespace Dunjun
 			//int numVertex = sizeof(vertices) / sizeof(vertices[0]);
 			//int numIndices = sizeof(indices) / sizeof(indices[0]);
 
-			// create array of floor tiles
-			for (int i = 0; i < mapSizeX; i++)
-			{
-				for (int j = 0; j < mapSizeZ; j++)
-					g_level.addTileSurface({ (f32)i, 0, (f32)j }, Level::TileSurfaceFace::Up, lightWoodTile);
-
-				//size_t index = floorMD.vertices.size();
+			//// create array of floor tiles
+			//for (int i = 0; i < mapSizeX; i++)
+			//{
+			//	for (int j = 0; j < mapSizeZ; j++)
+			//		g_level.addTileSurface({ (f32)i, 0, (f32)j }, Level::TileSurfaceFace::Up, lightWoodTile);
+			//
+			//	//size_t index = floorMD.vertices.size();
 				//
 				//// individual tile
 				//for (int k = 0; k < numVertex; k++)
@@ -333,28 +243,28 @@ namespace Dunjun
 				//
 				//for (int l = 0; l < numIndices; l++)
 				//	floorMD.indices.push_back(index + indices[l]);
-			}
-
-			// create array of wall tiles
-			// first for loop moves upward from one row to the next
-			for (int i = 0; i < mapSizeY; i++)
-			{
-				// create row of back wall tiles
-				for (int j = 0; j < mapSizeX; j++)
-					g_level.addTileSurface({ (f32)j, (f32)i, 0 }, Level::TileSurfaceFace::Forward, mossyStoneTiles);
-
-				// create row of front wall tiles
-				for (int j = 0; j < mapSizeX; j++)
-					g_level.addTileSurface({ (f32)j, (f32)i, (f32)mapSizeZ }, Level::TileSurfaceFace::Backward, mossyStoneTiles);
-
-				// create row of left wall tiles
-				for (int j = 0; j < mapSizeZ; j++)
-					g_level.addTileSurface({ 0, (f32)i, (f32)j }, Level::TileSurfaceFace::Left, mossyStoneTiles);
-
-				// create row of right wall tiles
-				for (int j = 0; j < mapSizeZ; j++)
-					g_level.addTileSurface({ (f32)mapSizeX, (f32)i, (f32)j }, Level::TileSurfaceFace::Right, mossyStoneTiles);
-			} // end create walls
+			//}
+			//
+			//// create array of wall tiles
+			//// first for loop moves upward from one row to the next
+			//for (int i = 0; i < mapSizeY; i++)
+			//{
+			//	// create row of back wall tiles
+			//	for (int j = 0; j < mapSizeX; j++)
+			//		g_level.addTileSurface({ (f32)j, (f32)i, 0 }, Level::TileSurfaceFace::Forward, mossyStoneTiles);
+			//
+			//	// create row of front wall tiles
+			//	for (int j = 0; j < mapSizeX; j++)
+			//		g_level.addTileSurface({ (f32)j, (f32)i, (f32)mapSizeZ }, Level::TileSurfaceFace::Backward, mossyStoneTiles);
+			//
+			//	// create row of left wall tiles
+			//	for (int j = 0; j < mapSizeZ; j++)
+			//		g_level.addTileSurface({ 0, (f32)i, (f32)j }, Level::TileSurfaceFace::Left, mossyStoneTiles);
+			//
+			//	// create row of right wall tiles
+			//	for (int j = 0; j < mapSizeZ; j++)
+			//		g_level.addTileSurface({ (f32)mapSizeX, (f32)i, (f32)j }, Level::TileSurfaceFace::Right, mossyStoneTiles);
+			//} // end create walls
 
 			g_level.generate();
 		}
@@ -406,6 +316,16 @@ namespace Dunjun
 			g_camera.fieldOfView = Degree(50.0f); // for perspective view
 			g_camera.orthoScale = 4.0f; // for ortho view
 		}
+
+		/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+		)				.
+		)					.
+		)
+		)				UPDATE
+		)					.
+		)
+		)				.
+		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
 		INTERNAL void update(f32 dt)
 		{
