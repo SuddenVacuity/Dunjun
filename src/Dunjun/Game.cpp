@@ -279,6 +279,8 @@ namespace Dunjun
 		)				.
 		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
+		GLOBAL Matrix4 g_projectionTest;
+
 		// create instances of vertex info
 		INTERNAL void loadInstances()
 		{
@@ -291,8 +293,8 @@ namespace Dunjun
 
 			ModelInstance a;
 			a.asset = &g_sprite;
-			a.transform.position = { 4, 0.5, 4 }; // translation
-			a.transform.scale = { 1, 1, 1 };
+			a.transform.position = { 4, 1, 4 }; // translation
+			a.transform.scale = { 1, 2, 1 };
 			a.transform.orientation = angleAxis(Degree(0), { 1, 0, 0 }); // rotation
 			g_instances.push_back(a);
 
@@ -305,16 +307,24 @@ namespace Dunjun
 			//}
 
 			//Initialize camera
+			g_camera.viewportAspectRatio = 16.0f / 9.0f;
 			g_camera.transform.position = { 4, 3, 10 };
-			g_camera.lookAt({ g_camera.transform.position.x, g_camera.transform.position.y, 0 });
-
+			g_camera.lookAt({ g_camera.transform.position.x, g_camera.transform.position.y, 2 });
 
 			g_camera.projectionType = ProjectionType::Perspective;
-
-			//g_camera.projectionType = ProjectionType::Orthographic;
-
 			g_camera.fieldOfView = Degree(50.0f); // for perspective view
+			
+			// test projection blending
+			const Matrix4 pp = g_camera.getProjection(); // perspective projection
+
+			g_camera.projectionType = ProjectionType::Orthographic;
 			g_camera.orthoScale = 4.0f; // for ortho view
+
+			const Matrix4 op = g_camera.getProjection(); // perspective projection
+
+
+			g_projectionTest = lerp(pp, op, 0.9f);
+			//g_projectionTest = g_camera.getProjection();
 		}
 
 		/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -327,12 +337,13 @@ namespace Dunjun
 		)				.
 		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
+		f32 holdButton = 0;
+
 		INTERNAL void update(f32 dt)
 		{
 			ModelInstance &player = g_instances[0];
 			//g_instances[0].transform.position.x = std::sin(3.0f * Input::getTime());
 			//g_instances[0].transform.position.z = std::cos(3.0f * Input::getTime());
-
 
 			f32 camVel = 8.0f; // multiplier for camera speed
 			f32 playerVel = 2.5f;
@@ -360,7 +371,7 @@ namespace Dunjun
 
 			//g_instances[2].transform.orientation = angleAxis(Degree(120) * dt, { 1, 0, 0 }) * g_instances[2].transform.orientation;
 		
-			{ // game pad input
+			// game pad input
 				Input::GamepadAxes axes = Input::getGamepadAxes(Input::Gamepad_1);
 		
 				const f32 lookSensitivityX = 2.0f;
@@ -388,22 +399,23 @@ namespace Dunjun
 		
 				if(length(lts) > 1.0f) // keep diagonals from being faster then straight x, y or z
 					lts = normalize(lts);
-		
-				Vector3 velocityDirection = {0, 0, 0};
+
+				Vector3 velocityDirection = { 0, 0, 0 };
+				Vector3 camVelocityDirection = { 0, 0, 0 };
 		
 				Vector3 forward = g_camera.forward();
 				forward.y = 0;
 				forward = normalize(forward);
 		
-				velocityDirection += lts.x * g_camera.right();
-				velocityDirection += lts.y * forward;
+				camVelocityDirection += lts.x * g_camera.right();
+				camVelocityDirection += lts.y * forward;
 		
 				Input::GamepadButtons buttons = Input::getGamepadButtons(Input::Gamepad_1);
 		
 				if (buttons[(size_t)Input::XboxButton::RightShoulder])
-					velocityDirection.y += 1;
+					camVelocityDirection.y += 1;
 				if (buttons[(size_t)Input::XboxButton::LeftShoulder])
-					velocityDirection.y -= 1;
+					camVelocityDirection.y -= 1;
 		
 				if (buttons[(size_t)Input::XboxButton::DpadUp])
 				{
@@ -434,10 +446,10 @@ namespace Dunjun
 					velocityDirection += r;
 				}
 		
-				if(length(velocityDirection) > 1.0f)
-					velocityDirection = normalize(velocityDirection);
+				if(length(camVelocityDirection) > 1.0f)
+					camVelocityDirection = normalize(camVelocityDirection);
 		
-				g_camera.transform.position += camVel * velocityDirection * dt;
+				g_camera.transform.position += camVel * camVelocityDirection * dt;
 		
 				// vibration test
 				if(Input::isGamepadButtonPressed(Input::Gamepad_1, Input::XboxButton::X))
@@ -447,12 +459,44 @@ namespace Dunjun
 
 				// camera swap
 				if (Input::isGamepadButtonPressed(Input::Gamepad_1, Input::XboxButton::B))
+				{
 					g_camera.projectionType = ProjectionType::Orthographic;
+					g_projectionTest = g_camera.getProjection();
+				}
 				if (Input::isGamepadButtonPressed(Input::Gamepad_1, Input::XboxButton::A))
+				{
 					g_camera.projectionType = ProjectionType::Perspective;
+					g_projectionTest = g_camera.getProjection();
+				}
+
+
+				g_camera.projectionType = ProjectionType::Perspective;
+				const Matrix4 pp = g_camera.getProjection(); // perspective projection
+
+				g_camera.projectionType = ProjectionType::Orthographic;
+				const Matrix4 op = g_camera.getProjection(); // perspective projection
+
 				if (Input::isGamepadButtonPressed(Input::Gamepad_1, Input::XboxButton::Y))
-					g_camera.projectionType = ProjectionType::InfinitePerspective;
-			}
+				{
+					// test projection blending
+
+					LOCAL_PERSIST f32 time = 0;
+					time += dt;
+
+					f32 w = 0.3f;
+					f32 t = std::sin(w * time)*std::sin(w * time);
+					
+					g_projectionTest = lerp(pp, op, std::pow(t, 0.3f));
+
+					std::cout << "Camera projection is " << t << " percent orthographic." << std::endl;
+					//g_projectionTest = g_camera.getProjection();
+				}
+				else
+				{
+					g_projectionTest = lerp(pp, op, 0.95f);
+				}
+
+			// end Gamepad Input
 		//
 		//
 		//
@@ -470,8 +514,6 @@ namespace Dunjun
 				// keyboard input
 				//Vector3& camPos = g_camera.transform.position;
 
-				Vector3 velocityDirection = { 0, 0, 0 };
-		
 				if (Input::isKeyPressed(Input::Key::Up))
 					velocityDirection += {0, 0 ,-1};
 				if (Input::isKeyPressed(Input::Key::Down))
@@ -522,8 +564,50 @@ namespace Dunjun
 				if (aspectRatio && Window::getFramebufferSize().y > 0)
 					g_camera.viewportAspectRatio = aspectRatio;
 
+				// camera movement
+				{
+					// delta between player and camera movement
+					// this only works correctly if player and camera have 
+					// the same coordinate in the axis being changed
+					f32 dx = player.transform.position.x - g_camera.transform.position.x;
+					f32 dy = player.transform.position.y - g_camera.transform.position.y;
+					f32 dz = player.transform.position.z - g_camera.transform.position.z;
+
+					// range the player can move before the camera reacts
+					f32 w = 1.0f;
+
+					// rate at which camera catches up tpo player
+					f32 speed = 7.0f;
+
+					f32 dxAbs = std::abs(dx);
+					f32 dyAbs = std::abs(dy);
+					f32 dzAbs = std::abs(dz);
+
+					// vectors for easier for loop
+					Vector3 v = {dx, dy, dz};
+					Vector3 vAbs = {dxAbs, dyAbs, dzAbs};
+
+					// creates a box that the player can move in where the camera doesn't move
+					for(int i = 0; i < 3; i++)
+					{
+						if(vAbs[i] > 1.0f)
+						{
+							f32 sgn = v[i] / vAbs[i];
+							f32 x = vAbs[i] - w;
+
+							x = std::sin(x); // give start/stop an S curve
+
+							g_camera.transform.position[i] += speed * sgn * x * dt;
+						}
+					}
+
+					g_camera.lookAt({ g_camera.transform.position.x, player.transform.position.y + 0.5f, player.transform.position.z });
+
+				}
+
 				//g_camera.transform.position.x = player.transform.position.x;
 				//g_camera.lookAt(player.transform.position, {0, 1, 0});
+
 		}
 
 		/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -543,7 +627,7 @@ namespace Dunjun
 			ModelAsset* asset = inst.asset;
 			Dunjun::ShaderProgram* shaders = asset->material->shaders;
 
-			shaders->setUniform("u_camera", g_camera.getMatrix()); // shaderprogram.cpp
+			shaders->setUniform("u_camera", g_projectionTest * g_camera.getView()); // shaderprogram.cpp
 			shaders->setUniform("u_transform", inst.transform); // shaderprogram.cpp
 			shaders->setUniform("u_tex", (Dunjun::u32)0); // shaderprogram.cpp
 
@@ -554,7 +638,7 @@ namespace Dunjun
 		{
 			Dunjun::ShaderProgram* shaders = level.material->shaders;
 
-			shaders->setUniform("u_camera", g_camera.getMatrix()); // shaderprogram.cpp
+			shaders->setUniform("u_camera", g_projectionTest * g_camera.getView()); // shaderprogram.cpp
 			shaders->setUniform("u_transform", level.transform); // shaderprogram.cpp
 			shaders->setUniform("u_tex", (Dunjun::u32)0); // shaderprogram.cpp
 

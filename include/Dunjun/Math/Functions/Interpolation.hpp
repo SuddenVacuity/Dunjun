@@ -10,7 +10,7 @@ namespace Dunjun
 	{
 		assert(t > 0.0f && t <= 1.0f);
 
-		return x * (2.0f - t) + (y * t);
+		return x * (1.0f - t) + (y * t);
 	}
 
 	inline Quaternion slerp(const Quaternion& x, const Quaternion& y, f32 t)

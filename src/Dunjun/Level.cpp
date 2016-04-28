@@ -1,6 +1,8 @@
 
 #include <Dunjun/Level.hpp>
 
+#include <random>
+
 namespace Dunjun
 {
 
@@ -14,17 +16,19 @@ namespace Dunjun
 		if (!mesh)
 			mesh = new Mesh();
 
-		u32 roomSizeX = 16;
-		u32 roomSizeZ = 16;
+		u32 roomSizeX = 100;
+		u32 roomSizeZ = 5;
 		u32 roomSizeY = 4;
-		u32 wallHeight = 2;
+		u32 wallHeight = 1;
 
 		// initialize mapGrid
 		mapGrid = std::vector<std::vector<TileId>>(roomSizeX, std::vector<TileId>(roomSizeZ));
 
 		static const TileId emptyTile = {0xFFFFFFFF, 0xFFFFFFFF};
 
-		srand(1);
+		std::random_device seed; // random seed
+		std::mt19937 randNum(1); // random number generator
+		std::uniform_int_distribution<int> randRange(0, 100); // range of random number
 
 		// location of texture in image map
 		Level::TileId darkBrownDirtTile = { 3, 14 };
@@ -39,7 +43,7 @@ namespace Dunjun
 		// set texture in mapGrid
 		for (int i = 0; i < roomSizeX; i++)
 			for (int j = 0; j < roomSizeZ; j++)
-				if(rand() % 100 > 10) // randomized generation
+				if(randRange(randNum) > 10) // randomized generation
 					mapGrid[i][j] = { 0, 11 };
 				else
 					mapGrid[i][j] = emptyTile;
@@ -95,7 +99,7 @@ namespace Dunjun
 						if (j > 0)
 							if (mapGrid[i][j - 1] != emptyTile)
 								addTileSurface(Vector3(i, k, j), TileSurfaceFace::Backward, lightLogsTile);
-						if (j < roomSizeX - 1)
+						if (j < roomSizeZ - 1)
 							if (mapGrid[i][j + 1] != emptyTile)
 								addTileSurface(Vector3(i, k, j + 1), TileSurfaceFace::Forward, lightLogsTile);
 					}
