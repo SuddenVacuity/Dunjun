@@ -78,8 +78,8 @@ namespace Dunjun
 				glfwWindowHint(GLFW_RESIZABLE, true);
 		
 				// default size
-				Window::width = 854;
-				Window::height = 480;
+				Window::width = windowSize_854_480[0];
+				Window::height = windowSize_854_480[1];
 				Window::isFullscreen = false;
 			}
 		

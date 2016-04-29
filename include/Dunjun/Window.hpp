@@ -14,8 +14,14 @@ namespace Dunjun
 	{
 		namespace
 		{
-			int width = 854;
-			int height = 480;
+			// preset window sizes
+			const int windowSize_1366_768[2] = {1366, 768};
+			const int windowSize_1280_600[2] = { 1280, 600 };
+			const int windowSize_854_480[2] = { 854, 480 };
+
+			// default window variables
+			int width = windowSize_854_480[0];
+			int height = windowSize_854_480[1];
 			bool isFullscreen = false;
 		} // end anon namespace
 

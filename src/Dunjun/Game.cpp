@@ -23,7 +23,11 @@ namespace Dunjun
 	//GLOBAL ModelAsset g_floor;
 	//GLOBAL ModelAsset g_wall;
 	GLOBAL std::vector<ModelInstance> g_instances;
-	GLOBAL Camera g_camera;
+
+	GLOBAL Camera g_cameraPlayer;
+	GLOBAL Camera g_cameraWorld;
+	GLOBAL Camera* g_currentCamera = &g_cameraPlayer;
+
 	GLOBAL std::map<std::string, Material> g_materials;
 	GLOBAL std::map<std::string, Mesh*> g_meshes;
 
@@ -159,9 +163,9 @@ namespace Dunjun
 			//
 			Vertex vertices[] = { // define vertexes for a triangle
 				//  x	    y	  z		  s	    t	       r	 g	   b	 a				// for triangle strips organize vertexes in a backwards Z
-				{ { 0.5f,  0.5f, 0.0f },{ 1.0f, 1.0f },{ 0x00, 0xFF, 0xFF, 0xFF } },	// 0 vertex         1 ---- 0        
+				{ { +0.5f,  0.5f, 0.0f },{ 1.0f, 1.0f },{ 0x00, 0xFF, 0xFF, 0xFF } },	// 0 vertex         1 ---- 0        
 				{ { -0.5f,  0.5f, 0.0f },{ 0.0f, 1.0f },{ 0xFF, 0xFF, 0x00, 0xFF } },	// 1 vertex           \             
-				{ { 0.5f, -0.5f, 0.0f },{ 1.0f, 0.0f },{ 0x00, 0x00, 0xFF, 0xFF }},	// 2 vertex              \           
+				{ { +0.5f, -0.5f, 0.0f },{ 1.0f, 0.0f },{ 0x00, 0x00, 0xFF, 0xFF } },	// 2 vertex              \           
 				{ { -0.5f, -0.5f, 0.0f },{ 0.0f, 0.0f },{ 0xFF, 0x00, 0xFF, 0xFF } },	// 3 vertex         3 -----2       
 			};
 
@@ -169,11 +173,13 @@ namespace Dunjun
 		
 			Mesh::Data meshData;
 
-			int numVertex = sizeof(vertices) / sizeof(vertices[0]);
+			// get number of entries
+			int numVertices = sizeof(vertices) / sizeof(vertices[0]);
 			int numIndices = sizeof(indices) / sizeof(indices[0]);
 
-			for(int i = 0; i < numVertex; i++)
-				meshData.vertices.push_back(vertices[i]);
+			// add the data
+			for(int i = 0; i < numVertices; i++)
+				meshData.vertices.append(vertices[i].position, vertices[i].texCoord, vertices[i].color);
 
 			for(int i = 0; i <  numIndices; i++)
 				meshData.indices.push_back(indices[i]);
@@ -307,24 +313,15 @@ namespace Dunjun
 			//}
 
 			//Initialize camera
-			g_camera.viewportAspectRatio = 16.0f / 9.0f;
-			g_camera.transform.position = { 4, 3, 10 };
-			g_camera.lookAt({ g_camera.transform.position.x, g_camera.transform.position.y, 2 });
+			g_cameraPlayer.viewportAspectRatio = 16.0f / 9.0f;
+			g_cameraPlayer.transform.position = { 4, 3, 10 };
+			g_cameraPlayer.lookAt({ g_cameraPlayer.transform.position.x, g_cameraPlayer.transform.position.y, 2 });
 
-			g_camera.projectionType = ProjectionType::Perspective;
-			g_camera.fieldOfView = Degree(50.0f); // for perspective view
+			g_cameraPlayer.projectionType = ProjectionType::Perspective;
+			g_cameraPlayer.fieldOfView = Degree(50.0f); // for perspective view
+			g_cameraPlayer.orthoScale = 4.0f; // for perspective view
 			
-			// test projection blending
-			const Matrix4 pp = g_camera.getProjection(); // perspective projection
-
-			g_camera.projectionType = ProjectionType::Orthographic;
-			g_camera.orthoScale = 4.0f; // for ortho view
-
-			const Matrix4 op = g_camera.getProjection(); // perspective projection
-
-
-			g_projectionTest = lerp(pp, op, 0.9f);
-			//g_projectionTest = g_camera.getProjection();
+			g_cameraWorld = g_cameraPlayer;
 		}
 
 		/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -337,8 +334,6 @@ namespace Dunjun
 		)				.
 		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-		f32 holdButton = 0;
-
 		INTERNAL void update(f32 dt)
 		{
 			ModelInstance &player = g_instances[0];
@@ -346,7 +341,8 @@ namespace Dunjun
 			//g_instances[0].transform.position.z = std::cos(3.0f * Input::getTime());
 
 			f32 camVel = 8.0f; // multiplier for camera speed
-			f32 playerVel = 2.5f;
+			f32 playerVelX = 3.5f;
+			f32 playerVelZ = 5.5f;
 
 			// TEST FUNCTION: delete this
 			//  y and z are not multipling correctly when transform * transform
@@ -378,7 +374,7 @@ namespace Dunjun
 				const f32 lookSensitivityY = 1.5f;
 				const f32 deadZone = 0.21f;
 		
-				// camera rotation
+				// gamepad camera rotation
 				Vector2 rts = axes.rightThumbStick;
 		
 				if (std::abs(rts.x) < deadZone) // ignore anything in the deadZone
@@ -386,10 +382,10 @@ namespace Dunjun
 				if (std::abs(rts.y) < deadZone)
 					rts.y = 0;
 		
-				g_camera.offsetOrientation(-lookSensitivityX * Radian(rts.x * dt)
+				g_cameraWorld.offsetOrientation(-lookSensitivityX * Radian(rts.x * dt)
 										  , lookSensitivityY * Radian(rts.y * dt));
 		
-				// camera translation
+				// gamepad camera translation
 				Vector2 lts = axes.leftThumbStick;
 		
 				if (std::abs(lts.x) < deadZone) // ignore anything in the deadZone
@@ -403,11 +399,11 @@ namespace Dunjun
 				Vector3 velocityDirection = { 0, 0, 0 };
 				Vector3 camVelocityDirection = { 0, 0, 0 };
 		
-				Vector3 forward = g_camera.forward();
+				Vector3 forward = g_cameraWorld.forward();
 				forward.y = 0;
 				forward = normalize(forward);
 		
-				camVelocityDirection += lts.x * g_camera.right();
+				camVelocityDirection += lts.x * g_cameraWorld.right();
 				camVelocityDirection += lts.y * forward;
 		
 				Input::GamepadButtons buttons = Input::getGamepadButtons(Input::Gamepad_1);
@@ -416,65 +412,70 @@ namespace Dunjun
 					camVelocityDirection.y += 1;
 				if (buttons[(size_t)Input::XboxButton::LeftShoulder])
 					camVelocityDirection.y -= 1;
+
+				if(length(camVelocityDirection) > 1.0f)
+					camVelocityDirection = normalize(camVelocityDirection);
 		
+				g_cameraWorld.transform.position += camVel * camVelocityDirection * dt;
+		
+				// gamepad player movement
 				if (buttons[(size_t)Input::XboxButton::DpadUp])
 				{
-					Vector3 f = g_camera.forward();
+					Vector3 f = g_cameraWorld.forward();
 					f.y = 0;
 					f = normalize(f);
 					velocityDirection += f;
 				}
 				if (buttons[(size_t)Input::XboxButton::DpadDown])
 				{
-					Vector3 b = g_camera.backward();
+					Vector3 b = g_cameraWorld.backward();
 					b.y = 0;
 					b = normalize(b);
 					velocityDirection += b;
 				}
 				if (buttons[(size_t)Input::XboxButton::DpadLeft])
 				{
-					Vector3 l = g_camera.left();
+					Vector3 l = g_cameraWorld.left();
 					l.y = 0;
 					l = normalize(l);
 					velocityDirection += l;
 				}
 				if (buttons[(size_t)Input::XboxButton::DpadRight])
 				{
-					Vector3 r = g_camera.right();
+					Vector3 r = g_cameraWorld.right();
 					r.y = 0;
 					r = normalize(r);
 					velocityDirection += r;
 				}
-		
-				if(length(camVelocityDirection) > 1.0f)
-					camVelocityDirection = normalize(camVelocityDirection);
-		
-				g_camera.transform.position += camVel * camVelocityDirection * dt;
-		
+
 				// vibration test
 				if(Input::isGamepadButtonPressed(Input::Gamepad_1, Input::XboxButton::X))
 					Input::setGamepadVibration(Input::Gamepad_1, 0.5f, 0.5f);
 				else
 					Input::setGamepadVibration(Input::Gamepad_1, 0.0f, 0.0f);
 
-				// camera swap
+				// projection type swap
 				if (Input::isGamepadButtonPressed(Input::Gamepad_1, Input::XboxButton::B))
 				{
-					g_camera.projectionType = ProjectionType::Orthographic;
-					g_projectionTest = g_camera.getProjection();
+					// test camera swap
+					g_currentCamera = &g_cameraPlayer;
 				}
 				if (Input::isGamepadButtonPressed(Input::Gamepad_1, Input::XboxButton::A))
 				{
-					g_camera.projectionType = ProjectionType::Perspective;
-					g_projectionTest = g_camera.getProjection();
+					// test camera swap
+					// TODO: reset forward vector when pressed
+					g_cameraWorld.transform = g_cameraPlayer.transform;
+					g_cameraWorld.transform.position.y = g_cameraWorld.transform.position.y + 1.0f;
+					g_cameraWorld.lookAt({g_cameraWorld.transform.position.x, player.transform.position.y, player.transform.position.z});
+					g_currentCamera = &g_cameraWorld;
 				}
 
 
-				g_camera.projectionType = ProjectionType::Perspective;
-				const Matrix4 pp = g_camera.getProjection(); // perspective projection
+				g_cameraWorld.projectionType = ProjectionType::Perspective;
+				const Matrix4 pp = g_cameraWorld.getProjection(); // perspective projection
 
-				g_camera.projectionType = ProjectionType::Orthographic;
-				const Matrix4 op = g_camera.getProjection(); // perspective projection
+				g_cameraWorld.projectionType = ProjectionType::Orthographic;
+				const Matrix4 op = g_cameraWorld.getProjection(); // perspective projection
 
 				if (Input::isGamepadButtonPressed(Input::Gamepad_1, Input::XboxButton::Y))
 				{
@@ -489,7 +490,7 @@ namespace Dunjun
 					g_projectionTest = lerp(pp, op, std::pow(t, 0.3f));
 
 					std::cout << "Camera projection is " << t << " percent orthographic." << std::endl;
-					//g_projectionTest = g_camera.getProjection();
+					//g_projectionTest = g_cameraPlayer.getProjection();
 				}
 				else
 				{
@@ -507,12 +508,12 @@ namespace Dunjun
 				//const f32 mouseSensitivityX = 0.06f;
 				//const f32 mouseSensitivityY = 0.09f;
 				//
-				//g_camera.offsetOrientation(-mouseSensitivityX * Radian(curPos.x * dt), -mouseSensitivityY * Radian(curPos.y * dt));
+				//g_cameraPlayer.offsetOrientation(-mouseSensitivityX * Radian(curPos.x * dt), -mouseSensitivityY * Radian(curPos.y * dt));
 				//
 				//Input::setCursorPosition({0, 0});
 		
 				// keyboard input
-				//Vector3& camPos = g_camera.transform.position;
+				//Vector3& camPos = g_cameraPlayer.transform.position;
 
 				if (Input::isKeyPressed(Input::Key::Up))
 					velocityDirection += {0, 0 ,-1};
@@ -531,17 +532,18 @@ namespace Dunjun
 				if (length(velocityDirection) > 0)
 					velocityDirection = normalize(velocityDirection);
 				{
-				//camPos += camVel * velocityDirection * dt;
-				player.transform.position += playerVel * velocityDirection * dt;
+					// update player position
+					player.transform.position += Vector3{playerVelX, 0, playerVelZ} * velocityDirection * dt;
 
+					// update pplayer orientation
 #if 0 // BillBoard
 				Quaternion pRot = 
 							conjugate(quaternionLookAt(player.transform.position, 
-							g_camera.transform.position, {0, 1, 0}));
+								g_cameraWorld.transform.position, {0, 1, 0}));
 
 				player.transform.orientation = pRot;
 #elif 0 // Billboard fixed Y axis
-				Vector3 f = player.transform.position - g_camera.transform.position;
+				Vector3 f = player.transform.position - g_cameraWorld.transform.position;
 				f.y = 0;
 
 				if(f.x == 0 && f.z == 0)
@@ -560,53 +562,58 @@ namespace Dunjun
 
 				}
 
+				// update aspect ratio each update
 				f32 aspectRatio = Window::getFramebufferSize().x / Window::getFramebufferSize().y;
 				if (aspectRatio && Window::getFramebufferSize().y > 0)
-					g_camera.viewportAspectRatio = aspectRatio;
+				{
+					g_cameraPlayer.viewportAspectRatio = aspectRatio;
+					g_cameraWorld.viewportAspectRatio = aspectRatio;
+				}
 
 				// camera movement
 				{
-					// delta between player and camera movement
-					// this only works correctly if player and camera have 
-					// the same coordinate in the axis being changed
-					f32 dx = player.transform.position.x - g_camera.transform.position.x;
-					f32 dy = player.transform.position.y - g_camera.transform.position.y;
-					f32 dz = player.transform.position.z - g_camera.transform.position.z;
+					//// delta between player and camera movement
+					//// this only works correctly if player and camera have 
+					//// the same coordinate in the axis being changed
+					//f32 dx = player.transform.position.x - g_cameraPlayer.transform.position.x;
+					//f32 dy = player.transform.position.y - g_cameraPlayer.transform.position.y;
+					//f32 dz = player.transform.position.z - g_cameraPlayer.transform.position.z;
+					//
+					//// range the player can move before the camera reacts
+					//f32 w = 1.0f;
+					//
+					//// rate at which camera catches up to player
+					//f32 speed = 7.0f;
+					//
+					//f32 dxAbs = std::abs(dx);
+					//f32 dyAbs = std::abs(dy);
+					//f32 dzAbs = std::abs(dz);
+					//
+					//// vectors for easier for loop
+					//Vector3 v = {dx, dy, dz};
+					//Vector3 vAbs = {dxAbs, dyAbs, dzAbs};
+					//
+					//// creates a box that the player can move in where the camera doesn't move
+					//// check each position in vector to check wether to move camera
+					//for(int i = 0; i < 3; i++)
+					//{
+					//	if(vAbs[i] > 1.0f)
+					//	{
+					//		f32 sgn = v[i] / vAbs[i];
+					//		f32 x = vAbs[i] - w;
+					//
+					//		x = std::sin(x); // give start/stop an S curve
+					//
+					//		g_cameraPlayer.transform.position[i] += speed * sgn * x * dt;
+					//	}
+					//}
 
-					// range the player can move before the camera reacts
-					f32 w = 1.0f;
+					g_cameraPlayer.transform.position.x = lerp(g_cameraPlayer.transform.position.x, player.transform.position.x, 0.15f);
 
-					// rate at which camera catches up tpo player
-					f32 speed = 7.0f;
-
-					f32 dxAbs = std::abs(dx);
-					f32 dyAbs = std::abs(dy);
-					f32 dzAbs = std::abs(dz);
-
-					// vectors for easier for loop
-					Vector3 v = {dx, dy, dz};
-					Vector3 vAbs = {dxAbs, dyAbs, dzAbs};
-
-					// creates a box that the player can move in where the camera doesn't move
-					for(int i = 0; i < 3; i++)
-					{
-						if(vAbs[i] > 1.0f)
-						{
-							f32 sgn = v[i] / vAbs[i];
-							f32 x = vAbs[i] - w;
-
-							x = std::sin(x); // give start/stop an S curve
-
-							g_camera.transform.position[i] += speed * sgn * x * dt;
-						}
-					}
-
-					g_camera.lookAt({ g_camera.transform.position.x, player.transform.position.y + 0.5f, player.transform.position.z });
+					g_cameraPlayer.lookAt({ g_cameraPlayer.transform.position.x, player.transform.position.y + 0.5f, player.transform.position.z });
 
 				}
 
-				//g_camera.transform.position.x = player.transform.position.x;
-				//g_camera.lookAt(player.transform.position, {0, 1, 0});
 
 		}
 
@@ -627,7 +634,7 @@ namespace Dunjun
 			ModelAsset* asset = inst.asset;
 			Dunjun::ShaderProgram* shaders = asset->material->shaders;
 
-			shaders->setUniform("u_camera", g_projectionTest * g_camera.getView()); // shaderprogram.cpp
+			shaders->setUniform("u_camera", g_projectionTest * g_currentCamera->getView()); // shaderprogram.cpp
 			shaders->setUniform("u_transform", inst.transform); // shaderprogram.cpp
 			shaders->setUniform("u_tex", (Dunjun::u32)0); // shaderprogram.cpp
 
@@ -638,7 +645,7 @@ namespace Dunjun
 		{
 			Dunjun::ShaderProgram* shaders = level.material->shaders;
 
-			shaders->setUniform("u_camera", g_projectionTest * g_camera.getView()); // shaderprogram.cpp
+			shaders->setUniform("u_camera", g_projectionTest * g_currentCamera->getView()); // shaderprogram.cpp
 			shaders->setUniform("u_transform", level.transform); // shaderprogram.cpp
 			shaders->setUniform("u_tex", (Dunjun::u32)0); // shaderprogram.cpp
 
@@ -647,11 +654,11 @@ namespace Dunjun
 
 		INTERNAL void render()
 		{
-			{
-				// vars used to define the size of the viewport
-				Vector2 fbSize = Window::getFramebufferSize();
-				glViewport(0, 0, fbSize.x, fbSize.y);
-			}
+			//{
+			//	// vars used to define the size of the viewport
+			//	Vector2 fbSize = Window::getFramebufferSize();
+			//	glViewport(0, 0, fbSize.x, fbSize.y);
+			//}
 
 			glClearColor(0.02f, 0.02f, 0.02f, 1.0f); // set the default color (R,G,B,A)
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -659,6 +666,7 @@ namespace Dunjun
 			const Dunjun::ShaderProgram* currentShaders = nullptr;
 			const Texture* currentTexture = nullptr;
 
+			
 			// render instances
 			for (const auto& inst : g_instances)
 			{
@@ -680,25 +688,25 @@ namespace Dunjun
 				renderInstance(inst);
 			}
 
-			// render level
+			//render level
 			{
 				if (g_level.material->shaders != currentShaders) // swap to new shaders
 				{
 					if (currentShaders) // checkif currentshader is in use
 						currentShaders->stopUsing();
-
+			
 					currentShaders = g_level.material->shaders;
 					currentShaders->use();
 				}
-
-
-
+			
+			
+			
 				if (g_level.material->texture != currentTexture) // swap to new shaders
 				{
 					currentTexture = g_level.material->texture;
 					Texture::bind(currentTexture, 0);
 				}
-
+			
 				renderLevel(g_level);
 			}
 

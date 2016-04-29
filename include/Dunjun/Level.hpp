@@ -15,8 +15,8 @@ namespace Dunjun
 			Right = 1,
 			Up = 2,
 			Down = 3,
-			Forward = 4,
-			Backward = 5,
+			Backward = 4,
+			Forward = 5,
 		};
 
 		// coordinates of texture in texture map

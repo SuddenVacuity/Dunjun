@@ -7,10 +7,53 @@ namespace Dunjun
 {
 	struct Vertex // must come before render
 	{
-		Vector3 position;
-		Vector2 texCoord;
-		Color color;
+		Vector3 position = {0, 0, 0};
+		Vector2 texCoord = {0, 0};
+		Color color = {{0xFF, 0xFF, 0xFF, 0xFF}};
+
+		Vertex() = default;
+
+		Vertex(const Vector3& position, const Vector2& texCoord, const Color& color)
+			: position(position)
+			, texCoord(texCoord)
+			, color(color)
+		{
+		}
 	};
+
+	class VertexArray
+	{
+	public:
+		inline VertexArray& append(const Vertex& vertex)
+		{
+			m_vertices.push_back(vertex);
+			return *this;
+		}
+
+		inline VertexArray& append(const Vector3& position, const Vector2& texCoord, const Color& color )
+		{
+			m_vertices.push_back(Vertex(position, texCoord, color));
+			return *this;
+		}
+
+		inline const Vertex& operator[](size_t index) const
+		{
+			return m_vertices[index];
+		}
+
+		inline Vertex& operator[](size_t index)
+		{
+			return m_vertices[index];
+		}
+
+		//const Vertex* getPtr() const { return &m_vertices[0]; }
+		//inline const std::vector<Vertex>& getVector() const { return m_vertices; }
+		inline const size_t size() const { return m_vertices.size(); }
+	private:
+		std::vector<Vertex> m_vertices;
+	};
+
+
 } // end Dunjun
 
 #endif
