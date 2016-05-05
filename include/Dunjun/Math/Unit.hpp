@@ -3,8 +3,6 @@
 
 #include <Dunjun/Math/Constants.hpp>
 
-#include <cmath>
-#include <chrono>
 
 namespace Dunjun
 {

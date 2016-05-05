@@ -297,14 +297,33 @@ namespace Dunjun
 			//parent.orientation = angleAxis(Degree(90), { 1, 0, 0 });
 			//parent.scale = { 1.0f, 1.0f, 1.0f };
 
-			ModelInstance a;
-			a.asset = &g_sprite;
-			a.transform.position = { 4, 1, 4 }; // translation
-			a.transform.scale = { 1, 2, 1 };
-			a.transform.orientation = angleAxis(Degree(0), { 1, 0, 0 }); // rotation
-			g_instances.push_back(a);
-
 			generateWorld();
+
+			ModelInstance player;
+			player.asset = &g_sprite;
+			player.transform.position = { 4, 1, 4 }; // translation
+			player.transform.scale = { 1, 2, 1 };
+			player.transform.orientation = angleAxis(Degree(0), { 1, 0, 0 }); // rotation
+
+			for(int j = 0; j < g_level.sizeX; j++)
+			{
+				bool escape = false;
+				for(int i = 0; i < g_level.sizeZ; i++)
+				{
+					if(g_level.mapGrid[i][j] != Level::TileId(0xFFFFFFFF, 0xFFFFFFFF))
+					{
+						player.transform.position = Vector3(i, 1.0f, j);
+						escape = true;
+						break;
+					}
+					if(escape == true)
+						break;
+				}
+				if (escape == true)
+					break;
+			}
+
+			g_instances.push_back(player);
 
 			//for (auto& inst : g_instances)
 			//{
@@ -314,8 +333,9 @@ namespace Dunjun
 
 			//Initialize camera
 			g_cameraPlayer.viewportAspectRatio = 16.0f / 9.0f;
-			g_cameraPlayer.transform.position = { 4, 3, 10 };
-			g_cameraPlayer.lookAt({ g_cameraPlayer.transform.position.x, g_cameraPlayer.transform.position.y, 2 });
+			g_cameraPlayer.transform.position = { player.transform.position.x - 8, player.transform.position.y + 3, player.transform.position.z + 10 };
+			//g_cameraPlayer.lookAt({ g_cameraPlayer.transform.position.x, g_cameraPlayer.transform.position.y, g_cameraPlayer.transform.position.x - 1 });
+			g_cameraPlayer.lookAt({0, 0, 0});
 
 			g_cameraPlayer.projectionType = ProjectionType::Perspective;
 			g_cameraPlayer.fieldOfView = Degree(50.0f); // for perspective view
@@ -382,7 +402,7 @@ namespace Dunjun
 				if (std::abs(rts.y) < deadZone)
 					rts.y = 0;
 		
-				g_cameraWorld.offsetOrientation(-lookSensitivityX * Radian(rts.x * dt)
+				g_cameraWorld.offsetOrientation(lookSensitivityX * Radian(rts.x * dt)
 										  , lookSensitivityY * Radian(rts.y * dt));
 		
 				// gamepad camera translation
@@ -466,7 +486,7 @@ namespace Dunjun
 					// TODO: reset forward vector when pressed
 					g_cameraWorld.transform = g_cameraPlayer.transform;
 					g_cameraWorld.transform.position.y = g_cameraWorld.transform.position.y + 1.0f;
-					g_cameraWorld.lookAt({g_cameraWorld.transform.position.x, player.transform.position.y, player.transform.position.z});
+					g_cameraWorld.lookAt({player.transform.position.x, player.transform.position.y, player.transform.position.z});
 					g_currentCamera = &g_cameraWorld;
 				}
 
@@ -608,9 +628,9 @@ namespace Dunjun
 					//	}
 					//}
 
-					g_cameraPlayer.transform.position.x = lerp(g_cameraPlayer.transform.position.x, player.transform.position.x, 0.15f);
+					g_cameraPlayer.transform.position.x = lerp(g_cameraPlayer.transform.position.x - 3, player.transform.position.x, 10.0f * dt);
 
-					g_cameraPlayer.lookAt({ g_cameraPlayer.transform.position.x, player.transform.position.y + 0.5f, player.transform.position.z });
+					g_cameraPlayer.lookAt({ player.transform.position.x, player.transform.position.y + 0.5f, player.transform.position.z });
 
 				}
 

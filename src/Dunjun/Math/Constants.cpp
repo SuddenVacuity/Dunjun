@@ -8,8 +8,8 @@ namespace Constants
 {
 	extern const f32 EPSILON = FLT_EPSILON;
 
-	const f32  ZERO = 0.0f;
-	const f32  ONE = 1.0f;
+	const f32  ZERO = 0.00000000f;
+	const f32  ONE = 1.00000000f;
 	const f32  THIRD = 0.33333333f;
 	const f32  TWO_THIRDS = 0.66666667f;
 		   

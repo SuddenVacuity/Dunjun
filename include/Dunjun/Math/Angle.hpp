@@ -4,7 +4,6 @@
 
 #include <Dunjun/Math/Unit.hpp>
 
-#include <ostream>
 
 namespace Dunjun
 {

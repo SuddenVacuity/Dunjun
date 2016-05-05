@@ -232,13 +232,13 @@ namespace Dunjun
 				return;
 			glUniform1i(loc, x);
 		}
-		void ShaderProgram::setUniform(const std::string& name, i32 x)
+		void ShaderProgram::setUniform(const std::string& name, s32 x)
 		{
 			checkInUse();
 			GLint loc = getUniformLocation(name);
 			if (loc == -1)
 				return;
-			glUniform1i(loc, (i32)x);
+			glUniform1i(loc, (s32)x);
 		}
 		void ShaderProgram::setUniform(const std::string& name, bool x)
 		{

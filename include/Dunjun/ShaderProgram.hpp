@@ -39,7 +39,7 @@ namespace Dunjun
 		void setUniform(const std::string& name, f32 x, f32 y, f32 z);
 		void setUniform(const std::string& name, f32 x, f32 y, f32 z, f32 w);
 		void setUniform(const std::string& name, u32 x);
-		void setUniform(const std::string& name, i32 x); // in case an interger is needed
+		void setUniform(const std::string& name, s32 x); // in case an interger is needed
 							
 		void setUniform(const std::string& name, bool x); // incase a bool is needed
 						

@@ -1,8 +1,6 @@
 #ifndef  DUNJUN_MATH_VECTOR4_HPP
 #define  DUNJUN_MATH_VECTOR4_HPP
 
-#include <Dunjun/Types.hpp>
-#include <cmath>
 
 #include <Dunjun/Math/Vector3.hpp>
 

@@ -4,14 +4,21 @@
 #include <Dunjun/ReadOnly.hpp>
 
 #include <cassert>
+#include <chrono>
+#include <cmath>
+#include <cstdint>
+#include <cstdlib>
 #include <functional>
 #include <fstream>
 #include <iostream>
+#include <limits>
 #include <memory>
+#include <ostream>
+#include <random>
 #include <sstream>
-#include <vector>
 #include <stack>
 #include <stdexcept>
+#include <vector>
 
 #define GLOBAL static // set static to refer to all these types
 #define INTERNAL static

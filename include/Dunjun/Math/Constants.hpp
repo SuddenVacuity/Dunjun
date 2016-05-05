@@ -1,9 +1,7 @@
 #ifndef DUNJUN_MATH_CONSTANTS_HPP
 #define DUNJUN_MATH_CONSTANTS_HPP
 
-#include <Dunjun/Common.hpp>
-
-#include <limits>
+#include <Dunjun/ReadOnly.hpp>
 
 namespace Dunjun
 {

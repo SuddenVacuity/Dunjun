@@ -1,8 +1,6 @@
 #ifndef  DUNJUN_MATH_VECTOR3_HPP
 #define  DUNJUN_MATH_VECTOR3_HPP
 
-#include <cmath>
-
 #include <Dunjun/Math/Vector2.hpp>
 
 namespace Dunjun

@@ -2,8 +2,6 @@
 #define  DUNJUN_MATH_VECTOR2_HPP
 
 #include <Dunjun/Math/Angle.hpp>
-#include <iostream>
-#include <cmath>
 
 namespace Dunjun
 {

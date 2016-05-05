@@ -63,11 +63,16 @@ namespace Dunjun
 		void generate();
 
 		std::vector<std::vector<TileId>> mapGrid;
+		ReadOnly<u32, Level> sizeX = 100;
+		ReadOnly<u32, Level> sizeZ = 100;
+		ReadOnly<u32, Level> sizeY = 4;
+		ReadOnly<u32, Level> wallHeight = 1;
 
 		const Material* material;
 		Mesh* mesh;
 		Transform transform;
 	private:
+		Random m_random;
 		Mesh::Data m_meshData;
 	};
 } // end Dunjun
