@@ -9,6 +9,7 @@
 
 //#include <Dunjun/Math/Quaternion.hpp>
 
-#include <Dunjun/Math/Functions.hpp>
+//#include <Dunjun/Math/Functions.hpp>
+#include <Dunjun/Math/Rectangle.hpp>
 
 #endif

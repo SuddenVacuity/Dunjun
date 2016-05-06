@@ -3,6 +3,7 @@
 
 #include <Dunjun/ReadOnly.hpp>
 
+#include <algorithm>
 #include <cassert>
 #include <chrono>
 #include <cmath>

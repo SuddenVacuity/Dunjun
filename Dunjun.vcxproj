@@ -165,6 +165,7 @@
     <ClCompile Include="src\Dunjun\Math\Constants.cpp" />
     <ClCompile Include="src\Dunjun\Math\Functions\Matrix.cpp" />
     <ClCompile Include="src\Dunjun\Math\Matrix4.cpp" />
+    <ClCompile Include="src\Dunjun\Math\Rectangle.cpp" />
     <ClCompile Include="src\Dunjun\Mesh.cpp" />
     <ClCompile Include="src\Dunjun\ShaderProgram.cpp" />
     <ClCompile Include="src\Dunjun\Texture.cpp" />
@@ -190,6 +191,7 @@
     <ClInclude Include="include\Dunjun\Math\Matrix4.hpp" />
     <ClInclude Include="include\Dunjun\Math\Quaternion.hpp" />
     <ClInclude Include="include\Dunjun\Math\Random.hpp" />
+    <ClInclude Include="include\Dunjun\Math\Rectangle.hpp" />
     <ClInclude Include="include\Dunjun\Math\Unit.hpp" />
     <ClInclude Include="include\Dunjun\Math\Vector2.hpp" />
     <ClInclude Include="include\Dunjun\Math\Vector3.hpp" />

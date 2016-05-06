@@ -9,6 +9,11 @@ namespace Dunjun
 	{
 	}
 
+	Level::~Level()
+	{
+		delete mesh;
+	}
+
 	void Level::generate()
 	{
 		if (!mesh)
@@ -41,19 +46,13 @@ namespace Dunjun
 					mapGrid[i][j] = emptyTile;
 		}
 
+		placeRooms();
 
-		for( int n = 0; n < 30; n ++)
+		for(const auto& room : m_rooms)
 		{
-			u32 roomSizeX = m_random.getInt(3, 16);
-			u32 roomSizeZ = m_random.getInt(3, 16);
-
-			int x = m_random.getInt(0, sizeX - 1 - roomSizeX);
-			int z = m_random.getInt(0, sizeZ - 1 - roomSizeZ);
-
-
-			for (int i = x; i < roomSizeX + x; i++)
+			for (int i = room.x; i < room.x + room.width; i++)
 			{
-				for (int j = z; j < roomSizeZ + z; j++)
+				for (int j = room.y; j < room.y + room.height; j++)
 				{
 					mapGrid[i][j] = lightWoodTile;
 				}
@@ -137,9 +136,49 @@ namespace Dunjun
 		mesh->addData(m_meshData);
 	}
 
-	Level::~Level()
+	void Level::placeRooms()
 	{
-		delete mesh;
+		int skips = 0;
+
+		for(int n = 0; n < 10; n++)
+		{
+			u32 roomSizeX = m_random.getInt(3, 16);
+			u32 roomSizeZ = m_random.getInt(3, 16);
+
+			int x = m_random.getInt(0, sizeX - 1 - roomSizeX);
+			int z = m_random.getInt(0, sizeZ - 1 - roomSizeZ);
+
+			Rectangle newRoom(roomSizeX, roomSizeZ, x, z);
+
+			// if room intersects, break
+			bool failed = false;
+			for(const Rectangle& room : m_rooms)
+			{
+				if(newRoom.intersects(room))
+				{
+					failed = true;
+					break;
+				}
+			}
+
+			// if room does not intersect push room
+			if(failed == false)
+			{
+				m_rooms.push_back(newRoom);
+			}
+			else
+			{
+				// limit number of attempts
+				skips++;
+
+				if (skips < 10)
+					n--;
+
+				continue;
+			}
+
+
+		}
 	}
 
 	// create a 4 vertex tile in the at position in the direction of TileSurfaceFace with texPos being the position in texture map for the texture
