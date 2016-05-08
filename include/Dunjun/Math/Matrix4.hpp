@@ -3,8 +3,6 @@
 
 #include <Dunjun/Math/Vector4.hpp>
 
-#include <array>
-
 namespace Dunjun
 {
 	class Matrix4
@@ -39,12 +37,7 @@ namespace Dunjun
 		Matrix4& operator-=(const Matrix4& other);
 		Matrix4& operator*=(const Matrix4& other);
 
-		// use in transpose matrix
-		Matrix4 transpose() const;
-		f32 determinant() const;
-		Matrix4& inverse() const;
-
-		std::array<Vector4, 4> data;
+		Vector4 data[4];
 	};
 
 	inline Matrix4 operator*(f32 scaler, const Matrix4& m) // scaler for the other side
@@ -58,17 +51,10 @@ namespace Dunjun
 
 
 	// use in transpose matrix
-	inline Matrix4 transpose(const Matrix4& m) { return m.transpose(); }
-	inline f32 determinant(const Matrix4& m) { return m.determinant(); }
-	inline Matrix4 inverse(const Matrix4& m) { return m.inverse(); }
-
-	inline Matrix4 hadamardProduct(const Matrix4& a, const Matrix4& b)
-	{
-		Matrix4 result;
-		for (size_t i = 0; i < 4; i++)
-			result[i] = a[i] * b[i];
-		return result;
-	}
+	Matrix4 transpose(const Matrix4& m);
+	f32 determinant(const Matrix4& m);
+	Matrix4 inverse(const Matrix4& m);
+	Matrix4 hadamardProduct(const Matrix4& a, const Matrix4& b);
 
 	inline std::ostream& operator<<(std::ostream& os, const Matrix4& m)
 	{

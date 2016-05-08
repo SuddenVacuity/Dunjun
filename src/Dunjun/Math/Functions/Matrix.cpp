@@ -49,7 +49,10 @@ namespace Dunjun
 	}
 	Matrix4 scale(const Vector3& v)
 	{
-		Matrix4 result({ v.x, 0, 0, 0 }, { 0, v.y, 0, 0 }, { 0, 0, v.z, 0 }, { 0, 0, 0, 1 });
+		Matrix4 result( { v.x, 0, 0, 0 }, 
+						{ 0, v.y, 0, 0 }, 
+						{ 0, 0, v.z, 0 }, 
+						{ 0, 0, 0, 1.0f });
 		return result;
 	}
 
@@ -185,5 +188,4 @@ namespace Dunjun
 		//Vector3 axis = cross(forward, f);
 		//return angleAxis(angle, axis);
 	}
-
 }

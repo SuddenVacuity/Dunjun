@@ -4,6 +4,7 @@
 #include <Dunjun/ReadOnly.hpp>
 
 #include <algorithm>
+#include <array>
 #include <cassert>
 #include <chrono>
 #include <cmath>
@@ -21,7 +22,7 @@
 #include <stdexcept>
 #include <vector>
 
-#define GLOBAL static // set static to refer to all these types
+#define GLOBAL static // set all these types to refer to static
 #define INTERNAL static
 #define LOCAL_PERSIST static
 

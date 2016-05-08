@@ -33,6 +33,11 @@ namespace Dunjun
 			return dist(m_engine);
 		}
 
+		b8 getBool()
+		{
+			return getInt(0, 1) == 1;
+		}
+
 	private:
 		std::mt19937 m_engine{std::random_device{}()};
 	};

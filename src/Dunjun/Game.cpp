@@ -325,23 +325,28 @@ namespace Dunjun
 
 			g_instances.push_back(player);
 
-			//for (auto& inst : g_instances)
-			//{
-			//	auto& t = inst.transform;
-			//	t = parent * t;
-			//}
+			{
+				//Initialize camera
+				g_cameraPlayer.viewportAspectRatio = 16.0f / 9.0f;
+				g_cameraPlayer.transform.position = { player.transform.position.x - 8, player.transform.position.y + 3, player.transform.position.z + 10 };
+				//g_cameraPlayer.lookAt({ g_cameraPlayer.transform.position.x, g_cameraPlayer.transform.position.y, g_cameraPlayer.transform.position.x - 1 });
+				g_cameraPlayer.lookAt({0, 0, 0});
 
-			//Initialize camera
-			g_cameraPlayer.viewportAspectRatio = 16.0f / 9.0f;
-			g_cameraPlayer.transform.position = { player.transform.position.x - 8, player.transform.position.y + 3, player.transform.position.z + 10 };
-			//g_cameraPlayer.lookAt({ g_cameraPlayer.transform.position.x, g_cameraPlayer.transform.position.y, g_cameraPlayer.transform.position.x - 1 });
-			g_cameraPlayer.lookAt({0, 0, 0});
+				g_cameraPlayer.projectionType = ProjectionType::Perspective;
+				g_cameraPlayer.fieldOfView = Degree(50.0f); // for perspective view
 
-			g_cameraPlayer.projectionType = ProjectionType::Perspective;
-			g_cameraPlayer.fieldOfView = Degree(50.0f); // for perspective view
-			g_cameraPlayer.orthoScale = 4.0f; // for perspective view
-			
-			g_cameraWorld = g_cameraPlayer;
+				// temp variables used in lerp()
+				g_cameraWorld.projectionType = ProjectionType::Perspective;
+				const Matrix4 pp = g_cameraWorld.getProjection();
+
+				g_cameraWorld.projectionType = ProjectionType::Orthographic;
+				const Matrix4 op = g_cameraWorld.getProjection();
+				
+				// initialize projection test
+				g_projectionTest = lerp(pp, op, 0.95f);
+
+				g_cameraWorld = g_cameraPlayer;
+			}
 		}
 
 		/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -474,11 +479,21 @@ namespace Dunjun
 				else
 					Input::setGamepadVibration(Input::Gamepad_1, 0.0f, 0.0f);
 
+
+				// temp variables used in lerp()
+				g_cameraWorld.projectionType = ProjectionType::Perspective;
+				const Matrix4 pp = g_cameraWorld.getProjection(); // perspective projection
+
+				g_cameraWorld.projectionType = ProjectionType::Orthographic;
+				const Matrix4 op = g_cameraWorld.getProjection(); // perspective projection
+
+
 				// projection type swap
 				if (Input::isGamepadButtonPressed(Input::Gamepad_1, Input::XboxButton::B))
 				{
 					// test camera swap
 					g_currentCamera = &g_cameraPlayer;
+					g_projectionTest = lerp(pp, op, 0.95f);
 				}
 				if (Input::isGamepadButtonPressed(Input::Gamepad_1, Input::XboxButton::A))
 				{
@@ -488,15 +503,10 @@ namespace Dunjun
 					g_cameraWorld.transform.position.y = g_cameraWorld.transform.position.y + 1.0f;
 					g_cameraWorld.lookAt({player.transform.position.x, player.transform.position.y, player.transform.position.z});
 					g_currentCamera = &g_cameraWorld;
+					g_projectionTest = lerp(pp, op, 0.01f);
 				}
 
-
-				g_cameraWorld.projectionType = ProjectionType::Perspective;
-				const Matrix4 pp = g_cameraWorld.getProjection(); // perspective projection
-
-				g_cameraWorld.projectionType = ProjectionType::Orthographic;
-				const Matrix4 op = g_cameraWorld.getProjection(); // perspective projection
-
+				// lerp() camera blending test
 				if (Input::isGamepadButtonPressed(Input::Gamepad_1, Input::XboxButton::Y))
 				{
 					// test projection blending
@@ -511,10 +521,6 @@ namespace Dunjun
 
 					std::cout << "Camera projection is " << t << " percent orthographic." << std::endl;
 					//g_projectionTest = g_cameraPlayer.getProjection();
-				}
-				else
-				{
-					g_projectionTest = lerp(pp, op, 0.95f);
 				}
 
 			// end Gamepad Input

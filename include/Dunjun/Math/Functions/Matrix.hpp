@@ -3,8 +3,6 @@
 
 #include <Dunjun/Math/Quaternion.hpp>
 
-#include <cmath>
-
 namespace Dunjun
 {
 	// matrix transform handling functions
