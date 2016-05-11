@@ -2,6 +2,7 @@
 
 //#include <Dunjun/Game.hpp> // included in Input.hpp
 #include <Dunjun/Input.hpp>
+#include <Dunjun/Scene/SceneNode.hpp>
 
 namespace Dunjun
 {
@@ -24,6 +25,8 @@ namespace Dunjun
 	//GLOBAL ModelAsset g_wall;
 	GLOBAL std::vector<ModelInstance> g_instances;
 
+	GLOBAL SceneNode g_rootNode;
+
 	GLOBAL Camera g_cameraPlayer;
 	GLOBAL Camera g_cameraWorld;
 	GLOBAL Camera* g_currentCamera = &g_cameraPlayer;
@@ -32,6 +35,28 @@ namespace Dunjun
 	GLOBAL std::map<std::string, Mesh*> g_meshes;
 
 	GLOBAL Level g_level;
+
+	class ModelNode : public SceneNode
+	{
+	public:
+		using u_ptr = std::unique_ptr<ModelNode>;
+
+		ModelAsset* asset = nullptr;
+
+	protected:
+		virtual void drawCurrent(Transform t)
+		{
+			ShaderProgram* shaders = asset->material->shaders;
+			Texture* tex = asset->material->texture;
+
+			shaders->use();
+			Texture::bind(tex, 0);
+
+			asset->mesh->draw();
+
+			shaders->stopUsing();
+		}
+	};
 
 	namespace Game
 	{
@@ -273,6 +298,8 @@ namespace Dunjun
 			//} // end create walls
 
 			g_level.generate();
+
+			g_rootNode.onStart();
 		}
 
 		/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -290,6 +317,15 @@ namespace Dunjun
 		// create instances of vertex info
 		INTERNAL void loadInstances()
 		{
+			{ // test scene node
+				ModelNode::u_ptr player = make_unique<ModelNode>();
+
+				player->asset = &g_sprite;
+				player->transform.position = {4.0f, 5.5f, 4.0f};
+				player->name = "player";
+
+				g_rootNode.attachChild(std::move(player));
+			}
 			// test multiple transforms
 			// FIXME parent cannot pass on 45 degree orientation
 			//Transform parent;
@@ -334,6 +370,7 @@ namespace Dunjun
 
 				g_cameraPlayer.projectionType = ProjectionType::Perspective;
 				g_cameraPlayer.fieldOfView = Degree(50.0f); // for perspective view
+				g_cameraPlayer.orthoScale = 10.0f; // for perspective view
 
 				// temp variables used in lerp()
 				g_cameraWorld.projectionType = ProjectionType::Perspective;
@@ -361,6 +398,11 @@ namespace Dunjun
 
 		INTERNAL void update(f32 dt)
 		{
+			// test scene node
+			SceneNode* playerPtr = g_rootNode.findChildByName("player");
+			playerPtr->transform.position.x = playerPtr->transform.position.x + (1 * dt);
+			g_rootNode.update(dt);
+
 			ModelInstance &player = g_instances[0];
 			//g_instances[0].transform.position.x = std::sin(3.0f * Input::getTime());
 			//g_instances[0].transform.position.z = std::cos(3.0f * Input::getTime());
@@ -740,6 +782,8 @@ namespace Dunjun
 				currentShaders->stopUsing();
 
 			Texture::bind(nullptr, 0); // unbind texture
+
+			g_rootNode.draw();
 
 			Window::swapBuffers();; // switches information between the front buffer and the back buffer
 		}

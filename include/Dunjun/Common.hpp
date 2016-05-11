@@ -1,8 +1,6 @@
 #ifndef DUNJUN_COMMON_HPP // ifndef checks if this macro has been defined
 #define DUNJUN_COMMON_HPP // if not then define it
 
-#include <Dunjun/ReadOnly.hpp>
-
 #include <algorithm>
 #include <array>
 #include <cassert>

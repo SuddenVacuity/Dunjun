@@ -1,7 +1,7 @@
 #ifndef DUNJUN_CAMERA_HPP 
 #define DUNJUN_CAMERA_HPP 
 
-#include <Dunjun/Transform.hpp>
+#include <Dunjun/Scene/SceneNode.hpp>
 
 namespace Dunjun
 {
