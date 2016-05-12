@@ -12,12 +12,15 @@
 #include <fstream>
 #include <iostream>
 #include <limits>
+#include <map>
 #include <memory>
 #include <ostream>
 #include <random>
 #include <sstream>
 #include <stack>
 #include <stdexcept>
+#include <typeindex> // SceneNode.hpp
+#include <typeinfo> // SceneNode.hpp
 #include <vector>
 
 #define GLOBAL static // set all these types to refer to static

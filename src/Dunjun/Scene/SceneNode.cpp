@@ -73,12 +73,29 @@ namespace Dunjun
 	{
 		onStartCurrent();
 		onStartChildren();
+
+		// check node components
+		for(auto& group : m_groupedComponents)
+		{
+			for(auto& component : group.second)
+			{
+				component->onStart();
+			}
+		}
 	}
 
 	void SceneNode::update(f32 dt)
 	{
 		updateCurrent(dt);
 		updateChildren(dt);
+
+		for (auto& group : m_groupedComponents)
+		{
+			for (auto& component : group.second)
+			{
+				component->update(dt);
+			}
+		}
 	}
 
 	void SceneNode::draw(Transform t)
@@ -87,7 +104,47 @@ namespace Dunjun
 
 		drawCurrent(t);
 		drawChildren(t);
+
+		for (auto& group : m_groupedComponents)
+		{
+			for (auto& component : group.second)
+			{
+				component->draw(t);
+			}
+		}
 	}
+
+
+	/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	)				.
+	)					NODECOMPONENTS
+	)
+	)				.
+	)					.
+	)
+	)				.
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+
+	SceneNode* SceneNode::addComponent(NodeComponent* component)
+	{
+		component->parent = this;
+
+		const std::type_index id(typeid(*component));
+
+		m_groupedComponents[id].push_back(component);
+
+		return this;
+	}
+
+	/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	)				.
+	)					PROTECTED
+	)
+	)				.
+	)					.
+	)
+	)				.
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
 	void SceneNode::onStartCurrent()
 	{

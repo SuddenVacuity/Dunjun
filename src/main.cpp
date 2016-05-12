@@ -13,12 +13,12 @@ found here: https://www.youtube.com/watch?v=fRUYl6_5m3o
 HEADER MAP
 ==============================================================
 
-Common.hpp >> Types.hpp >> ReadOnly.hpp >> Constants.hpp >> Unit.hpp >> Angle.hpp >>
+Common.hpp >> Types.hpp >> ReadOnly.hpp >> NonCopyable.hpp >> Constants.hpp >> Unit.hpp >> Angle.hpp >>
 Vector2.hpp >> Vector3.hpp >> Vector4.hpp >> Matrix4.hpp >> Quaternion.hpp >>
 Matrix.hpp >> Interpolation.hpp >> Random.hpp >> Functions.hpp >> Rectangle.hpp >> Math.hpp >>
-Transform.hpp >> SceneNode.hpp >> Camera.hpp >> NonCopyable.hpp >> OpenGL.hpp >> Window.hpp >> Clock.hpp >>
+Transform.hpp >> NodeComponent.hpp >> SceneNode.hpp >> Camera.hpp >> OpenGL.hpp >> Window.hpp >> Clock.hpp >>
 TickCounter.hpp >> Image.hpp >> Texture.hpp >> Color.hpp >> Vertex.hpp >> Mesh.hpp >>
-ShaderProgram.hpp >> Material.hpp >> ModelAsset.hpp >> Level.hpp >> Game.hpp >> Input.hpp >>
+ShaderProgram.hpp >> Material.hpp >> MeshRenderer.hpp >> ModelAsset.hpp >> Level.hpp >> Game.hpp >> Input.hpp >>
 main.cpp
 
 */

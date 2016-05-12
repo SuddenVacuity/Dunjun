@@ -13,6 +13,40 @@ namespace Dunjun
 		Transform transform;
 	};
 
+
+	GLOBAL Camera g_cameraPlayer;
+	GLOBAL Camera g_cameraWorld;
+	GLOBAL Camera* g_currentCamera = &g_cameraPlayer;
+	GLOBAL Matrix4 g_projectionTest;
+
+	class ModelNode : public SceneNode
+	{
+	public:
+		using u_ptr = std::unique_ptr<ModelNode>;
+
+		ModelAsset* asset = nullptr;
+
+	protected:
+		virtual void drawCurrent(Transform t)
+		{
+			ShaderProgram* shaders = asset->material->shaders;
+			const Texture* tex = asset->material->texture;
+
+			shaders->use();
+			Texture::bind(tex, 0);
+
+			shaders->setUniform("u_camera", g_projectionTest * g_currentCamera->getView()); // shaderprogram.cpp
+			shaders->setUniform("u_transform", t); // shaderprogram.cpp
+			shaders->setUniform("u_tex", (Dunjun::u32)0); // shaderprogram.cpp
+
+			asset->mesh->draw();
+
+			shaders->stopUsing();
+
+			Texture::bind(nullptr, 0);
+		}
+	};
+
 	namespace
 	{
 		GLOBAL const f32 TIME_STEP = 1.0f / 60.0f;
@@ -26,37 +60,14 @@ namespace Dunjun
 	GLOBAL std::vector<ModelInstance> g_instances;
 
 	GLOBAL SceneNode g_rootNode;
-
-	GLOBAL Camera g_cameraPlayer;
-	GLOBAL Camera g_cameraWorld;
-	GLOBAL Camera* g_currentCamera = &g_cameraPlayer;
+	GLOBAL ModelNode* g_player;
 
 	GLOBAL std::map<std::string, Material> g_materials;
 	GLOBAL std::map<std::string, Mesh*> g_meshes;
 
 	GLOBAL Level g_level;
 
-	class ModelNode : public SceneNode
-	{
-	public:
-		using u_ptr = std::unique_ptr<ModelNode>;
 
-		ModelAsset* asset = nullptr;
-
-	protected:
-		virtual void drawCurrent(Transform t)
-		{
-			ShaderProgram* shaders = asset->material->shaders;
-			Texture* tex = asset->material->texture;
-
-			shaders->use();
-			Texture::bind(tex, 0);
-
-			asset->mesh->draw();
-
-			shaders->stopUsing();
-		}
-	};
 
 	namespace Game
 	{
@@ -312,8 +323,6 @@ namespace Dunjun
 		)				.
 		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-		GLOBAL Matrix4 g_projectionTest;
-
 		// create instances of vertex info
 		INTERNAL void loadInstances()
 		{
@@ -323,6 +332,9 @@ namespace Dunjun
 				player->asset = &g_sprite;
 				player->transform.position = {4.0f, 5.5f, 4.0f};
 				player->name = "player";
+
+				// no idea why this says it's an error
+				g_player = player.get();
 
 				g_rootNode.attachChild(std::move(player));
 			}
@@ -335,11 +347,11 @@ namespace Dunjun
 
 			generateWorld();
 
-			ModelInstance player;
-			player.asset = &g_sprite;
-			player.transform.position = { 4, 1, 4 }; // translation
-			player.transform.scale = { 1, 2, 1 };
-			player.transform.orientation = angleAxis(Degree(0), { 1, 0, 0 }); // rotation
+			//ModelInstance player;
+			//player.asset = &g_sprite;
+			//player.transform.position = { 4, 1, 4 }; // translation
+			//player.transform.scale = { 1, 2, 1 };
+			//player.transform.orientation = angleAxis(Degree(0), { 1, 0, 0 }); // rotation
 
 			for(int j = 0; j < g_level.sizeX; j++)
 			{
@@ -348,7 +360,7 @@ namespace Dunjun
 				{
 					if(g_level.mapGrid[i][j] != Level::TileId(0xFFFFFFFF, 0xFFFFFFFF))
 					{
-						player.transform.position = Vector3(i, 1.0f, j);
+						g_player->transform.position = Vector3(i, 1.0f, j);
 						escape = true;
 						break;
 					}
@@ -359,12 +371,12 @@ namespace Dunjun
 					break;
 			}
 
-			g_instances.push_back(player);
+			//g_instances.push_back(player);
 
 			{
 				//Initialize camera
 				g_cameraPlayer.viewportAspectRatio = 16.0f / 9.0f;
-				g_cameraPlayer.transform.position = { player.transform.position.x - 8, player.transform.position.y + 3, player.transform.position.z + 10 };
+				g_cameraPlayer.transform.position = { g_player->transform.position.x - 8, g_player->transform.position.y + 8, g_player->transform.position.z + 10 };
 				//g_cameraPlayer.lookAt({ g_cameraPlayer.transform.position.x, g_cameraPlayer.transform.position.y, g_cameraPlayer.transform.position.x - 1 });
 				g_cameraPlayer.lookAt({0, 0, 0});
 
@@ -399,11 +411,10 @@ namespace Dunjun
 		INTERNAL void update(f32 dt)
 		{
 			// test scene node
-			SceneNode* playerPtr = g_rootNode.findChildByName("player");
-			playerPtr->transform.position.x = playerPtr->transform.position.x + (1 * dt);
+			//SceneNode* playerPtr = g_rootNode.findChildByName("player");
 			g_rootNode.update(dt);
 
-			ModelInstance &player = g_instances[0];
+			//ModelInstance &player = g_instances[0];
 			//g_instances[0].transform.position.x = std::sin(3.0f * Input::getTime());
 			//g_instances[0].transform.position.z = std::cos(3.0f * Input::getTime());
 
@@ -419,17 +430,17 @@ namespace Dunjun
 
 			parent.orientation = angleAxis(Degree(360 * std::sin(glfwGetTime())) * dt / 5, { 1, 0, 0 }) * parent.orientation;
 			
-			player.transform = player.transform * parent;
+			g_player->transform = g_player->transform * parent;
 
-			std::cout << "Scale: " << player.transform.scale << std::endl;
-			std::cout << "Oreintation: " << player.transform.orientation << std::endl;
+			std::cout << "Scale: " << g_player->transform.scale << std::endl;
+			std::cout << "Oreintation: " << g_player->transform.orientation << std::endl;
 			std::cout << "\n";
 			}
 			else if (Input::isKeyPressed(Input::Key::R)) // test multipling transforms
 			{
-				player.transform.position = { 0, 0, 0 }; // translation
-				player.transform.scale = { 1, 1, 1 };
-				player.transform.orientation = angleAxis(Degree(0), { 0, 0, 1 }); // rotation
+				g_player->transform.position = { 0, 0, 0 }; // translation
+				g_player->transform.scale = { 1, 1, 1 };
+				g_player->transform.orientation = angleAxis(Degree(0), { 0, 0, 1 }); // rotation
 			}
 
 			//g_instances[2].transform.orientation = angleAxis(Degree(120) * dt, { 1, 0, 0 }) * g_instances[2].transform.orientation;
@@ -543,7 +554,7 @@ namespace Dunjun
 					// TODO: reset forward vector when pressed
 					g_cameraWorld.transform = g_cameraPlayer.transform;
 					g_cameraWorld.transform.position.y = g_cameraWorld.transform.position.y + 1.0f;
-					g_cameraWorld.lookAt({player.transform.position.x, player.transform.position.y, player.transform.position.z});
+					g_cameraWorld.lookAt({ g_player->transform.position.x, g_player->transform.position.y, g_player->transform.position.z});
 					g_currentCamera = &g_cameraWorld;
 					g_projectionTest = lerp(pp, op, 0.01f);
 				}
@@ -601,21 +612,21 @@ namespace Dunjun
 					velocityDirection = normalize(velocityDirection);
 				{
 					// update player position
-					player.transform.position += Vector3{playerVelX, 0, playerVelZ} * velocityDirection * dt;
+					g_player->transform.position += Vector3{playerVelX, 0, playerVelZ} * velocityDirection * dt;
 
 					// update pplayer orientation
 #if 0 // BillBoard
 				Quaternion pRot = 
-							conjugate(quaternionLookAt(player.transform.position, 
+							conjugate(quaternionLookAt(g_player->transform.position,
 								g_cameraWorld.transform.position, {0, 1, 0}));
 
-				player.transform.orientation = pRot;
+				g_player->transform.orientation = pRot;
 #elif 0 // Billboard fixed Y axis
-				Vector3 f = player.transform.position - g_cameraWorld.transform.position;
+				Vector3 f = g_player->transform.position - g_cameraWorld.transform.position;
 				f.y = 0;
 
 				if(f.x == 0 && f.z == 0)
-					player.transform.orientation = Quaternion();
+					g_player->transform.orientation = Quaternion();
 				else
 				{
 				Radian a(std::atan(f.z / f.x));
@@ -624,7 +635,7 @@ namespace Dunjun
 				if(f.x < 0) // prevent flipping
 					a += Radian(Constants::TAU / 2);
 
-				player.transform.orientation = angleAxis(-a, {0, 1, 0});
+				g_player->transform.orientation = angleAxis(-a, {0, 1, 0});
 				}
 #endif // end billboard
 
@@ -676,9 +687,10 @@ namespace Dunjun
 					//	}
 					//}
 
-					g_cameraPlayer.transform.position.x = lerp(g_cameraPlayer.transform.position.x - 3, player.transform.position.x, 10.0f * dt);
+					g_cameraPlayer.transform.position.x = lerp(g_cameraPlayer.transform.position.x - 3, g_player->transform.position.x, 10.0f * dt);
+					g_cameraPlayer.transform.position.z = lerp(g_cameraPlayer.transform.position.z + 3, g_player->transform.position.z, 10.0f * dt);
 
-					g_cameraPlayer.lookAt({ player.transform.position.x, player.transform.position.y + 0.5f, player.transform.position.z });
+					g_cameraPlayer.lookAt({ g_player->transform.position.x, g_player->transform.position.y + 0.5f, g_player->transform.position.z });
 
 				}
 

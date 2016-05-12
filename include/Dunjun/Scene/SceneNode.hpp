@@ -1,14 +1,15 @@
 #ifndef DUNJUN_SCENE_SCENENODE_HPP
 #define DUNJUN_SCENE_SCENENODE_HPP
 
-#include <Dunjun/Transform.hpp>
+#include <Dunjun/Scene/NodeComponent.hpp>
 
 namespace Dunjun
 {
-	class SceneNode
+	class SceneNode : private NonCopyable
 	{
 	public:
 		using u_ptr = std::unique_ptr<SceneNode>; // quick typedef for unique pointers
+		using GroupedComponentMap = std::map<std::type_index, std::vector<NodeComponent*>>;
 
 		SceneNode();
 
@@ -30,6 +31,71 @@ namespace Dunjun
 		Transform transform;
 		ReadOnly<SceneNode*, SceneNode> parent;
 
+		/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+		)				.
+		)					NODECOMPONENTS
+		)
+		)				.
+		)					.
+		)
+		)				.
+		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+
+		SceneNode* addComponent(NodeComponent* component);
+
+		template <class Derived, class ... Args>
+		inline SceneNode* addComponent(Args&& ... args)
+		{
+			return addComponent(new Derived(args...));
+		}
+		
+		inline void removeAllComponents()
+		{
+			for(auto& group : m_groupedComponents)
+				group.second.clear();
+			m_groupedComponents.clear();
+		}
+
+		template <class ComponentType>
+		std::vector<NodeComponent*>* getComponents()
+		{
+			if(!std::is_base_of<NodeComponent, ComponentType>::value)
+				return nullptr;
+
+			if(m_groupedComponents.size() == 0)
+				return nullptr;
+
+			const std::type_index id(typeid(ComponentType));
+
+			for(auto& group : m_groupedComponents)
+			{
+				if(group.first == id)
+					return &m_groupedComponents[id];
+			}
+
+			return nullptr;
+		}
+
+		template <class ComponentType>
+		NodeComponent* getComponent()
+		{
+			auto c = getComponents<ComponentType>();
+
+			if(c)
+				return std::static_pointer_cast<ComponentType>(c->at(0));
+			
+			return nullptr;
+		}
+
+		/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+		)				.
+		)					PROTECTED
+		)
+		)				.
+		)					.
+		)
+		)				.
+		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 	protected:
 		virtual void onStartCurrent();
 		void onStartChildren();
@@ -40,8 +106,9 @@ namespace Dunjun
 		virtual void drawCurrent(Transform t);
 		void drawChildren(Transform t);
 
-
 		std::vector<u_ptr> m_children;
+		// A GroupedComponentMap groups components of the same type together by type_index(...).hash_code()
+		GroupedComponentMap m_groupedComponents;
 
 	}; // end SceneNode
 } // end Dunjun

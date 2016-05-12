@@ -207,6 +207,8 @@
     <ClInclude Include="include\Dunjun\NonCopyable.hpp" />
     <ClInclude Include="include\Dunjun\OpenGL.hpp" />
     <ClInclude Include="include\Dunjun\ReadOnly.hpp" />
+    <ClInclude Include="include\Dunjun\Scene\MeshRenderer.hpp" />
+    <ClInclude Include="include\Dunjun\Scene\NodeComponent.hpp" />
     <ClInclude Include="include\Dunjun\Scene\SceneNode.hpp" />
     <ClInclude Include="include\Dunjun\ShaderProgram.hpp" />
     <ClInclude Include="include\Dunjun\Texture.hpp" />

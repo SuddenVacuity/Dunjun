@@ -1,7 +1,7 @@
 #ifndef DUNJUN_NONCOPYABLE_HPP
 #define DUNJUN_NONCOPYABLE_HPP
 
-#include <Dunjun/Camera.hpp>
+#include <Dunjun/ReadOnly.hpp>
 
 // this keeps shaders and texture from being copied
 namespace Dunjun

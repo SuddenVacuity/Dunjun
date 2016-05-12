@@ -1,7 +1,7 @@
 #ifndef DUNJUN_OPENGL_HPP
 #define DUNJUN_OPENGL_HPP
 
-#include <Dunjun/NonCopyable.hpp>
+#include <Dunjun/Camera.hpp>
 // this hpp file includes open glew for various operating systems
 
 #ifndef GLFW_STATIC
