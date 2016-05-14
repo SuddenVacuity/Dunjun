@@ -3,12 +3,23 @@
 
 namespace Dunjun
 {
+	namespace
+	{
+		GLOBAL size_t idCount = 0;
+	} // end anon namespace
+
+	// TODO idCount-- when destrucitng
 	SceneNode::SceneNode()
 		: m_children()
-		, name("DEFAULT SCENENODE")
+		, id(idCount++)
+		, name("")
 		, transform()
 		, parent(nullptr)
+		, visible(true)
 	{
+		std::stringstream ss;
+		ss << "node_" << id;
+		name = ss.str();
 	}
 
 	SceneNode& SceneNode::attachChild(u_ptr child)
@@ -48,11 +59,23 @@ namespace Dunjun
 		return nullptr;
 	}
 
+	// TODO: return the id of all with the same name
 	SceneNode* SceneNode::findChildByName(const std::string& name) const
 	{
 		for(const u_ptr& child : m_children)
 		{
 			if(child->name == name)
+				return child.get();
+		}
+
+		return nullptr;
+	}
+
+	SceneNode* SceneNode::findChildById(size_t id) const
+	{
+		for (const u_ptr& child : m_children)
+		{
+			if (child->id == id)
 				return child.get();
 		}
 
@@ -98,8 +121,11 @@ namespace Dunjun
 		}
 	}
 
-	void SceneNode::draw(Renderer& renderer, Transform t)
+	void SceneNode::draw(Renderer& renderer, Transform t) const
 	{
+		if(!visible)
+			return;
+
 		t *= this->transform;
 
 		drawCurrent(renderer, t);
@@ -125,13 +151,13 @@ namespace Dunjun
 	)				.
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-	SceneNode* SceneNode::addComponent(NodeComponent* component)
+	SceneNode* SceneNode::addComponent(NodeComponent::u_ptr component)
 	{
 		component->parent = this;
 
 		const std::type_index id(typeid(*component));
 
-		m_groupedComponents[id].push_back(component);
+		m_groupedComponents[id].push_back(std::move(component));
 
 		return this;
 	}
@@ -168,14 +194,14 @@ namespace Dunjun
 			child->update(dt);
 	}
 
-	void SceneNode::drawCurrent(Renderer& renderer, Transform t)
+	void SceneNode::drawCurrent(Renderer& renderer, Transform t) const
 	{
 		// Do nothing by default
 	}
 
-	void SceneNode::drawChildren(Renderer& renderer, Transform t)
+	void SceneNode::drawChildren(Renderer& renderer, Transform t) const
 	{
-		for (u_ptr& child : m_children)
+		for (const u_ptr& child : m_children)
 			child->draw(renderer, t);
 	}
 

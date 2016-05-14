@@ -1,6 +1,8 @@
 
 #include <Dunjun/Renderer.hpp>
 
+#include <Dunjun/Scene/SceneNode.hpp>
+
 namespace Dunjun
 {
 	Renderer::Renderer()
@@ -21,6 +23,11 @@ namespace Dunjun
 		Texture::bind(nullptr, 0);
 
 		m_currentCamera = nullptr;
+	}
+
+	void Renderer::draw(const SceneNode& node, const Transform& t)
+	{
+		node.draw(*this, t);
 	}
 
 	void Renderer::setShaders(ShaderProgram* shaders)
@@ -50,6 +57,8 @@ namespace Dunjun
 	{
 		if(!m_currentShaders)
 			return;
+		else if(!m_currentShaders->isInUse())
+			m_currentShaders->use();
 
 		m_currentShaders->setUniform("u_camera", m_currentCamera->getMatrix()); // shaderprogram.cpp
 		m_currentShaders->setUniform("u_transform", t); // shaderprogram.cpp

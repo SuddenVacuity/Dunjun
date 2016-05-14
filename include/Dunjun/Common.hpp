@@ -8,6 +8,7 @@
 #include <cmath>
 #include <cstdint>
 #include <cstdlib>
+#include <deque> // SceneNode.hpp
 #include <functional>
 #include <fstream>
 #include <iostream>
@@ -52,7 +53,7 @@ namespace
 template <class T, class... Args>
 std::unique_ptr<T> make_unique(Args&&... args)
 {
-	return make_unique_helper<T>(std::is_array<T>(), std::forward<ARGS>(args)...);
+	return make_unique_helper<T>(std::is_array<T>(), std::forward<Args>(args)...);
 }
 
 

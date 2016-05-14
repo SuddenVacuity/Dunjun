@@ -2,7 +2,6 @@
 
 //#include <Dunjun/Game.hpp> // included in Input.hpp
 #include <Dunjun/Input.hpp>
-#include <Dunjun/Scene/SceneNode.hpp>
 
 namespace Dunjun
 {
@@ -29,7 +28,7 @@ namespace Dunjun
 	GLOBAL ModelAsset g_sprite;
 	//GLOBAL ModelAsset g_floor;
 	//GLOBAL ModelAsset g_wall;
-	GLOBAL std::vector<ModelInstance> g_instances;
+	//GLOBAL std::vector<ModelInstance> g_instances;
 
 	GLOBAL SceneNode g_rootNode;
 	GLOBAL SceneNode* g_player;
@@ -300,7 +299,18 @@ namespace Dunjun
 		// create instances of vertex info
 		INTERNAL void loadInstances()
 		{
-			{ // test scene node
+			generateWorld();
+
+			{ // level scene node
+				SceneNode::u_ptr level = make_unique<SceneNode>();
+
+				level->name = "level";
+				level->addComponent<MeshRenderer>(*g_level.mesh, *g_level.material);
+
+				g_rootNode.attachChild(std::move(level));
+			}
+
+			{ // player scene node
 				SceneNode::u_ptr player = make_unique<SceneNode>();
 
 				player->transform.position = { 4.0f, 5.5f, 4.0f };
@@ -310,7 +320,6 @@ namespace Dunjun
 				player->addComponent<MeshRenderer>(g_sprite);
 				player->addComponent<FaceCamera>(g_cameraWorld);
 
-				// no idea why this says it's an error
 				g_player = player.get();
 
 				g_rootNode.attachChild(std::move(player));
@@ -321,8 +330,6 @@ namespace Dunjun
 			//parent.position = { 0, 0, 0 };
 			//parent.orientation = angleAxis(Degree(90), { 1, 0, 0 });
 			//parent.scale = { 1.0f, 1.0f, 1.0f };
-
-			generateWorld();
 
 			//ModelInstance player;
 			//player.asset = &g_sprite;
@@ -715,63 +722,63 @@ namespace Dunjun
 			glClearColor(0.02f, 0.02f, 0.02f, 1.0f); // set the default color (R,G,B,A)
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-			const Dunjun::ShaderProgram* currentShaders = nullptr;
-			const Texture* currentTexture = nullptr;
-
-			
-			// render instances
-			for (const auto& inst : g_instances)
-			{
-				if (inst.asset->material->shaders != currentShaders) // swap to new shaders
-				{
-					if (currentShaders) // checkif currentshader is in use
-						currentShaders->stopUsing();
-
-					currentShaders = inst.asset->material->shaders;
-					currentShaders->use();
-				}
-
-				if (inst.asset->material->texture != currentTexture) // swap to new shaders
-				{
-					currentTexture = inst.asset->material->texture;
-					Texture::bind(currentTexture, 0);
-				}
-
-				renderInstance(inst);
-			}
-
-			//render level
-			{
-				if (g_level.material->shaders != currentShaders) // swap to new shaders
-				{
-					if (currentShaders) // checkif currentshader is in use
-						currentShaders->stopUsing();
-			
-					currentShaders = g_level.material->shaders;
-					currentShaders->use();
-				}
-			
-				if (g_level.material->texture != currentTexture) // swap to new shaders
-				{
-					currentTexture = g_level.material->texture;
-					Texture::bind(currentTexture, 0);
-				}
-			
-				renderLevel(g_level);
-			}
-
-			if (currentShaders) // checkif currentshader is in use
-				currentShaders->stopUsing();
-
-			Texture::bind(nullptr, 0); // unbind texture
-
-			g_renderer.setCamera(*g_currentCamera);
-
-			g_rootNode.draw(g_renderer);
+		// OLD RENDER CODE
+		//	const Dunjun::ShaderProgram* currentShaders = nullptr;
+		//	const Texture* currentTexture = nullptr;
+		//
+		//	
+		//	// render instances
+		//	for (const auto& inst : g_instances)
+		//	{
+		//		if (inst.asset->material->shaders != currentShaders) // swap to new shaders
+		//		{
+		//			if (currentShaders) // checkif currentshader is in use
+		//				currentShaders->stopUsing();
+		//
+		//			currentShaders = inst.asset->material->shaders;
+		//			currentShaders->use();
+		//		}
+		//
+		//		if (inst.asset->material->texture != currentTexture) // swap to new shaders
+		//		{
+		//			currentTexture = inst.asset->material->texture;
+		//			Texture::bind(currentTexture, 0);
+		//		}
+		//
+		//		renderInstance(inst);
+		//	}
+		//
+		//	//render level
+		//	{
+		//		if (g_level.material->shaders != currentShaders) // swap to new shaders
+		//		{
+		//			if (currentShaders) // checkif currentshader is in use
+		//				currentShaders->stopUsing();
+		//	
+		//			currentShaders = g_level.material->shaders;
+		//			currentShaders->use();
+		//		}
+		//	
+		//		if (g_level.material->texture != currentTexture) // swap to new shaders
+		//		{
+		//			currentTexture = g_level.material->texture;
+		//			Texture::bind(currentTexture, 0);
+		//		}
+		//	
+		//		renderLevel(g_level);
+		//	}
+		//
+		//	if (currentShaders) // checkif currentshader is in use
+		//		currentShaders->stopUsing();
+		//
+		//	Texture::bind(nullptr, 0); // unbind texture
 
 			g_renderer.reset();
 
-			Window::swapBuffers();; // switches information between the front buffer and the back buffer
+			g_renderer.setCamera(*g_currentCamera);
+			g_renderer.draw(g_rootNode);
+
+			Window::swapBuffers(); // switches information between the front buffer and the back buffer
 		}
 
 		/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
