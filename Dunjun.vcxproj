@@ -157,6 +157,7 @@
     </ProjectReference>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\Dunjun\Renderer.cpp" />
     <ClCompile Include="src\Dunjun\Camera.cpp" />
     <ClCompile Include="src\Dunjun\Game.cpp" />
     <ClCompile Include="src\Dunjun\Image.cpp" />
@@ -172,6 +173,7 @@
     <ClCompile Include="src\Dunjun\Math\Vector3.cpp" />
     <ClCompile Include="src\Dunjun\Math\Vector4.cpp" />
     <ClCompile Include="src\Dunjun\Mesh.cpp" />
+    <ClCompile Include="src\Dunjun\Scene\FaceCamera.cpp" />
     <ClCompile Include="src\Dunjun\Scene\SceneNode.cpp" />
     <ClCompile Include="src\Dunjun\ShaderProgram.cpp" />
     <ClCompile Include="src\Dunjun\Texture.cpp" />
@@ -207,8 +209,11 @@
     <ClInclude Include="include\Dunjun\NonCopyable.hpp" />
     <ClInclude Include="include\Dunjun\OpenGL.hpp" />
     <ClInclude Include="include\Dunjun\ReadOnly.hpp" />
+    <ClInclude Include="include\Dunjun\Scene.hpp" />
+    <ClInclude Include="include\Dunjun\Scene\FaceCamera.hpp" />
     <ClInclude Include="include\Dunjun\Scene\MeshRenderer.hpp" />
     <ClInclude Include="include\Dunjun\Scene\NodeComponent.hpp" />
+    <ClInclude Include="include\Dunjun\Renderer.hpp" />
     <ClInclude Include="include\Dunjun\Scene\SceneNode.hpp" />
     <ClInclude Include="include\Dunjun\ShaderProgram.hpp" />
     <ClInclude Include="include\Dunjun\Texture.hpp" />

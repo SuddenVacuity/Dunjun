@@ -17,35 +17,7 @@ namespace Dunjun
 	GLOBAL Camera g_cameraPlayer;
 	GLOBAL Camera g_cameraWorld;
 	GLOBAL Camera* g_currentCamera = &g_cameraPlayer;
-	GLOBAL Matrix4 g_projectionTest;
-
-	class ModelNode : public SceneNode
-	{
-	public:
-		using u_ptr = std::unique_ptr<ModelNode>;
-
-		ModelAsset* asset = nullptr;
-
-	protected:
-		virtual void drawCurrent(Transform t)
-		{
-			ShaderProgram* shaders = asset->material->shaders;
-			const Texture* tex = asset->material->texture;
-
-			shaders->use();
-			Texture::bind(tex, 0);
-
-			shaders->setUniform("u_camera", g_projectionTest * g_currentCamera->getView()); // shaderprogram.cpp
-			shaders->setUniform("u_transform", t); // shaderprogram.cpp
-			shaders->setUniform("u_tex", (Dunjun::u32)0); // shaderprogram.cpp
-
-			asset->mesh->draw();
-
-			shaders->stopUsing();
-
-			Texture::bind(nullptr, 0);
-		}
-	};
+	//GLOBAL Matrix4 g_projection;
 
 	namespace
 	{
@@ -60,7 +32,9 @@ namespace Dunjun
 	GLOBAL std::vector<ModelInstance> g_instances;
 
 	GLOBAL SceneNode g_rootNode;
-	GLOBAL ModelNode* g_player;
+	GLOBAL SceneNode* g_player;
+
+	GLOBAL Renderer g_renderer;
 
 	GLOBAL std::map<std::string, Material> g_materials;
 	GLOBAL std::map<std::string, Mesh*> g_meshes;
@@ -327,11 +301,14 @@ namespace Dunjun
 		INTERNAL void loadInstances()
 		{
 			{ // test scene node
-				ModelNode::u_ptr player = make_unique<ModelNode>();
+				SceneNode::u_ptr player = make_unique<SceneNode>();
 
-				player->asset = &g_sprite;
-				player->transform.position = {4.0f, 5.5f, 4.0f};
+				player->transform.position = { 4.0f, 5.5f, 4.0f };
+				player->transform.scale = { 1.0f, 2.0f, 1.0f };
 				player->name = "player";
+
+				player->addComponent<MeshRenderer>(g_sprite);
+				player->addComponent<FaceCamera>(g_cameraWorld);
 
 				// no idea why this says it's an error
 				g_player = player.get();
@@ -376,25 +353,32 @@ namespace Dunjun
 			{
 				//Initialize camera
 				g_cameraPlayer.viewportAspectRatio = 16.0f / 9.0f;
-				g_cameraPlayer.transform.position = { g_player->transform.position.x - 8, g_player->transform.position.y + 8, g_player->transform.position.z + 10 };
+				g_cameraPlayer.transform.position = { g_player->transform.position.x - 3, g_player->transform.position.y + 2, g_player->transform.position.z + 3 };
 				//g_cameraPlayer.lookAt({ g_cameraPlayer.transform.position.x, g_cameraPlayer.transform.position.y, g_cameraPlayer.transform.position.x - 1 });
-				g_cameraPlayer.lookAt({0, 0, 0});
+				g_cameraPlayer.lookAt(g_player->transform.position);
 
-				g_cameraPlayer.projectionType = ProjectionType::Perspective;
+				g_cameraPlayer.projectionType = ProjectionType::Orthographic;
 				g_cameraPlayer.fieldOfView = Degree(50.0f); // for perspective view
 				g_cameraPlayer.orthoScale = 10.0f; // for perspective view
 
-				// temp variables used in lerp()
+				
+				// initialize world camera
+				g_cameraWorld = g_cameraPlayer;
 				g_cameraWorld.projectionType = ProjectionType::Perspective;
+				g_cameraWorld.lookAt({ g_cameraWorld.transform.position.x, g_cameraWorld.transform.position.y, g_cameraWorld.transform.position.z - 1 });
+
+				// temp variables used in lerp()
+				const Matrix4 op = g_cameraPlayer.getProjection();
 				const Matrix4 pp = g_cameraWorld.getProjection();
 
-				g_cameraWorld.projectionType = ProjectionType::Orthographic;
-				const Matrix4 op = g_cameraWorld.getProjection();
-				
-				// initialize projection test
-				g_projectionTest = lerp(pp, op, 0.95f);
+				/*// initialize projection types
+				Matrix4 g_projection;
 
-				g_cameraWorld = g_cameraPlayer;
+				// TODO: make Camera::Matrix4 view editable for blending
+				g_projection = lerp(pp, op, 0.95f); // mostly orthographic
+				g_cameraPlayer.getView() * g_projection;
+				g_projection = lerp(pp, op, 0.01f); // mostly perspective
+				g_cameraWorld.getView() * g_projection; */
 			}
 		}
 
@@ -534,19 +518,20 @@ namespace Dunjun
 
 
 				// temp variables used in lerp()
-				g_cameraWorld.projectionType = ProjectionType::Perspective;
-				const Matrix4 pp = g_cameraWorld.getProjection(); // perspective projection
-
-				g_cameraWorld.projectionType = ProjectionType::Orthographic;
-				const Matrix4 op = g_cameraWorld.getProjection(); // perspective projection
+				//g_cameraWorld.projectionType = ProjectionType::Perspective;
+				//const Matrix4 pp = g_cameraWorld.getProjection(); // perspective projection
+				//
+				//g_cameraWorld.projectionType = ProjectionType::Orthographic;
+				//const Matrix4 op = g_cameraWorld.getProjection(); // perspective projection
 
 
 				// projection type swap
 				if (Input::isGamepadButtonPressed(Input::Gamepad_1, Input::XboxButton::B))
 				{
 					// test camera swap
+					g_cameraWorld.transform = g_cameraPlayer.transform;
 					g_currentCamera = &g_cameraPlayer;
-					g_projectionTest = lerp(pp, op, 0.95f);
+					//g_projectionTest = lerp(pp, op, 0.95f);
 				}
 				if (Input::isGamepadButtonPressed(Input::Gamepad_1, Input::XboxButton::A))
 				{
@@ -554,26 +539,13 @@ namespace Dunjun
 					// TODO: reset forward vector when pressed
 					g_cameraWorld.transform = g_cameraPlayer.transform;
 					g_cameraWorld.transform.position.y = g_cameraWorld.transform.position.y + 1.0f;
-					g_cameraWorld.lookAt({ g_player->transform.position.x, g_player->transform.position.y, g_player->transform.position.z});
+					g_cameraWorld.lookAt({ g_cameraWorld.transform.position.x, g_cameraWorld.transform.position.y, g_cameraWorld.transform.position.z - 1});
 					g_currentCamera = &g_cameraWorld;
-					g_projectionTest = lerp(pp, op, 0.01f);
+					//g_projectionTest = lerp(pp, op, 0.01f);
 				}
 
-				// lerp() camera blending test
 				if (Input::isGamepadButtonPressed(Input::Gamepad_1, Input::XboxButton::Y))
 				{
-					// test projection blending
-
-					LOCAL_PERSIST f32 time = 0;
-					time += dt;
-
-					f32 w = 0.3f;
-					f32 t = std::sin(w * time)*std::sin(w * time);
-					
-					g_projectionTest = lerp(pp, op, std::pow(t, 0.3f));
-
-					std::cout << "Camera projection is " << t << " percent orthographic." << std::endl;
-					//g_projectionTest = g_cameraPlayer.getProjection();
 				}
 
 			// end Gamepad Input
@@ -649,7 +621,7 @@ namespace Dunjun
 					g_cameraWorld.viewportAspectRatio = aspectRatio;
 				}
 
-				// camera movement
+				// camera follow movement
 				{
 					//// delta between player and camera movement
 					//// this only works correctly if player and camera have 
@@ -714,7 +686,7 @@ namespace Dunjun
 			ModelAsset* asset = inst.asset;
 			Dunjun::ShaderProgram* shaders = asset->material->shaders;
 
-			shaders->setUniform("u_camera", g_projectionTest * g_currentCamera->getView()); // shaderprogram.cpp
+			shaders->setUniform("u_camera", g_currentCamera->getMatrix()); // shaderprogram.cpp
 			shaders->setUniform("u_transform", inst.transform); // shaderprogram.cpp
 			shaders->setUniform("u_tex", (Dunjun::u32)0); // shaderprogram.cpp
 
@@ -725,7 +697,7 @@ namespace Dunjun
 		{
 			Dunjun::ShaderProgram* shaders = level.material->shaders;
 
-			shaders->setUniform("u_camera", g_projectionTest * g_currentCamera->getView()); // shaderprogram.cpp
+			shaders->setUniform("u_camera", g_currentCamera->getMatrix()); // shaderprogram.cpp
 			shaders->setUniform("u_transform", level.transform); // shaderprogram.cpp
 			shaders->setUniform("u_tex", (Dunjun::u32)0); // shaderprogram.cpp
 
@@ -779,8 +751,6 @@ namespace Dunjun
 					currentShaders->use();
 				}
 			
-			
-			
 				if (g_level.material->texture != currentTexture) // swap to new shaders
 				{
 					currentTexture = g_level.material->texture;
@@ -795,7 +765,11 @@ namespace Dunjun
 
 			Texture::bind(nullptr, 0); // unbind texture
 
-			g_rootNode.draw();
+			g_renderer.setCamera(*g_currentCamera);
+
+			g_rootNode.draw(g_renderer);
+
+			g_renderer.reset();
 
 			Window::swapBuffers();; // switches information between the front buffer and the back buffer
 		}

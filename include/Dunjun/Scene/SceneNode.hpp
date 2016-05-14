@@ -21,11 +21,11 @@ namespace Dunjun
 		// children of only the node being searched
 		SceneNode* findChildByName(const std::string& name) const;
 
-		Transform getGlobaTransform() const;
+		Transform getGlobalTransform() const;
 
 		void onStart();
 		void update(f32 dt);
-		virtual void draw(Transform t = Transform());
+		virtual void draw(Renderer& renderer, Transform t = Transform());
 
 		std::string name;
 		Transform transform;
@@ -103,8 +103,8 @@ namespace Dunjun
 		virtual void updateCurrent(f32 dt);
 		void updateChildren(f32 dt);
 
-		virtual void drawCurrent(Transform t);
-		void drawChildren(Transform t);
+		virtual void drawCurrent(Renderer& renderer, Transform t);
+		void drawChildren(Renderer& renderer, Transform t);
 
 		std::vector<u_ptr> m_children;
 		// A GroupedComponentMap groups components of the same type together by type_index(...).hash_code()

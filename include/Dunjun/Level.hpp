@@ -1,7 +1,7 @@
 #ifndef DUNJUN_LEVEL_HPP
 #define DUNJUN_LEVEL_HPP
 
-#include <Dunjun/ModelAsset.hpp>
+#include <Dunjun/Scene.hpp>
 
 namespace Dunjun
 {
