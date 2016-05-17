@@ -65,7 +65,7 @@ namespace Dunjun
 		std::vector<std::vector<TileId>> mapGrid;
 		ReadOnly<u32, Level> sizeX = 128;
 		ReadOnly<u32, Level> sizeZ = 128;
-		ReadOnly<u32, Level> sizeY = 4;
+		ReadOnly<u32, Level> sizeY = 1;
 		ReadOnly<u32, Level> wallHeight = 1;
 
 		const Material* material;

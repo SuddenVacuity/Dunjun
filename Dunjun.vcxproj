@@ -157,6 +157,7 @@
     </ProjectReference>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\Dunjun\Level\Room.cpp" />
     <ClCompile Include="src\Dunjun\Renderer.cpp" />
     <ClCompile Include="src\Dunjun\Camera.cpp" />
     <ClCompile Include="src\Dunjun\Game.cpp" />
@@ -189,6 +190,7 @@
     <ClInclude Include="include\Dunjun\Image.hpp" />
     <ClInclude Include="include\Dunjun\Input.hpp" />
     <ClInclude Include="include\Dunjun\Level.hpp" />
+    <ClInclude Include="include\Dunjun\Level\Room.hpp" />
     <ClInclude Include="include\Dunjun\Material.hpp" />
     <ClInclude Include="include\Dunjun\Math.hpp" />
     <ClInclude Include="include\Dunjun\Math\Angle.hpp" />

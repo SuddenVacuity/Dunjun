@@ -22,8 +22,14 @@ namespace Dunjun
 
 		virtual void draw(Renderer& renderer, Transform t) const
 		{
+			if(!material)
+				return;
+
 			ShaderProgram* shaders = material->shaders;
 			const Texture* tex = material->texture;
+
+			if(!shaders || !tex)
+				return;
 
 			renderer.setShaders(shaders);
 			renderer.setTexture(tex);

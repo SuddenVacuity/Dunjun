@@ -24,16 +24,17 @@ namespace Dunjun
 		// initialize mapGrid
 		mapGrid = std::vector<std::vector<TileId>>(sizeX, std::vector<TileId>(sizeZ));
 
-		static const TileId emptyTile = {0xFFFFFFFF, 0xFFFFFFFF};
-
 		m_random.setSeed(1);
 
+		static const TileId emptyTile = { 0xFFFFFFFF, 0xFFFFFFFF };
+
 		// location of texture in image map
-		Level::TileId darkBrownDirtTile = { 3, 14 };
-		Level::TileId lightWoodTile = { 0, 11 };
-		Level::TileId lightLogsTile = { 1, 11 };
-		Level::TileId lightLogEndTile = { 2, 11 };
-		Level::TileId stoneTile = { 2, 15 };
+		TileId lightWoodTile = { 0, 11 };
+		TileId meshTile = { 0, 13 };
+		TileId lightLogsTile = { 1, 11 };
+		TileId lightLogEndTile = { 2, 11 };
+		TileId stoneTile = { 2, 15 };
+		TileId darkBrownDirtTile = { 3, 14 };
 		
 		Level::RandomTileSet mossyStoneTiles;
 		for (u32 i = 1; i <= 2; i++)
@@ -48,6 +49,7 @@ namespace Dunjun
 
 		placeRooms();
 
+		// generate rooms
 		for(const auto& room : m_rooms)
 		{
 			for (int i = room.x; i < room.x + room.width; i++)
@@ -57,16 +59,7 @@ namespace Dunjun
 					mapGrid[i][j] = lightWoodTile;
 				}
 			}
-
 		}
-
-
-
-
-
-
-
-
 
 		// generate mesh
 		for (int i = 0; i < sizeX; i++)
@@ -75,31 +68,32 @@ namespace Dunjun
 				// generate edge walls
 				if (i == 0)
 				{ // left edge
-					for (int k = 0; k < roomSizeY; k++)
+					for (int k = 0; k < sizeY; k++)
 						if(mapGrid[i][j] != emptyTile || k >= 0) // only add a wall if there's a floor or if is higher than obstacle
-							addTileSurface(Vector3(i, k, j), TileSurfaceFace::Right, mossyStoneTiles);
+							addTileSurface(Vector3(i, k, j), TileSurfaceFace::Right, meshTile);
 				}
 				else if (i == sizeX - 1)
 				{ // right edge
-					for (int k = 0; k < roomSizeY; k++)
+					for (int k = 0; k < sizeY; k++)
 						if (mapGrid[i][j] != emptyTile || k >= 0)
-							addTileSurface(Vector3(i + 1, k, j), TileSurfaceFace::Left, mossyStoneTiles);
+							addTileSurface(Vector3(i + 1, k, j), TileSurfaceFace::Left, meshTile);
 				}
 				if (j == 0)
 				{ // back edge
-					for (int k = 0; k < roomSizeY; k++)
+					for (int k = 0; k < sizeY; k++)
 						if (mapGrid[i][j] != emptyTile || k >= 0)
-							addTileSurface(Vector3(i, k, j), TileSurfaceFace::Backward, mossyStoneTiles);
+							addTileSurface(Vector3(i, k, j), TileSurfaceFace::Backward, meshTile);
 				}
 				else if (j == sizeZ - 1)
 				{ // front edge
-					for (int k = 0; k < roomSizeY; k++)
+					for (int k = 0; k < sizeY; k++)
 						if (mapGrid[i][j] != emptyTile || k >= 0)
-							addTileSurface(Vector3(i, k, j + 1), TileSurfaceFace::Forward, mossyStoneTiles);
+							addTileSurface(Vector3(i, k, j + 1), TileSurfaceFace::Forward, meshTile);
 				}
 				
 
 				// generate floor and internal walls
+				if(0)
 				if(mapGrid[i][j] != emptyTile)
 				{ // generate floors
 					addTileSurface(Vector3(i, 0, j), TileSurfaceFace::Up, darkBrownDirtTile);
@@ -129,6 +123,7 @@ namespace Dunjun
 				//} // end generate internal walls
 
 				// generate ceiling
+				if(0)
 				addTileSurface(Vector3(i, roomSizeY, j), TileSurfaceFace::Down, mossyStoneTiles);
 
 			} // end generate floors and internal walls

@@ -1,7 +1,7 @@
 #ifndef DUNJUN_GAME_HPP
 #define DUNJUN_GAME_HPP
 
-#include <Dunjun/Level.hpp>
+#include <Dunjun/Level/Room.hpp>
 
 namespace Dunjun
 {

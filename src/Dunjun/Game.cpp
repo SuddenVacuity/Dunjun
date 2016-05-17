@@ -303,10 +303,10 @@ namespace Dunjun
 
 			{ // level scene node
 				SceneNode::u_ptr level = make_unique<SceneNode>();
-
-				level->name = "level";
+			
+				level->name = "default";
 				level->addComponent<MeshRenderer>(*g_level.mesh, *g_level.material);
-
+			
 				g_rootNode.attachChild(std::move(level));
 			}
 
@@ -324,6 +324,20 @@ namespace Dunjun
 
 				g_rootNode.attachChild(std::move(player));
 			}
+
+			{ // test room
+				Random random(1);
+
+				auto room = make_unique<Room>(random, Room::Size(10, 4, 15));
+
+				room->material = &g_materials["terrain"];
+
+				room->generate();
+				room->transform.position = Vector3(1, 0, 1);
+
+				g_rootNode.attachChild(std::move(room));
+			}
+
 			// test multiple transforms
 			// FIXME parent cannot pass on 45 degree orientation
 			//Transform parent;
@@ -386,6 +400,8 @@ namespace Dunjun
 				g_cameraPlayer.getView() * g_projection;
 				g_projection = lerp(pp, op, 0.01f); // mostly perspective
 				g_cameraWorld.getView() * g_projection; */
+
+				g_rootNode.onStart();
 			}
 		}
 
@@ -451,7 +467,7 @@ namespace Dunjun
 				if (std::abs(rts.y) < deadZone)
 					rts.y = 0;
 		
-				g_cameraWorld.offsetOrientation(lookSensitivityX * Radian(rts.x * dt)
+				g_cameraWorld.offsetOrientation(-lookSensitivityX * Radian(rts.x * dt)
 										  , lookSensitivityY * Radian(rts.y * dt));
 		
 				// gamepad camera translation
