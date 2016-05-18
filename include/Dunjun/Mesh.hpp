@@ -5,15 +5,14 @@
 
 namespace Dunjun
 {
+	class Renderer;
+
 	enum class AttribLocation : u32
 	{
 		Position = 0,
 		TexCoord = 1,
 		Color = 2,
 	};
-
-
-
 
 	class Mesh
 	{
@@ -59,8 +58,6 @@ namespace Dunjun
 
 		void generate() const;
 
-		void draw() const;
-
 		inline void destroy() const
 		{
 			glDeleteBuffers(1, &m_vbo);
@@ -69,6 +66,10 @@ namespace Dunjun
 
 
 	private:
+		friend class Renderer;
+
+		void draw() const;
+
 		Data m_data;
 
 		mutable b32 m_generated;

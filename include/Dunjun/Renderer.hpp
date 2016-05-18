@@ -6,6 +6,7 @@
 namespace Dunjun
 {
 	class SceneNode;
+	class Drawable;
 
 	class Renderer : private NonCopyable
 	{
@@ -16,18 +17,22 @@ namespace Dunjun
 
 		void reset();
 
-		void draw(const SceneNode& node, const Transform& t = Transform());
+		void draw(const Drawable& node, const Transform& t = Transform());
+		void draw(const Mesh* mesh) const;
 
-		void setShaders(ShaderProgram* shaders);
-		void setTexture(const Texture* texture);
+		void setMaterial(const Material* material);
 		void setCamera(const Camera& camera);
 
 		void setUniforms(const Transform& t);
 
 	private:
-		ShaderProgram* m_currentShaders = nullptr;
+		const Material* m_currentMaterial = nullptr;
+		const ShaderProgram* m_currentShaders = nullptr;
 		const Texture* m_currentTexture = nullptr;
 		const Camera* m_currentCamera = nullptr;
+
+		void setShaders(const ShaderProgram* shaders);
+		void setTexture(const Texture* texture);
 	};
 } // end Dunjun
 

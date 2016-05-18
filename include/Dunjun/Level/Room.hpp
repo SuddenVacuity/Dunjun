@@ -2,7 +2,7 @@
 #define DUNJUN_lEVEL_ROOM_HPP
 
 
-#include <Dunjun/Level.hpp>
+#include <Dunjun/Scene.hpp>
 
 
 namespace Dunjun
@@ -89,14 +89,16 @@ namespace Dunjun
 		void generate();
 
 		const Room::Size size;
-		Mesh* mesh;
 		const Material* material;
 
 	protected:
 		void addTileSurface(const Vector3& position, TileSurfaceFace face, const TileId& texPos);
 		void addTileSurface(const Vector3& position, TileSurfaceFace face, const RandomTileSet& randomTilePosSet);
 
+		Mesh* m_mesh;
+
 		Random& m_random;
+		bool m_generated;
 		Mesh::Data m_meshData;
 	};
 } // end Dunjun

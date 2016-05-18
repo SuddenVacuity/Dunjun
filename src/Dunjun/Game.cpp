@@ -38,7 +38,7 @@ namespace Dunjun
 	GLOBAL std::map<std::string, Material> g_materials;
 	GLOBAL std::map<std::string, Mesh*> g_meshes;
 
-	GLOBAL Level g_level;
+	GLOBAL Level* g_level;
 
 
 
@@ -202,7 +202,7 @@ namespace Dunjun
 		// generate world objects
 		INTERNAL void generateWorld()
 		{
-			g_level.material = &g_materials["terrain"];
+			//g_level.material = &g_materials["terrain"];
 			
 			//// number of instances to create
 			//int mapSizeX = 24;
@@ -281,7 +281,7 @@ namespace Dunjun
 			//		g_level.addTileSurface({ (f32)mapSizeX, (f32)i, (f32)j }, Level::TileSurfaceFace::Right, mossyStoneTiles);
 			//} // end create walls
 
-			g_level.generate();
+			//g_level.generate();
 
 			g_rootNode.onStart();
 		}
@@ -301,19 +301,19 @@ namespace Dunjun
 		{
 			generateWorld();
 
-			{ // level scene node
-				SceneNode::u_ptr level = make_unique<SceneNode>();
-			
-				level->name = "default";
-				level->addComponent<MeshRenderer>(*g_level.mesh, *g_level.material);
-			
-				g_rootNode.attachChild(std::move(level));
-			}
+			//{ // level scene node
+			//	SceneNode::u_ptr level = make_unique<SceneNode>();
+			//
+			//	level->name = "default";
+			//	level->addComponent<MeshRenderer>(*g_level.mesh, *g_level.material);
+			//
+			//	g_rootNode.attachChild(std::move(level));
+			//}
 
 			{ // player scene node
 				SceneNode::u_ptr player = make_unique<SceneNode>();
 
-				player->transform.position = { 4.0f, 5.5f, 4.0f };
+				player->transform.position = { 4.0f, 1.0f, 4.0f };
 				player->transform.scale = { 1.0f, 2.0f, 1.0f };
 				player->name = "player";
 
@@ -325,17 +325,29 @@ namespace Dunjun
 				g_rootNode.attachChild(std::move(player));
 			}
 
-			{ // test room
-				Random random(1);
+			
+			//{ // test room
+			//	Random random(1);
+			//
+			//	auto room = make_unique<Room>(random, Room::Size(10, 4, 15));
+			//
+			//	room->material = &g_materials["terrain"];
+			//
+			//	room->generate();
+			//	room->transform.position = Vector3(1, 0, 1);
+			//
+			//	g_rootNode.attachChild(std::move(room));
+			//}
 
-				auto room = make_unique<Room>(random, Room::Size(10, 4, 15));
+			{ // test level generation
+				auto level = make_unique<Level>();
 
-				room->material = &g_materials["terrain"];
+				level->material = &g_materials["terrain"];
+				level->generate();
 
-				room->generate();
-				room->transform.position = Vector3(1, 0, 1);
+				g_level = level.get();
 
-				g_rootNode.attachChild(std::move(room));
+				g_rootNode.attachChild(std::move(level));
 			}
 
 			// test multiple transforms
@@ -351,23 +363,24 @@ namespace Dunjun
 			//player.transform.scale = { 1, 2, 1 };
 			//player.transform.orientation = angleAxis(Degree(0), { 1, 0, 0 }); // rotation
 
-			for(int j = 0; j < g_level.sizeX; j++)
-			{
-				bool escape = false;
-				for(int i = 0; i < g_level.sizeZ; i++)
-				{
-					if(g_level.mapGrid[i][j] != Level::TileId(0xFFFFFFFF, 0xFFFFFFFF))
-					{
-						g_player->transform.position = Vector3(i, 1.0f, j);
-						escape = true;
-						break;
-					}
-					if(escape == true)
-						break;
-				}
-				if (escape == true)
-					break;
-			}
+			//// place player on a floor
+			//for(int j = 0; j < g_level.sizeX; j++)
+			//{
+			//	bool escape = false;
+			//	for(int i = 0; i < g_level.sizeZ; i++)
+			//	{
+			//		if(g_level.mapGrid[i][j] != TileId(0xFFFFFFFF, 0xFFFFFFFF))
+			//		{
+			//			g_player->transform.position = Vector3(i, 1.0f, j);
+			//			escape = true;
+			//			break;
+			//		}
+			//		if(escape == true)
+			//			break;
+			//	}
+			//	if (escape == true)
+			//		break;
+			//}
 
 			//g_instances.push_back(player);
 
@@ -704,28 +717,28 @@ namespace Dunjun
 
 
 		// shader info
-		INTERNAL void renderInstance(const ModelInstance& inst)
-		{
-			ModelAsset* asset = inst.asset;
-			Dunjun::ShaderProgram* shaders = asset->material->shaders;
+		//INTERNAL void renderInstance(const ModelInstance& inst)
+		//{
+		//	ModelAsset* asset = inst.asset;
+		//	Dunjun::ShaderProgram* shaders = asset->material->shaders;
+		//
+		//	shaders->setUniform("u_camera", g_currentCamera->getMatrix()); // shaderprogram.cpp
+		//	shaders->setUniform("u_transform", inst.transform); // shaderprogram.cpp
+		//	shaders->setUniform("u_tex", (Dunjun::u32)0); // shaderprogram.cpp
+		//
+		//	asset->mesh->draw(); // mesh.cpp
+		//}
 
-			shaders->setUniform("u_camera", g_currentCamera->getMatrix()); // shaderprogram.cpp
-			shaders->setUniform("u_transform", inst.transform); // shaderprogram.cpp
-			shaders->setUniform("u_tex", (Dunjun::u32)0); // shaderprogram.cpp
-
-			asset->mesh->draw(); // mesh.cpp
-		}
-
-		INTERNAL void renderLevel(const Level& level)
-		{
-			Dunjun::ShaderProgram* shaders = level.material->shaders;
-
-			shaders->setUniform("u_camera", g_currentCamera->getMatrix()); // shaderprogram.cpp
-			shaders->setUniform("u_transform", level.transform); // shaderprogram.cpp
-			shaders->setUniform("u_tex", (Dunjun::u32)0); // shaderprogram.cpp
-
-			level.mesh->draw();
-		}
+		//INTERNAL void renderLevel(const Level& level)
+		//{
+		//	Dunjun::ShaderProgram* shaders = level.material->shaders;
+		//
+		//	shaders->setUniform("u_camera", g_currentCamera->getMatrix()); // shaderprogram.cpp
+		//	shaders->setUniform("u_transform", level.transform); // shaderprogram.cpp
+		//	shaders->setUniform("u_tex", (Dunjun::u32)0); // shaderprogram.cpp
+		//
+		//	level.mesh->draw();
+		//}
 
 		INTERNAL void render()
 		{

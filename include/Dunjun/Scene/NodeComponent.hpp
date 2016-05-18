@@ -1,7 +1,7 @@
 #ifndef DUNJUN_SCENE_NODE_COMPONENT_HPP
 #define DUNJUN_SCENE_NODE_COMPONENT_HPP
 
-#include <Dunjun/Renderer.hpp>
+#include <Dunjun/Drawable.hpp>
 
 namespace Dunjun
 {

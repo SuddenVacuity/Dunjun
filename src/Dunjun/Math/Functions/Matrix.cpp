@@ -135,7 +135,8 @@ namespace Dunjun
 		return result;
 	}
 
-	Matrix4 matrix4LookAt(const Vector3& eye, const Vector3& center, const Vector3& up)
+	template<>
+	Matrix4 lookAt<Matrix4>(const Vector3& eye, const Vector3& center, const Vector3& up)
 	{
 		const Vector3 f(normalize(center - eye));
 		const Vector3 s(normalize(cross(f, up)));
@@ -161,31 +162,26 @@ namespace Dunjun
 		return result;
 	}
 
-
-	Quaternion quaternionLookAt(const Vector3& eye, const Vector3& center, const Vector3& up)
+	template <>
+	Quaternion lookAt<Quaternion>(const Vector3& eye, const Vector3& center, const Vector3& up)
 	{
 		//const Vector3& pos = transform.position;
 
 		if (length(center - eye) < 0.001f)
 			return Quaternion(); // ignore as you can't look at where you are
 
-		const Vector3 f(normalize(center - eye));
-		const Vector3 s(normalize(cross(f, up)));
-		const Vector3 u(cross(s, f));
-		const Vector3 refUp(normalize(up));
+		// TODO: fix quaternion lookat so that it doesn't use matrix4
+		return matrix4ToQuaternion(lookAt<Matrix4>(eye, center, up));
 
-		const f32 m = std::sqrt(2.0f + 2.0f * dot(u, refUp));
-
-		Vector3 v = (1.0f / m) * cross(u, refUp);
-
-		return Quaternion(v, 0.5f * m);
-
-		// forward vector
-		//Vector3 f = normalize(center - eye);
-		//f32 cosTheta = dot(forward, f);
+		//const Vector3 f(normalize(center - eye));
+		//const Vector3 s(normalize(cross(f, up)));
+		//const Vector3 u(cross(s, f));
+		//const Vector3 refUp(normalize(up));
 		//
-		//Radian angle(std::acos(cosTheta));
-		//Vector3 axis = cross(forward, f);
-		//return angleAxis(angle, axis);
+		//const f32 m = std::sqrt(2.0f + 2.0f * dot(u, refUp));
+		//
+		//Vector3 v = (1.0f / m) * cross(u, refUp);
+		//
+		//return Quaternion(v, 0.5f * m);
 	}
 }

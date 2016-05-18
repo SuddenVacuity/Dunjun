@@ -5,22 +5,27 @@ namespace Dunjun
 {
 	Room::Room(Random& random, const Room::Size& size)
 		: SceneNode()
-		, m_random(random)
 		, size(size)
-		, mesh(nullptr)
 		, material(nullptr)
+		, m_mesh(nullptr)
+		, m_random(random)
+		, m_generated(false)
+		, m_meshData()
 	{
 	}
 
 	Room::~Room()
 	{
-		delete mesh;
+		delete m_mesh;
 	}
 
 	void Room::generate()
 	{
-		if(!mesh)
-			mesh = new Mesh();
+		if(m_generated)
+			return;
+
+		if(!m_mesh)
+			m_mesh = new Mesh();
 
 		std::vector<std::vector<TileId>> mapGrid(size.x, std::vector<TileId>(size.z));
 
@@ -49,7 +54,7 @@ namespace Dunjun
 		{
 			for (int j = 0; j < size.z; j++)
 			{
-				if(m_random.getBool() == true)
+				//if(m_random.getBool() == true)
 					mapGrid[i][j] = lightWoodTile;
 			}
 		}
@@ -95,17 +100,19 @@ namespace Dunjun
 
 			} // end generate floors and internal walls
 
-		mesh->addData(m_meshData);
+		m_mesh->addData(m_meshData);
 
-		addComponent<MeshRenderer>(*mesh, *material);
+		addComponent<MeshRenderer>(*m_mesh, *material);
+
+		m_generated = true;
 	}
 
 
 	// create a 4 vertex tile in the at position in the direction of TileSurfaceFace with texPos being the position in texture map for the texture
 	void Room::addTileSurface(const Vector3& position, TileSurfaceFace face, const TileId& texPos)
 	{
-		if (!mesh)
-			mesh = new Mesh();
+		//if (!m_mesh)
+		//	m_mesh = new Mesh();
 
 		// size of image map
 		const f32 tileWidth = 1.0f / 16;

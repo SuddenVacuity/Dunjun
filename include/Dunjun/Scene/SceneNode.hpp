@@ -5,7 +5,7 @@
 
 namespace Dunjun
 {
-	class SceneNode : private NonCopyable
+	class SceneNode : public Drawable, private NonCopyable
 	{
 	public:
 		using u_ptr = std::unique_ptr<SceneNode>; // quick typedef for unique pointers
