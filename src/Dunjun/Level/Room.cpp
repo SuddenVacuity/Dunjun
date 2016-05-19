@@ -32,16 +32,24 @@ namespace Dunjun
 		static const TileId emptyTile = { 0xFFFFFFFF, 0xFFFFFFFF };
 
 		// location of texture in image map
-		TileId darkBrownDirtTile = { 3, 14 };
-		TileId lightWoodTile = { 0, 11 };
-		TileId lightLogsTile = { 1, 11 };
-		TileId lightLogEndTile = { 2, 11 };
-		TileId stoneTile = { 2, 15 };
-		TileId whiteTile = { 15, 15 };
+		// basic single type tiles
+		const TileId darkBrownDirtTile = { 3, 14 };
+		const TileId lightWoodTile = { 0, 11 };
+		const TileId lightLogsTile = { 1, 11 };
+		const TileId lightLogEndTile = { 2, 11 };
+		const TileId stoneTile = { 2, 15 };
+		const TileId whiteTile = { 15, 15 };
 
+		// random type per tile tiles
 		RandomTileSet mossyStoneTiles;
-		for (u32 i = 1; i <= 2; i++)
-			mossyStoneTiles.emplace_back(TileId{ i, 15 });
+			for (u32 i = 1; i <= 2; i++)
+				mossyStoneTiles.emplace_back(TileId{ i, 15 });
+		RandomTileSet gravelTiles;
+			for (u32 i = 0; i <= 3; i++)
+				gravelTiles.emplace_back(TileId{ i, 14 });
+
+		// random type per room tiles
+		TileId gravelTile = gravelTiles[m_random.getInt(0, gravelTiles.size() - 1)];
 
 		// initialize mapGrid to build room from
 		for (int i = 0; i < size.x; i++)
@@ -59,11 +67,14 @@ namespace Dunjun
 			}
 		}
 
-		// generate mesh
+		// generate walls, floor and ceiling mesh
 		for (int i = 0; i < size.x; i++)
+		{
 			for (int j = 0; j < size.z; j++)
 			{
 				// generate edge walls
+				if(0) // set to 0 to temporarily remove walls
+				{
 				if (i == 0)
 				{ // left edge
 					for (int k = 0; k < size.y; k++)
@@ -88,17 +99,20 @@ namespace Dunjun
 						if (mapGrid[i][j] != emptyTile || k >= 0)
 							addTileSurface(Vector3(i, k, j + 1), TileSurfaceFace::Forward, mossyStoneTiles);
 				}
-
-
-				// generate floor and internal walls
-				if (mapGrid[i][j] != emptyTile)
-				{ // generate floors
-					addTileSurface(Vector3(i, 0, j), TileSurfaceFace::Up, darkBrownDirtTile);
 				}
+
+
+				// generate floor
+				if (mapGrid[i][j] != emptyTile)
+				{
+					addTileSurface(Vector3(i, 0, j), TileSurfaceFace::Up, gravelTile);
+				}
+
 				// generate ceiling
 				addTileSurface(Vector3(i, size.y, j), TileSurfaceFace::Down, mossyStoneTiles);
 
-			} // end generate floors and internal walls
+			}
+		} // end generate walls, floor and ceiling mesh
 
 		m_mesh->addData(m_meshData);
 

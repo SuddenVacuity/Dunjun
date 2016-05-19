@@ -62,11 +62,11 @@ namespace Dunjun
 
 		void generate();
 
-		std::vector<std::vector<TileId>> mapGrid;
-		ReadOnly<u32, Level> sizeX = 128;
-		ReadOnly<u32, Level> sizeZ = 128;
-		ReadOnly<u32, Level> sizeY = 1;
-		ReadOnly<u32, Level> wallHeight = 1;
+		//std::vector<std::vector<TileId>> mapGrid;
+		//ReadOnly<u32, Level> sizeX = 128;
+		//ReadOnly<u32, Level> sizeZ = 128;
+		//ReadOnly<u32, Level> sizeY = 1;
+		//ReadOnly<u32, Level> wallHeight = 1;
 
 		const Material* material;
 		//Mesh* mesh;
@@ -75,6 +75,7 @@ namespace Dunjun
 		void placeRooms();
 
 		std::vector<Room> m_rooms;
+		u32 roomCount;
 
 		Random m_random;
 		//Mesh::Data m_meshData;

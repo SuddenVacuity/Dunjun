@@ -313,12 +313,12 @@ namespace Dunjun
 			{ // player scene node
 				SceneNode::u_ptr player = make_unique<SceneNode>();
 
-				player->transform.position = { 4.0f, 1.0f, 4.0f };
+				player->transform.position = { 8.0f, 1.0f, 8.0f };
 				player->transform.scale = { 1.0f, 2.0f, 1.0f };
 				player->name = "player";
 
 				player->addComponent<MeshRenderer>(g_sprite);
-				player->addComponent<FaceCamera>(g_cameraWorld);
+				player->addComponent<FaceCamera>(g_cameraPlayer);
 
 				g_player = player.get();
 
@@ -387,23 +387,26 @@ namespace Dunjun
 			{
 				//Initialize camera
 				g_cameraPlayer.viewportAspectRatio = 16.0f / 9.0f;
-				g_cameraPlayer.transform.position = { g_player->transform.position.x - 3, g_player->transform.position.y + 2, g_player->transform.position.z + 3 };
-				//g_cameraPlayer.lookAt({ g_cameraPlayer.transform.position.x, g_cameraPlayer.transform.position.y, g_cameraPlayer.transform.position.x - 1 });
+				g_cameraPlayer.transform.position = g_player->transform.position + Vector3(8 * 3, 8 * 2, 8 * 3);
 				g_cameraPlayer.lookAt(g_player->transform.position);
 
 				g_cameraPlayer.projectionType = ProjectionType::Orthographic;
 				g_cameraPlayer.fieldOfView = Degree(50.0f); // for perspective view
-				g_cameraPlayer.orthoScale = 10.0f; // for perspective view
+				g_cameraPlayer.orthoScale = 15.0f; // for perspective view
 
+				// aspect ratio
+				f32 aspectRatio = Window::getFramebufferSize().x / Window::getFramebufferSize().y;
+
+				g_cameraPlayer.viewportAspectRatio = aspectRatio;
 				
 				// initialize world camera
 				g_cameraWorld = g_cameraPlayer;
 				g_cameraWorld.projectionType = ProjectionType::Perspective;
-				g_cameraWorld.lookAt({ g_cameraWorld.transform.position.x, g_cameraWorld.transform.position.y, g_cameraWorld.transform.position.z - 1 });
+				g_cameraWorld.lookAt(g_player->transform.position);
 
 				// temp variables used in lerp()
-				const Matrix4 op = g_cameraPlayer.getProjection();
-				const Matrix4 pp = g_cameraWorld.getProjection();
+				//const Matrix4 op = g_cameraPlayer.getProjection();
+				//const Matrix4 pp = g_cameraWorld.getProjection();
 
 				/*// initialize projection types
 				Matrix4 g_projection;
@@ -458,8 +461,8 @@ namespace Dunjun
 			}
 			else if (Input::isKeyPressed(Input::Key::R)) // test multipling transforms
 			{
-				g_player->transform.position = { 0, 0, 0 }; // translation
-				g_player->transform.scale = { 1, 1, 1 };
+				g_player->transform.position = { 8.0f, 1.0f, 8.0f }; // translation
+				g_player->transform.scale = { 1.0f, 2.0f, 1.0f };
 				g_player->transform.orientation = angleAxis(Degree(0), { 0, 0, 1 }); // rotation
 			}
 
@@ -480,7 +483,7 @@ namespace Dunjun
 				if (std::abs(rts.y) < deadZone)
 					rts.y = 0;
 		
-				g_cameraWorld.offsetOrientation(-lookSensitivityX * Radian(rts.x * dt)
+				g_cameraWorld.offsetOrientation(lookSensitivityX * Radian(-rts.x * dt)
 										  , lookSensitivityY * Radian(rts.y * dt));
 		
 				// gamepad camera translation
@@ -574,8 +577,7 @@ namespace Dunjun
 					// test camera swap
 					// TODO: reset forward vector when pressed
 					g_cameraWorld.transform = g_cameraPlayer.transform;
-					g_cameraWorld.transform.position.y = g_cameraWorld.transform.position.y + 1.0f;
-					g_cameraWorld.lookAt({ g_cameraWorld.transform.position.x, g_cameraWorld.transform.position.y, g_cameraWorld.transform.position.z - 1});
+					g_cameraWorld.lookAt(g_player->transform.position);
 					g_currentCamera = &g_cameraWorld;
 					//g_projectionTest = lerp(pp, op, 0.01f);
 				}
@@ -695,10 +697,14 @@ namespace Dunjun
 					//	}
 					//}
 
-					g_cameraPlayer.transform.position.x = lerp(g_cameraPlayer.transform.position.x - 3, g_player->transform.position.x, 10.0f * dt);
-					g_cameraPlayer.transform.position.z = lerp(g_cameraPlayer.transform.position.z + 3, g_player->transform.position.z, 10.0f * dt);
+					g_cameraPlayer.transform.position.x = lerp(g_cameraPlayer.transform.position.x, g_player->transform.position.x + 8.0f * 3.0f, 12.0f * dt);
+					g_cameraPlayer.transform.position.y = lerp(g_cameraPlayer.transform.position.y, g_player->transform.position.y + 8.0f * 2.0f, 8.0f * dt);
+					g_cameraPlayer.transform.position.z = lerp(g_cameraPlayer.transform.position.z, g_player->transform.position.z + 8.0f * 3.0f, 12.0f * dt);
 
-					g_cameraPlayer.lookAt({ g_player->transform.position.x, g_player->transform.position.y + 0.5f, g_player->transform.position.z });
+
+					//g_cameraPlayer.transform.position = g_player->transform.position + Vector3(-8 * 3, 8 * 2, 8 * 3);
+
+					g_cameraPlayer.lookAt({ g_player->transform.position });
 
 				}
 
