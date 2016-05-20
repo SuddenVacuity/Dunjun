@@ -137,170 +137,266 @@ namespace Dunjun
 	{
 		if (material == nullptr)
 		{
-			std::cout << "Level::placeRoom() material = null ptr" << std::endl;
+			std::cout << "Level::placeRoom() <<<< material = null ptr" << std::endl;
 			return;
 		}
 
-		m_random.setSeed(142);
+		if(0)
+			m_random.setSeed(142);
 
-		const u32 levelSizeX = 10;
-		const u32 levelSizeY = 3;
-		const u32 levelSizeZ = 10;
+		// set room range
+		// rooms can still end up small (30 - 50) with min rooms set
+		u32 minRooms = 999999; // if min is not met it tries again but breaks if it fails too much
+		u32 maxRooms = 999999; // hard cap to number of rooms
+
+		const u32 levelSizeX = 30;
+		const u32 levelSizeY = 5;
+		const u32 levelSizeZ = 30;
+
+		// starting point
+		u32 startX = levelSizeX / 2;
+		u32 startY = levelSizeY / 2;
+		u32 startZ = levelSizeZ / 2;
 
 		bool grid[levelSizeX][levelSizeY][levelSizeZ] = { false };
 
 		const Room::Size roomSize(5, 4, 5);
 
-		// repeat process for multiple paths form start
-		for (int r = 0; r < 3; r++)
-			{
-			// number of steps to take
-			const u32 numSteps = 8;
+		// number of steps taken since last turn
+		const u32 numSteps = 6;
 
-			// starting point
-			u32 x = levelSizeX / 2;
-			u32 z = levelSizeZ / 2;
+		// used to limit attempts to generate a room
+		u32 breaks = 0;
+
+		// TODO: make branch generation its own function
+		// random walk (decide where rooms will be)
+		for (int i = 0; i < 1; i++)
+		{
+			// check minimum room count has been met
+			if (roomCount < minRooms)
+			{
+				i--; // run again
+			}
+			// escape if caught in endless loop
+			if (breaks > 30 || roomCount >= maxRooms)
+			{
+				break;
+			}
+
+			// used to limit attempts to generate a room
+			u32 skips = 0;
+
+			u32 stepsTaken = 0; // used to keep direction change from happening after only 1 step
+
+			// current location
+			u32 stepX = startX;
+			u32 stepY = startY;
+			u32 stepZ = startZ;
 
 			// variables to track previous position
-			u32 prevPosX = x;
-			u32 prevPosZ = z;
+			u32 prevPosX = stepX;
+			u32 prevPosY = stepY;
+			u32 prevPosZ = stepZ;
+
+			// set starting room as true
+			if(grid[stepX][stepY][stepZ] == false)
+			{
+				grid[stepX][stepY][stepZ] = true;
+				roomCount++;
+			}
 
 			// variable to keep track of last direction
 			u32 direction = m_random.getInt(0, 3);
 
-			// TODO: make branch generation its own function
-			// random walk (decide where rooms will be)
-			// do for each floor
-			for (int i = 0; i < levelSizeY; i++)
+			for (int j = 0; j < numSteps; j++)
 			{
-				// set starting room as true
-				grid[x][i][z] = true;
-
-				u32 skips = 0; // used to limit attempts to generate a room
-				u32 stepsTaken = 0; // used to keep direction change from happening after only 1 step
-
-				for (int j = 0; j < numSteps; j++)
+				if(skips > 10 || roomCount >= maxRooms)
 				{
-					if(skips > 10)
-						break;
-
-					// chance to change direction
-					if(m_random.getInt(0, 2) == 2 && stepsTaken > 0)
-						direction = m_random.getInt(0, 3);
-
-					switch (direction)
-					{
-					case 0: x++; break; // right
-					case 1: z++; break;	// back
-					case 2: x--; break;	// left
-					case 3: z--; break;	// forward
-					}
-
-					// check if a room is already there
-					if (grid[x][i][z] == true)
-					{
-						j--;
-						skips++;
-						x = prevPosX;
-						z = prevPosZ;
-						continue;
-					}
-
-					// check array limits
-					if (x < 0 || z < 0)
-					{
-						j--;
-						skips++;
-						x = prevPosX;
-						z = prevPosZ;
-						continue;
-					}
-					else if (x > levelSizeX - 1 || z > levelSizeZ - 1)
-					{
-						j--;
-						skips++;
-						x = prevPosX;
-						z = prevPosZ;
-						continue;
-					}
-
-					prevPosX = x;
-					prevPosZ = z;
-
-					grid[x][i][z] = true;
-
-					stepsTaken++;
-
-					// try for branching path
-					if(m_random.getInt(0, 4) == 4)
-					{
-						u32 branchX = x;
-						u32 branchZ = z;
-
-						u32 branchPrevPosX = prevPosX;
-						u32 branchPrevPosZ = prevPosZ;
-
-						u32 branchDirection = 0;
-
-						u32 branchSkips = 0;
-						u32 branchStepsTaken = 0;
-
-						// generate branching path
-						// static cast to avoid decimals
-						for (int j = 0; j <static_cast<u32>(numSteps / 2); j++)
-						{
-							if (branchSkips > 10)
-								break;
-
-							// chance to change direction
-							if (m_random.getInt(0, 2) == 2 && branchStepsTaken > 0)
-								branchDirection = m_random.getInt(0, 3);
-
-							switch (branchDirection)
-							{
-							case 0: branchX++; break; // right
-							case 1: branchZ++; break; // back
-							case 2: branchX--; break; // left
-							case 3: branchZ--; break; // forward
-							}
-
-							// check if a room is already there
-							if (grid[branchX][i][branchZ] == true)
-							{
-								j--;
-								branchSkips++;
-								branchX = branchPrevPosX;
-								branchZ = branchPrevPosZ;
-								continue;
-							}
-
-							// check array limits
-							if (branchX < 0 || branchZ < 0)
-							{
-								j--;
-								branchSkips++;
-								branchX = branchPrevPosX;
-								branchZ = branchPrevPosZ;
-								continue;
-							}
-							else if (branchX > levelSizeX - 1 || branchZ > levelSizeZ - 1)
-							{
-								j--;
-								branchSkips++;
-								branchX = branchPrevPosX;
-								branchZ = branchPrevPosZ;
-								continue;
-							}
-
-							branchPrevPosX = branchX;
-							branchPrevPosZ = branchZ;
-
-							grid[branchX][i][branchZ] = true;
-						} // end generate branching path
-					} // end try for branching path
+					breaks++;
+					break;
 				}
-			} // end do for each floor
-		} // end repeat process for multiple paths
+
+				u32 rand = m_random.getInt(0, 100);
+
+				// chance to change direction
+				if (rand <= 10 && stepsTaken > 1)
+				{
+					direction = m_random.getInt(4, 5); // up or down
+					stepsTaken = 1; // set to one to make multiple y changes less common
+					j -= 2; // add a few more steps for new floors
+							// doesn't go below zero since you to take more than one step to get here
+				}
+				else if(rand <= 40 && stepsTaken > 0)
+				{
+					direction = m_random.getInt(0, 3); // left/right/back/forward
+					stepsTaken = 0; // set to zero to prevent turn after 1 step
+				}
+				
+				switch (direction)
+				{
+				case 0: stepX++; break; // right
+				case 1: stepZ++; break;	// back
+				case 2: stepX--; break;	// left
+				case 3: stepZ--; break;	// forward
+				case 4: stepY++; break;	// up
+				case 5: stepY--; break;	// down
+				}
+
+				// check if a room is already there and undo step change if it is
+				if (grid[stepX][stepY][stepZ] == true)
+				{
+					j--;
+					skips++;
+					stepX = prevPosX;
+					stepY = prevPosY;
+					stepZ = prevPosZ;
+					continue;
+				}
+
+				// check array limits and undo step change if out of bounds
+				if (stepX < 0 || stepY < 0 || stepZ < 0)
+				{
+					j--;
+					skips++;
+					stepX = prevPosX;
+					stepY = prevPosY;
+					stepZ = prevPosZ;
+					continue;
+				}
+				else if (stepX > levelSizeX - 1 || stepY > levelSizeY - 1 || stepZ > levelSizeZ - 1)
+				{
+					j--;
+					skips++;
+					stepX = prevPosX;
+					stepY = prevPosY;
+					stepZ = prevPosZ;
+					continue;
+				}
+
+				// chance to change start location
+				if(rand < 90)
+				{
+					startX = stepX;
+					startY = stepY;
+					startZ = stepZ;
+				}
+
+				// set prevpos for next loop
+				prevPosX = stepX;
+				prevPosY = stepY;
+				prevPosZ = stepZ;
+
+				grid[stepX][stepY][stepZ] = true;
+
+				roomCount++;
+				stepsTaken++;
+				skips = 0;
+
+				// try for branching path
+				if(m_random.getInt(0, 4) == 4)
+				{
+					// these act the same as the main path versions
+					u32 branchNumSteps = 4;
+
+					u32 branchX = stepX;
+					u32 branchY = stepY;
+					u32 branchZ = stepZ;
+
+					u32 branchPrevPosX = prevPosX;
+					u32 branchPrevPosY = prevPosY;
+					u32 branchPrevPosZ = prevPosZ;
+
+					u32 branchDirection = 0;
+
+					u32 branchSkips = 0;
+					u32 branchStepsTaken = 0;
+
+					// generate branching path
+					// static cast to avoid decimals
+					for (int j = 0; j < branchNumSteps; j++)
+					{
+						if (branchSkips > 10 || roomCount >= maxRooms)
+						{
+							breaks++;
+							break;
+						}
+
+						u32 branchRand = m_random.getInt(1, 100);
+
+						// chance to change direction
+						if (branchRand <= 10 && branchStepsTaken > 1)
+						{
+							branchDirection = m_random.getInt(4, 5); // up or down
+							branchStepsTaken = 1;
+							j -= 2;
+						}
+						else if (branchRand <= 40 && stepsTaken > 0)
+						{
+							branchDirection = m_random.getInt(0, 3); // left/right/back/forward
+							branchStepsTaken = 0;
+						}
+
+						switch (branchDirection)
+						{
+						case 0: branchX++; break; // right
+						case 1: branchZ++; break; // back
+						case 2: branchX--; break; // left
+						case 3: branchZ--; break; // forward
+						case 4: branchY++; break; // up
+						case 5: branchY--; break; // down
+						}
+
+						// check if a room is already there
+						if (grid[branchX][branchY][branchZ] == true)
+						{
+							j--;
+							branchSkips++;
+							branchX = branchPrevPosX;
+							branchY = branchPrevPosY;
+							branchZ = branchPrevPosZ;
+							continue;
+						}
+
+						// check array limits
+						if (branchX < 0 || branchY < 0 || branchZ < 0)
+						{
+							j--;
+							branchSkips++;
+							branchX = branchPrevPosX;
+							branchY = branchPrevPosY;
+							branchZ = branchPrevPosZ;
+							continue;
+						}
+						else if (branchX > levelSizeX - 1 || branchY > levelSizeY - 1 || branchZ > levelSizeZ - 1)
+						{
+							j--;
+							branchSkips++;
+							branchX = branchPrevPosX;
+							branchY = branchPrevPosY;
+							branchZ = branchPrevPosZ;
+							continue;
+						}
+
+						branchPrevPosX = branchX;
+						branchPrevPosY = branchY;
+						branchPrevPosZ = branchZ;
+
+						grid[branchX][branchY][branchZ] = true;
+
+						roomCount++;
+						branchNumSteps++;
+						skips = 0;
+					} // end generate branching path
+				} // end try for branching path
+			}
+
+			std::cout << "Level::placeRooms() <<<< The number of skips this loop was  " << skips << "." << std::endl;
+			std::cout << "Level::placeRooms() <<<< The number of breaks this loop was  " << breaks << "." << std::endl;
+
+		} // end do for each floor
+
+		// where to place the lowest point of the level
+		f32 levelBase = -1;
 
 		// generate rooms
 		for (int i = 0; i < levelSizeY; i++)
@@ -316,15 +412,15 @@ namespace Dunjun
 
 					const u32 gap = 1;
 
-					room->transform.position.y = (roomSize.y + gap) * i;
+					room->transform.position.y = (roomSize.y + gap) * i + levelBase * (roomSize.y + gap);
 					room->transform.position.x = (roomSize.x + gap) * j;
 					room->transform.position.z = (roomSize.z + gap) * k;
 
 					room->material = material;
+
 					room->generate();
 
 					attachChild(std::move(room));
-					roomCount++;
 				}
 			}
 		} // end generate rooms

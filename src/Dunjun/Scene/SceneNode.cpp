@@ -3,15 +3,20 @@
 
 namespace Dunjun
 {
-	namespace
+	namespace Impl
 	{
-		GLOBAL size_t idCount = 0;
-	} // end anon namespace
+		//GLOBAL size_t idCount = 0;
+		inline size_t getUniqueSceneNodeId()
+		{
+			LOCAL_PERSIST size_t lastId = 0;
+			return lastId++;
+		}
+	} // end Impl namespace
 
 	// TODO idCount-- when destrucitng
 	SceneNode::SceneNode()
 		: m_children()
-		, id(idCount++)
+		, id(Impl::getUniqueSceneNodeId())
 		, name("")
 		, transform()
 		, parent(nullptr)
@@ -98,12 +103,9 @@ namespace Dunjun
 		onStartChildren();
 
 		// check node components
-		for(auto& group : m_groupedComponents)
+		for(auto& component : m_components)
 		{
-			for(auto& component : group.second)
-			{
-				component->onStart();
-			}
+			component->onStart();
 		}
 	}
 
@@ -112,12 +114,9 @@ namespace Dunjun
 		updateCurrent(dt);
 		updateChildren(dt);
 
-		for (auto& group : m_groupedComponents)
+		for (auto& component : m_components)
 		{
-			for (auto& component : group.second)
-			{
-				component->update(dt);
-			}
+			component->update(dt);
 		}
 	}
 
@@ -131,12 +130,9 @@ namespace Dunjun
 		drawCurrent(renderer, t);
 		drawChildren(renderer, t);
 
-		for (auto& group : m_groupedComponents)
+		for (auto& component : m_components)
 		{
-			for (auto& component : group.second)
-			{
-				component->draw(renderer, t);
-			}
+			component->draw(renderer, t);
 		}
 	}
 
@@ -151,16 +147,16 @@ namespace Dunjun
 	)				.
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-	SceneNode* SceneNode::addComponent(NodeComponent::u_ptr component)
-	{
-		component->parent = this;
-
-		const std::type_index id(typeid(*component));
-
-		m_groupedComponents[id].push_back(std::move(component));
-
-		return this;
-	}
+	//SceneNode* SceneNode::addComponent(NodeComponent::u_ptr component)
+	//{
+	//	component->parent = this;
+	//
+	//	const std::type_index id(typeid(*component));
+	//
+	//	m_components[id].push_back(std::move(component));
+	//
+	//	return this;
+	//}
 
 	/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	)				.

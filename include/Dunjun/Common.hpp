@@ -2,7 +2,8 @@
 #define DUNJUN_COMMON_HPP // if not then define it
 
 #include <algorithm>
-#include <array>
+#include <array> // SceneNode.hpp
+#include <bitset> // SceneNode.hpp
 #include <cassert>
 #include <chrono>
 #include <cmath>

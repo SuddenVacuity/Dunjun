@@ -84,7 +84,7 @@ namespace Dunjun
 
 		explicit Room(Random& random, const Room::Size& size);
 
-		virtual ~Room();
+		virtual ~Room() override;
 
 		void generate();
 

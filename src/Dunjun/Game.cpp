@@ -313,12 +313,12 @@ namespace Dunjun
 			{ // player scene node
 				SceneNode::u_ptr player = make_unique<SceneNode>();
 
-				player->transform.position = { 8.0f, 1.0f, 8.0f };
+				player->transform.position = { 5 * 6 + 4, 1 * 6, 5 * 6 + 4 };
 				player->transform.scale = { 1.0f, 2.0f, 1.0f };
 				player->name = "player";
 
 				player->addComponent<MeshRenderer>(g_sprite);
-				player->addComponent<FaceCamera>(g_cameraPlayer);
+				//player->addComponent<FaceCamera>(g_cameraPlayer);
 
 				g_player = player.get();
 
@@ -343,6 +343,7 @@ namespace Dunjun
 				auto level = make_unique<Level>();
 
 				level->material = &g_materials["terrain"];
+				level->name = "level";
 				level->generate();
 
 				g_level = level.get();
@@ -388,6 +389,7 @@ namespace Dunjun
 				//Initialize camera
 				g_cameraPlayer.viewportAspectRatio = 16.0f / 9.0f;
 				g_cameraPlayer.transform.position = g_player->transform.position + Vector3(8 * 3, 8 * 2, 8 * 3);
+				//g_cameraPlayer.transform.orientation = angleAxis(Degree(45), {0, 1, 0}) * angleAxis(Degree(-30), {1, 0, 0});
 				g_cameraPlayer.lookAt(g_player->transform.position);
 
 				g_cameraPlayer.projectionType = ProjectionType::Orthographic;
@@ -584,6 +586,7 @@ namespace Dunjun
 
 				if (Input::isGamepadButtonPressed(Input::Gamepad_1, Input::XboxButton::Y))
 				{
+					std::cout << "This button does nothing" << std::endl;
 				}
 
 			// end Gamepad Input
@@ -603,6 +606,26 @@ namespace Dunjun
 		
 				// keyboard input
 				//Vector3& camPos = g_cameraPlayer.transform.position;
+
+				// level generation on key press
+				if(Input::isKeyPressed(Input::Key::W))
+				{
+					SceneNode* level = g_rootNode.findChildByName("level");
+					g_rootNode.detachChild(*level);
+
+					{ // test level generation
+						auto level = make_unique<Level>();
+
+						level->material = &g_materials["terrain"];
+						level->name = "level";
+						level->generate();
+
+						g_level = level.get();
+
+						g_rootNode.attachChild(std::move(level));
+					}
+				}
+
 
 				if (Input::isKeyPressed(Input::Key::Up))
 					velocityDirection += {0, 0 ,-1};
@@ -698,16 +721,13 @@ namespace Dunjun
 					//}
 
 					g_cameraPlayer.transform.position.x = lerp(g_cameraPlayer.transform.position.x, g_player->transform.position.x + 8.0f * 3.0f, 12.0f * dt);
-					g_cameraPlayer.transform.position.y = lerp(g_cameraPlayer.transform.position.y, g_player->transform.position.y + 8.0f * 2.0f, 8.0f * dt);
+					g_cameraPlayer.transform.position.y = lerp(g_cameraPlayer.transform.position.y, g_player->transform.position.y + 8.0f * 2.0f, 12.0f * dt);
 					g_cameraPlayer.transform.position.z = lerp(g_cameraPlayer.transform.position.z, g_player->transform.position.z + 8.0f * 3.0f, 12.0f * dt);
 
-
-					//g_cameraPlayer.transform.position = g_player->transform.position + Vector3(-8 * 3, 8 * 2, 8 * 3);
-
-					g_cameraPlayer.lookAt({ g_player->transform.position });
-
 				}
-
+				// make player face the camera
+				g_cameraPlayer.lookAt({ g_player->transform.position });
+				g_player->transform.orientation = -g_cameraWorld.transform.orientation;
 
 		}
 
@@ -862,6 +882,15 @@ namespace Dunjun
 
 			// load instances
 			loadInstances();
+
+
+			std::cout << "Switch between player camera, world camera and vibration with XInput Buttons" << std::endl;
+			std::cout << "Camera: move with XInput control sticks, L and R." << std::endl;
+			std::cout << "Move player with arrow keys/RCtr/LCtr or XInput d-pad" << std::endl;
+			std::cout << "Re-generate World with W" << std::endl;
+			std::cout << "Show bug with multiplying transforms with T" << std::endl;
+			std::cout << "Reset player position with R" << std::endl;
+			std::cout << "" << std::endl;
 		}
 
 		void run()
