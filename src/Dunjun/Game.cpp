@@ -40,7 +40,7 @@ namespace Dunjun
 
 	GLOBAL Level* g_level;
 
-
+	GLOBAL Transform g_parentTest;
 
 	namespace Game
 	{
@@ -440,10 +440,10 @@ namespace Dunjun
 			g_rootNode.update(dt);
 
 			//ModelInstance &player = g_instances[0];
-			//g_instances[0].transform.position.x = std::sin(3.0f * Input::getTime());
-			//g_instances[0].transform.position.z = std::cos(3.0f * Input::getTime());
+			//g_instances[0].transform.position.x = Math::sin(3.0f * Input::getTime());
+			//g_instances[0].transform.position.z = Math::cos(3.0f * Input::getTime());
 
-			f32 camVel = 8.0f; // multiplier for camera speed
+			f32 camVel = 50.0f; // multiplier for camera speed
 			f32 playerVelX = 3.5f;
 			f32 playerVelZ = 5.5f;
 
@@ -451,15 +451,15 @@ namespace Dunjun
 			//  y and z are not multipling correctly when transform * transform
 			if(Input::isKeyPressed(Input::Key::T)) // test multipling transforms
 			{
-			Transform parent;
+				g_parentTest.scale = g_parentTest.scale * (1.0f + 0.05f * dt);
+				g_parentTest.position += {0.2f * dt, 0.0f * dt, 0.0f * dt};
+				g_parentTest.orientation = angleAxis(Degree(360) * dt, { 0, 1, 0 });
+				
+				g_player->transform = g_player->transform * g_parentTest;
 
-			parent.orientation = angleAxis(Degree(360 * std::sin(glfwGetTime())) * dt / 5, { 1, 0, 0 }) * parent.orientation;
-			
-			g_player->transform = g_player->transform * parent;
-
-			std::cout << "Scale: " << g_player->transform.scale << std::endl;
-			std::cout << "Oreintation: " << g_player->transform.orientation << std::endl;
-			std::cout << "\n";
+				std::cout << "Scale: " << g_player->transform.scale << std::endl;
+				std::cout << "Oreintation: " << g_player->transform.orientation << std::endl;
+				std::cout << "\n";
 			}
 			else if (Input::isKeyPressed(Input::Key::R)) // test multipling transforms
 			{
@@ -480,9 +480,9 @@ namespace Dunjun
 				// gamepad camera rotation
 				Vector2 rts = axes.rightThumbStick;
 		
-				if (std::abs(rts.x) < deadZone) // ignore anything in the deadZone
+				if (Math::abs(rts.x) < deadZone) // ignore anything in the deadZone
 					rts.x = 0;
-				if (std::abs(rts.y) < deadZone)
+				if (Math::abs(rts.y) < deadZone)
 					rts.y = 0;
 		
 				g_cameraWorld.offsetOrientation(lookSensitivityX * Radian(-rts.x * dt)
@@ -491,9 +491,9 @@ namespace Dunjun
 				// gamepad camera translation
 				Vector2 lts = axes.leftThumbStick;
 		
-				if (std::abs(lts.x) < deadZone) // ignore anything in the deadZone
+				if (Math::abs(lts.x) < deadZone) // ignore anything in the deadZone
 					lts.x = 0;
-				if (std::abs(lts.y) < deadZone)
+				if (Math::abs(lts.y) < deadZone)
 					lts.y = 0;
 		
 				if(length(lts) > 1.0f) // keep diagonals from being faster then straight x, y or z
@@ -584,9 +584,23 @@ namespace Dunjun
 					//g_projectionTest = lerp(pp, op, 0.01f);
 				}
 
+				// level regeneration button
 				if (Input::isGamepadButtonPressed(Input::Gamepad_1, Input::XboxButton::Y))
 				{
-					std::cout << "This button does nothing" << std::endl;
+					SceneNode* level = g_rootNode.findChildByName("level");
+					g_rootNode.detachChild(*level);
+
+					{ // test level generation
+						auto level = make_unique<Level>();
+
+						level->material = &g_materials["terrain"];
+						level->name = "level";
+						level->generate();
+
+						g_level = level.get();
+
+						g_rootNode.attachChild(std::move(level));
+					}
 				}
 
 			// end Gamepad Input
@@ -606,26 +620,6 @@ namespace Dunjun
 		
 				// keyboard input
 				//Vector3& camPos = g_cameraPlayer.transform.position;
-
-				// level generation on key press
-				if(Input::isKeyPressed(Input::Key::W))
-				{
-					SceneNode* level = g_rootNode.findChildByName("level");
-					g_rootNode.detachChild(*level);
-
-					{ // test level generation
-						auto level = make_unique<Level>();
-
-						level->material = &g_materials["terrain"];
-						level->name = "level";
-						level->generate();
-
-						g_level = level.get();
-
-						g_rootNode.attachChild(std::move(level));
-					}
-				}
-
 
 				if (Input::isKeyPressed(Input::Key::Up))
 					velocityDirection += {0, 0 ,-1};
@@ -662,7 +656,7 @@ namespace Dunjun
 					g_player->transform.orientation = Quaternion();
 				else
 				{
-				Radian a(std::atan(f.z / f.x));
+				Radian a(Math::atan(f.z / f.x));
 				a += Radian(Constants::TAU / 4);
 
 				if(f.x < 0) // prevent flipping
@@ -697,9 +691,9 @@ namespace Dunjun
 					//// rate at which camera catches up to player
 					//f32 speed = 7.0f;
 					//
-					//f32 dxAbs = std::abs(dx);
-					//f32 dyAbs = std::abs(dy);
-					//f32 dzAbs = std::abs(dz);
+					//f32 dxAbs = Math::abs(dx);
+					//f32 dyAbs = Math::abs(dy);
+					//f32 dzAbs = Math::abs(dz);
 					//
 					//// vectors for easier for loop
 					//Vector3 v = {dx, dy, dz};
@@ -714,15 +708,15 @@ namespace Dunjun
 					//		f32 sgn = v[i] / vAbs[i];
 					//		f32 x = vAbs[i] - w;
 					//
-					//		x = std::sin(x); // give start/stop an S curve
+					//		x = Math::sin(x); // give start/stop an S curve
 					//
 					//		g_cameraPlayer.transform.position[i] += speed * sgn * x * dt;
 					//	}
 					//}
 
-					g_cameraPlayer.transform.position.x = lerp(g_cameraPlayer.transform.position.x, g_player->transform.position.x + 8.0f * 3.0f, 12.0f * dt);
-					g_cameraPlayer.transform.position.y = lerp(g_cameraPlayer.transform.position.y, g_player->transform.position.y + 8.0f * 2.0f, 12.0f * dt);
-					g_cameraPlayer.transform.position.z = lerp(g_cameraPlayer.transform.position.z, g_player->transform.position.z + 8.0f * 3.0f, 12.0f * dt);
+					g_cameraPlayer.transform.position.x = Math::lerp(g_cameraPlayer.transform.position.x, g_player->transform.position.x + 8.0f * 3.0f, 12.0f * dt);
+					g_cameraPlayer.transform.position.y = Math::lerp(g_cameraPlayer.transform.position.y, g_player->transform.position.y + 8.0f * 2.0f, 12.0f * dt);
+					g_cameraPlayer.transform.position.z = Math::lerp(g_cameraPlayer.transform.position.z, g_player->transform.position.z + 8.0f * 3.0f, 12.0f * dt);
 
 				}
 				// make player face the camera
@@ -887,8 +881,8 @@ namespace Dunjun
 			std::cout << "Switch between player camera, world camera and vibration with XInput Buttons" << std::endl;
 			std::cout << "Camera: move with XInput control sticks, L and R." << std::endl;
 			std::cout << "Move player with arrow keys/RCtr/LCtr or XInput d-pad" << std::endl;
-			std::cout << "Re-generate World with W" << std::endl;
-			std::cout << "Show bug with multiplying transforms with T" << std::endl;
+			std::cout << "Re-generate World with gamepad Xbox Y" << std::endl;
+			std::cout << "Test bug with multiplying transforms with T" << std::endl;
 			std::cout << "Reset player position with R" << std::endl;
 			std::cout << "" << std::endl;
 		}

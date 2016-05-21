@@ -165,7 +165,7 @@ namespace Dunjun
 	
 	f32 length(const Vector3& a)
 	{
-		return std::sqrtf(lengthSquared(a));
+		return Math::sqrt(lengthSquared(a));
 	}
 	
 	Vector3 normalize(const Vector3& a) // normalize

@@ -9,9 +9,11 @@ namespace Dunjun
 		Transform ws;
 		// correct order: scale >> rotate >> translate
 
-		ws.position = ps.position + ps.orientation * (ps.scale * ls.position);
+		ws.position = ps.position + ps.orientation * (ps.scale * ls.position); // <-- This is correct
+		//ws.position = ps.position + (ps.scale * ls.position); // removed orientation for easier testing
 		ws.orientation = ps.orientation * ls.orientation;
-		ws.scale = ps.scale * (ps.orientation * ls.scale);
+		//ws.scale = ps.scale * (ps.orientation * ls.scale); // the orientation doesn't multiply with the scale correctly
+		ws.scale = ps.scale * ls.scale;
 
 		return ws;
 	}
@@ -38,7 +40,7 @@ namespace Dunjun
 
 	Matrix4 transformMatrix4(const Transform& t)
 	{
-		return translate(t.position) * quaternionToMatrix4(t.orientation) * scale(t.scale);
+		return Math::translate(t.position) * quaternionToMatrix4(t.orientation) * Math::scale(t.scale);
 	}
 
 }

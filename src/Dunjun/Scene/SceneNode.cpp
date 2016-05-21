@@ -6,9 +6,9 @@ namespace Dunjun
 	namespace Impl
 	{
 		//GLOBAL size_t idCount = 0;
-		inline size_t getUniqueSceneNodeId()
+		inline SceneNode::ID getUniqueSceneNodeId()
 		{
-			LOCAL_PERSIST size_t lastId = 0;
+			LOCAL_PERSIST SceneNode::ID lastId = 0;
 			return lastId++;
 		}
 	} // end Impl namespace

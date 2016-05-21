@@ -5,6 +5,8 @@
 
 namespace Dunjun
 {
+namespace Math
+{
 	template <class T>
 	inline T lerp(const T& x, const T& y, f32 t)
 	{
@@ -36,18 +38,27 @@ namespace Dunjun
 		}
 		else
 		{
-			f32 angle = std::acos(cosTheta);
+			Radian angle = Math::acos(cosTheta);
 
-			result = std::sin(1.0f - t * angle) * x + std::sin(t * angle) * z;
-			result = result * (1.0f / std::sin(angle));
+			result = Math::sin(Radian(1.0f) - (t * angle)) * x + Math::sin(t * angle) * z;
+			result = result * (1.0f / Math::sin(angle));
 		}
 		return result;
 		
 	}
 
+	// Shoemake's Quaternion curves
+	// Sphereical cubic interpolation
+	inline Quaternion squad(const Quaternion& p,
+							const Quaternion& a,
+							const Quaternion& b,
+							const Quaternion& q,
+							f32 t)
+	{
+		return slerp(slerp(p, q, t), slerp(a, b, t), 2.0f * t * (1.0f - t));
+	}
 
-
-
+} // end Math
 } // end Dunjun
 
 #endif

@@ -53,7 +53,8 @@ namespace Dunjun
 		void onStart();
 		void update(f32 dt);
 
-		const size_t id;
+		using ID = u64;
+		const ID id;
 		std::string name;
 		Transform transform;
 		ReadOnly<SceneNode*, SceneNode> parent;
@@ -171,7 +172,7 @@ namespace Dunjun
 		// A GroupedComponentMap groups components of the same type together by type_index(...).hash_code()
 		//GroupedComponentMap m_groupedComponents;
 
-		std::vector<NodeComponent::u_ptr> m_components;
+		std::deque<NodeComponent::u_ptr> m_components;
 		ComponentArray m_componentArray;
 		ComponentBitset m_componentBitset;
 

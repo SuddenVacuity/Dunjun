@@ -27,6 +27,11 @@ namespace Dunjun
 		{
 		}
 
+		ReadOnly(T&& t)
+			: data(std::move(t))
+		{
+		}
+
 		ReadOnly& operator=(const T& t)
 		{
 			data = t;
@@ -38,8 +43,23 @@ namespace Dunjun
 			return &data;
 		}
 
-		// Does not 'm_' prefix as its accessable within the Super class so
-		// it is not technically private for that class.
+		template <class U>
+		U& operator*()
+		{
+			return *data;
+		}
+
+		bool operator==(const T& t) const
+		{
+			return data == t;
+		}
+		bool operator!=(const T& t) const
+		{
+			return !operator==(t);
+		}
+
+		// Does not use 'm_' prefix as its accessable within the Super class so
+		// it is not technically private for that class (friend)
 		// This will be the only exception to the private member variable prefix
 		// rule of 'm_'
 		T data;

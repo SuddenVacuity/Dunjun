@@ -31,8 +31,6 @@ namespace Dunjun
 		f32 scaler() const;
 		f32& scaler();
 
-		f32 lengthSquared() const;
-		f32 length() const;
 
 		union
 		{
@@ -50,6 +48,10 @@ Quaternion operator*(f32 s, const Quaternion& q);
 
 f32 dot(const Quaternion& a, const Quaternion& b);
 Quaternion cross(const Quaternion& a, const Quaternion& b);
+
+f32 lengthSquared(const Quaternion& q);
+f32 length(const Quaternion& q);
+
 Quaternion normalize(const Quaternion& q);
 Quaternion conjugate(const Quaternion& q);
 Quaternion inverse(const Quaternion& q);
@@ -83,15 +85,28 @@ Radian angle(const Quaternion& q);
 Vector3 axis(const Quaternion& q);
 Quaternion angleAxis(const Radian& angle, const Vector3& axis);
 
-Radian roll(const Quaternion& q);
-Radian pitch(const Quaternion& q);
-Radian yaw(const Quaternion& q);
+inline Radian roll(const Quaternion& q);
+inline Radian pitch(const Quaternion& q);
+inline Radian yaw(const Quaternion& q);
 
-EulerAngles quaternionToEulerAngles(const Quaternion& q);
+inline EulerAngles quaternionToEulerAngles(const Quaternion& q);
+inline Quaternion eulerAnglesToQuaternion(const EulerAngles& e,
+										  const Vector3& xAxis = { 1, 0, 0 },
+										  const Vector3& yAxis = { 0, 1, 0 },
+										  const Vector3& zAxis = { 0, 0, 1 });
+
+inline Quaternion eulerAnglesToQuaternion(const Radian& pitch, const Radian& yaw, const Radian& roll,
+										  const Vector3& xAxis = { 1, 0, 0 },
+										  const Vector3& yAxis = { 0, 1, 0 },
+										  const Vector3& zAxis = { 0, 0, 1 })
+{
+	return eulerAnglesToQuaternion({pitch, yaw, roll}, xAxis, yAxis, zAxis);
+}
+
 //
 // Matrices
 Matrix4 quaternionToMatrix4(const Quaternion& q);
-// NOTE: assumes matrix is only a rotational matrix and has no skew applied (scale)
+// NOTE: assumes matrix is only a rotational matrix and has no shear applied (scale)
 Quaternion matrix4ToQuaternion(const Matrix4& m);
 
 } // end Dunjun

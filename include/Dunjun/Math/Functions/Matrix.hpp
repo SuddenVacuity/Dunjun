@@ -5,6 +5,8 @@
 
 namespace Dunjun
 {
+namespace Math
+{
 	// matrix transform handling functions
 	Matrix4 translate(const Vector3& v);
 	Matrix4 rotate(const Radian& angle, const Vector3& v); // angle is in radians, v is the axis to rotate around
@@ -25,5 +27,6 @@ namespace Dunjun
 	template <>
 	Quaternion lookAt<Quaternion>(const Vector3& eye, const Vector3& center, const Vector3& up);
 
-}
+} // end Math
+} // end Dunjun
 #endif

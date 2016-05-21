@@ -122,14 +122,14 @@ namespace Dunjun
 	f32 Quaternion::scaler() const { return w; }
 	f32& Quaternion::scaler() { return w; }
 
-	f32 Quaternion::lengthSquared() const
+	f32 lengthSquared(const Quaternion& q)
 	{
-		return x * x + y * y + z * z + w * w;
+		return dot(q, q);
 	}
 
-	f32 Quaternion::length() const
+	f32 length(const Quaternion& q)
 	{
-		return std::sqrt(lengthSquared());
+		return Math::sqrt(lengthSquared(q));
 	}
 	/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	)				.
@@ -165,7 +165,7 @@ namespace Dunjun
 
 	Quaternion normalize(const Quaternion& q)
 	{
-		return q * (1.0f / q.length());
+		return q * (1.0f / length(q));
 	}
 
 	Quaternion conjugate(const Quaternion& q)
@@ -199,7 +199,7 @@ namespace Dunjun
 
 	Radian angle(const Quaternion& q)
 	{
-		return Radian(2.0f * std::acos(q.w));
+		return Radian(2.0f * Math::acos(q.w));
 	}
 
 	Vector3 axis(const Quaternion& q)
@@ -208,7 +208,7 @@ namespace Dunjun
 		if (s2 <-0)
 			return Vector3(0, 0, 1);
 
-		f32 invs2 = 1.0f / std::sqrt(s2);
+		f32 invs2 = 1.0f / Math::sqrt(s2);
 
 		return q.vector() * invs2;
 	}
@@ -219,29 +219,29 @@ namespace Dunjun
 
 		const Vector3 a = normalize(axis);
 
-		const f32 s = std::sin((f32)(0.5f * angle));
+		const f32 s = Math::sin(0.5f * angle);
 
 		q.vector() = a * s;
-		q.w = std::cos((f32)(0.5f * angle));
+		q.w = Math::cos(0.5f * angle);
 
 		return q;
 	}
 
 	Radian roll(const Quaternion& q)
 	{
-		return Radian(std::atan2(2.0f * q[0] * q[1] + q[2] * q[3],
+		return Radian(Math::atan2(2.0f * q[0] * q[1] + q[2] * q[3],
 			q[0] * q[0] + q[3] * q[3] - q[1] * q[1] - q[2] * q[2]));
 	}
 
 	Radian pitch(const Quaternion& q)
 	{
-		return Radian(std::atan2(2.0f * q[1] * q[2] + q[3] * q[0],
+		return Radian(Math::atan2(2.0f * q[1] * q[2] + q[3] * q[0],
 			q[3] * q[3] - q[0] * q[0] - q[1] * q[1] + q[2] * q[2]));
 	}
 
 	Radian yaw(const Quaternion& q)
 	{
-		return Radian(std::asin(-2.0f * (q[0] * q[2] - q[3] * q[1])));
+		return Radian(Math::asin(-2.0f * (q[0] * q[2] - q[3] * q[1])));
 	}
 
 	EulerAngles quaternionToEulerAngles(const Quaternion& q)
@@ -318,7 +318,7 @@ namespace Dunjun
 			biggestIndex = 3;
 		}
 
-		f32 biggestVal = std::sqrt(fourBiggestSquaredMinus1 + 1.0f) * 0.5f;
+		f32 biggestVal = Math::sqrt(fourBiggestSquaredMinus1 + 1.0f) * 0.5f;
 		f32 mult = 0.25f / biggestVal;
 
 		Quaternion q;
@@ -367,6 +367,18 @@ namespace Dunjun
 
 
 		return q;
+	}
+
+	Quaternion eulerAnglesToQuaternion(const EulerAngles& e,
+									   const Vector3& xAxis,
+									   const Vector3& yAxis,
+									   const Vector3& zAxis)
+	{
+		Quaternion p = angleAxis(e.pitch, xAxis);
+		Quaternion y = angleAxis(e.yaw, yAxis);
+		Quaternion r = angleAxis(e.roll, zAxis);
+
+		return y * p * r;
 	}
 
 } // end Dunjun

@@ -4,6 +4,8 @@
 
 namespace Dunjun
 {
+namespace Math
+{
 
 	// matrix transform handling functions
 	Matrix4 translate(const Vector3& v)
@@ -15,8 +17,8 @@ namespace Dunjun
 	}
 	Matrix4 rotate(const Radian& angle, const Vector3& v) // angle is in radians, v is the axis to rotate around
 	{
-		const f32 c = std::cos(static_cast<f32>(angle));
-		const f32 s = std::sin(static_cast<f32>(angle));
+		const f32 c = Math::cos(angle);
+		const f32 s = Math::sin(angle);
 
 		const Vector3 axis(normalize(v));
 		const Vector3 t = (1.0f - c) * axis;
@@ -88,11 +90,11 @@ namespace Dunjun
 	// fov angle is in radians
 	Matrix4 perspective(const Radian& fovy, f32 aspect, f32 zNear, f32 zFar)
 	{
-		assert(std::fabs(aspect - std::numeric_limits<f32>::epsilon()) > 0.0f); // make sure aspect ratio is greater than 0
+		assert(Math::abs(aspect - std::numeric_limits<f32>::epsilon()) > 0.0f); // make sure aspect ratio is greater than 0
 
 		Matrix4 result(0.0f);
 
-		const f32 range = std::tan(static_cast<f32>(fovy) / 2.0f);
+		const f32 range = Math::tan(fovy / 2.0f);
 
 		result[0][0] = 1.0f / (aspect * range);
 		result[1][1] = 1.0f / (range);
@@ -119,7 +121,7 @@ namespace Dunjun
 	}
 	Matrix4 infinitePerspective(const Radian& fovy, f32 aspect, f32 zNear)
 	{
-		const f32 range = std::tan(static_cast<f32>(fovy) / 2.0f) * zNear;
+		const f32 range = Math::tan(fovy / 2.0f) * zNear;
 		const f32 left = -range * aspect;
 		const f32 right  = range * aspect;
 		const f32 bottom = -range;
@@ -136,7 +138,7 @@ namespace Dunjun
 	}
 
 	template<>
-	Matrix4 lookAt<Matrix4>(const Vector3& eye, const Vector3& center, const Vector3& up)
+	Matrix4 Math::lookAt<Matrix4>(const Vector3& eye, const Vector3& center, const Vector3& up)
 	{
 		const Vector3 f(normalize(center - eye));
 		const Vector3 s(normalize(cross(f, up)));
@@ -163,7 +165,7 @@ namespace Dunjun
 	}
 
 	template <>
-	Quaternion lookAt<Quaternion>(const Vector3& eye, const Vector3& center, const Vector3& up)
+	Quaternion Math::lookAt<Quaternion>(const Vector3& eye, const Vector3& center, const Vector3& up)
 	{
 		//const Vector3& pos = transform.position;
 
@@ -178,10 +180,11 @@ namespace Dunjun
 		//const Vector3 u(cross(s, f));
 		//const Vector3 refUp(normalize(up));
 		//
-		//const f32 m = std::sqrt(2.0f + 2.0f * dot(u, refUp));
+		//const f32 m = Math::sqrt(2.0f + 2.0f * dot(u, refUp));
 		//
 		//Vector3 v = (1.0f / m) * cross(u, refUp);
 		//
 		//return Quaternion(v, 0.5f * m);
 	}
-}
+} // end Math
+} // end Dunjun

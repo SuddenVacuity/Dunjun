@@ -1,7 +1,7 @@
 #ifndef  DUNJUN_MATH_VECTOR2_HPP
 #define  DUNJUN_MATH_VECTOR2_HPP
 
-#include <Dunjun/Math/Angle.hpp>
+#include <Dunjun/Math/Functions/MathLib.hpp>
 
 namespace Dunjun
 {

@@ -22,6 +22,7 @@ namespace Dunjun
 		// inclusive
 		s32 getInt(s32 min, s32 max)
 		{
+			assert(!(min > max));
 			std::uniform_int_distribution<s32> dist(min, max);
 			return dist(m_engine);
 		}
@@ -29,6 +30,7 @@ namespace Dunjun
 		// inclusive
 		f32 getFloat(f32 min, f32 max)
 		{
+			assert(!(min > max));
 			std::uniform_real_distribution<f32> dist(min, max);
 			return dist(m_engine);
 		}
