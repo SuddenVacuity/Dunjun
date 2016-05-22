@@ -82,16 +82,38 @@ namespace Dunjun
 			u32 z = 0;
 		};
 
+		enum class Walls
+		{
+			North,
+			West,
+			South,
+			East, 
+		};
+
+		enum class Door
+		{
+			North,
+			West,
+			South,
+			East,
+		};
+
 		explicit Room(Random& random, const Room::Size& size);
 
 		virtual ~Room() override;
 
-		void generate();
+		void generate(bool showWalls);
+		void generate(bool northWall, bool westWall, bool southWall, bool eastWall);
 
 		const Room::Size size;
 		const Material* material;
 
+		bool northDoor = false;
+		bool westDoor = false;
+		bool southDoor = false;
+		bool eastDoor = false;
 	protected:
+
 		void addTileSurface(const Vector3& position, TileSurfaceFace face, const TileId& texPos);
 		void addTileSurface(const Vector3& position, TileSurfaceFace face, const RandomTileSet& randomTilePosSet);
 

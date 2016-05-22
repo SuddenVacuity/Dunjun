@@ -313,7 +313,7 @@ namespace Dunjun
 			{ // player scene node
 				SceneNode::u_ptr player = make_unique<SceneNode>();
 
-				player->transform.position = { 5 * 6 + 4, 1 * 6, 5 * 6 + 4 };
+				player->transform.position = { 0.0f, 1.0f, 0.0f };
 				player->transform.scale = { 1.0f, 2.0f, 1.0f };
 				player->name = "player";
 
@@ -463,7 +463,7 @@ namespace Dunjun
 			}
 			else if (Input::isKeyPressed(Input::Key::R)) // test multipling transforms
 			{
-				g_player->transform.position = { 8.0f, 1.0f, 8.0f }; // translation
+				g_player->transform.position = { 0.0f, 1.0f, 0.0f }; // translation
 				g_player->transform.scale = { 1.0f, 2.0f, 1.0f };
 				g_player->transform.orientation = angleAxis(Degree(0), { 0, 0, 1 }); // rotation
 			}

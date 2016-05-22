@@ -25,27 +25,28 @@ namespace Dunjun
 	{
 		if (material == nullptr)
 		{
-			std::cout << "Level::placeRoom() <<<< material = null ptr" << std::endl;
+			std::cout << "Level::placeRoom() <<<< material == nullptr" << std::endl;
 			return;
 		}
 
 		if(0)
 			m_random.setSeed(142);
 
-		const u32 levelSizeX = 60;
-		const u32 levelSizeY = 5;
-		const u32 levelSizeZ = 60;
+		// TODO: FIX: player doesn't line up with even/odd numbers correctly
+		const u32 levelSizeX = 55;
+		const u32 levelSizeY = 6;
+		const u32 levelSizeZ = 55;
 
 		// set room count range
 		// on average generates ~400 rooms in a 60*5*60 area with very high minRoom value
-		u32 minRooms = 10; // min to range of number of rooms
-		u32 maxRooms = 800; // max to range of number of rooms
+		u32 minRooms = 1; // min to range of number of rooms
+		u32 maxRooms = 1000; // max to range of number of rooms
 
 		// calculate number of rooms possible
 		// if min is not met it tries again but the loop will break if it fails too many times
 		minRooms = m_random.getInt(minRooms, maxRooms);
 
-		bool grid[levelSizeX][levelSizeY][levelSizeZ] = { false };
+		bool grid[levelSizeX][levelSizeY][levelSizeZ] = {{{  }}};
 
 		const Room::Size roomSize(5, 4, 5);
 
@@ -71,7 +72,7 @@ namespace Dunjun
 		// chance to turn to an axis, total 0~1 float value for chance to turn
 		// cumulative and must be checked in the same order as added together
 		f32 chanceTurnX = 0.15f;
-		f32 chanceTurnY = 0.08f + chanceTurnX;
+		f32 chanceTurnY = 0.10f + chanceTurnX;
 		f32 chanceTurnZ = 0.15f + chanceTurnY;
 
 		// used to limit attempts to generate a room
@@ -79,6 +80,7 @@ namespace Dunjun
 
 		// TODO: make branch generation its own function
 		// random walk (decide where rooms will be)
+		if(1)
 		while (roomCount < minRooms)
 		{
 			// escape if caught in endless loop
@@ -113,7 +115,7 @@ namespace Dunjun
 			u32 direction = m_random.getInt(0, 3);
 
 			// main path
-			for (int j = 0; j < numSteps; j++)
+			for (u32 j = 0; j < numSteps; j++)
 			{
 				if(roomCount >= minRooms)
 					break;
@@ -123,12 +125,12 @@ namespace Dunjun
 					// move start to a room as far from center as possible
 					switch (farRoomCycle)
 					{
-						case 0: startX = mostPosX.x ; startY = mostPosX.y ; startZ = mostPosX.z ; farRoomCycle = 1; break; // Positive X
-						case 1: startX = mostNegX.x ; startY = mostNegX.y ; startZ = mostNegX.z ; farRoomCycle = 2; break; // Negative X
-						case 2: startX = mostPosZ.x ; startY = mostPosZ.y ; startZ = mostPosZ.z ; farRoomCycle = 3; break; // Positive Z
-						case 3: startX = mostNegZ.x ; startY = mostNegZ.y ; startZ = mostNegZ.z ; farRoomCycle = 4; break; // Negative Z
-						case 4: startX = mostPosY.x ; startY = mostPosY.y ; startZ = mostPosY.z ; farRoomCycle = 5; break; // Positive Y
-						case 5: startX = mostNegY.x ; startY = mostNegY.y ; startZ = mostNegY.z ; farRoomCycle = 0; break; // Negative Y
+						case 0: startX = mostPosX.x; startY = mostPosX.y; startZ = mostPosX.z; farRoomCycle = 1; break; // Positive X
+						case 1: startX = mostNegX.x; startY = mostNegX.y; startZ = mostNegX.z; farRoomCycle = 2; break; // Negative X
+						case 2: startX = mostPosZ.x; startY = mostPosZ.y; startZ = mostPosZ.z; farRoomCycle = 3; break; // Positive Z
+						case 3: startX = mostNegZ.x; startY = mostNegZ.y; startZ = mostNegZ.z; farRoomCycle = 4; break; // Negative Z
+						case 4: startX = mostPosY.x; startY = mostPosY.y; startZ = mostPosY.z; farRoomCycle = 5; break; // Positive Y
+						case 5: startX = mostNegY.x; startY = mostNegY.y; startZ = mostNegY.z; farRoomCycle = 0; break; // Negative Y
 					}
 
 					// move current location to new start location
@@ -151,7 +153,7 @@ namespace Dunjun
 					direction = m_random.getInt(0, 1); // left/right/back/forward
 					stepsTaken = 0; // set to zero to prevent turn after 1 step
 				}
-				else if (rand <= chanceTurnY && stepsTaken > 1)
+				else if (rand <= chanceTurnY && stepsTaken > 0)
 				{
 					direction = m_random.getInt(4, 5); // up or down
 					stepsTaken = 0; // set to one to make multiple y changes less common
@@ -206,7 +208,7 @@ namespace Dunjun
 				}
 
 				// chance to change start location
-				if (rand <= 0.8f)
+				if (rand >= 0.8f)
 				{
 					startX = stepX;
 					startY = stepY;
@@ -222,14 +224,15 @@ namespace Dunjun
 
 				// check if room is farthest in any direction
 				Vector3 currentPos(stepX, stepY, stepZ);
+				//u32 currentPosX = stepX, currentPosY = stepY, currentPosZ = stepZ;
 
-				if		(stepX > mostPosX.x) { mostPosX = currentPos; }
+				if (stepX > mostPosX.x) { mostPosX = currentPos; }
 				else if (stepX < mostNegX.x) { mostNegX = currentPos; }
-
-				if		(stepY > mostPosY.y) { mostPosY = currentPos; }
+				
+				if (stepY > mostPosY.y) { mostPosY = currentPos; }
 				else if (stepY < mostNegY.y) { mostNegY = currentPos; }
-
-				if		(stepZ > mostPosZ.z) { mostPosZ = currentPos; }
+				
+				if (stepZ > mostPosZ.z) { mostPosZ = currentPos; }
 				else if (stepZ < mostNegZ.z) { mostNegZ = currentPos; }
 
 				roomCount++;
@@ -256,8 +259,7 @@ namespace Dunjun
 					u32 branchStepsTaken = 0;
 
 					// generate branching path
-					// static cast to avoid decimals
-					for (int j = 0; j < branchNumSteps; j++)
+					for (u32 j = 0; j < branchNumSteps; j++)
 					{
 						if (branchSkips > 10 || roomCount >= minRooms)
 						{
@@ -336,10 +338,10 @@ namespace Dunjun
 
 						if		(branchX > mostPosX.x) { mostPosX = currentPos; }
 						else if (branchX < mostNegX.x) { mostNegX = currentPos; }
-
+						
 						if		(branchY > mostPosY.y) { mostPosY = currentPos; }
 						else if (branchY < mostNegY.y) { mostNegY = currentPos; }
-
+						
 						if		(branchZ > mostPosZ.z) { mostPosZ = currentPos; }
 						else if (branchZ < mostNegZ.z) { mostNegZ = currentPos; }
 
@@ -350,35 +352,117 @@ namespace Dunjun
 				} // end try for branching path
 			} // end main path
 
-			//std::cout << "Level::placeRooms() <<<< The number of skips this loop was  " << skips << "." << std::endl;
-			//std::cout << "Level::placeRooms() <<<< The number of breaks this loop was  " << breaks << "." << std::endl;
-
 		} // end random walk (decide where rooms will be)
 
-		// where to place the lowest point of the level in world
-		f32 levelBase = -1;
+		// center of the level : used to center level in the world
+		f32 levelCenterOffsetX = levelSizeX / 2.0f;
+		f32 levelCenterOffsetY = levelSizeY / 2.0f;
+		f32 levelCenterOffsetZ = levelSizeZ / 2.0f;
 
 		// generate rooms
-		for (int i = 0; i < levelSizeY; i++)
+		for (u32 i = 0; i < levelSizeX; i++)
 		{
-			for (int j = 0; j < levelSizeZ; j++)
+			for (u32 j = 0; j < levelSizeY; j++)
 			{
-				for (int k = 0; k < levelSizeX; k++)
+				for (u32 k = 0; k < levelSizeZ; k++)
 				{
-					if (grid[k][i][j] == false)
+					if (grid[i][j][k] == false)
 						continue;
 
 					auto room = make_unique<Room>(m_random, roomSize);
 
-					const u32 gap = 1;
+					// debug variables
+					const u32 gap = 0;
+					f32 rand = m_random.getFloat(0, 1);
 
-					room->transform.position.y = (roomSize.y + gap) * i + levelBase * (roomSize.y + gap);
-					room->transform.position.x = (roomSize.x + gap) * j;
-					room->transform.position.z = (roomSize.z + gap) * k;
+					// cast levelCenterY as u32 so player doesn't float
+					room->transform.position.x = (roomSize.x + gap) * i - levelCenterOffsetX  * (roomSize.x + gap);
+					room->transform.position.y = (roomSize.y + gap) * j - levelCenterOffsetY  * (roomSize.y + gap);
+					room->transform.position.z = (roomSize.z + gap) * k - levelCenterOffsetZ  * (roomSize.z + gap);
 
 					room->material = material;
 
-					room->generate();
+					bool northWall = false;
+					bool westWall = false;
+					bool southWall = false;
+					bool eastWall = false;
+
+					// check wether to add walls
+					if(1)
+					{
+						// using switches to keep within array limits
+						switch (i)
+						{
+						case 0:
+							if (grid[i + 1][j][k] == 0 || rand > 1.7f) { eastWall = true; }
+							westWall = true; break;
+						case (levelSizeX - 1):
+							if (grid[i - 1][j][k] == 0 || rand > 1.7f) { westWall = true; }
+							eastWall = true; break;
+						default: 
+							if (grid[i - 1][j][k] == 0 || rand > 1.7f) { westWall = true; }
+							if (grid[i + 1][j][k] == 0 || rand > 1.7f) { eastWall = true; }
+							break;
+						};
+
+						// Y level not needed atm
+					//switch (j)
+					//{
+					//case 0: floor = true; break;
+					//case levelSizeY: ceiling = true; break;
+					//default:
+					//};
+
+						switch (k)
+						{
+						case 0:
+							if (grid[i][j][k + 1] == 0 || rand > 1.7f) { southWall = true; }
+							northWall = true; break;
+						case (levelSizeZ - 1):
+							if (grid[i][j][k - 1] == 0 || rand > 1.7f) { northWall = true; }
+							southWall = true; break;
+						default:
+							if (grid[i][j][k + 1] == 0 || rand > 1.7f) { southWall = true; }
+							if (grid[i][j][k - 1] == 0 || rand > 1.7f) { northWall = true; }
+							break;
+						};
+					} // end check wether to add walls
+
+
+					// check wether to add door KEEP SEPERATE FROM CHECK WALLS
+					if(1)
+					{
+						// using switches to keep within array limits
+						switch (i)
+						{
+						case 0:
+							if (grid[i + 1][j][k] != 0) { room->eastDoor = true; }
+							room->westDoor = false; break;
+						case (levelSizeX - 1):
+							if (grid[i - 1][j][k] != 0) { room->westDoor = true; }
+							room->eastDoor = false; break;
+						default:
+							if (grid[i - 1][j][k] != 0) { room->westDoor = true; }
+							if (grid[i + 1][j][k] != 0) { room->eastDoor = true; }
+							break;
+						};
+
+						switch (k)
+						{
+						case 0:
+							if (grid[i][j][k + 1] != 0) { room->southDoor = true; }
+							room->northDoor = false; break;
+						case (levelSizeZ - 1):
+							if (grid[i][j][k - 1] != 0) { room->northDoor = true; }
+							room->southDoor = false; break;
+						default:
+							if (grid[i][j][k + 1] != 0) { room->southDoor = true; }
+							if (grid[i][j][k - 1] != 0) { room->northDoor = true; }
+							break;
+						};
+					} // end check wether to add door
+
+					room->generate(northWall, westWall, southWall, eastWall);
 
 					attachChild(std::move(room));
 				}
@@ -387,50 +471,7 @@ namespace Dunjun
 
 		std::cout << "Level::placeRooms() <<<< There are " << roomCount << " of " << minRooms << " attemped rooms." << std::endl;
 
-		//int skips = 0;
-		//
-		//for(int n = 0; n < 10; n++)
-		//{
-		//	u32 roomSizeX = m_random.getInt(3, 16);
-		//	u32 roomSizeZ = m_random.getInt(3, 16);
-		//
-		//	int x = m_random.getInt(0, sizeX - 1 - roomSizeX);
-		//	int z = m_random.getInt(0, sizeZ - 1 - roomSizeZ);
-		//
-		//	Rectangle newRoom(roomSizeX, roomSizeZ, x, z);
-		//
-		//	// if room intersects, break
-		//	bool failed = false;
-		//	for(const Room& room : m_rooms)
-		//	{
-		//		Rectangle a(room.transform.position.x, room.transform.position.y, room.size.x, room.size.y);
-		//		if(newRoom.intersects(a))
-		//		{
-		//			failed = true;
-		//			break;
-		//		}
-		//	}
-		//
-		//	// if room does not intersect push room
-		//	if(failed == false)
-		//	{
-		//		m_rooms.push_back(newRoom);
-		//	}
-		//	else
-		//	{
-		//		// limit number of attempts
-		//		skips++;
-		//
-		//		if (skips < 10)
-		//			n--;
-		//
-		//		continue;
-		//	}
-		//
-		//
-		//}
-		//
-	} //; end place rooms
+	} // end place rooms
 
 
 } // end Dunjun
