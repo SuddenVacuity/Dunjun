@@ -15,7 +15,7 @@ namespace Dunjun
 
 	GLOBAL Camera g_cameraPlayer;
 	GLOBAL Camera g_cameraWorld;
-	GLOBAL Camera* g_currentCamera = &g_cameraPlayer;
+	GLOBAL Camera* g_currentCamera = &g_cameraWorld;
 	//GLOBAL Matrix4 g_projection;
 
 	namespace
@@ -41,6 +41,9 @@ namespace Dunjun
 	GLOBAL Level* g_level;
 
 	GLOBAL Transform g_parentTest;
+
+	GLOBAL u32 testIterator_5[5] = {0, 0, 0, 0, 0};
+	GLOBAL bool toggleCulling = true;
 
 	namespace Game
 	{
@@ -75,7 +78,7 @@ namespace Dunjun
 		//
 		INTERNAL void handleInput()
 		{
-			if (glfwWindowShouldClose(Window::ptr) || // check if window was closed
+			if (Window::shouldClose() || // check if window was closed
 				Input::isKeyPressed(Input::Key::Escape)) // checks if the escape key is pressed in window
 				g_running = false;
 		
@@ -443,7 +446,7 @@ namespace Dunjun
 			//g_instances[0].transform.position.x = Math::sin(3.0f * Input::getTime());
 			//g_instances[0].transform.position.z = Math::cos(3.0f * Input::getTime());
 
-			f32 camVel = 50.0f; // multiplier for camera speed
+			f32 camVel = 20.0f; // multiplier for camera speed
 			f32 playerVelX = 3.5f;
 			f32 playerVelZ = 5.5f;
 
@@ -468,7 +471,106 @@ namespace Dunjun
 				g_player->transform.orientation = angleAxis(Degree(0), { 0, 0, 1 }); // rotation
 			}
 
-			//g_instances[2].transform.orientation = angleAxis(Degree(120) * dt, { 1, 0, 0 }) * g_instances[2].transform.orientation;
+			// room visibility test
+			if (Input::isKeyPressed(Input::Key::B))
+			{
+				std::cout << "Rendering " << g_level->roomsRendered << " Rooms" << std::endl;
+			}
+
+			// return direction
+			if (Input::isKeyPressed(Input::Key::Space))
+			{
+				Vector3 f = g_cameraWorld.forward();
+
+				s32 angle = f.y * 90;
+
+				std::string direction;
+
+				if(f.x > 0) // right side
+				{
+					if(f.z > 0) // right-bottom quadrant
+					{
+						if(f.x > f.z)
+							direction = "East";
+						else
+							direction = "South";
+					}
+					else // right-top quadrant
+					{
+						if (f.x > -f.z)
+							direction = "East";
+						else
+							direction = "North";
+					}
+				}
+				else // left side
+				{
+					if (f.z > 0) // left-bottom quadrant
+					{
+						if (-f.x > f.z)
+							direction = "West";
+						else
+							direction = "South";
+					}
+					else // left-top quadrant
+					{
+						if (f.z > f.x)
+							direction = "West";
+						else
+							direction = "North";
+					}
+				}
+
+				std::cout << "You are facing " << direction << " and looking " << angle << " degrees vertically." << std::endl;
+	
+			}
+
+			// help
+			if(Input::isKeyPressed(Input::Key::H))
+			{
+				std::cout << "\n\n\n\n\n\n\n\n\n\n" << std::endl;
+				std::cout << "/////////////////////////////////////" << std::endl;
+
+				std::cout << "GamePad::Left Stick = Move camera" << std::endl;
+				std::cout << "GamePad::Right Stick = Turn camera" << std::endl;
+				std::cout << "GamePad::D-Pad Move = sprite" << std::endl;
+				std::cout << "GamePad::Shoulder Buttons = Move camera up/down" << std::endl;
+				std::cout << "GamePad::X = Test vibration" << std::endl;
+				std::cout << "GamePad::Y = Regenerate level with culling" << std::endl;
+				std::cout << "GamePad::B = Change to orthographic camera" << std::endl;
+				std::cout << "GamePad::A = Change to perspective camera" << std::endl;
+				std::cout << "\n" << std::endl;
+				std::cout << "Keyboard::ArrowKeys = Move sprite" << std::endl;
+				std::cout << "Keyboard::L/R Ctrl = Move sprite up/down" << std::endl;
+				std::cout << "Keyboard::C = Regenerate level without culling" << std::endl;
+				std::cout << "Keyboard::Space = Return views cardinal direction and vertical angle" << std::endl;
+				std::cout << "Keyboard::B = Return number of rooms currently rendering" << std::endl;
+				std::cout << "Keyboard::T = Test multiply transforms" << std::endl;
+				std::cout << "Keyboard::R = Reset sprite position, orientation and scale" << std::endl;
+
+
+			}
+
+			// regenerate world without culling
+			if (Input::isKeyPressed(Input::Key::C))
+			{
+				toggleCulling = false;
+
+				SceneNode* level = g_rootNode.findChildByName("level");
+				g_rootNode.detachChild(*level);
+
+				{ // test level generation
+					auto level = make_unique<Level>();
+
+					level->material = &g_materials["terrain"];
+					level->name = "level";
+					level->generate();
+
+					g_level = level.get();
+
+					g_rootNode.attachChild(std::move(level));
+				}
+			}
 		
 			// game pad input
 				Input::GamepadAxes axes = Input::getGamepadAxes(Input::Gamepad_1);
@@ -587,6 +689,7 @@ namespace Dunjun
 				// level regeneration button
 				if (Input::isGamepadButtonPressed(Input::Gamepad_1, Input::XboxButton::Y))
 				{
+					toggleCulling = true;
 					SceneNode* level = g_rootNode.findChildByName("level");
 					g_rootNode.detachChild(*level);
 
@@ -723,7 +826,74 @@ namespace Dunjun
 				g_cameraPlayer.lookAt({ g_player->transform.position });
 				g_player->transform.orientation = -g_cameraWorld.transform.orientation;
 
-		}
+				// object culling
+				g_level->roomsRendered = 0;
+				const Vector3 viewPos = g_cameraWorld.transform.position;
+				const Vector3 cameraOrientation = g_cameraWorld.forward();
+				const f32 viewDistance = 50;
+				if (toggleCulling == true)
+				for( auto& room : g_level->rooms)
+				{
+					Vector3 cullPoint = room->transform.position;
+
+					// check if cullPoint should add room size to itself
+					// decide based on the 3d (octo)-quadrant the camera is facing
+					if(cameraOrientation.x > 0) // +X
+					{
+						cullPoint.x += room->size.x;
+						if (cameraOrientation.y > 0) // +Y
+						{
+							cullPoint.y += room->size.y;
+							if (cameraOrientation.z > 0) // +Z
+								cullPoint.z += room->size.z;
+						}
+						else // stay -Y
+							if (cameraOrientation.z > 0) // +Z
+								cullPoint.z += room->size.z;
+					}
+					else // stay -X
+					{
+						if (cameraOrientation.y > 0) // +Y
+						{
+							cullPoint.y += room->size.y;
+							if (cameraOrientation.z > 0) // +Z
+								cullPoint.z += room->size.z;
+						}
+						else // stay -Y
+							if (cameraOrientation.z > 0) // +Z
+								cullPoint.z += room->size.z;
+					}
+
+					const Vector3 dp = cullPoint - viewPos;
+
+					const f32 dist = length(dp);
+
+					// distance culling
+					if(dist < viewDistance)
+					{
+
+						f32 cosTheta = dot(cameraOrientation, normalize(dp));
+
+						Radian theta = Math::acos(cosTheta);
+
+						// cheap cone culling
+						if(Math::abs(theta) <= g_cameraWorld.fieldOfView || dist < 20)
+						{
+							g_level->roomsRendered++;
+							room->visible = true;
+						}
+						else
+							room->visible = false;
+					}
+					else
+						room->visible = false;
+				}
+
+
+
+
+
+		} // end update
 
 		/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 		)				.
@@ -734,31 +904,6 @@ namespace Dunjun
 		)
 		)				.
 		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
-
-
-		// shader info
-		//INTERNAL void renderInstance(const ModelInstance& inst)
-		//{
-		//	ModelAsset* asset = inst.asset;
-		//	Dunjun::ShaderProgram* shaders = asset->material->shaders;
-		//
-		//	shaders->setUniform("u_camera", g_currentCamera->getMatrix()); // shaderprogram.cpp
-		//	shaders->setUniform("u_transform", inst.transform); // shaderprogram.cpp
-		//	shaders->setUniform("u_tex", (Dunjun::u32)0); // shaderprogram.cpp
-		//
-		//	asset->mesh->draw(); // mesh.cpp
-		//}
-
-		//INTERNAL void renderLevel(const Level& level)
-		//{
-		//	Dunjun::ShaderProgram* shaders = level.material->shaders;
-		//
-		//	shaders->setUniform("u_camera", g_currentCamera->getMatrix()); // shaderprogram.cpp
-		//	shaders->setUniform("u_transform", level.transform); // shaderprogram.cpp
-		//	shaders->setUniform("u_tex", (Dunjun::u32)0); // shaderprogram.cpp
-		//
-		//	level.mesh->draw();
-		//}
 
 		INTERNAL void render()
 		{
@@ -877,14 +1022,7 @@ namespace Dunjun
 			// load instances
 			loadInstances();
 
-
-			std::cout << "Switch between player camera, world camera and vibration with XInput Buttons" << std::endl;
-			std::cout << "Camera: move with XInput control sticks, L and R." << std::endl;
-			std::cout << "Move player with arrow keys/RCtr/LCtr or XInput d-pad" << std::endl;
-			std::cout << "Re-generate World with gamepad Xbox Y" << std::endl;
-			std::cout << "Test bug with multiplying transforms with T" << std::endl;
-			std::cout << "Reset player position with R" << std::endl;
-			std::cout << "" << std::endl;
+			std::cout << " Press H to see controls." << std::endl;
 		}
 
 		void run()
@@ -898,6 +1036,7 @@ namespace Dunjun
 
 			TickCounter tc;
 			Clock frameClock;
+			f32 tickLimit = 1.0f / 240.0f;
 
 			Clock deltaClock;
 

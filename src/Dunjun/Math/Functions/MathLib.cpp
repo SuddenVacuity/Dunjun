@@ -185,6 +185,16 @@ namespace Dunjun
 			return reinterpret_cast<const s64&>(i);
 		}
 
+		Radian abs(const Radian& x)
+		{
+			return Radian(abs(static_cast<f32>(x)));
+		}
+
+		Degree abs(const Degree& x)
+		{
+			return Degree(abs(static_cast<f32>(x)));
+		}
+
 
 	} // end Math
 } // end Dunjun

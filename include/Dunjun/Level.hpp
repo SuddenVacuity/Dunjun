@@ -68,13 +68,15 @@ namespace Dunjun
 		//ReadOnly<u32, Level> sizeY = 1;
 		//ReadOnly<u32, Level> wallHeight = 1;
 
-		const Material* material;
 		//Mesh* mesh;
 		Transform transform;
+		const Material* material;
+
+		u32 roomsRendered = 0;
+		std::vector<Room*> rooms;
 	private:
 		void placeRooms();
 
-		std::vector<Room> m_rooms;
 		u32 roomCount;
 
 		Random m_random;

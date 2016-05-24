@@ -37,6 +37,7 @@ namespace Dunjun
 		void destroyWindow(GLFWwindow* windowPtr);
 
 		GLFWwindow* createWindow(GLFWmonitor* monitor);
+		GLFWwindow* createWindow(GLFWmonitor* monitor, u32 width, u32 height);
 
 		void makeContextCurrent();
 		void swapInterval(int i);
@@ -49,6 +50,7 @@ namespace Dunjun
 		Vector2 getWindowSize();
 		Vector2 getFramebufferSize();
 
+		bool shouldClose();
 		bool isInFocus();
 		bool isIconified();
 

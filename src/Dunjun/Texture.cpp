@@ -1,6 +1,5 @@
 
 #include <Dunjun/Texture.hpp>
-#include <Dunjun/Common.hpp>
 
 namespace Dunjun
 {

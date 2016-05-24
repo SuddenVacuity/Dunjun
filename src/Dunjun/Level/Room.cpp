@@ -189,6 +189,33 @@ namespace Dunjun
 	}
 
 
+
+	void Room::setDoors(bool north, bool west, bool south, bool east)
+	{
+		northDoor = north;
+		westDoor = west;
+		southDoor = south;
+		eastDoor = east;
+	}
+
+	void Room::setDoors(bool doors)
+	{
+		northDoor = doors;
+		westDoor = doors;
+		southDoor = doors;
+		eastDoor = doors;
+	}
+
+	/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	)				.
+	)					PROTECTED
+	)
+	)				.
+	)					.
+	)
+	)				.
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+
 	// create a 4 vertex tile in the at position in the direction of TileSurfaceFace with texPos being the position in texture map for the texture
 	void Room::addTileSurface(const Vector3& position, TileSurfaceFace face, const TileId& texPos)
 	{
@@ -276,5 +303,6 @@ namespace Dunjun
 		addTileSurface(position, face, tilePos);
 	}
 
+	
 
 } // end Dunjun

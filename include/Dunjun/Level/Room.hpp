@@ -104,15 +104,18 @@ namespace Dunjun
 
 		void generate(bool showWalls);
 		void generate(bool northWall, bool westWall, bool southWall, bool eastWall);
+		
+		void setDoors(bool northWall, bool westWall, bool southWall, bool eastWall);
+		void setDoors(bool doors);
 
 		const Room::Size size;
 		const Material* material;
 
+	protected:
 		bool northDoor = false;
 		bool westDoor = false;
 		bool southDoor = false;
 		bool eastDoor = false;
-	protected:
 
 		void addTileSurface(const Vector3& position, TileSurfaceFace face, const TileId& texPos);
 		void addTileSurface(const Vector3& position, TileSurfaceFace face, const RandomTileSet& randomTilePosSet);

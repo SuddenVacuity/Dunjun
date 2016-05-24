@@ -62,13 +62,13 @@ namespace Dunjun
 		if(!m_generated)
 			generate();
 
-		glBindBuffer(GL_ARRAY_BUFFER, m_vbo); // bind the buffer
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ibo); // bind the buffer
-
 		// set attrib to data from m_data
 		glEnableVertexAttribArray((u32)AttribLocation::Position); // enables attribute array[0] a_position
 		glEnableVertexAttribArray((u32)AttribLocation::TexCoord); // enable attribute [1] a_texCoord
 		glEnableVertexAttribArray((u32)AttribLocation::Color); // enables attribute array[2] a_color ''
+
+		glBindBuffer(GL_ARRAY_BUFFER, m_vbo); // bind the buffer
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ibo); // bind the buffer
 
 		// pointer for attribute position (att position[], size of vertices x/y/z, int type, normalized?, stride, pointer)
 		glVertexAttribPointer((u32)AttribLocation::Position, 3, 
@@ -87,13 +87,12 @@ namespace Dunjun
 		//glDrawArrays(asset->drawType, asset->drawStart, asset->drawCount); // (mode to draw in, first vertex, total vertices)
 		glDrawElements(m_drawType, m_drawCount, GL_UNSIGNED_INT, nullptr);
 
+		glBindBuffer(GL_ARRAY_BUFFER, 0); // unbind the buffer
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0); // unbind the buffer
+
 		glDisableVertexAttribArray((u32)AttribLocation::Position); // enables attribute array[0] a_position
 		glDisableVertexAttribArray((u32)AttribLocation::TexCoord); // enable attribute [1] a_texCoord
 		glDisableVertexAttribArray((u32)AttribLocation::Color); // enables attribute array[2] a_color ''
-
-
-		glBindBuffer(GL_ARRAY_BUFFER, 0); // unbind the buffer
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0); // unbind the buffer
 
 	}
 
