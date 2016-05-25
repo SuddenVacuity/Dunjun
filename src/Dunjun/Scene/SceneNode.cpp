@@ -120,7 +120,7 @@ namespace Dunjun
 		}
 	}
 
-	void SceneNode::draw(Renderer& renderer, Transform t) const
+	void SceneNode::draw(SceneRenderer& renderer, Transform t) const
 	{
 		if(!visible)
 			return;
@@ -131,9 +131,7 @@ namespace Dunjun
 		drawChildren(renderer, t);
 
 		for (auto& component : m_components)
-		{
 			component->draw(renderer, t);
-		}
 	}
 
 	/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -189,12 +187,12 @@ namespace Dunjun
 			child->update(dt);
 	}
 
-	void SceneNode::drawCurrent(Renderer& renderer, Transform t) const
+	void SceneNode::drawCurrent(SceneRenderer& renderer, Transform t) const
 	{
 		// Do nothing by default
 	}
 
-	void SceneNode::drawChildren(Renderer& renderer, Transform t) const
+	void SceneNode::drawChildren(SceneRenderer& renderer, Transform t) const
 	{
 		for (const u_ptr& child : m_children)
 			child->draw(renderer, t);

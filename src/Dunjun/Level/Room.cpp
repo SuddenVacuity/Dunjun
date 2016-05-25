@@ -21,10 +21,10 @@ namespace Dunjun
 
 	void Room::generate(bool showWalls)
 	{
-		Room::generate(showWalls, showWalls, showWalls, showWalls);
+		Room::generate(showWalls, showWalls, showWalls, showWalls, showWalls, showWalls);
 	}
 
-	void Room::generate(bool northWall, bool westWall, bool southWall, bool eastWall)
+	void Room::generate(bool northWall, bool westWall, bool southWall, bool eastWall, bool floor, bool ceiling)
 	{
 		if(m_generated)
 			return;
@@ -171,12 +171,12 @@ namespace Dunjun
 
 				// generate floor
 				if (mapGrid[i][j] != emptyTile)
-				{
-					addTileSurface(Vector3(i, 0, j), TileSurfaceFace::Up, gravelTile);
-				}
+					if(floor == true)
+						addTileSurface(Vector3(i, 0, j), TileSurfaceFace::Up, gravelTile);
 
 				// generate ceiling
-				addTileSurface(Vector3(i, size.y, j), TileSurfaceFace::Down, mossyStoneTiles);
+				if(ceiling == true)
+					addTileSurface(Vector3(i, size.y, j), TileSurfaceFace::Down, mossyStoneTiles);
 
 			}
 		} // end generate walls, floor and ceiling mesh

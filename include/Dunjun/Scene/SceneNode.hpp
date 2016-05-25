@@ -26,7 +26,7 @@ namespace Dunjun
 		return typeId;
 	}
 
-	class SceneNode : public Drawable, private NonCopyable
+	class SceneNode : private NonCopyable
 	{
 	public:
 		using u_ptr = std::unique_ptr<SceneNode>; // quick typedef for unique pointers
@@ -155,9 +155,9 @@ namespace Dunjun
 		)				.
 		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 	protected:
-		friend class Renderer;
+		friend class SceneRenderer;
 
-		void draw(Renderer& renderer, Transform t = Transform()) const;
+		void draw(SceneRenderer& renderer, Transform t = Transform()) const;
 
 		virtual void onStartCurrent();
 		void onStartChildren();
@@ -165,8 +165,8 @@ namespace Dunjun
 		virtual void updateCurrent(f32 dt);
 		void updateChildren(f32 dt);
 
-		virtual void drawCurrent(Renderer& renderer, Transform t) const;
-		void drawChildren(Renderer& renderer, Transform t) const;
+		virtual void drawCurrent(SceneRenderer& renderer, Transform t) const;
+		void drawChildren(SceneRenderer& renderer, Transform t) const;
 
 		std::deque<u_ptr> m_children;
 		// A GroupedComponentMap groups components of the same type together by type_index(...).hash_code()

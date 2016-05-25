@@ -220,7 +220,7 @@
     <ClInclude Include="include\Dunjun\Scene\FaceCamera.hpp" />
     <ClInclude Include="include\Dunjun\Scene\MeshRenderer.hpp" />
     <ClInclude Include="include\Dunjun\Scene\NodeComponent.hpp" />
-    <ClInclude Include="include\Dunjun\Renderer.hpp" />
+    <ClInclude Include="include\Dunjun\Scene\SceneRenderer.hpp" />
     <ClInclude Include="include\Dunjun\Scene\SceneNode.hpp" />
     <ClInclude Include="include\Dunjun\ShaderProgram.hpp" />
     <ClInclude Include="include\Dunjun\Texture.hpp" />

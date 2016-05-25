@@ -5,7 +5,7 @@
 
 namespace Dunjun
 {
-	class Renderer;
+	class SceneRenderer;
 
 	enum class AttribLocation : u32
 	{
@@ -66,7 +66,7 @@ namespace Dunjun
 
 
 	private:
-		friend class Renderer;
+		friend class SceneRenderer;
 
 		void draw() const;
 

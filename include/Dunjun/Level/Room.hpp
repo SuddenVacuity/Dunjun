@@ -103,7 +103,7 @@ namespace Dunjun
 		virtual ~Room() override;
 
 		void generate(bool showWalls);
-		void generate(bool northWall, bool westWall, bool southWall, bool eastWall);
+		void generate(bool northWall, bool westWall, bool southWall, bool eastWall, bool floor, bool ceiling);
 		
 		void setDoors(bool northWall, bool westWall, bool southWall, bool eastWall);
 		void setDoors(bool doors);

@@ -32,10 +32,16 @@ namespace Dunjun
 		if(0)
 			m_random.setSeed(142);
 
+		// X * Y * Z must be less than 1024000
 		// TODO: FIX: player doesn't line up with even/odd numbers correctly
-		const u32 levelSizeX = 20;
-		const u32 levelSizeY = 3;
-		const u32 levelSizeZ = 20;
+		const u32 levelSizeX = 205;
+		const u32 levelSizeY = 11;
+		const u32 levelSizeZ = 205;
+
+		//this large an area causes overflow when regenerating rooms
+		//const u32 levelSizeX = 305;
+		//const u32 levelSizeY = 11;
+		//const u32 levelSizeZ = 305;
 
 		// set room count range
 		// on average generates ~400 rooms in a 60*5*60 area with very high minRoom value
@@ -393,6 +399,9 @@ namespace Dunjun
 					bool southWall = false;
 					bool eastWall = false;
 
+					bool floor = false;
+					bool ceiling = false;
+
 					bool northDoor = false;
 					bool westDoor = false;
 					bool southDoor = false;
@@ -405,36 +414,44 @@ namespace Dunjun
 						switch (i)
 						{
 						case 0:
-							if (grid[i + 1][j][k] == 0 || rand > 1.7f) { eastWall = true; }
+							if (grid[i + 1][j][k] == 0) { eastWall = true; }
 							westWall = true; break;
 						case (levelSizeX - 1):
-							if (grid[i - 1][j][k] == 0 || rand > 1.7f) { westWall = true; }
+							if (grid[i - 1][j][k] == 0) { westWall = true; }
 							eastWall = true; break;
 						default: 
-							if (grid[i - 1][j][k] == 0 || rand > 1.7f) { westWall = true; }
-							if (grid[i + 1][j][k] == 0 || rand > 1.7f) { eastWall = true; }
+							if (grid[i - 1][j][k] == 0) { westWall = true; }
+							if (grid[i + 1][j][k] == 0) { eastWall = true; }
 							break;
 						};
 
-						// Y level not needed atm
-					//switch (j)
-					//{
-					//case 0: floor = true; break;
-					//case levelSizeY: ceiling = true; break;
-					//default:
-					//};
+						// TODO: move this to grid generation so only up/down movements have openings
+						// Y level
+						switch (j)
+						{
+						case 0:
+							if (grid[i][j + 1][k] == 0) { ceiling = true; }
+							floor = true; break;
+						case (levelSizeY - 1) :
+							if (grid[i][j - 1][k] == 0) { floor = true; }
+							ceiling = true; break;
+						default:
+							if (grid[i][j + 1][k] == 0) { ceiling = true; }
+							if (grid[i][j - 1][k] == 0) { floor = true; }
+							break;
+						};
 
 						switch (k)
 						{
 						case 0:
-							if (grid[i][j][k + 1] == 0 || rand > 1.7f) { southWall = true; }
+							if (grid[i][j][k + 1] == 0) { southWall = true; }
 							northWall = true; break;
 						case (levelSizeZ - 1):
-							if (grid[i][j][k - 1] == 0 || rand > 1.7f) { northWall = true; }
+							if (grid[i][j][k - 1] == 0) { northWall = true; }
 							southWall = true; break;
 						default:
-							if (grid[i][j][k + 1] == 0 || rand > 1.7f) { southWall = true; }
-							if (grid[i][j][k - 1] == 0 || rand > 1.7f) { northWall = true; }
+							if (grid[i][j][k + 1] == 0) { southWall = true; }
+							if (grid[i][j][k - 1] == 0) { northWall = true; }
 							break;
 						};
 					} // end check wether to add walls
@@ -475,7 +492,7 @@ namespace Dunjun
 
 					room->setDoors(northDoor, westDoor, southDoor, eastDoor);
 					
-					room->generate(northWall, westWall, southWall, eastWall);
+					room->generate(northWall, westWall, southWall, eastWall, floor, ceiling);
 
 					rooms.push_back(room.get());
 

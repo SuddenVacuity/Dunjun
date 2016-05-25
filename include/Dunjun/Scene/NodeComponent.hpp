@@ -1,7 +1,7 @@
 #ifndef DUNJUN_SCENE_NODE_COMPONENT_HPP
 #define DUNJUN_SCENE_NODE_COMPONENT_HPP
 
-#include <Dunjun/Drawable.hpp>
+#include <Dunjun/Scene/SceneRenderer.hpp>
 
 namespace Dunjun
 {
@@ -17,7 +17,7 @@ namespace Dunjun
 
 		virtual void onStart() {}
 		virtual void update(f32 dt) {}
-		virtual void draw(Renderer& renderer, Transform t) const {}
+		virtual void draw(SceneRenderer& renderer, Transform t) const {}
 
 		SceneNode* parent = nullptr;
 

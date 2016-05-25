@@ -20,15 +20,17 @@ namespace Dunjun
 		{
 		}
 
-		virtual void draw(Renderer& renderer, Transform t) const override
+		virtual void draw(SceneRenderer& renderer, Transform t) const override
 		{
 			if(!material || !mesh)
 				return;
 
-			renderer.setMaterial(material);
-			renderer.setUniforms(t);
+			renderer.addModelInstance(*this, t);
 
-			renderer.draw(mesh);
+			//renderer.setMaterial(material);
+			//renderer.setUniforms(t);
+			//
+			//renderer.draw(mesh);
 
 			//shaders->use();
 			//Texture::bind(tex, 0);

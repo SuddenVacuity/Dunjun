@@ -22,6 +22,7 @@
 #include <functional>
 #include <fstream>
 #include <iostream>
+#include <iterator> // Renderer.cpp
 #include <limits>
 #include <map>
 #include <memory>

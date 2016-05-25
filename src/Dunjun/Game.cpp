@@ -6,11 +6,11 @@
 namespace Dunjun
 {
 
-	struct ModelInstance // copies an asset to use
-	{
-		ModelAsset* asset;
-		Transform transform;
-	};
+	//struct ModelInstance // copies an asset to use
+	//{
+	//	ModelAsset* asset;
+	//	Transform transform;
+	//};
 
 
 	GLOBAL Camera g_cameraPlayer;
@@ -33,7 +33,7 @@ namespace Dunjun
 	GLOBAL SceneNode g_rootNode;
 	GLOBAL SceneNode* g_player;
 
-	GLOBAL Renderer g_renderer;
+	GLOBAL SceneRenderer g_renderer;
 
 	GLOBAL std::map<std::string, Material> g_materials;
 	GLOBAL std::map<std::string, Mesh*> g_meshes;
@@ -969,8 +969,9 @@ namespace Dunjun
 
 			g_renderer.reset();
 
-			g_renderer.setCamera(*g_currentCamera);
+			g_renderer.currentCamera = g_currentCamera;
 			g_renderer.draw(g_rootNode);
+			g_renderer.renderAll();
 
 			Window::swapBuffers(); // switches information between the front buffer and the back buffer
 		}
