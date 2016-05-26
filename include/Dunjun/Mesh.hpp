@@ -12,6 +12,7 @@ namespace Dunjun
 		Position = 0,
 		TexCoord = 1,
 		Color = 2,
+		Normal = 3,
 	};
 
 	class Mesh
@@ -44,6 +45,8 @@ namespace Dunjun
 
 				return *this;
 			}
+
+			void generateNormals();
 		};
 
 		Mesh();

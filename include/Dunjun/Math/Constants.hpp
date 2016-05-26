@@ -5,6 +5,7 @@
 
 namespace Dunjun
 {
+	GLOBAL u32 testIterator_5[5];
 namespace Constants
 {
 

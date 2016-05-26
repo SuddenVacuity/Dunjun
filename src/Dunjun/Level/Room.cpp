@@ -181,6 +181,8 @@ namespace Dunjun
 			}
 		} // end generate walls, floor and ceiling mesh
 
+		m_meshData.generateNormals();
+
 		m_mesh->addData(m_meshData);
 
 		addComponent<MeshRenderer>(*m_mesh, *material);
@@ -241,6 +243,8 @@ namespace Dunjun
 								 { 0xFF, 0xFF, 0xFF, 0xFF },
 								 { 0xFF, 0xFF, 0xFF, 0xFF } };
 
+		Vector3 flipNormals = {0, 0, 0};
+
 		// choose draw order based on direction
 		if ((u32)face % 2 == 0)
 			m_meshData.addFace(index, 0, 1, 2).addFace(index, 1, 3, 2); // hypotenuse goes down and right
@@ -266,30 +270,30 @@ namespace Dunjun
 		if ((u32)face < 2)
 		{
 			//vertex data				position (x, y, z}									texture coords		vertex colors
-			m_meshData.vertices.append({ position.x, position.y + 1.0f, position.z + 1.0f }, vertexTexCoord[0], vertexColor[0]);
-			m_meshData.vertices.append({ position.x, position.y + 1.0f, position.z + 0.0f }, vertexTexCoord[1], vertexColor[1]);
-			m_meshData.vertices.append({ position.x, position.y + 0.0f, position.z + 1.0f }, vertexTexCoord[2], vertexColor[2]);
-			m_meshData.vertices.append({ position.x, position.y + 0.0f, position.z + 0.0f }, vertexTexCoord[3], vertexColor[3]);
+			m_meshData.vertices.append({ position.x, position.y + 1.0f, position.z + 1.0f }, vertexTexCoord[0], vertexColor[0], flipNormals );
+			m_meshData.vertices.append({ position.x, position.y + 1.0f, position.z + 0.0f }, vertexTexCoord[1], vertexColor[1], flipNormals );
+			m_meshData.vertices.append({ position.x, position.y + 0.0f, position.z + 1.0f }, vertexTexCoord[2], vertexColor[2], flipNormals );
+			m_meshData.vertices.append({ position.x, position.y + 0.0f, position.z + 0.0f }, vertexTexCoord[3], vertexColor[3], flipNormals );
 		}
 
 		// up/down vertices
 		else if ((u32)face < 4)
 		{
 			//vertex data				position (x, y, z}									texture coords		vertex colors
-			m_meshData.vertices.append({ position.x + 1.0f, position.y, position.z + 0.0f }, vertexTexCoord[0], vertexColor[0]);
-			m_meshData.vertices.append({ position.x + 0.0f, position.y, position.z + 0.0f }, vertexTexCoord[1], vertexColor[1]);
-			m_meshData.vertices.append({ position.x + 1.0f, position.y, position.z + 1.0f }, vertexTexCoord[2], vertexColor[2]);
-			m_meshData.vertices.append({ position.x + 0.0f, position.y, position.z + 1.0f }, vertexTexCoord[3], vertexColor[3]);
-		}
-
-		// forward/backward vertices
-		else if ((u32)face< 6)
-		{
-			//vertex data				position (x, y, z}									texture coords		vertex colors
-			m_meshData.vertices.append({ position.x + 1.0f, position.y + 1.0f, position.z }, vertexTexCoord[0], vertexColor[0]);
-			m_meshData.vertices.append({ position.x + 0.0f, position.y + 1.0f, position.z }, vertexTexCoord[1], vertexColor[1]);
-			m_meshData.vertices.append({ position.x + 1.0f, position.y + 0.0f, position.z }, vertexTexCoord[2], vertexColor[2]);
-			m_meshData.vertices.append({ position.x + 0.0f, position.y + 0.0f, position.z }, vertexTexCoord[3], vertexColor[3]);
+			m_meshData.vertices.append({ position.x + 1.0f, position.y, position.z + 0.0f }, vertexTexCoord[0], vertexColor[0], flipNormals);
+			m_meshData.vertices.append({ position.x + 0.0f, position.y, position.z + 0.0f }, vertexTexCoord[1], vertexColor[1], flipNormals);
+			m_meshData.vertices.append({ position.x + 1.0f, position.y, position.z + 1.0f }, vertexTexCoord[2], vertexColor[2], flipNormals);
+			m_meshData.vertices.append({ position.x + 0.0f, position.y, position.z + 1.0f }, vertexTexCoord[3], vertexColor[3], flipNormals);
+		}																													  
+																															  
+		// forward/backward vertices																						  
+		else if ((u32)face< 6)																								  
+		{																													  
+			//vertex data				position (x, y, z}									texture coords		vertex colors 
+			m_meshData.vertices.append({ position.x + 1.0f, position.y + 1.0f, position.z }, vertexTexCoord[0], vertexColor[0], flipNormals);
+			m_meshData.vertices.append({ position.x + 0.0f, position.y + 1.0f, position.z }, vertexTexCoord[1], vertexColor[1], flipNormals);
+			m_meshData.vertices.append({ position.x + 1.0f, position.y + 0.0f, position.z }, vertexTexCoord[2], vertexColor[2], flipNormals);
+			m_meshData.vertices.append({ position.x + 0.0f, position.y + 0.0f, position.z }, vertexTexCoord[3], vertexColor[3], flipNormals);
 		}
 		else
 			std::runtime_error(std::string("Room::addTileSurface() <<<< Invalid tile direction."));

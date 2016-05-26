@@ -8,6 +8,8 @@
 //#include <Dunjun/Scene/MeshRenderer.hpp> // included in facecamera
 #include <Dunjun/Scene/FaceCamera.hpp>
 
+#include <Dunjun/Scene/Lighting.hpp>
+
 namespace Dunjun
 {
 

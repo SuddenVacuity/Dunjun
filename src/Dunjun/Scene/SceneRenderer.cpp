@@ -24,6 +24,7 @@ namespace Dunjun
 		m_currentMaterial = nullptr; // commenting this out makes the top right corner of the window white
 		currentCamera = nullptr;
 		m_modelInstances.clear();
+		m_pointLights.clear();
 	}
 
 	void SceneRenderer::draw(const SceneNode& node, const Transform& t)
@@ -43,6 +44,12 @@ namespace Dunjun
 			m_modelInstances.push_back({&meshRenderer, t});
 	}
 
+	void SceneRenderer::addPointLight(const PointLight* light)
+	{
+		m_pointLights.push_back(light);
+	}
+
+
 	void SceneRenderer::renderAll()
 	{
 		std::sort(std::begin(m_modelInstances), std::end(m_modelInstances),
@@ -58,6 +65,9 @@ namespace Dunjun
 				return A->shaders < B->shaders;
 		});
 
+
+		// FIXME: out of range happens somewhere in here when level::grid is large and initialized as true
+		// somehow related to levelSizeY in Level::placeRooms() being greater than 2
 		for(const auto& inst : m_modelInstances)
 		{
 			if(!m_currentShaders)
@@ -67,6 +77,8 @@ namespace Dunjun
 			{
 				m_currentShaders->setUniform("u_camera", currentCamera->getMatrix()); // shaderprogram.cpp
 				m_currentShaders->setUniform("u_tex", (Dunjun::u32)0); // shaderprogram.cpp
+				m_currentShaders->setUniform("u_light.position", m_pointLights[0]->position); // shaderprogram.cpp
+				m_currentShaders->setUniform("u_light.intensities", m_pointLights[0]->intensities); // shaderprogram.cpp
 			}
 
 			setTexture(inst.asset->material->texture);
@@ -75,7 +87,6 @@ namespace Dunjun
 
 			draw(inst.asset->mesh);
 		}
-
 	}
 
 	//void SceneRenderer::setMaterial(const Material* material)

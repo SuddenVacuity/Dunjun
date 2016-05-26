@@ -33,6 +33,8 @@ namespace Dunjun
 	GLOBAL SceneNode g_rootNode;
 	GLOBAL SceneNode* g_player;
 
+	GLOBAL PointLight g_light;
+
 	GLOBAL SceneRenderer g_renderer;
 
 	GLOBAL std::map<std::string, Material> g_materials;
@@ -42,7 +44,6 @@ namespace Dunjun
 
 	GLOBAL Transform g_parentTest;
 
-	GLOBAL u32 testIterator_5[5] = {0, 0, 0, 0, 0};
 	GLOBAL bool toggleCulling = true;
 
 	namespace Game
@@ -133,6 +134,7 @@ namespace Dunjun
 			g_defaultShader->bindAttribLocation((u32)AttribLocation::Position, "a_position"); // bind the position of 1st attribute in shaders
 			g_defaultShader->bindAttribLocation((u32)AttribLocation::TexCoord, "a_texCoord"); // bind the position of 3rd attribute in shaders
 			g_defaultShader->bindAttribLocation((u32)AttribLocation::Color, "a_color"); // bind the position of 2nd attribute in shaders
+			g_defaultShader->bindAttribLocation((u32)AttribLocation::Normal, "a_normal"); // bind the position of 2nd attribute in shaders
 
 			if (!g_defaultShader->link())
 				throw std::runtime_error(g_defaultShader->errorLog);
@@ -174,15 +176,15 @@ namespace Dunjun
 			// Here is where you add vertice information
 			//
 			Vertex vertices[] = { // define vertexes for a triangle
-				//  x	    y	  z		  s	    t	       r	 g	   b	 a				// for triangle strips organize vertexes in a backwards Z
-				{ { +0.5f,  0.5f, 0.0f },{ 1.0f, 1.0f },{ 0x00, 0xFF, 0xFF, 0xFF } },	// 0 vertex         1 ---- 0        
-				{ { -0.5f,  0.5f, 0.0f },{ 0.0f, 1.0f },{ 0xFF, 0xFF, 0x00, 0xFF } },	// 1 vertex           \             
-				{ { +0.5f, -0.5f, 0.0f },{ 1.0f, 0.0f },{ 0x00, 0x00, 0xFF, 0xFF } },	// 2 vertex              \           
-				{ { -0.5f, -0.5f, 0.0f },{ 0.0f, 0.0f },{ 0xFF, 0x00, 0xFF, 0xFF } },	// 3 vertex         3 -----2       
+				//  x	    y	  z		  s	    t	       r	 g	   b	 a		normals				// for triangle strips organize vertexes in a backwards Z
+				{ { +0.5f,  0.5f, 0.0f },{ 1.0f, 1.0f },{ 0x00, 0xFF, 0xFF, 0xFF }, { 0, 0, 0 } },	// 0 vertex         1 ---- 0        
+				{ { -0.5f,  0.5f, 0.0f },{ 0.0f, 1.0f },{ 0xFF, 0xFF, 0x00, 0xFF }, { 0, 0, 0 } },	// 1 vertex           \             
+				{ { +0.5f, -0.5f, 0.0f },{ 1.0f, 0.0f },{ 0x00, 0x00, 0xFF, 0xFF }, { 0, 0, 0 } },	// 2 vertex              \           
+				{ { -0.5f, -0.5f, 0.0f },{ 0.0f, 0.0f },{ 0xFF, 0x00, 0xFF, 0xFF }, { 0, 0, 0 } },	// 3 vertex         3 -----2       
 			};
 
 			u32 indices[] = { 0, 1, 2, 1, 3, 2 }; // vertex draw order for GL_TRIANGLES
-		
+
 			Mesh::Data meshData;
 
 			// get number of entries
@@ -195,6 +197,8 @@ namespace Dunjun
 
 			for(int i = 0; i <  numIndices; i++)
 				meshData.indices.push_back(indices[i]);
+
+			meshData.generateNormals();
 
 			g_meshes["sprite"] = new Mesh(meshData); // NOTE: new Mesh remember to delete
 
@@ -328,7 +332,7 @@ namespace Dunjun
 				g_rootNode.attachChild(std::move(player));
 			}
 
-			
+
 			//{ // test room
 			//	Random random(1);
 			//
@@ -347,12 +351,17 @@ namespace Dunjun
 
 				level->material = &g_materials["terrain"];
 				level->name = "level";
+
 				level->generate();
 
 				g_level = level.get();
 
 				g_rootNode.attachChild(std::move(level));
 			}
+
+			g_light.position = { 0.0f, 0.0f, 0.0f };
+			g_light.intensities = { 10.0f, 10.0f, 10.0f };
+
 
 			// test multiple transforms
 			// FIXME parent cannot pass on 45 degree orientation
@@ -523,6 +532,16 @@ namespace Dunjun
 
 				std::cout << "You are facing " << direction << " and looking " << angle << " degrees vertically." << std::endl;
 	
+			}
+
+			// cout test iterator
+			if (Input::isKeyPressed(Input::Key::I))
+			{
+				std::cout << "Test Iterator 0: " << testIterator_5[0] << std::endl;
+				std::cout << "Test Iterator 1: " << testIterator_5[1] << std::endl;
+				std::cout << "Test Iterator 2: " << testIterator_5[2] << std::endl;
+				std::cout << "Test Iterator 3: " << testIterator_5[3] << std::endl;
+				std::cout << "Test Iterator 4: " << testIterator_5[4] << std::endl;
 			}
 
 			// help
@@ -889,7 +908,9 @@ namespace Dunjun
 						room->visible = false;
 				}
 
-
+				// move light around
+				g_light.position.z = 0.0f + Math::cos(Radian(5.0f * Input::getTime()));
+				g_light.position.x = 0.0f + Math::sin(Radian(5.0f * Input::getTime()));
 
 
 
@@ -971,6 +992,10 @@ namespace Dunjun
 
 			g_renderer.currentCamera = g_currentCamera;
 			g_renderer.draw(g_rootNode);
+
+			g_renderer.addPointLight(&g_light);
+
+			// lighting related - out of range happens in renderAll()
 			g_renderer.renderAll();
 
 			Window::swapBuffers(); // switches information between the front buffer and the back buffer

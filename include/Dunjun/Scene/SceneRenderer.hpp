@@ -2,6 +2,7 @@
 #define DUNJUN_RENDERER_HPP
 
 #include <Dunjun/ModelAsset.hpp>
+#include <Dunjun/Scene/Lighting.hpp>
 
 namespace Dunjun
 {
@@ -29,11 +30,13 @@ namespace Dunjun
 		void draw(const Mesh* mesh) const;
 
 		void addModelInstance(const MeshRenderer& meshRenderer, Transform t);
+		void addPointLight(const PointLight* light);
+
 
 		void renderAll();
 
 		//void setMaterial(const Material* material);
-		void setCamera(const Camera& camera);
+		//void setCamera(const Camera& camera);
 
 		//void setUniforms(const Transform& t);
 
@@ -46,6 +49,7 @@ namespace Dunjun
 
 		// cache of instances
 		mutable std::vector<ModelInstance> m_modelInstances;
+		std::vector<const PointLight*> m_pointLights;
 
 		bool isCurrentShaders(const ShaderProgram* shaders);
 		bool isCurrentTexture(const Texture* texture);

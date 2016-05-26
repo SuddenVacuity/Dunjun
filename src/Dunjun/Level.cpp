@@ -32,11 +32,11 @@ namespace Dunjun
 		if(0)
 			m_random.setSeed(142);
 
-		// X * Y * Z must be less than 1024000
+		// 
 		// TODO: FIX: player doesn't line up with even/odd numbers correctly
-		const u32 levelSizeX = 205;
-		const u32 levelSizeY = 11;
-		const u32 levelSizeZ = 205;
+		const u32 levelSizeX = 10;
+		const u32 levelSizeY = 10;
+		const u32 levelSizeZ = 10;
 
 		//this large an area causes overflow when regenerating rooms
 		//const u32 levelSizeX = 305;
@@ -54,21 +54,54 @@ namespace Dunjun
 
 		bool grid[levelSizeX][levelSizeY][levelSizeZ] = {{{  }}};
 
-		if(0) // initialize grid as true for testing
+		// gen each spot in grid in order
+		if(0)
+		{
+		testIterator_5[2] += 1;
+
+		if (testIterator_5[2] >= levelSizeX)
+		{
+			testIterator_5[1] += 1;
+			testIterator_5[2] = 0;
+		}
+
+		if (testIterator_5[1] >= levelSizeY)
+		{
+			testIterator_5[0] += 1;
+			testIterator_5[1] = 0;
+		}
+
+		if (testIterator_5[0] >= levelSizeZ)
+			testIterator_5[0] = 0;
+
+
+		std::cout << "grid[" << testIterator_5[0] << "][" << testIterator_5[1] << "][" << testIterator_5[2] << "]" << std::endl;
+
+		grid[testIterator_5[0]][testIterator_5[1]][testIterator_5[2]] = true;
+		}
+
+		// initialize grid as true for testing
+		if(0)
+		{
 		for (int i = 0; i < levelSizeX; i++)
 			for (int j = 0; j < levelSizeY; j++)
 				for (int k = 0; k < levelSizeZ; k++)
 					grid[i][j][k] = true;
+		}
 
 		const Room::Size roomSize(5, 4, 5);
 
 		// number of steps take in each loop
 		const u32 numSteps = 10;
+		// center of the level : used to center level in the world
+		f32 levelCenterOffsetX = levelSizeX / 2.0f;
+		f32 levelCenterOffsetY = levelSizeY / 2.0f;
+		f32 levelCenterOffsetZ = levelSizeZ / 2.0f;
 
 		// starting point
-		u32 startX = levelSizeX / 2;
-		u32 startY = levelSizeY / 2;
-		u32 startZ = levelSizeZ / 2;
+		u32 startX = levelCenterOffsetX;
+		u32 startY = levelCenterOffsetY;
+		u32 startZ = levelCenterOffsetZ;
 
 		// TODO: make Size class public data holder
 		// track farthest room +/- on any given axis
@@ -127,7 +160,7 @@ namespace Dunjun
 			u32 direction = m_random.getInt(0, 3);
 
 			// main path
-			for (u32 j = 0; j < numSteps; j++)
+			for (int j = 0; j < numSteps; j++)
 			{
 				if(roomCount >= minRooms)
 					break;
@@ -189,17 +222,6 @@ namespace Dunjun
 				case 5: stepY--; break;	// down
 				}
 
-				// check if a room is already there and undo step change if it is
-				if (grid[stepX][stepY][stepZ] == true)
-				{
-					j--;
-					skips++;
-					stepX = prevPosX;
-					stepY = prevPosY;
-					stepZ = prevPosZ;
-					continue;
-				}
-
 				// check array limits and undo step change if out of bounds
 				if (stepX < 0 || stepY < 0 || stepZ < 0)
 				{
@@ -211,6 +233,17 @@ namespace Dunjun
 					continue;
 				}
 				else if (stepX > levelSizeX - 1 || stepY > levelSizeY - 1 || stepZ > levelSizeZ - 1)
+				{
+					j--;
+					skips++;
+					stepX = prevPosX;
+					stepY = prevPosY;
+					stepZ = prevPosZ;
+					continue;
+				}
+
+				// check if a room is already there and undo step change if it is
+				if (grid[stepX][stepY][stepZ] == true)
 				{
 					j--;
 					skips++;
@@ -271,7 +304,7 @@ namespace Dunjun
 					u32 branchStepsTaken = 0;
 
 					// generate branching path
-					for (u32 j = 0; j < branchNumSteps; j++)
+					for (int j = 0; j < branchNumSteps; j++)
 					{
 						if (branchSkips > 10 || roomCount >= minRooms)
 						{
@@ -308,17 +341,6 @@ namespace Dunjun
 						case 5: branchY--; break; // down
 						}
 
-						// check if a room is already there
-						if (grid[branchX][branchY][branchZ] == true)
-						{
-							j--;
-							branchSkips++;
-							branchX = branchPrevPosX;
-							branchY = branchPrevPosY;
-							branchZ = branchPrevPosZ;
-							continue;
-						}
-
 						// check array limits
 						if (branchX < 0 || branchY < 0 || branchZ < 0)
 						{
@@ -330,6 +352,17 @@ namespace Dunjun
 							continue;
 						}
 						else if (branchX > levelSizeX - 1 || branchY > levelSizeY - 1 || branchZ > levelSizeZ - 1)
+						{
+							j--;
+							branchSkips++;
+							branchX = branchPrevPosX;
+							branchY = branchPrevPosY;
+							branchZ = branchPrevPosZ;
+							continue;
+						}
+
+						// check if a room is already there
+						if (grid[branchX][branchY][branchZ] == true)
 						{
 							j--;
 							branchSkips++;
@@ -366,17 +399,13 @@ namespace Dunjun
 
 		} // end random walk (decide where rooms will be)
 
-		// center of the level : used to center level in the world
-		f32 levelCenterOffsetX = levelSizeX / 2.0f;
-		f32 levelCenterOffsetY = levelSizeY / 2.0f;
-		f32 levelCenterOffsetZ = levelSizeZ / 2.0f;
 
 		// generate rooms
-		for (u32 i = 0; i < levelSizeX; i++)
+		for (int i = 0; i < levelSizeX; i++)
 		{
-			for (u32 j = 0; j < levelSizeY; j++)
+			for (int j = 0; j < levelSizeY; j++)
 			{
-				for (u32 k = 0; k < levelSizeZ; k++)
+				for (int k = 0; k < levelSizeZ; k++)
 				{
 					if (grid[i][j][k] == false)
 						continue;
@@ -385,7 +414,6 @@ namespace Dunjun
 
 					// debug variables
 					const u32 gap = 0;
-					f32 rand = m_random.getFloat(0, 1);
 
 					// cast levelCenterY as u32 so player doesn't float
 					room->transform.position.x = (roomSize.x + gap) * i - levelCenterOffsetX  * (roomSize.x + gap);
@@ -407,7 +435,7 @@ namespace Dunjun
 					bool southDoor = false;
 					bool eastDoor = false;
 
-					// check wether to add walls
+					// check whether to add walls
 					if(1)
 					{
 						// using switches to keep within array limits
@@ -500,6 +528,8 @@ namespace Dunjun
 				}
 			}
 		} // end generate rooms
+
+
 
 		std::cout << "Level::placeRooms() <<<< There are " << roomCount << " of " << minRooms << " attemped rooms." << std::endl;
 
