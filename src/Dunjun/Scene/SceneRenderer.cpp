@@ -70,11 +70,10 @@ namespace Dunjun
 		// somehow related to levelSizeY in Level::placeRooms() being greater than 2
 		for(const auto& inst : m_modelInstances)
 		{
-			if(!m_currentShaders)
+			if (!isCurrentShaders(inst.asset->material->shaders))
+			{
 				setShaders(inst.asset->material->shaders);
 
-			if (isCurrentShaders(inst.asset->material->shaders))
-			{
 				m_currentShaders->setUniform("u_camera", currentCamera->getMatrix()); // shaderprogram.cpp
 				m_currentShaders->setUniform("u_cameraPosition", currentCamera->transform.position); // shaderprogram.cpp
 				m_currentShaders->setUniform("u_tex", (Dunjun::u32)0); // shaderprogram.cpp
