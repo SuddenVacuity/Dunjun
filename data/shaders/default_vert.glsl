@@ -18,6 +18,8 @@ attribute vec2 a_texCoord; // vertex texture coordinates
 attribute vec3 a_color; // vertex color
 attribute vec3 a_normal; // surface normals
 
+varying vec3 v_position_ws;
+
 varying vec3 v_position;
 varying vec2 v_texCoord;
 varying vec3 v_color;
@@ -37,6 +39,7 @@ void main()
 	pos = u_transform.scale * pos;
 	pos = quaternionRotate(u_transform.orientation, pos);
 	pos = u_transform.position + pos;
+	v_position_ws = pos;
 
 	gl_Position = u_camera * vec4(pos, 1.0); // defines position
 }

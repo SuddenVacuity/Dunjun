@@ -17,9 +17,9 @@ namespace Dunjun
 			Vector3 normal = normalize(cross(a, b));
 
 			// smoothes out shared vertices/indices
-			v0.normal = normal;
-			v1.normal = normal;
-			v2.normal = normal;
+			v0.normal += normal;
+			v1.normal += normal;
+			v2.normal += normal;
 		}
 	
 		for (size_t i = 0; i < vertices.size(); i++)

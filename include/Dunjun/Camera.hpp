@@ -42,6 +42,8 @@ namespace Dunjun
 		f32 orthoScale;
 		f32 nearPlane;
 		f32 farPlane;
+
+		Vector2 viewportSize;
 		f32 viewportAspectRatio;
 
 		ProjectionType projectionType;

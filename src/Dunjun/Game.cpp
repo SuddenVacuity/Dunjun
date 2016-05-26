@@ -361,6 +361,7 @@ namespace Dunjun
 
 			g_light.position = { 0.0f, 0.0f, 0.0f };
 			g_light.intensities = { 10.0f, 10.0f, 10.0f };
+			g_light.ambientCoefficient = {0.0001f, 0.0001f, 0.0001f };
 
 
 			// test multiple transforms
@@ -409,9 +410,8 @@ namespace Dunjun
 				g_cameraPlayer.orthoScale = 15.0f; // for perspective view
 
 				// aspect ratio
-				f32 aspectRatio = Window::getFramebufferSize().x / Window::getFramebufferSize().y;
-
-				g_cameraPlayer.viewportAspectRatio = aspectRatio;
+				g_cameraPlayer.viewportSize = Window::getFramebufferSize();
+				g_cameraPlayer.viewportAspectRatio = g_cameraPlayer.viewportSize.x / g_cameraPlayer.viewportSize.y;
 				
 				// initialize world camera
 				g_cameraWorld = g_cameraPlayer;
@@ -791,9 +791,14 @@ namespace Dunjun
 				}
 
 				// update aspect ratio each update
-				f32 aspectRatio = Window::getFramebufferSize().x / Window::getFramebufferSize().y;
-				if (aspectRatio && Window::getFramebufferSize().y > 0)
+				if (g_currentCamera->viewportSize != Window::getFramebufferSize())
 				{
+					Vector2 viewSize = Window::getFramebufferSize();
+					f32 aspectRatio = viewSize.x / viewSize.y;
+
+					g_cameraPlayer.viewportSize = viewSize;
+					g_cameraWorld.viewportSize = viewSize;
+
 					g_cameraPlayer.viewportAspectRatio = aspectRatio;
 					g_cameraWorld.viewportAspectRatio = aspectRatio;
 				}

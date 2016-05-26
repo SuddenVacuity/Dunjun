@@ -1,7 +1,6 @@
 #ifndef DUNJUN_RENDERER_HPP
 #define DUNJUN_RENDERER_HPP
 
-#include <Dunjun/ModelAsset.hpp>
 #include <Dunjun/Scene/Lighting.hpp>
 
 namespace Dunjun

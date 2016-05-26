@@ -76,11 +76,19 @@ namespace Dunjun
 			if (isCurrentShaders(inst.asset->material->shaders))
 			{
 				m_currentShaders->setUniform("u_camera", currentCamera->getMatrix()); // shaderprogram.cpp
+				m_currentShaders->setUniform("u_cameraPosition", currentCamera->transform.position); // shaderprogram.cpp
 				m_currentShaders->setUniform("u_tex", (Dunjun::u32)0); // shaderprogram.cpp
+
 				m_currentShaders->setUniform("u_light.position", m_pointLights[0]->position); // shaderprogram.cpp
 				m_currentShaders->setUniform("u_light.intensities", m_pointLights[0]->intensities); // shaderprogram.cpp
+				m_currentShaders->setUniform("u_light.ambientCoefficient", m_pointLights[0]->ambientCoefficient); // shaderprogram.cpp
+
+				m_currentShaders->setUniform("u_light.attenuation.constant", m_pointLights[0]->attenuation.constant); // shaderprogram.cpp
+				m_currentShaders->setUniform("u_light.attenuation.linear", m_pointLights[0]->attenuation.linear); // shaderprogram.cpp
+				m_currentShaders->setUniform("u_light.attenuation.quadratic", m_pointLights[0]->attenuation.quadratic); // shaderprogram.cpp
 			}
 
+			// seems like textures could be missing
 			setTexture(inst.asset->material->texture);
 
 			m_currentShaders->setUniform("u_transform", inst.transform); // shaderprogram.cpp
@@ -102,6 +110,9 @@ namespace Dunjun
 
 	bool SceneRenderer::isCurrentShaders(const ShaderProgram* shaders)
 	{
+		if(!m_currentShaders)
+			return false;
+
 		if(shaders == m_currentShaders)
 		{
 			return true;
@@ -136,7 +147,9 @@ namespace Dunjun
 
 	void SceneRenderer::setTexture(const Texture* texture)
 	{
-		if (texture != m_currentTexture)
+		//assert(m_currentTexture);
+
+		if (texture != m_currentTexture || !m_currentTexture)
 		{
 			m_currentTexture = texture;
 			Texture::bind(m_currentTexture, 0);

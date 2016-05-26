@@ -34,9 +34,9 @@ namespace Dunjun
 
 		// 
 		// TODO: FIX: player doesn't line up with even/odd numbers correctly
-		const u32 levelSizeX = 10;
-		const u32 levelSizeY = 10;
-		const u32 levelSizeZ = 10;
+		const u32 levelSizeX = 11;
+		const u32 levelSizeY = 11;
+		const u32 levelSizeZ = 11;
 
 		//this large an area causes overflow when regenerating rooms
 		//const u32 levelSizeX = 305;
