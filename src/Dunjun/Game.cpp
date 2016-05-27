@@ -320,7 +320,7 @@ namespace Dunjun
 			{ // player scene node
 				SceneNode::u_ptr player = make_unique<SceneNode>();
 
-				player->transform.position = { 0.0f, 1.0f, 0.0f };
+				player->transform.position = { 1.0f, 1.0f, 1.0f };
 				player->transform.scale = { 1.0f, 2.0f, 1.0f };
 				player->name = "player";
 
@@ -914,8 +914,9 @@ namespace Dunjun
 				}
 
 				// move light around
-				g_light.position.z = 0.0f + Math::cos(Radian(5.0f * Input::getTime()));
-				g_light.position.x = 0.0f + Math::sin(Radian(5.0f * Input::getTime()));
+				g_light.position.z = 2.5f + Math::cos(Radian(5.0f * Input::getTime()));
+				g_light.position.y = 2.0f;
+				g_light.position.x = 2.5f + Math::sin(Radian(5.0f * Input::getTime()));
 
 
 

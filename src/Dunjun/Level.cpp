@@ -34,9 +34,9 @@ namespace Dunjun
 
 		// 
 		// TODO: FIX: player doesn't line up with even/odd numbers correctly
-		const u32 levelSizeX = 11;
-		const u32 levelSizeY = 11;
-		const u32 levelSizeZ = 11;
+		const u32 levelSizeX = 31;
+		const u32 levelSizeY = 5;
+		const u32 levelSizeZ = 31;
 
 		//this large an area causes overflow when regenerating rooms
 		//const u32 levelSizeX = 305;
@@ -54,39 +54,19 @@ namespace Dunjun
 
 		bool grid[levelSizeX][levelSizeY][levelSizeZ] = {{{  }}};
 
-		// gen each spot in grid in order
-		if(0)
-		{
-		testIterator_5[2] += 1;
-
-		if (testIterator_5[2] >= levelSizeX)
-		{
-			testIterator_5[1] += 1;
-			testIterator_5[2] = 0;
-		}
-
-		if (testIterator_5[1] >= levelSizeY)
-		{
-			testIterator_5[0] += 1;
-			testIterator_5[1] = 0;
-		}
-
-		if (testIterator_5[0] >= levelSizeZ)
-			testIterator_5[0] = 0;
-
-
-		std::cout << "grid[" << testIterator_5[0] << "][" << testIterator_5[1] << "][" << testIterator_5[2] << "]" << std::endl;
-
-		grid[testIterator_5[0]][testIterator_5[1]][testIterator_5[2]] = true;
-		}
+		// bools for testing
+		bool testEnableWalls = true;
+		bool testEnableDoors = false;
 
 		// initialize grid as true for testing
+		bool testEnableRandomWalk = true;
 		if(0)
 		{
 		for (int i = 0; i < levelSizeX; i++)
 			for (int j = 0; j < levelSizeY; j++)
 				for (int k = 0; k < levelSizeZ; k++)
 					grid[i][j][k] = true;
+		testEnableRandomWalk = false;
 		}
 
 		const Room::Size roomSize(5, 4, 5);
@@ -127,7 +107,7 @@ namespace Dunjun
 		// TODO: make branch generation its own function
 		// random walk (decide where rooms will be)
 		// generate rooms until minRooms is met or break too many times
-		if(1)
+		if(testEnableRandomWalk)
 		while (roomCount < minRooms)
 		{
 			// escape if caught in endless loop
@@ -436,7 +416,7 @@ namespace Dunjun
 					bool eastDoor = false;
 
 					// check whether to add walls
-					if(1)
+					if(testEnableWalls)
 					{
 						// using switches to keep within array limits
 						switch (i)
@@ -486,7 +466,7 @@ namespace Dunjun
 
 
 					// check wether to add door KEEP SEPERATE FROM CHECK WALLS
-					if(1)
+					if(testEnableDoors)
 					{
 						// using switches to keep within array limits
 						switch (i)

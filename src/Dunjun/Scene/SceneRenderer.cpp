@@ -66,10 +66,11 @@ namespace Dunjun
 		});
 
 
-		// FIXME: out of range happens somewhere in here when level::grid is large and initialized as true
-		// somehow related to levelSizeY in Level::placeRooms() being greater than 2
 		for(const auto& inst : m_modelInstances)
 		{
+			if(!inst.asset->mesh)
+				continue;
+
 			if (!isCurrentShaders(inst.asset->material->shaders))
 			{
 				setShaders(inst.asset->material->shaders);

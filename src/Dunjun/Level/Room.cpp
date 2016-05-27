@@ -29,6 +29,14 @@ namespace Dunjun
 		if(m_generated)
 			return;
 
+		// handle room with no mesh
+		// TODO: make this check for an emptyroom room ID
+		if (northWall == false && southWall == false && eastWall == false && westWall == false && floor == false && ceiling == false)
+		{
+			m_generated = true;
+			return;
+		}
+
 		if(!m_mesh)
 			m_mesh = new Mesh();
 
@@ -68,16 +76,16 @@ namespace Dunjun
 				mapGrid[i][j] = emptyTile;
 		}
 
-		for (int i = 0; i < size.x; i++)
-		{
-			for (int j = 0; j < size.z; j++)
-			{
-				//if(m_random.getBool() == true)
-					mapGrid[i][j] = lightWoodTile;
-			}
-		}
+		// used for gaps in the floor generation
+		//for (int i = 0; i < size.x; i++)
+		//{
+		//	for (int j = 0; j < size.z; j++)
+		//	{
+		//		//if(m_random.getBool() == true)
+		//			mapGrid[i][j] = lightWoodTile;
+		//	}
+		//}
 
-		// generate walls, floor and ceiling mesh
 		for (int i = 0; i < size.x; i++)
 		{
 			for (int j = 0; j < size.z; j++)
@@ -85,94 +93,94 @@ namespace Dunjun
 				// generate room walls
 				// back wall
 				if (j == 0 && northWall == true)
-				{
-					for (int k = 0; k < size.y; k++)
-					{ // build from bottom to top
-						if (mapGrid[i][j] != emptyTile || k >= 0)
-						{
-							if (northDoor == true)
-							{ // check for door
-								if (i < doorWallX || i >= size.x - doorWallX || k >= size.y - doorWallY)
-									addTileSurface(Vector3(i, k, j), TileSurfaceFace::Backward, mossyStoneTiles);
-								else // only add a wall if there's a floor or if is higher than obstacle
-								{
-									// do nothing: this is where the open area for the door is
+					{
+						for (int k = 0; k < size.y; k++)
+						{ // build from bottom to top
+							if (mapGrid[i][j] != emptyTile || k >= 0)
+							{
+								if (northDoor == true)
+								{ // check for door
+									if (i < doorWallX || i >= size.x - doorWallX || k >= size.y - doorWallY)
+										addTileSurface(Vector3(i, k, j), TileSurfaceFace::Backward, mossyStoneTiles);
+									else // only add a wall if there's a floor or if is higher than obstacle
+									{
+										// do nothing: this is where the open area for the door is
+									}
 								}
+								else // only add a wall if there's a floor or if is higher than obstacle
+									addTileSurface(Vector3(i, k, j), TileSurfaceFace::Backward, mossyStoneTiles);
 							}
-							else // only add a wall if there's a floor or if is higher than obstacle
-								addTileSurface(Vector3(i, k, j), TileSurfaceFace::Backward, mossyStoneTiles);
 						}
-					}
-				} // end back wall
+					} // end back wall
 				// front wall
 				else if (j == size.z - 1 && southWall == true)
-				{
-					for (int k = 0; k < size.y; k++)
-					{ // build from bottom to top
-						if (mapGrid[i][j] != emptyTile || k >= 0)
-						{
-							if (southDoor == true)
-							{ // check for door
-								if (i < doorWallX || i >= size.x - doorWallX || k >= size.y - doorWallY)
-									addTileSurface(Vector3(i, k, j + 1), TileSurfaceFace::Forward, mossyStoneTiles);
-								else // only add a wall if there's a floor or if is higher than obstacle
-								{
-									// do nothing: this is where the open area for the door is
+					{
+						for (int k = 0; k < size.y; k++)
+						{ // build from bottom to top
+							if (mapGrid[i][j] != emptyTile || k >= 0)
+							{
+								if (southDoor == true)
+								{ // check for door
+									if (i < doorWallX || i >= size.x - doorWallX || k >= size.y - doorWallY)
+										addTileSurface(Vector3(i, k, j + 1), TileSurfaceFace::Forward, mossyStoneTiles);
+									else // only add a wall if there's a floor or if is higher than obstacle
+									{
+										// do nothing: this is where the open area for the door is
+									}
 								}
+								else // only add a wall if there's a floor or if is higher than obstacle
+									addTileSurface(Vector3(i, k, j + 1), TileSurfaceFace::Forward, mossyStoneTiles);
 							}
-							else // only add a wall if there's a floor or if is higher than obstacle
-								addTileSurface(Vector3(i, k, j + 1), TileSurfaceFace::Forward, mossyStoneTiles);
 						}
-					}
-				} // end front wall
+					} // end front wall
 
 				// left wall
 				if (i == 0 && westWall == true)
-				{ 
-					for (int k = 0; k < size.y; k++)
-					{ // build from bottom to top
-						if(mapGrid[i][j] != emptyTile || k >= 0)
-						{
-							if(westDoor == true)
-							{ // check for door
-								if(j < doorWallZ || j >= size.z - doorWallZ || k >= size.y - doorWallY)
-									addTileSurface(Vector3(i, k, j), TileSurfaceFace::Right, mossyStoneTiles);
-								else // only add a wall if there's a floor or if is higher than obstacle
-								{
-									// do nothing: this is where the open area for the door is
+					{ 
+						for (int k = 0; k < size.y; k++)
+						{ // build from bottom to top
+							if(mapGrid[i][j] != emptyTile || k >= 0)
+							{
+								if(westDoor == true)
+								{ // check for door
+									if(j < doorWallZ || j >= size.z - doorWallZ || k >= size.y - doorWallY)
+										addTileSurface(Vector3(i, k, j), TileSurfaceFace::Right, mossyStoneTiles);
+									else // only add a wall if there's a floor or if is higher than obstacle
+									{
+										// do nothing: this is where the open area for the door is
+									}
 								}
+								else // only add a wall if there's a floor or if is higher than obstacle
+									addTileSurface(Vector3(i, k, j), TileSurfaceFace::Right, mossyStoneTiles);
 							}
-							else // only add a wall if there's a floor or if is higher than obstacle
-								addTileSurface(Vector3(i, k, j), TileSurfaceFace::Right, mossyStoneTiles);
 						}
-					}
-				} // end left wall
+					} // end left wall
 				// right wall
 				else if (i == size.x - 1 && eastWall == true)
-				{
-					for (int k = 0; k < size.y; k++)
-					{ // build from bottom to top
-						if (mapGrid[i][j] != emptyTile || k >= 0)
-						{
-							if (eastDoor == true)
-							{ // check for door
-								if (j < doorWallZ || j >= size.z - doorWallZ || k >= size.y - doorWallY)
-									addTileSurface(Vector3(i + 1, k, j), TileSurfaceFace::Left, mossyStoneTiles);
-								else // only add a wall if there's a floor or if is higher than obstacle
-								{
-									// do nothing: this is where the open area for the door is
+					{
+						for (int k = 0; k < size.y; k++)
+						{ // build from bottom to top
+							if (mapGrid[i][j] != emptyTile || k >= 0)
+							{
+								if (eastDoor == true)
+								{ // check for door
+									if (j < doorWallZ || j >= size.z - doorWallZ || k >= size.y - doorWallY)
+										addTileSurface(Vector3(i + 1, k, j), TileSurfaceFace::Left, mossyStoneTiles);
+									else // only add a wall if there's a floor or if is higher than obstacle
+									{
+										// do nothing: this is where the open area for the door is
+									}
 								}
+								else // only add a wall if there's a floor or if is higher than obstacle
+									addTileSurface(Vector3(i + 1, k, j), TileSurfaceFace::Left, mossyStoneTiles);
 							}
-							else // only add a wall if there's a floor or if is higher than obstacle
-								addTileSurface(Vector3(i + 1, k, j), TileSurfaceFace::Left, mossyStoneTiles);
 						}
-					}
-				} // end right wall
+					} // end right wall
 
 				// generate floor
-				if (mapGrid[i][j] != emptyTile)
-					if(floor == true)
-						addTileSurface(Vector3(i, 0, j), TileSurfaceFace::Up, gravelTile);
+				//if (mapGrid[i][j] != emptyTile) // this is so the room can have holes in the floor
+				if(floor == true)
+					addTileSurface(Vector3(i, 0, j), TileSurfaceFace::Up, gravelTile);
 
 				// generate ceiling
 				if(ceiling == true)
@@ -180,7 +188,7 @@ namespace Dunjun
 
 			}
 		} // end generate walls, floor and ceiling mesh
-
+		
 		m_meshData.generateNormals();
 
 		m_mesh->addData(m_meshData);
@@ -188,6 +196,8 @@ namespace Dunjun
 		addComponent<MeshRenderer>(*m_mesh, *material);
 
 		m_generated = true;
+	
+		
 	}
 
 
