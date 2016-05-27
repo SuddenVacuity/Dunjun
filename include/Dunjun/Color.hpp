@@ -7,6 +7,9 @@ namespace Dunjun
 {
 	struct Color // must come before render
 	{
+		GLOBAL const u32 COLOR_DEPTH = 256;
+
+
 		Color(u8 r, u8 b, u8 g, u8 a = 0xFF)
 			: r(r)
 			, b(b)
@@ -30,8 +33,8 @@ namespace Dunjun
 		};
 	};
 	
-	const Color defaultVertex(0xFFFFFFFF);
-	const Color defaultMaterial(0xFF7F00FF); // orange
+	const Color defaultWhite(0xFFFFFFFF);
+	const Color defaultOrange(0xFF7F00FF); // orange
 
 
 	//

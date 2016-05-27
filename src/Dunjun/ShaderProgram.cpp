@@ -290,14 +290,14 @@ namespace Dunjun
 		}
 
 
-		void ShaderProgram::setUniform(const std::string& name, const Quaternion& t) const
+		void ShaderProgram::setUniform(const std::string& name, const Quaternion& q) const
 		{
 			checkInUse();
 			GLint loc = getUniformLocation(name);
 			if (loc == -1)
 				return;
 
-			glUniform4fv(loc, 1, &t.data[0]);
+			glUniform4fv(loc, 1, &q.data[0]);
 
 		}
 
@@ -308,5 +308,16 @@ namespace Dunjun
 			setUniform(name + ".position", t.position);
 			setUniform(name + ".orientation", t.orientation);
 			setUniform(name + ".scale", t.scale);
+		}
+
+		void ShaderProgram::setUniform(const std::string& name, const Color& c) const
+		{
+			f32 r, g, b, a;
+			r = c.r / 255.0f;
+			g = c.g / 255.0f;
+			b = c.b / 255.0f;
+			a = c.a / 255.0f;
+
+			setUniform(name, r, g, b, a);
 		}
 } // end Dunjun

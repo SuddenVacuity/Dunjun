@@ -48,8 +48,9 @@ namespace Dunjun
 		void setUniform(const std::string& name, const Vector4& v) const;
 		void setUniform(const std::string& name, const Matrix4& m) const;
 						
-		void setUniform(const std::string& name, const Quaternion& t) const;
+		void setUniform(const std::string& name, const Quaternion& q) const;
 		void setUniform(const std::string& name, const Transform& t) const;
+		void setUniform(const std::string& name, const Color& c) const;
 
 		//readonly       V the only class that can edit
 		ReadOnly<GLuint, ShaderProgram>  object; // the file

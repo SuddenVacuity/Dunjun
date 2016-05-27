@@ -1,6 +1,13 @@
 #version 120
 
-#define COLOR_DEPTH 256
+struct Material
+{
+	sampler2D diffuseMap;
+	vec4 diffuseColor;
+
+	vec4 specularColor;
+	float specularExponent;
+};
 
 struct Attenuation
 {
@@ -13,9 +20,10 @@ struct PointLight
 {
 	vec3 position;
 	vec3 intensities; // color * brightness
-	vec3 ambient;
 
 	Attenuation attenuation;
+
+	float range;
 };
 
 struct Transform
@@ -33,8 +41,7 @@ vec3 quaternionRotate(vec4 q, vec3 v)
 uniform vec3 u_cameraPosition;
 uniform Transform u_transform; // transform function
 
-uniform mat4 u_camera; // view function
-uniform sampler2D u_tex; // sampler for colors
+uniform Material u_material;
 
 uniform PointLight u_light;
 
@@ -45,23 +52,14 @@ varying vec2 v_texCoord; // attribute for texture coord from vert.glsl
 varying vec3 v_color; // attribute for color from vert.glsl
 varying vec3 v_normal;
 
-float lightRange()
-{
-	float i = max(u_light.intensities.r, max(u_light.intensities.g, u_light.intensities.b));
-	Attenuation a = u_light.attenuation;
-
-	return -a.linear + sqrt(a.linear * a.linear -  4.0f * a.quadratic * (a.constant - COLOR_DEPTH * i));
-
-}
-
 void main()
 {
-	vec4 texColor = texture2D(u_tex, v_texCoord).rgba; // get the color from texture coordinates to add to v_color
+	vec4 texColor = texture2D(u_material.diffuseMap, v_texCoord).rgba; // get the color from texture coordinates to add to v_color
 
 	if(texColor.a < 0.5) // check alpha value
 		discard;
 
-	vec3 surfaceColor = texColor.rgb * v_color;
+	vec3 surfaceColor = u_material.diffuseColor.rgb * texColor.rgb * v_color;
 
 // start calculate light
 	vec3 normal = normalize(quaternionRotate(u_transform.orientation, v_normal));
@@ -77,22 +75,23 @@ void main()
 	vec3 diffuse = diffuseCoefficient * u_light.intensities.rgb;
 
 	// ambient light
-	vec3 ambient = u_light.ambient.rgb;
+	vec3 ambient = vec3(0.001f, 0.001f, 0.001f);
 
 	// specular light
+	float specularCoefficient = 0.0f;
+
 	vec3 incidence = -surfaceToLight;
 	vec3 reflection = reflect(incidence, normal);
 	vec3 surfaceToCamera = normalize(u_cameraPosition - v_position_ws);
 
-	float specularCoefficient = 0.0f;
+	float cosTheta = max(0.0f, dot(surfaceToCamera, reflection));
 
 	if(diffuseCoefficient > 0.0f) // if() is more efficient than high pow()
 	{
-	float cosTheta = max(0.0f, dot(surfaceToCamera, reflection));
-	specularCoefficient = pow(cosTheta, 80.0f); // increase 2nd value to sharpen reflection
+		specularCoefficient = pow(cosTheta, u_material.specularExponent); // increase 2nd value to sharpen reflection
 	}
 
-	vec3 specular = specularCoefficient * u_light.intensities.rgb * vec3(1.0f, 1.0f, 1.0f); // last value is specular color
+	vec3 specular = specularCoefficient * u_light.intensities.rgb * u_material.specularColor.rgb; // last value is specular color
 
 // end calculate light
 	float attenuation = (u_light.attenuation.constant + 
@@ -101,7 +100,7 @@ void main()
 	attenuation = 1.0f / attenuation;
 
 	// TODO: break apart so it's easier to read
-	attenuation *= pow(1 - clamp(pow(distanceToLight / lightRange(), 4.0f), 0.0f, 1.0f), 2.0f);
+	attenuation *= pow(1 - clamp(pow(distanceToLight / u_light.range, 4.0f), 0.0f, 1.0f), 2.0f);
 
 	vec3 finalColor = (ambient.rgb + (diffuse.rgb + specular.rgb) * attenuation) * surfaceColor.rgb;
 

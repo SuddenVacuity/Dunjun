@@ -75,17 +75,32 @@ namespace Dunjun
 			{
 				setShaders(inst.asset->material.shaders);
 
+				const Material& material = inst.asset->material;
+				const PointLight* light = m_pointLights[0];
+
 				m_currentShaders->setUniform("u_camera", currentCamera->getMatrix()); // shaderprogram.cpp
 				m_currentShaders->setUniform("u_cameraPosition", currentCamera->transform.position); // shaderprogram.cpp
-				m_currentShaders->setUniform("u_tex", (Dunjun::u32)0); // shaderprogram.cpp
 
-				m_currentShaders->setUniform("u_light.position", m_pointLights[0]->position); // shaderprogram.cpp
-				m_currentShaders->setUniform("u_light.intensities", m_pointLights[0]->intensities); // shaderprogram.cpp
-				m_currentShaders->setUniform("u_light.ambient", m_pointLights[0]->ambient); // shaderprogram.cpp
+				m_currentShaders->setUniform("u_material.diffuseMap", (u32)0); // shaderprogram.cpp
+				m_currentShaders->setUniform("u_material.diffuseColor", material.diffuseColor); // shaderprogram.cpp
+				m_currentShaders->setUniform("u_material.specularColor", material.specularColor); // shaderprogram.cpp
+				m_currentShaders->setUniform("u_material.specularExponent", material.specularExponent); // shaderprogram.cpp
 
-				m_currentShaders->setUniform("u_light.attenuation.constant", m_pointLights[0]->attenuation.constant); // shaderprogram.cpp
-				m_currentShaders->setUniform("u_light.attenuation.linear", m_pointLights[0]->attenuation.linear); // shaderprogram.cpp
-				m_currentShaders->setUniform("u_light.attenuation.quadratic", m_pointLights[0]->attenuation.quadratic); // shaderprogram.cpp
+				Vector3 lightIntensities;
+				lightIntensities.r = light->color.r / 255.0f;
+				lightIntensities.g = light->color.g / 255.0f;
+				lightIntensities.b = light->color.b / 255.0f;
+				lightIntensities *= light->brightness;
+
+				m_currentShaders->setUniform("u_light.position", light->position); // shaderprogram.cpp
+				m_currentShaders->setUniform("u_light.intensities", lightIntensities); // shaderprogram.cpp
+
+				m_currentShaders->setUniform("u_light.attenuation.constant", light->attenuation.constant); // shaderprogram.cpp
+				m_currentShaders->setUniform("u_light.attenuation.linear", light->attenuation.linear); // shaderprogram.cpp
+				m_currentShaders->setUniform("u_light.attenuation.quadratic", light->attenuation.quadratic); // shaderprogram.cpp
+
+				m_currentShaders->setUniform("u_light.range", light->range); // shaderprogram.cpp
+
 			}
 
 			// seems like textures could be missing

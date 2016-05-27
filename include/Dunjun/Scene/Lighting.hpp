@@ -15,10 +15,24 @@ namespace Dunjun
 	struct PointLight
 	{
 		Vector3 position = {0, 0, 0};
-		Vector3 intensities = {1, 1, 1}; // color * brightness
-		Vector3 ambient = { 0.001f, 0.001f, 0.001f };
+		Color color = defaultWhite;
+		f32 brightness = 1.0f; // intensity = max(color component) * brightness
 
 		Attenuation attenuation;
+
+		f32 range = 16.0f;
+
+		inline void calculateRange()
+		{
+			f32 i = brightness * (f32)std::max(color.r, std::max(color.g, color.b));
+
+			f32 r = -attenuation.linear +
+				Math::sqrt(attenuation.linear * attenuation.linear -
+					4.0f * attenuation.quadratic * (attenuation.constant - i));
+			r /= 2.0f * attenuation.quadratic;
+
+			range = r;
+		}
 	};
 
 

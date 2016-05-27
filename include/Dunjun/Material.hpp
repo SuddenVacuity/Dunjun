@@ -37,10 +37,10 @@ namespace Dunjun
 		//Dunjun::Texture* texture;
 
 		Dunjun::Texture* diffuseMap = nullptr;
-		Color diffuseColor = defaultMaterial;
+		Color diffuseColor = defaultWhite;
 
-		Color specularColor = defaultMaterial;
-		f32 specularExponent = 80.f;
+		Color specularColor = defaultWhite;
+		f32 specularExponent = 80.0f;
 	};
 } // end Dunjun
 

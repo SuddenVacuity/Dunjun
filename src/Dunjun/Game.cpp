@@ -359,44 +359,9 @@ namespace Dunjun
 				g_rootNode.attachChild(std::move(level));
 			}
 
-			g_light.position = { 0.0f, 0.0f, 0.0f };
-			g_light.intensities = { 10.0f, 10.0f, 10.0f };
-			g_light.ambient = {0.001f, 0.001f, 0.001f };
-
-
-			// test multiple transforms
-			// FIXME parent cannot pass on 45 degree orientation
-			//Transform parent;
-			//parent.position = { 0, 0, 0 };
-			//parent.orientation = angleAxis(Degree(90), { 1, 0, 0 });
-			//parent.scale = { 1.0f, 1.0f, 1.0f };
-
-			//ModelInstance player;
-			//player.asset = &g_sprite;
-			//player.transform.position = { 4, 1, 4 }; // translation
-			//player.transform.scale = { 1, 2, 1 };
-			//player.transform.orientation = angleAxis(Degree(0), { 1, 0, 0 }); // rotation
-
-			//// place player on a floor
-			//for(int j = 0; j < g_level.sizeX; j++)
-			//{
-			//	bool escape = false;
-			//	for(int i = 0; i < g_level.sizeZ; i++)
-			//	{
-			//		if(g_level.mapGrid[i][j] != TileId(0xFFFFFFFF, 0xFFFFFFFF))
-			//		{
-			//			g_player->transform.position = Vector3(i, 1.0f, j);
-			//			escape = true;
-			//			break;
-			//		}
-			//		if(escape == true)
-			//			break;
-			//	}
-			//	if (escape == true)
-			//		break;
-			//}
-
-			//g_instances.push_back(player);
+			g_light.position = { 2.5f, 2.0f, 2.5f };
+			g_light.brightness = 10.0f;
+			g_light.calculateRange();
 
 			{
 				//Initialize camera
@@ -556,8 +521,8 @@ namespace Dunjun
 				std::cout << "GamePad::Shoulder Buttons = Move camera up/down" << std::endl;
 				std::cout << "GamePad::X = Test vibration" << std::endl;
 				std::cout << "GamePad::Y = Regenerate level with culling" << std::endl;
-				std::cout << "GamePad::B = Change to orthographic camera" << std::endl;
-				std::cout << "GamePad::A = Change to perspective camera" << std::endl;
+				//std::cout << "GamePad::B = Move Light to current Camera location" << std::endl;
+				std::cout << "GamePad::A = Move Light to current Camera location" << std::endl;
 				std::cout << "\n" << std::endl;
 				std::cout << "Keyboard::ArrowKeys = Move sprite" << std::endl;
 				std::cout << "Keyboard::L/R Ctrl = Move sprite up/down" << std::endl;
@@ -566,8 +531,29 @@ namespace Dunjun
 				std::cout << "Keyboard::B = Return number of rooms currently rendering" << std::endl;
 				std::cout << "Keyboard::T = Test multiply transforms" << std::endl;
 				std::cout << "Keyboard::R = Reset sprite position, orientation and scale" << std::endl;
+				std::cout << "Keyboard::L = Change to orthographic camera" << std::endl;
+				std::cout << "Keyboard::K = Change to perspective camera" << std::endl;
 
 
+			}
+
+			if (Input::isKeyPressed(Input::Key::L))
+			{
+				// test camera swap
+				g_cameraWorld.transform = g_cameraPlayer.transform;
+				g_currentCamera = &g_cameraPlayer;
+				//g_projectionTest = lerp(pp, op, 0.95f);
+			}
+
+
+			if (Input::isKeyPressed(Input::Key::K))
+			{
+				// test camera swap
+				// TODO: reset forward vector when pressed
+				g_cameraWorld.transform = g_cameraPlayer.transform;
+				g_cameraWorld.lookAt(g_player->transform.position);
+				g_currentCamera = &g_cameraWorld;
+				//g_projectionTest = lerp(pp, op, 0.01f);
 			}
 
 			// regenerate world without culling
@@ -690,19 +676,10 @@ namespace Dunjun
 				// projection type swap
 				if (Input::isGamepadButtonPressed(Input::Gamepad_1, Input::XboxButton::B))
 				{
-					// test camera swap
-					g_cameraWorld.transform = g_cameraPlayer.transform;
-					g_currentCamera = &g_cameraPlayer;
-					//g_projectionTest = lerp(pp, op, 0.95f);
 				}
 				if (Input::isGamepadButtonPressed(Input::Gamepad_1, Input::XboxButton::A))
 				{
-					// test camera swap
-					// TODO: reset forward vector when pressed
-					g_cameraWorld.transform = g_cameraPlayer.transform;
-					g_cameraWorld.lookAt(g_player->transform.position);
-					g_currentCamera = &g_cameraWorld;
-					//g_projectionTest = lerp(pp, op, 0.01f);
+					g_light.position = g_cameraWorld.transform.position;
 				}
 
 				// level regeneration button
@@ -914,10 +891,8 @@ namespace Dunjun
 				}
 
 				// move light around
-				g_light.position.z = 2.5f + Math::cos(Radian(5.0f * Input::getTime()));
-				g_light.position.y = 2.0f;
-				g_light.position.x = 2.5f + Math::sin(Radian(5.0f * Input::getTime()));
-
+				g_light.position.z += dt * Math::cos(Radian(5.0f * Input::getTime()));
+				g_light.position.x += dt * Math::sin(Radian(5.0f * Input::getTime()));
 
 
 		} // end update
