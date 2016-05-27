@@ -16,7 +16,7 @@ namespace Dunjun
 	{
 		Vector3 position = {0, 0, 0};
 		Vector3 intensities = {1, 1, 1}; // color * brightness
-		Vector3 ambientCoefficient = { 0.0001f, 0.0001f, 0.0001f };
+		Vector3 ambient = { 0.001f, 0.001f, 0.001f };
 
 		Attenuation attenuation;
 	};

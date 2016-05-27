@@ -7,7 +7,7 @@ namespace Dunjun
 {
 	struct ModelAsset // includes the shader, the texture and the vbo's
 	{
-		const Material *material;
+		Material material;
 		const Mesh *mesh;
 	};
 } // end Dunjun

@@ -23,9 +23,9 @@ namespace Dunjun
 
 	void Level::placeRooms()
 	{
-		if (material == nullptr)
+		if (material.shaders == nullptr)
 		{
-			std::cout << "Level::placeRoom() <<<< material == nullptr" << std::endl;
+			std::cout << "Level::placeRoom() <<<< material.shaders == nullptr" << std::endl;
 			return;
 		}
 
@@ -34,9 +34,9 @@ namespace Dunjun
 
 		// 
 		// TODO: FIX: player doesn't line up with even/odd numbers correctly
-		const u32 levelSizeX = 31;
-		const u32 levelSizeY = 5;
-		const u32 levelSizeZ = 31;
+		const u32 levelSizeX = 20;
+		const u32 levelSizeY = 6;
+		const u32 levelSizeZ = 20;
 
 		//this large an area causes overflow when regenerating rooms
 		//const u32 levelSizeX = 305;

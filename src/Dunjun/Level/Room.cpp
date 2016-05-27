@@ -6,7 +6,7 @@ namespace Dunjun
 	Room::Room(Random& random, const Room::Size& size)
 		: SceneNode()
 		, size(size)
-		, material(nullptr)
+		, material()
 		, m_mesh(nullptr)
 		, m_random(random)
 		, m_generated(false)
@@ -193,7 +193,7 @@ namespace Dunjun
 
 		m_mesh->addData(m_meshData);
 
-		addComponent<MeshRenderer>(*m_mesh, *material);
+		addComponent<MeshRenderer>(*m_mesh, material);
 
 		m_generated = true;
 	
@@ -248,10 +248,10 @@ namespace Dunjun
 									  { (texPos.x + 0)*tileWidth, (texPos.y + 0)*tileHeight } };
 
 		// predefine this to save space and allow value swapping
-		Color vertexColor[4] = { { 0xFF, 0xFF, 0xFF, 0xFF },
-								 { 0xFF, 0xFF, 0xFF, 0xFF },
-								 { 0xFF, 0xFF, 0xFF, 0xFF },
-								 { 0xFF, 0xFF, 0xFF, 0xFF } };
+		Color vertexColor[4] = { { 0xFF,0xFF,0xFF,0xFF },
+								 { 0xFF,0xFF,0xFF,0xFF },
+								 { 0xFF,0xFF,0xFF,0xFF },
+								 { 0xFF,0xFF,0xFF,0xFF } };
 
 		Vector3 flipNormals = {0, 0, 0};
 

@@ -7,8 +7,40 @@ namespace Dunjun
 {
 	struct Material
 	{
-		Dunjun::ShaderProgram* shaders;
-		Dunjun::Texture* texture;
+		/*
+			shaders
+			
+			diffuse
+				map
+				color
+
+			specular
+				map
+				intensity(exponent)
+				color
+
+			// Other Things
+
+			ambient occlusion
+				map
+
+			emissive light
+				map
+
+			detail
+				map
+				color
+
+		*/
+
+		Dunjun::ShaderProgram* shaders = nullptr;
+		//Dunjun::Texture* texture;
+
+		Dunjun::Texture* diffuseMap = nullptr;
+		Color diffuseColor = defaultMaterial;
+
+		Color specularColor = defaultMaterial;
+		f32 specularExponent = 80.f;
 	};
 } // end Dunjun
 

@@ -54,7 +54,7 @@ namespace Dunjun
 		bool isCurrentTexture(const Texture* texture);
 
 		void setShaders(const ShaderProgram* shaders);
-		void setTexture(const Texture* texture);
+		void setTexture(const Texture* texture, GLuint position);
 
 	};
 } // end Dunjun

@@ -144,20 +144,20 @@ namespace Dunjun
 		INTERNAL void loadMaterials()
 		{
 			g_materials["default"].shaders = g_defaultShader; // apply the default shader to sprite
-			g_materials["default"].texture = new Texture(); // apply new texture to sprite
-			g_materials["default"].texture->loadFromFile("data/textures/dunjunText.jpg"); // Path to the image
+			g_materials["default"].diffuseMap = new Texture(); // apply new texture to sprite
+			g_materials["default"].diffuseMap->loadFromFile("data/textures/dunjunText.jpg"); // Path to the image
 
 			g_materials["dunjunText"].shaders = g_defaultShader; // apply the default shader to sprite
-			g_materials["dunjunText"].texture = new Texture(); // apply new texture to sprite
-			g_materials["dunjunText"].texture->loadFromFile("data/textures/dunjunText.jpg"); // Path to the image
+			g_materials["dunjunText"].diffuseMap = new Texture(); // apply new texture to sprite
+			g_materials["dunjunText"].diffuseMap->loadFromFile("data/textures/dunjunText.jpg"); // Path to the image
 
 			g_materials["stone"].shaders = g_defaultShader; // apply the default shader to sprite
-			g_materials["stone"].texture = new Texture(); // apply new texture to sprite
-			g_materials["stone"].texture->loadFromFile("data/textures/stone.png", TextureFilter::Nearest); // Path to the image
+			g_materials["stone"].diffuseMap = new Texture(); // apply new texture to sprite
+			g_materials["stone"].diffuseMap->loadFromFile("data/textures/stone.png", TextureFilter::Nearest); // Path to the image
 
 			g_materials["terrain"].shaders = g_defaultShader; // apply the default shader to sprite
-			g_materials["terrain"].texture = new Texture(); // apply new texture to sprite
-			g_materials["terrain"].texture->loadFromFile("data/textures/terrain.png", TextureFilter::Nearest); // Path to the image
+			g_materials["terrain"].diffuseMap = new Texture(); // apply new texture to sprite
+			g_materials["terrain"].diffuseMap->loadFromFile("data/textures/terrain.png", TextureFilter::Nearest); // Path to the image
 		}
 
 		/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -177,10 +177,10 @@ namespace Dunjun
 			//
 			Vertex vertices[] = { // define vertexes for a triangle
 				//  x	    y	  z		  s	    t	       r	 g	   b	 a		normals				// for triangle strips organize vertexes in a backwards Z
-				{ { +0.5f,  0.5f, 0.0f },{ 1.0f, 1.0f },{ 0x00, 0xFF, 0xFF, 0xFF }, { 0, 0, 0 } },	// 0 vertex         1 ---- 0        
-				{ { -0.5f,  0.5f, 0.0f },{ 0.0f, 1.0f },{ 0xFF, 0xFF, 0x00, 0xFF }, { 0, 0, 0 } },	// 1 vertex           \             
-				{ { +0.5f, -0.5f, 0.0f },{ 1.0f, 0.0f },{ 0x00, 0x00, 0xFF, 0xFF }, { 0, 0, 0 } },	// 2 vertex              \           
-				{ { -0.5f, -0.5f, 0.0f },{ 0.0f, 0.0f },{ 0xFF, 0x00, 0xFF, 0xFF }, { 0, 0, 0 } },	// 3 vertex         3 -----2       
+				{ { +0.5f,  0.5f, 0.0f },{ 1.0f, 1.0f },{ 0xFF,0xFF,0xFF,0xFF }, { 0, 0, 0 } },	// 0 vertex         1 ---- 0        
+				{ { -0.5f,  0.5f, 0.0f },{ 0.0f, 1.0f },{ 0xFF,0xFF,0xFF,0xFF }, { 0, 0, 0 } },	// 1 vertex           \             
+				{ { +0.5f, -0.5f, 0.0f },{ 1.0f, 0.0f },{ 0xFF,0xFF,0xFF,0xFF }, { 0, 0, 0 } },	// 2 vertex              \           
+				{ { -0.5f, -0.5f, 0.0f },{ 0.0f, 0.0f },{ 0xFF,0xFF,0xFF,0xFF }, { 0, 0, 0 } },	// 3 vertex         3 -----2       
 			};
 
 			u32 indices[] = { 0, 1, 2, 1, 3, 2 }; // vertex draw order for GL_TRIANGLES
@@ -202,7 +202,7 @@ namespace Dunjun
 
 			g_meshes["sprite"] = new Mesh(meshData); // NOTE: new Mesh remember to delete
 
-			g_sprite.material = &g_materials["dunjunText"]; // apply material
+			g_sprite.material = g_materials["dunjunText"]; // apply material
 			g_sprite.mesh = g_meshes["sprite"];
 		}
 
@@ -349,7 +349,7 @@ namespace Dunjun
 			{ // test level generation
 				auto level = make_unique<Level>();
 
-				level->material = &g_materials["terrain"];
+				level->material = g_materials["terrain"];
 				level->name = "level";
 
 				level->generate();
@@ -361,7 +361,7 @@ namespace Dunjun
 
 			g_light.position = { 0.0f, 0.0f, 0.0f };
 			g_light.intensities = { 10.0f, 10.0f, 10.0f };
-			g_light.ambientCoefficient = {0.0001f, 0.0001f, 0.0001f };
+			g_light.ambient = {0.001f, 0.001f, 0.001f };
 
 
 			// test multiple transforms
@@ -581,7 +581,7 @@ namespace Dunjun
 				{ // test level generation
 					auto level = make_unique<Level>();
 
-					level->material = &g_materials["terrain"];
+					level->material = g_materials["terrain"];
 					level->name = "level";
 					level->generate();
 
@@ -715,7 +715,7 @@ namespace Dunjun
 					{ // test level generation
 						auto level = make_unique<Level>();
 
-						level->material = &g_materials["terrain"];
+						level->material = g_materials["terrain"];
 						level->name = "level";
 						level->generate();
 

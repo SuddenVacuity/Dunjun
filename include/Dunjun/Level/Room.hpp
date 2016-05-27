@@ -109,7 +109,7 @@ namespace Dunjun
 		void setDoors(bool doors);
 
 		const Room::Size size;
-		const Material* material;
+		Material material;
 
 	protected:
 		bool northDoor = false;
