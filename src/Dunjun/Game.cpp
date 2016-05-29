@@ -202,7 +202,7 @@ namespace Dunjun
 
 			g_meshes["sprite"] = new Mesh(meshData); // NOTE: new Mesh remember to delete
 
-			g_sprite.material = g_materials["dunjunText"]; // apply material
+			g_sprite.material = &g_materials["dunjunText"]; // apply material
 			g_sprite.mesh = g_meshes["sprite"];
 		}
 
@@ -349,7 +349,7 @@ namespace Dunjun
 			{ // test level generation
 				auto level = make_unique<Level>();
 
-				level->material = g_materials["terrain"];
+				level->material = &g_materials["terrain"];
 				level->name = "level";
 
 				level->generate();
@@ -521,7 +521,7 @@ namespace Dunjun
 				std::cout << "GamePad::Shoulder Buttons = Move camera up/down" << std::endl;
 				std::cout << "GamePad::X = Test vibration" << std::endl;
 				std::cout << "GamePad::Y = Regenerate level with culling" << std::endl;
-				//std::cout << "GamePad::B = Move Light to current Camera location" << std::endl;
+				std::cout << "GamePad::B = Render Texture on sprite" << std::endl;
 				std::cout << "GamePad::A = Move Light to current Camera location" << std::endl;
 				std::cout << "\n" << std::endl;
 				std::cout << "Keyboard::ArrowKeys = Move sprite" << std::endl;
@@ -567,7 +567,7 @@ namespace Dunjun
 				{ // test level generation
 					auto level = make_unique<Level>();
 
-					level->material = g_materials["terrain"];
+					level->material = &g_materials["terrain"];
 					level->name = "level";
 					level->generate();
 
@@ -673,10 +673,32 @@ namespace Dunjun
 				//const Matrix4 op = g_cameraWorld.getProjection(); // perspective projection
 
 
-				// projection type swap
+				// render texture test BIG FRAME RATE DROP
 				if (Input::isGamepadButtonPressed(Input::Gamepad_1, Input::XboxButton::B))
 				{
+					LOCAL_PERSIST RenderTexture* rt = new RenderTexture();
+
+					rt->create(64, 128, RenderTexture::ColorAndDepth);
+					rt->setActive(true);
+					{
+						glViewport(0, 0, rt->width, rt->height);
+						glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+						g_renderer.reset();
+						g_renderer.currentCamera = g_currentCamera;
+						g_renderer.draw(g_rootNode);
+
+						g_renderer.addPointLight(&g_light);
+
+						g_renderer.renderAll();
+					}
+					rt->setActive(false);
+
+					g_materials["dunjunText"].diffuseMap = &rt->colorTexture;
+
+					glViewport(0, 0, Window::width, Window::height);
 				}
+
 				if (Input::isGamepadButtonPressed(Input::Gamepad_1, Input::XboxButton::A))
 				{
 					g_light.position = g_cameraWorld.transform.position;
@@ -692,7 +714,7 @@ namespace Dunjun
 					{ // test level generation
 						auto level = make_unique<Level>();
 
-						level->material = g_materials["terrain"];
+						level->material = &g_materials["terrain"];
 						level->name = "level";
 						level->generate();
 
@@ -701,7 +723,6 @@ namespace Dunjun
 						g_rootNode.attachChild(std::move(level));
 					}
 				}
-
 			// end Gamepad Input
 		//
 		//
@@ -918,56 +939,6 @@ namespace Dunjun
 			glClearColor(0.02f, 0.02f, 0.02f, 1.0f); // set the default color (R,G,B,A)
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		// OLD RENDER CODE
-		//	const Dunjun::ShaderProgram* currentShaders = nullptr;
-		//	const Texture* currentTexture = nullptr;
-		//
-		//	
-		//	// render instances
-		//	for (const auto& inst : g_instances)
-		//	{
-		//		if (inst.asset->material->shaders != currentShaders) // swap to new shaders
-		//		{
-		//			if (currentShaders) // checkif currentshader is in use
-		//				currentShaders->stopUsing();
-		//
-		//			currentShaders = inst.asset->material->shaders;
-		//			currentShaders->use();
-		//		}
-		//
-		//		if (inst.asset->material->texture != currentTexture) // swap to new shaders
-		//		{
-		//			currentTexture = inst.asset->material->texture;
-		//			Texture::bind(currentTexture, 0);
-		//		}
-		//
-		//		renderInstance(inst);
-		//	}
-		//
-		//	//render level
-		//	{
-		//		if (g_level.material->shaders != currentShaders) // swap to new shaders
-		//		{
-		//			if (currentShaders) // checkif currentshader is in use
-		//				currentShaders->stopUsing();
-		//	
-		//			currentShaders = g_level.material->shaders;
-		//			currentShaders->use();
-		//		}
-		//	
-		//		if (g_level.material->texture != currentTexture) // swap to new shaders
-		//		{
-		//			currentTexture = g_level.material->texture;
-		//			Texture::bind(currentTexture, 0);
-		//		}
-		//	
-		//		renderLevel(g_level);
-		//	}
-		//
-		//	if (currentShaders) // checkif currentshader is in use
-		//		currentShaders->stopUsing();
-		//
-		//	Texture::bind(nullptr, 0); // unbind texture
 
 			g_renderer.reset();
 

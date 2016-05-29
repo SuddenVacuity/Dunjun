@@ -1,10 +1,8 @@
 
 #include <Dunjun/Level.hpp>
 
-
 namespace Dunjun
 {
-
 	Level::Level()
 		: m_random()
 		, rooms()
@@ -23,9 +21,14 @@ namespace Dunjun
 
 	void Level::placeRooms()
 	{
-		if (material.shaders == nullptr)
+		if (material == nullptr)
 		{
-			std::cout << "Level::placeRoom() <<<< material.shaders == nullptr" << std::endl;
+			std::cout << "Level::placeRoom() <<<< material == nullptr" << std::endl;
+			return;
+		}
+		else if (material->shaders == nullptr)
+		{
+			std::cout << "Level::placeRoom() <<<< shaders == nullptr" << std::endl;
 			return;
 		}
 
@@ -514,6 +517,57 @@ namespace Dunjun
 		std::cout << "Level::placeRooms() <<<< There are " << roomCount << " of " << minRooms << " attemped rooms." << std::endl;
 
 	} // end place rooms
+
+
+
+
+			//		// if version of wall switch in placeRooms() function
+			//		// way too many comparisons
+			//		if(i == 0 || j == 0 || k == 0)
+			//		{
+			//			if (i == 0)
+			//			{
+			//				if (grid[i + 1][j][k] == 0) { eastWall = true; }
+			//				westWall = true;
+			//			}
+			//			if (j == 0)
+			//			{
+			//				if (grid[i][j + 1][k] == 0) { ceiling = true; }
+			//				floor = true;
+			//			}
+			//			if (k == 0)
+			//			{
+			//				if (grid[i][j][k + 1] == 0) { southWall = true; }
+			//				northWall = true;
+			//			}
+			//		}
+			//		if (i == levelSizeX - 1 || j == levelSizeY - 1 || k == levelSizeZ - 1)
+			//		{
+			//			if (i == levelSizeX - 1)
+			//			{
+			//				if (grid[i - 1][j][k] == 0) { westWall = true; }
+			//				eastWall = true;
+			//			}
+			//			if (j == levelSizeY - 1)
+			//			{
+			//				if (grid[i][j - 1][k] == 0) { floor = true; }
+			//				ceiling = true;
+			//			}
+			//			if (k == levelSizeZ - 1)
+			//			{
+			//				if (grid[i][j][k - 1] == 0) { northWall = true; }
+			//				southWall = true;
+			//			}
+			//		}
+			//		if((i > 0 && i < levelSizeX - 1) || (j > 0 && j < levelSizeY - 1) || (k > 0 && k < levelSizeZ - 1))
+			//		{
+			//			if (grid[i - 1][j][k] == 0) { westWall = true; }
+			//			if (grid[i + 1][j][k] == 0) { eastWall = true; }
+			//			if (grid[i][j + 1][k] == 0) { ceiling = true; }
+			//			if (grid[i][j - 1][k] == 0) { floor = true; }
+			//			if (grid[i][j][k + 1] == 0) { southWall = true; }
+			//			if (grid[i][j][k - 1] == 0) { northWall = true; }
+			//		}
 
 
 } // end Dunjun

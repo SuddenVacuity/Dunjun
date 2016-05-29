@@ -13,6 +13,11 @@ namespace Dunjun
 	public:
 		operator const T&() const { return data; }
 
+		const T* operator&() const
+		{
+			return &data;
+		}
+		
 	private:
 		friend Super;
 

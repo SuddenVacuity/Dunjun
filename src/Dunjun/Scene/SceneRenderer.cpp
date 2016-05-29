@@ -59,10 +59,10 @@ namespace Dunjun
 			const auto& B = b.asset->material;
 
 			// if same shaders sort by texture else sort by shader
-			if(A.shaders == B.shaders)
-				return A.diffuseMap < B.diffuseMap;
+			if(A->shaders == B->shaders)
+				return A->diffuseMap < B->diffuseMap;
 			else
-				return A.shaders < B.shaders;
+				return A->shaders < B->shaders;
 		});
 
 
@@ -71,11 +71,11 @@ namespace Dunjun
 			if(!inst.asset->mesh)
 				continue;
 
-			if (!isCurrentShaders(inst.asset->material.shaders))
+			if (!isCurrentShaders(inst.asset->material->shaders))
 			{
-				setShaders(inst.asset->material.shaders);
+				setShaders(inst.asset->material->shaders);
 
-				const Material& material = inst.asset->material;
+				const Material& material = *inst.asset->material;
 				const PointLight* light = m_pointLights[0];
 
 				m_currentShaders->setUniform("u_camera", currentCamera->getMatrix()); // shaderprogram.cpp
@@ -104,7 +104,7 @@ namespace Dunjun
 			}
 
 			// seems like textures could be missing
-			setTexture(inst.asset->material.diffuseMap, 0);
+			setTexture(inst.asset->material->diffuseMap, 0);
 
 			m_currentShaders->setUniform("u_transform", inst.transform); // shaderprogram.cpp
 

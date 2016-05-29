@@ -70,7 +70,7 @@ namespace Dunjun
 
 		//Mesh* mesh;
 		Transform transform;
-		Material material;
+		Material* material;
 
 		u32 roomsRendered = 0;
 		std::vector<Room*> rooms;

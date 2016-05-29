@@ -45,9 +45,13 @@ namespace Dunjun
 		GLOBAL void bind(const Texture* tex, GLuint position);
 		//GLOBAL void unbindTexture(GLuint position);
 		
-		ReadOnly<GLuint, Texture> object;
-		ReadOnly<GLsizei, Texture> width;
-		ReadOnly<GLsizei, Texture> height;
+		GLsizei width;
+		GLsizei height;
+
+	private:
+		friend class RenderTexture;
+
+		GLuint m_object;
 	};
 }
 

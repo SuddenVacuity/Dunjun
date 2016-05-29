@@ -161,6 +161,7 @@
   <ItemGroup>
     <ClCompile Include="src\Dunjun\Level\Room.cpp" />
     <ClCompile Include="src\Dunjun\Math\Functions\MathLib.cpp" />
+    <ClCompile Include="src\Dunjun\RenderTexture.cpp" />
     <ClCompile Include="src\Dunjun\Scene\SceneRenderer.cpp" />
     <ClCompile Include="src\Dunjun\Camera.cpp" />
     <ClCompile Include="src\Dunjun\Game.cpp" />
@@ -216,6 +217,7 @@
     <ClInclude Include="include\Dunjun\NonCopyable.hpp" />
     <ClInclude Include="include\Dunjun\OpenGL.hpp" />
     <ClInclude Include="include\Dunjun\ReadOnly.hpp" />
+    <ClInclude Include="include\Dunjun\RenderTexture.hpp" />
     <ClInclude Include="include\Dunjun\Scene.hpp" />
     <ClInclude Include="include\Dunjun\Scene\FaceCamera.hpp" />
     <ClInclude Include="include\Dunjun\Scene\Lighting.hpp" />
