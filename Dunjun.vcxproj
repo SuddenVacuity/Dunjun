@@ -159,6 +159,7 @@
     </ProjectReference>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\Dunjun\GBuffer.cpp" />
     <ClCompile Include="src\Dunjun\Level\Room.cpp" />
     <ClCompile Include="src\Dunjun\Math\Functions\MathLib.cpp" />
     <ClCompile Include="src\Dunjun\RenderTexture.cpp" />
@@ -192,6 +193,7 @@
     <ClInclude Include="include\Dunjun\Common.hpp" />
     <ClInclude Include="include\Dunjun\Drawable.hpp" />
     <ClInclude Include="include\Dunjun\Game.hpp" />
+    <ClInclude Include="include\Dunjun\GBuffer.hpp" />
     <ClInclude Include="include\Dunjun\Image.hpp" />
     <ClInclude Include="include\Dunjun\Input.hpp" />
     <ClInclude Include="include\Dunjun\Level.hpp" />
@@ -236,6 +238,8 @@
   <ItemGroup>
     <None Include="data\shaders\default_frag.glsl" />
     <None Include="data\shaders\default_vert.glsl" />
+    <None Include="data\shaders\texPass_frag.glsl" />
+    <None Include="data\shaders\texPass_vert.glsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

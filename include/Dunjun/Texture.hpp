@@ -50,6 +50,7 @@ namespace Dunjun
 
 	private:
 		friend class RenderTexture;
+		friend class GBuffer;
 
 		GLuint m_object;
 	};

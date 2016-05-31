@@ -23,9 +23,13 @@ namespace Dunjun
 
 		virtual ~SceneRenderer();
 
+		// clear all pointers
 		void reset();
 
-		void draw(const SceneNode& node, const Transform& t = Transform());
+		// clear double ended queues
+		void clearAll();
+
+		void addSceneGraph(const SceneNode& node, const Transform& t = Transform());
 		void draw(const Mesh* mesh) const;
 
 		void addModelInstance(const MeshRenderer& meshRenderer, Transform t);
@@ -35,7 +39,7 @@ namespace Dunjun
 		void renderAll();
 
 		//void setMaterial(const Material* material);
-		//void setCamera(const Camera& camera);
+		void setCamera(const Camera& camera);
 
 		//void setUniforms(const Transform& t);
 
@@ -47,8 +51,8 @@ namespace Dunjun
 		const Texture* m_currentTexture = nullptr;
 
 		// cache of instances
-		mutable std::vector<ModelInstance> m_modelInstances;
-		std::vector<const PointLight*> m_pointLights;
+		mutable std::deque<ModelInstance> m_modelInstances;
+		std::deque<const PointLight*> m_pointLights;
 
 		bool isCurrentShaders(const ShaderProgram* shaders);
 		bool isCurrentTexture(const Texture* texture);

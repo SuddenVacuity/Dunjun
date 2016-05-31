@@ -2,6 +2,7 @@
 #define DUNJUN_RENDER_TEXTURE_HPP
 
 #include <Dunjun/Texture.hpp>
+#include <Dunjun/GBuffer.hpp>
 
 namespace Dunjun
 {
@@ -18,23 +19,27 @@ namespace Dunjun
 		RenderTexture();
 		virtual ~RenderTexture();
 
-		bool create(u32 w, u32 h, TextureType t,
+		bool create(u32 w, u32 h,
+			TextureType t = ColorAndDepth,
 			TextureFilter minMagFilter = TextureFilter::Linear,
 			TextureWrapMode wrapMode = TextureWrapMode::ClampToEdge);
 
-		void setActive(bool active = true);
-		void flush();
+		//void setActive(bool active = true);
+		//void flush();
 
-		void bindTexture(TextureType t, GLuint position) const;
+		GLOBAL void bind(const RenderTexture* rt);
+		GLOBAL void unbind(const RenderTexture* rt);
+
+		//void bindTexture(TextureType t, GLuint position) const;
 
 		Texture colorTexture;
 		Texture depthTexture;
 
+		ReadOnly<TextureType, RenderTexture> type;
+
 		ReadOnly<u32, RenderTexture> width;
 		ReadOnly<u32, RenderTexture> height;
-		ReadOnly<TextureType, RenderTexture> type;
 		ReadOnly<GLuint, RenderTexture> fbo; //frame buffer object
-		
 	};
 
 

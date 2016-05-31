@@ -25,6 +25,8 @@ namespace Dunjun
 	} // end anon namespace
 
 	GLOBAL ShaderProgram* g_defaultShader;
+	GLOBAL ShaderProgram* g_texPassShader;
+
 	GLOBAL ModelAsset g_sprite;
 	//GLOBAL ModelAsset g_floor;
 	//GLOBAL ModelAsset g_wall;
@@ -104,7 +106,7 @@ namespace Dunjun
 				//glfwDestroyWindow(Window::ptr); // destroys old window
 				Window::swapInterval(1);
 		
-				glInit();
+				//glInit();
 			}
 		}
 
@@ -122,22 +124,38 @@ namespace Dunjun
 		// File path for shader files and define and bind attributes
 		INTERNAL void loadShaders()
 		{
+			{
 			// Shader Program
-			g_defaultShader = new Dunjun::ShaderProgram();
-			if (!g_defaultShader->attachShaderFromFile(Dunjun::ShaderType::Vertex, "data/shaders/default_vert.glsl")) // check if the file loaded
-				throw std::runtime_error(g_defaultShader->errorLog);
+				g_defaultShader = new Dunjun::ShaderProgram();
+				if (!g_defaultShader->attachShaderFromFile(Dunjun::ShaderType::Vertex, "data/shaders/default_vert.glsl")) // check if the file loaded
+					throw std::runtime_error(g_defaultShader->errorLog);
 
-			if (!g_defaultShader->attachShaderFromFile(Dunjun::ShaderType::Fragment, "data/shaders/default_frag.glsl")) // check if the file loaded
-				throw std::runtime_error(g_defaultShader->errorLog);
+				if (!g_defaultShader->attachShaderFromFile(Dunjun::ShaderType::Fragment, "data/shaders/default_frag.glsl")) // check if the file loaded
+					throw std::runtime_error(g_defaultShader->errorLog);
 
 
-			g_defaultShader->bindAttribLocation((u32)AttribLocation::Position, "a_position"); // bind the position of 1st attribute in shaders
-			g_defaultShader->bindAttribLocation((u32)AttribLocation::TexCoord, "a_texCoord"); // bind the position of 3rd attribute in shaders
-			g_defaultShader->bindAttribLocation((u32)AttribLocation::Color, "a_color"); // bind the position of 2nd attribute in shaders
-			g_defaultShader->bindAttribLocation((u32)AttribLocation::Normal, "a_normal"); // bind the position of 2nd attribute in shaders
+				g_defaultShader->bindAttribLocation((u32)AttribLocation::Position, "a_position"); // bind the position of 1st attribute in shaders
+				g_defaultShader->bindAttribLocation((u32)AttribLocation::TexCoord, "a_texCoord"); // bind the position of 3rd attribute in shaders
+				g_defaultShader->bindAttribLocation((u32)AttribLocation::Color, "a_color"); // bind the position of 2nd attribute in shaders
+				g_defaultShader->bindAttribLocation((u32)AttribLocation::Normal, "a_normal"); // bind the position of 2nd attribute in shaders
 
-			if (!g_defaultShader->link())
-				throw std::runtime_error(g_defaultShader->errorLog);
+				if (!g_defaultShader->link())
+					throw std::runtime_error(g_defaultShader->errorLog);
+			}
+			{// texPassShader
+				g_texPassShader = new Dunjun::ShaderProgram();
+				if (!g_texPassShader->attachShaderFromFile(Dunjun::ShaderType::Vertex, "data/shaders/texPass_vert.glsl"))
+					throw std::runtime_error(g_texPassShader->errorLog);
+
+				if (!g_texPassShader->attachShaderFromFile(Dunjun::ShaderType::Fragment, "data/shaders/texPass_frag.glsl"))
+					throw std::runtime_error(g_texPassShader->errorLog);
+
+				g_texPassShader->bindAttribLocation((u32)AttribLocation::Position, "a_position");
+				g_texPassShader->bindAttribLocation((u32)AttribLocation::TexCoord, "a_texCoord");
+
+				if (!g_texPassShader->link())
+					throw std::runtime_error(g_texPassShader->errorLog);
+			}
 
 		}
 
@@ -321,7 +339,7 @@ namespace Dunjun
 				SceneNode::u_ptr player = make_unique<SceneNode>();
 
 				player->transform.position = { 1.0f, 1.0f, 1.0f };
-				player->transform.scale = { 1.0f, 2.0f, 1.0f };
+				player->transform.scale = { 2.0f * g_cameraWorld.viewportAspectRatio, 2.0f, 2.0f };
 				player->name = "player";
 
 				player->addComponent<MeshRenderer>(g_sprite);
@@ -521,7 +539,7 @@ namespace Dunjun
 				std::cout << "GamePad::Shoulder Buttons = Move camera up/down" << std::endl;
 				std::cout << "GamePad::X = Test vibration" << std::endl;
 				std::cout << "GamePad::Y = Regenerate level with culling" << std::endl;
-				std::cout << "GamePad::B = Render Texture on sprite" << std::endl;
+				//std::cout << "GamePad::B = Render Texture on sprite" << std::endl;
 				std::cout << "GamePad::A = Move Light to current Camera location" << std::endl;
 				std::cout << "\n" << std::endl;
 				std::cout << "Keyboard::ArrowKeys = Move sprite" << std::endl;
@@ -673,30 +691,10 @@ namespace Dunjun
 				//const Matrix4 op = g_cameraWorld.getProjection(); // perspective projection
 
 
-				// render texture test BIG FRAME RATE DROP
+				// 
 				if (Input::isGamepadButtonPressed(Input::Gamepad_1, Input::XboxButton::B))
 				{
-					LOCAL_PERSIST RenderTexture* rt = new RenderTexture();
-
-					rt->create(64, 128, RenderTexture::ColorAndDepth);
-					rt->setActive(true);
-					{
-						glViewport(0, 0, rt->width, rt->height);
-						glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-						g_renderer.reset();
-						g_renderer.currentCamera = g_currentCamera;
-						g_renderer.draw(g_rootNode);
-
-						g_renderer.addPointLight(&g_light);
-
-						g_renderer.renderAll();
-					}
-					rt->setActive(false);
-
-					g_materials["dunjunText"].diffuseMap = &rt->colorTexture;
-
-					glViewport(0, 0, Window::width, Window::height);
+					std::cout << "un-mapped button." << std::endl;
 				}
 
 				if (Input::isGamepadButtonPressed(Input::Gamepad_1, Input::XboxButton::A))
@@ -786,19 +784,6 @@ namespace Dunjun
 				}
 #endif // end billboard
 
-				}
-
-				// update aspect ratio each update
-				if (g_currentCamera->viewportSize != Window::getFramebufferSize())
-				{
-					Vector2 viewSize = Window::getFramebufferSize();
-					f32 aspectRatio = viewSize.x / viewSize.y;
-
-					g_cameraPlayer.viewportSize = viewSize;
-					g_cameraWorld.viewportSize = viewSize;
-
-					g_cameraPlayer.viewportAspectRatio = aspectRatio;
-					g_cameraWorld.viewportAspectRatio = aspectRatio;
 				}
 
 				// camera follow movement
@@ -930,25 +915,76 @@ namespace Dunjun
 
 		INTERNAL void render()
 		{
-			//{
-			//	// vars used to define the size of the viewport
-			//	Vector2 fbSize = Window::getFramebufferSize();
-			//	glViewport(0, 0, fbSize.x, fbSize.y);
-			//}
 
+			// check whether to update aspect ratio each cycle
+			if (g_currentCamera->viewportSize != Window::getFramebufferSize())
+			{
+				Vector2 viewSize = Window::getFramebufferSize();
+				f32 aspectRatio = viewSize.x / viewSize.y;
+
+				g_cameraPlayer.viewportSize = viewSize;
+				g_cameraWorld.viewportSize = viewSize;
+
+				g_cameraPlayer.viewportAspectRatio = aspectRatio;
+				g_cameraWorld.viewportAspectRatio = aspectRatio;
+			}
+
+			LOCAL_PERSIST RenderTexture* rt = new RenderTexture();
+			LOCAL_PERSIST GBuffer* gb = new GBuffer();
+
+			g_renderer.reset();
+			g_renderer.clearAll();
+
+			g_renderer.addSceneGraph(g_rootNode);
+			g_renderer.addPointLight(&g_light);
+			g_renderer.currentCamera = g_currentCamera;
+
+			rt->create(Window::width, Window::height);
+			RenderTexture::bind(rt);
+			{
+				glViewport(0, 0, rt->width, rt->height);
+				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+				g_renderer.renderAll();
+
+				glFlush();
+			}
+			RenderTexture::unbind(rt); // includes glFush()
+			g_renderer.reset();
+			g_renderer.currentCamera = g_currentCamera;
+
+
+			gb->create(Window::width, Window::height);
+			GBuffer::bind(gb);
+			{
+				glViewport(0, 0, gb->width, gb->height);
+				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+				g_renderer.renderAll();
+
+				glFlush();
+			}
+			GBuffer::unbind(gb);
+
+			g_renderer.currentCamera = g_currentCamera;
+
+			g_materials["dunjunText"].diffuseMap = &gb->diffuse;
+
+			/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+			)	
+			%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+
+			glViewport(0, 0, Window::width, Window::height);
 			glClearColor(0.02f, 0.02f, 0.02f, 1.0f); // set the default color (R,G,B,A)
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+			g_texPassShader->use();
+			g_texPassShader->setUniform("u_tex", 0);
+			g_texPassShader->setUniform("u_scale", Vector3(2.0f));
 
-			g_renderer.reset();
+			Texture::bind(&rt->colorTexture, 0);
 
-			g_renderer.currentCamera = g_currentCamera;
-			g_renderer.draw(g_rootNode);
-
-			g_renderer.addPointLight(&g_light);
-
-			// lighting related - out of range happens in renderAll()
-			g_renderer.renderAll();
+			g_renderer.draw(g_meshes["sprite"]);
 
 			Window::swapBuffers(); // switches information between the front buffer and the back buffer
 		}

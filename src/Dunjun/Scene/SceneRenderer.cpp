@@ -22,12 +22,17 @@ namespace Dunjun
 		m_currentTexture = nullptr;
 		Texture::bind(nullptr, 0);
 		m_currentMaterial = nullptr; // commenting this out makes the top right corner of the window white
+
 		currentCamera = nullptr;
+	}
+
+	void SceneRenderer::clearAll()
+	{
 		m_modelInstances.clear();
 		m_pointLights.clear();
 	}
 
-	void SceneRenderer::draw(const SceneNode& node, const Transform& t)
+	void SceneRenderer::addSceneGraph(const SceneNode& node, const Transform& t)
 	{
 		node.draw(*this, t);
 	}
@@ -103,7 +108,6 @@ namespace Dunjun
 
 			}
 
-			// seems like textures could be missing
 			setTexture(inst.asset->material->diffuseMap, 0);
 
 			m_currentShaders->setUniform("u_transform", inst.transform); // shaderprogram.cpp
@@ -171,11 +175,11 @@ namespace Dunjun
 		}
 	}
 
-	//void SceneRenderer::setCamera(const Camera& camera)
-	//{
-	//	m_currentCamera = &camera;
-	//}
-	//
+	void SceneRenderer::setCamera(const Camera& camera)
+	{
+		currentCamera = &camera;
+	}
+	
 	//void SceneRenderer::setUniforms(const Transform& t)
 	//{
 	//	if(!m_currentShaders)
