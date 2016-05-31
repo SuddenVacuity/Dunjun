@@ -242,5 +242,7 @@
     <None Include="data\shaders\default_frag.glsl" />
     <None Include="data\shaders\texPass_frag.glsl" />
     <None Include="data\shaders\texPass_vert.glsl" />
+    <None Include="data\shaders\defferedGeometryPass_vert.glsl" />
+    <None Include="data\shaders\defferedGeometryPass_frag.glsl" />
   </ItemGroup>
 </Project>

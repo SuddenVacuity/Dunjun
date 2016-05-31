@@ -35,8 +35,29 @@ namespace Dunjun
 		void addModelInstance(const MeshRenderer& meshRenderer, Transform t);
 		void addPointLight(const PointLight* light);
 
-
 		void renderAll();
+
+		inline void createGBuffer(u32 w, u32 h)
+		{
+			if (m_gBuffer == nullptr)
+			{
+				m_gBuffer = make_unique<GBuffer>();
+			}
+
+			m_gBuffer->create(w, h);
+		}
+
+		inline GBuffer& getGBuffer()
+		{
+			if(m_gBuffer == nullptr)
+			{
+				createGBuffer(Window::width, Window::height);
+			}
+
+			return *m_gBuffer.get();
+		}
+
+		void defferedGeometryPass();
 
 		//void setMaterial(const Material* material);
 		void setCamera(const Camera& camera);
@@ -44,15 +65,18 @@ namespace Dunjun
 		//void setUniforms(const Transform& t);
 
 		const Camera* currentCamera = nullptr;
+		const ShaderProgram* geometryPassShaders = nullptr;
 
+		// cache of instances
+		mutable std::deque<ModelInstance> modelInstances;
+		std::deque<const PointLight*> pointLights;
 	private:
 		const Material* m_currentMaterial = nullptr;
 		const ShaderProgram* m_currentShaders = nullptr;
-		const Texture* m_currentTexture = nullptr;
 
-		// cache of instances
-		mutable std::deque<ModelInstance> m_modelInstances;
-		std::deque<const PointLight*> m_pointLights;
+		const Texture* m_currentTexture = nullptr;
+		std::unique_ptr<GBuffer> m_gBuffer = nullptr;
+
 
 		bool isCurrentShaders(const ShaderProgram* shaders);
 		bool isCurrentTexture(const Texture* texture);

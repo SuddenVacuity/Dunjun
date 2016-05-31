@@ -1,7 +1,6 @@
 #ifndef DUNJUN_RENDER_TEXTURE_HPP
 #define DUNJUN_RENDER_TEXTURE_HPP
 
-#include <Dunjun/Texture.hpp>
 #include <Dunjun/GBuffer.hpp>
 
 namespace Dunjun

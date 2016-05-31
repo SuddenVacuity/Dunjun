@@ -64,12 +64,13 @@ namespace Dunjun
 				attachment,
 				tex.m_object, 0);
 
-			drawBuffers.push_back(attachment);
+			if(attachment != GL_DEPTH_ATTACHMENT_EXT)
+				drawBuffers.push_back(attachment);
 		};
 
-		addRT(diffuse,	GL_COLOR_ATTACHMENT0_EXT, GL_RGB, GL_RGB, GL_UNSIGNED_BYTE);
-		addRT(specular, GL_COLOR_ATTACHMENT1_EXT, GL_RGB, GL_RGB, GL_UNSIGNED_BYTE);
-		addRT(world,	GL_COLOR_ATTACHMENT2_EXT, GL_RGB, GL_RGB, GL_UNSIGNED_BYTE);
+		addRT(diffuse,	GL_COLOR_ATTACHMENT0_EXT, GL_RGB8, GL_RGB, GL_UNSIGNED_BYTE);
+		addRT(specular, GL_COLOR_ATTACHMENT1_EXT, GL_RGBA8, GL_RGB, GL_UNSIGNED_BYTE);
+		addRT(normals,	GL_COLOR_ATTACHMENT2_EXT, GL_RGB8, GL_RGB, GL_UNSIGNED_BYTE);
 		addRT(depth,	GL_DEPTH_ATTACHMENT_EXT, GL_DEPTH_COMPONENT24, GL_DEPTH_COMPONENT, GL_FLOAT);
 
 		glDrawBuffers(drawBuffers.size(), &drawBuffers[0]);

@@ -23,13 +23,12 @@ namespace Dunjun
 		Texture::bind(nullptr, 0);
 		m_currentMaterial = nullptr; // commenting this out makes the top right corner of the window white
 
-		currentCamera = nullptr;
 	}
 
 	void SceneRenderer::clearAll()
 	{
-		m_modelInstances.clear();
-		m_pointLights.clear();
+		modelInstances.clear();
+		pointLights.clear();
 	}
 
 	void SceneRenderer::addSceneGraph(const SceneNode& node, const Transform& t)
@@ -46,18 +45,18 @@ namespace Dunjun
 	void SceneRenderer::addModelInstance(const MeshRenderer& meshRenderer, Transform t)
 	{
 		if(meshRenderer.parent->visible == true)
-			m_modelInstances.push_back({&meshRenderer, t});
+			modelInstances.push_back({&meshRenderer, t});
 	}
 
 	void SceneRenderer::addPointLight(const PointLight* light)
 	{
-		m_pointLights.push_back(light);
+		pointLights.push_back(light);
 	}
 
 
 	void SceneRenderer::renderAll()
 	{
-		std::sort(std::begin(m_modelInstances), std::end(m_modelInstances),
+		std::sort(std::begin(modelInstances), std::end(modelInstances),
 			[](const ModelInstance& a, const ModelInstance& b) -> bool
 		{
 			const auto& A = a.asset->material;
@@ -71,7 +70,7 @@ namespace Dunjun
 		});
 
 
-		for(const auto& inst : m_modelInstances)
+		for(const auto& inst : modelInstances)
 		{
 			if(!inst.asset->mesh)
 				continue;
@@ -81,7 +80,7 @@ namespace Dunjun
 				setShaders(inst.asset->material->shaders);
 
 				const Material& material = *inst.asset->material;
-				const PointLight* light = m_pointLights[0];
+				const PointLight* light = pointLights[0];
 
 				m_currentShaders->setUniform("u_camera", currentCamera->getMatrix()); // shaderprogram.cpp
 				m_currentShaders->setUniform("u_cameraPosition", currentCamera->transform.position); // shaderprogram.cpp
@@ -114,6 +113,57 @@ namespace Dunjun
 
 			draw(inst.asset->mesh);
 		}
+	}
+
+	void SceneRenderer::defferedGeometryPass()
+	{
+		std::sort(std::begin(modelInstances), std::end(modelInstances),
+			[](const ModelInstance& a, const ModelInstance& b) -> bool
+		{
+			const auto& A = a.asset->material;
+			const auto& B = b.asset->material;
+
+			// if same shaders sort by texture else sort by shader
+			if (A->shaders == B->shaders)
+				return A->diffuseMap < B->diffuseMap;
+			else
+				return A->shaders < B->shaders;
+		});
+
+		GBuffer::bind(&getGBuffer());
+		{
+			glViewport(0, 0, getGBuffer().width, getGBuffer().height);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+			geometryPassShaders->use();
+
+			geometryPassShaders->setUniform("u_camera", currentCamera->getMatrix()); // shaderprogram.cpp
+			geometryPassShaders->setUniform("u_cameraPosition", currentCamera->transform.position); // shaderprogram.cpp
+
+			for (const auto& inst : modelInstances)
+			{
+				if (!inst.asset->mesh)
+					continue;
+
+					//setShaders(inst.asset->material->shaders);
+
+				const Material& material = *inst.asset->material;
+				const PointLight* light = pointLights[0];
+
+				geometryPassShaders->setUniform("u_material.diffuseMap", (u32)0); // shaderprogram.cpp
+				geometryPassShaders->setUniform("u_material.diffuseColor", material.diffuseColor); // shaderprogram.cpp
+				geometryPassShaders->setUniform("u_material.specularColor", material.specularColor); // shaderprogram.cpp
+				geometryPassShaders->setUniform("u_material.specularExponent", material.specularExponent); // shaderprogram.cpp
+
+				setTexture(inst.asset->material->diffuseMap, 0);
+
+				geometryPassShaders->setUniform("u_transform", inst.transform); // shaderprogram.cpp
+
+				draw(inst.asset->mesh);
+			}
+			glFlush();
+		}
+		GBuffer::unbind(&getGBuffer());
 	}
 
 	//void SceneRenderer::setMaterial(const Material* material)

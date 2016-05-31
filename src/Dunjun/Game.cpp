@@ -26,6 +26,7 @@ namespace Dunjun
 
 	GLOBAL ShaderProgram* g_defaultShader;
 	GLOBAL ShaderProgram* g_texPassShader;
+	GLOBAL ShaderProgram* g_defferedGeometryPassShader;
 
 	GLOBAL ModelAsset g_sprite;
 	//GLOBAL ModelAsset g_floor;
@@ -124,8 +125,8 @@ namespace Dunjun
 		// File path for shader files and define and bind attributes
 		INTERNAL void loadShaders()
 		{
+			// defaultShader
 			{
-			// Shader Program
 				g_defaultShader = new Dunjun::ShaderProgram();
 				if (!g_defaultShader->attachShaderFromFile(Dunjun::ShaderType::Vertex, "data/shaders/default_vert.glsl")) // check if the file loaded
 					throw std::runtime_error(g_defaultShader->errorLog);
@@ -142,7 +143,9 @@ namespace Dunjun
 				if (!g_defaultShader->link())
 					throw std::runtime_error(g_defaultShader->errorLog);
 			}
-			{// texPassShader
+
+			// texPassShader
+			{
 				g_texPassShader = new Dunjun::ShaderProgram();
 				if (!g_texPassShader->attachShaderFromFile(Dunjun::ShaderType::Vertex, "data/shaders/texPass_vert.glsl"))
 					throw std::runtime_error(g_texPassShader->errorLog);
@@ -157,6 +160,24 @@ namespace Dunjun
 					throw std::runtime_error(g_texPassShader->errorLog);
 			}
 
+			// g_defferedGeometryPassShader
+			{
+				g_defferedGeometryPassShader = new Dunjun::ShaderProgram();
+				if (!g_defferedGeometryPassShader->attachShaderFromFile(Dunjun::ShaderType::Vertex, "data/shaders/defferedGeometryPass_vert.glsl")) // check if the file loaded
+					throw std::runtime_error(g_defferedGeometryPassShader->errorLog);
+
+				if (!g_defferedGeometryPassShader->attachShaderFromFile(Dunjun::ShaderType::Fragment, "data/shaders/defferedGeometryPass_frag.glsl")) // check if the file loaded
+					throw std::runtime_error(g_defferedGeometryPassShader->errorLog);
+
+
+				g_defferedGeometryPassShader->bindAttribLocation((u32)AttribLocation::Position, "a_position"); // bind the position of 1st attribute in shaders
+				g_defferedGeometryPassShader->bindAttribLocation((u32)AttribLocation::TexCoord, "a_texCoord"); // bind the position of 3rd attribute in shaders
+				g_defferedGeometryPassShader->bindAttribLocation((u32)AttribLocation::Color, "a_color"); // bind the position of 2nd attribute in shaders
+				g_defferedGeometryPassShader->bindAttribLocation((u32)AttribLocation::Normal, "a_normal"); // bind the position of 2nd attribute in shaders
+
+				if (!g_defferedGeometryPassShader->link())
+					throw std::runtime_error(g_defferedGeometryPassShader->errorLog);
+			}
 		}
 
 		INTERNAL void loadMaterials()
@@ -930,14 +951,14 @@ namespace Dunjun
 			}
 
 			LOCAL_PERSIST RenderTexture* rt = new RenderTexture();
-			LOCAL_PERSIST GBuffer* gb = new GBuffer();
-
+			
 			g_renderer.reset();
 			g_renderer.clearAll();
 
 			g_renderer.addSceneGraph(g_rootNode);
 			g_renderer.addPointLight(&g_light);
 			g_renderer.currentCamera = g_currentCamera;
+			g_renderer.geometryPassShaders = g_defferedGeometryPassShader;
 
 			rt->create(Window::width, Window::height);
 			RenderTexture::bind(rt);
@@ -951,24 +972,14 @@ namespace Dunjun
 			}
 			RenderTexture::unbind(rt); // includes glFush()
 			g_renderer.reset();
-			g_renderer.currentCamera = g_currentCamera;
 
 
-			gb->create(Window::width, Window::height);
-			GBuffer::bind(gb);
-			{
-				glViewport(0, 0, gb->width, gb->height);
-				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			g_renderer.createGBuffer(Window::width, Window::height);
+			
+			g_renderer.defferedGeometryPass();
 
-				g_renderer.renderAll();
 
-				glFlush();
-			}
-			GBuffer::unbind(gb);
-
-			g_renderer.currentCamera = g_currentCamera;
-
-			g_materials["dunjunText"].diffuseMap = &gb->diffuse;
+			g_materials["dunjunText"].diffuseMap = &g_renderer.getGBuffer().diffuse;
 
 			/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 			)	

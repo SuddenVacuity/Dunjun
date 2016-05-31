@@ -24,7 +24,7 @@ namespace Dunjun
 
 		Texture diffuse;   // diffuse color rgb
 		Texture specular;  // specular color rbg + smoothness
-		Texture world;	   // world normals rgb
+		Texture normals;	   // world normals rgb
 
 		Texture depth;
 	};
