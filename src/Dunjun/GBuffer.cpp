@@ -49,8 +49,8 @@ namespace Dunjun
 			glBindTexture(GL_TEXTURE_2D, (GLuint)tex.m_object);
 
 			glTexImage2D(GL_TEXTURE_2D, 0, internalFormat,
-				(GLsizei)w, (GLsizei)h,
-				0, format, type, 0);
+						(GLsizei)w, (GLsizei)h,
+						0, format, type, nullptr);
 
 			tex.width = w;
 			tex.height = h;
@@ -70,12 +70,12 @@ namespace Dunjun
 
 		addRT(diffuse,	GL_COLOR_ATTACHMENT0_EXT, GL_RGB8, GL_RGB, GL_UNSIGNED_BYTE);
 		addRT(specular, GL_COLOR_ATTACHMENT1_EXT, GL_RGBA8, GL_RGB, GL_UNSIGNED_BYTE);
-		addRT(normals,	GL_COLOR_ATTACHMENT2_EXT, GL_RGB8, GL_RGB, GL_UNSIGNED_BYTE);
+		addRT(normal,	GL_COLOR_ATTACHMENT2_EXT, GL_RGB8, GL_RGB, GL_UNSIGNED_BYTE);
 		addRT(depth,	GL_DEPTH_ATTACHMENT_EXT, GL_DEPTH_COMPONENT24, GL_DEPTH_COMPONENT, GL_FLOAT);
 
 		glDrawBuffers(drawBuffers.size(), &drawBuffers[0]);
 
-		if (glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT) != GL_FRAMEBUFFER_COMPLETE)
+		if (glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT) != GL_FRAMEBUFFER_COMPLETE_EXT)
 		{
 			glBindTexture(GL_TEXTURE_2D, 0);
 			glBindFramebuffer(GL_FRAMEBUFFER_EXT, 0);

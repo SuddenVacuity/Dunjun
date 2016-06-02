@@ -89,14 +89,12 @@ namespace Dunjun
 		if (type.data & Color)
 			drawBuffers.push_back(GL_COLOR_ATTACHMENT0_EXT);
 		if (type.data & Depth)
-		{
 			drawBuffers.push_back(GL_DEPTH_ATTACHMENT_EXT);
-			//drawBuffers.push_back(GL_DEPTH_COMPONENT);
-		}
+		
 
 		glDrawBuffers(drawBuffers.size(), &drawBuffers[0]);
 
-		if(glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT) != GL_FRAMEBUFFER_COMPLETE )
+		if(glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT) != GL_FRAMEBUFFER_COMPLETE_EXT )
 		{
 			glBindTexture(GL_TEXTURE_2D, 0);
 			glBindFramebuffer(GL_FRAMEBUFFER_EXT, 0);

@@ -24,9 +24,10 @@ namespace Dunjun
 		GLOBAL bool g_running = true;
 	} // end anon namespace
 
-	GLOBAL ShaderProgram* g_defaultShader;
-	GLOBAL ShaderProgram* g_texPassShader;
-	GLOBAL ShaderProgram* g_defferedGeometryPassShader;
+	GLOBAL std::unique_ptr<ShaderProgram> g_defaultShaders;
+	GLOBAL std::unique_ptr<ShaderProgram> g_texPassShaders;
+	GLOBAL std::unique_ptr<ShaderProgram> g_deferredGeometryPassShaders;
+	GLOBAL std::unique_ptr<ShaderProgram> g_pointLightShaders;
 
 	GLOBAL ModelAsset g_sprite;
 	//GLOBAL ModelAsset g_floor;
@@ -36,7 +37,7 @@ namespace Dunjun
 	GLOBAL SceneNode g_rootNode;
 	GLOBAL SceneNode* g_player;
 
-	GLOBAL PointLight g_light;
+	GLOBAL std::vector<PointLight> g_lights;
 
 	GLOBAL SceneRenderer g_renderer;
 
@@ -127,74 +128,89 @@ namespace Dunjun
 		{
 			// defaultShader
 			{
-				g_defaultShader = new Dunjun::ShaderProgram();
-				if (!g_defaultShader->attachShaderFromFile(Dunjun::ShaderType::Vertex, "data/shaders/default_vert.glsl")) // check if the file loaded
-					throw std::runtime_error(g_defaultShader->errorLog);
+				g_defaultShaders = make_unique<ShaderProgram>();
+				if (!g_defaultShaders->attachShaderFromFile(Dunjun::ShaderType::Vertex, "data/shaders/default_vert.glsl")) // check if the file loaded
+					throw std::runtime_error(g_defaultShaders->errorLog);
 
-				if (!g_defaultShader->attachShaderFromFile(Dunjun::ShaderType::Fragment, "data/shaders/default_frag.glsl")) // check if the file loaded
-					throw std::runtime_error(g_defaultShader->errorLog);
+				if (!g_defaultShaders->attachShaderFromFile(Dunjun::ShaderType::Fragment, "data/shaders/default_frag.glsl")) // check if the file loaded
+					throw std::runtime_error(g_defaultShaders->errorLog);
 
 
-				g_defaultShader->bindAttribLocation((u32)AttribLocation::Position, "a_position"); // bind the position of 1st attribute in shaders
-				g_defaultShader->bindAttribLocation((u32)AttribLocation::TexCoord, "a_texCoord"); // bind the position of 3rd attribute in shaders
-				g_defaultShader->bindAttribLocation((u32)AttribLocation::Color, "a_color"); // bind the position of 2nd attribute in shaders
-				g_defaultShader->bindAttribLocation((u32)AttribLocation::Normal, "a_normal"); // bind the position of 2nd attribute in shaders
+				g_defaultShaders->bindAttribLocation((u32)AttribLocation::Position, "a_position"); // bind the position of 1st attribute in shaders
+				g_defaultShaders->bindAttribLocation((u32)AttribLocation::TexCoord, "a_texCoord"); // bind the position of 3rd attribute in shaders
+				g_defaultShaders->bindAttribLocation((u32)AttribLocation::Color, "a_color"); // bind the position of 2nd attribute in shaders
+				g_defaultShaders->bindAttribLocation((u32)AttribLocation::Normal, "a_normal"); // bind the position of 2nd attribute in shaders
 
-				if (!g_defaultShader->link())
-					throw std::runtime_error(g_defaultShader->errorLog);
+				if (!g_defaultShaders->link())
+					throw std::runtime_error(g_defaultShaders->errorLog);
 			}
 
 			// texPassShader
 			{
-				g_texPassShader = new Dunjun::ShaderProgram();
-				if (!g_texPassShader->attachShaderFromFile(Dunjun::ShaderType::Vertex, "data/shaders/texPass_vert.glsl"))
-					throw std::runtime_error(g_texPassShader->errorLog);
+				g_texPassShaders = make_unique<ShaderProgram>();
+				if (!g_texPassShaders->attachShaderFromFile(Dunjun::ShaderType::Vertex, "data/shaders/texPass_vert.glsl"))
+					throw std::runtime_error(g_texPassShaders->errorLog);
 
-				if (!g_texPassShader->attachShaderFromFile(Dunjun::ShaderType::Fragment, "data/shaders/texPass_frag.glsl"))
-					throw std::runtime_error(g_texPassShader->errorLog);
+				if (!g_texPassShaders->attachShaderFromFile(Dunjun::ShaderType::Fragment, "data/shaders/texPass_frag.glsl"))
+					throw std::runtime_error(g_texPassShaders->errorLog);
 
-				g_texPassShader->bindAttribLocation((u32)AttribLocation::Position, "a_position");
-				g_texPassShader->bindAttribLocation((u32)AttribLocation::TexCoord, "a_texCoord");
+				g_texPassShaders->bindAttribLocation((u32)AttribLocation::Position, "a_position");
+				g_texPassShaders->bindAttribLocation((u32)AttribLocation::TexCoord, "a_texCoord");
 
-				if (!g_texPassShader->link())
-					throw std::runtime_error(g_texPassShader->errorLog);
+				if (!g_texPassShaders->link())
+					throw std::runtime_error(g_texPassShaders->errorLog);
 			}
 
 			// g_defferedGeometryPassShader
 			{
-				g_defferedGeometryPassShader = new Dunjun::ShaderProgram();
-				if (!g_defferedGeometryPassShader->attachShaderFromFile(Dunjun::ShaderType::Vertex, "data/shaders/defferedGeometryPass_vert.glsl")) // check if the file loaded
-					throw std::runtime_error(g_defferedGeometryPassShader->errorLog);
+				g_deferredGeometryPassShaders = make_unique<ShaderProgram>();
+				if (!g_deferredGeometryPassShaders->attachShaderFromFile(Dunjun::ShaderType::Vertex, "data/shaders/deferredGeometryPass_vert.glsl")) // check if the file loaded
+					throw std::runtime_error(g_deferredGeometryPassShaders->errorLog);
 
-				if (!g_defferedGeometryPassShader->attachShaderFromFile(Dunjun::ShaderType::Fragment, "data/shaders/defferedGeometryPass_frag.glsl")) // check if the file loaded
-					throw std::runtime_error(g_defferedGeometryPassShader->errorLog);
+				if (!g_deferredGeometryPassShaders->attachShaderFromFile(Dunjun::ShaderType::Fragment, "data/shaders/deferredGeometryPass_frag.glsl")) // check if the file loaded
+					throw std::runtime_error(g_deferredGeometryPassShaders->errorLog);
 
+				g_deferredGeometryPassShaders->bindAttribLocation((u32)AttribLocation::Position, "a_position"); // bind the position of 1st attribute in shaders
+				g_deferredGeometryPassShaders->bindAttribLocation((u32)AttribLocation::TexCoord, "a_texCoord"); // bind the position of 3rd attribute in shaders
+				g_deferredGeometryPassShaders->bindAttribLocation((u32)AttribLocation::Color, "a_color"); // bind the position of 2nd attribute in shaders
+				g_deferredGeometryPassShaders->bindAttribLocation((u32)AttribLocation::Normal, "a_normal"); // bind the position of 2nd attribute in shaders
 
-				g_defferedGeometryPassShader->bindAttribLocation((u32)AttribLocation::Position, "a_position"); // bind the position of 1st attribute in shaders
-				g_defferedGeometryPassShader->bindAttribLocation((u32)AttribLocation::TexCoord, "a_texCoord"); // bind the position of 3rd attribute in shaders
-				g_defferedGeometryPassShader->bindAttribLocation((u32)AttribLocation::Color, "a_color"); // bind the position of 2nd attribute in shaders
-				g_defferedGeometryPassShader->bindAttribLocation((u32)AttribLocation::Normal, "a_normal"); // bind the position of 2nd attribute in shaders
+				if (!g_deferredGeometryPassShaders->link())
+					throw std::runtime_error(g_deferredGeometryPassShaders->errorLog);
+			}
 
-				if (!g_defferedGeometryPassShader->link())
-					throw std::runtime_error(g_defferedGeometryPassShader->errorLog);
+			// g_pointLightShader
+			{
+				g_pointLightShaders = make_unique<ShaderProgram>();
+				if (!g_pointLightShaders->attachShaderFromFile(Dunjun::ShaderType::Vertex, "data/shaders/deferredLightPass_vert.glsl")) // check if the file loaded
+					throw std::runtime_error(g_pointLightShaders->errorLog);
+
+				if (!g_pointLightShaders->attachShaderFromFile(Dunjun::ShaderType::Fragment, "data/shaders/deferredPointLightPass_frag.glsl")) // check if the file loaded
+					throw std::runtime_error(g_pointLightShaders->errorLog);
+
+				g_pointLightShaders->bindAttribLocation((u32)AttribLocation::Position, "a_position"); // bind the position of 1st attribute in shaders
+				g_pointLightShaders->bindAttribLocation((u32)AttribLocation::TexCoord, "a_texCoord"); // bind the position of 3rd attribute in shaders
+
+				if (!g_pointLightShaders->link())
+					throw std::runtime_error(g_pointLightShaders->errorLog);
 			}
 		}
 
 		INTERNAL void loadMaterials()
 		{
-			g_materials["default"].shaders = g_defaultShader; // apply the default shader to sprite
+			g_materials["default"].shaders = g_defaultShaders.get(); // apply the default shader to sprite
 			g_materials["default"].diffuseMap = new Texture(); // apply new texture to sprite
 			g_materials["default"].diffuseMap->loadFromFile("data/textures/dunjunText.jpg"); // Path to the image
 
-			g_materials["dunjunText"].shaders = g_defaultShader; // apply the default shader to sprite
+			g_materials["dunjunText"].shaders = g_deferredGeometryPassShaders.get(); // apply the default shader to sprite
 			g_materials["dunjunText"].diffuseMap = new Texture(); // apply new texture to sprite
 			g_materials["dunjunText"].diffuseMap->loadFromFile("data/textures/dunjunText.jpg"); // Path to the image
 
-			g_materials["stone"].shaders = g_defaultShader; // apply the default shader to sprite
+			g_materials["stone"].shaders = g_defaultShaders.get(); // apply the default shader to sprite
 			g_materials["stone"].diffuseMap = new Texture(); // apply new texture to sprite
 			g_materials["stone"].diffuseMap->loadFromFile("data/textures/stone.png", TextureFilter::Nearest); // Path to the image
 
-			g_materials["terrain"].shaders = g_defaultShader; // apply the default shader to sprite
+			g_materials["terrain"].shaders = g_defaultShaders.get(); // apply the default shader to sprite
 			g_materials["terrain"].diffuseMap = new Texture(); // apply new texture to sprite
 			g_materials["terrain"].diffuseMap->loadFromFile("data/textures/terrain.png", TextureFilter::Nearest); // Path to the image
 		}
@@ -212,123 +228,75 @@ namespace Dunjun
 		// sprite vertex info, vbo and ibo
 		INTERNAL void loadSpriteAsset()
 		{
-			// Here is where you add vertice information
-			//
-			Vertex vertices[] = { // define vertexes for a triangle
-				//  x	    y	  z		  s	    t	       r	 g	   b	 a		normals				// for triangle strips organize vertexes in a backwards Z
-				{ { +0.5f,  0.5f, 0.0f },{ 1.0f, 1.0f },{ 0xFF,0xFF,0xFF,0xFF }, { 0, 0, 0 } },	// 0 vertex         1 ---- 0        
-				{ { -0.5f,  0.5f, 0.0f },{ 0.0f, 1.0f },{ 0xFF,0xFF,0xFF,0xFF }, { 0, 0, 0 } },	// 1 vertex           \             
-				{ { +0.5f, -0.5f, 0.0f },{ 1.0f, 0.0f },{ 0xFF,0xFF,0xFF,0xFF }, { 0, 0, 0 } },	// 2 vertex              \           
-				{ { -0.5f, -0.5f, 0.0f },{ 0.0f, 0.0f },{ 0xFF,0xFF,0xFF,0xFF }, { 0, 0, 0 } },	// 3 vertex         3 -----2       
-			};
+			{
+				// Here is where you add vertice information
+				//
+				Vertex vertices[] = { // define vertexes for a triangle
+					//  x	    y	  z		  s	    t	       r	 g	   b	 a		normals				// for triangle strips organize vertexes in a backwards Z
+					{ { +0.5f,  0.5f, 0.0f },{ 1.0f, 1.0f },{ 0xFF,0xFF,0xFF,0xFF }, { 0, 0, 0 } },	// 0 vertex         1 ---- 0        
+					{ { -0.5f,  0.5f, 0.0f },{ 0.0f, 1.0f },{ 0xFF,0xFF,0xFF,0xFF }, { 0, 0, 0 } },	// 1 vertex           \             
+					{ { +0.5f, -0.5f, 0.0f },{ 1.0f, 0.0f },{ 0xFF,0xFF,0xFF,0xFF }, { 0, 0, 0 } },	// 2 vertex              \           
+					{ { -0.5f, -0.5f, 0.0f },{ 0.0f, 0.0f },{ 0xFF,0xFF,0xFF,0xFF }, { 0, 0, 0 } },	// 3 vertex         3 -----2       
+				};
 
-			u32 indices[] = { 0, 1, 2, 1, 3, 2 }; // vertex draw order for GL_TRIANGLES
+				u32 indices[] = { 0, 1, 2, 1, 3, 2 }; // vertex draw order for GL_TRIANGLES
 
-			Mesh::Data meshData;
+				Mesh::Data meshData;
 
-			// get number of entries
-			int numVertices = sizeof(vertices) / sizeof(vertices[0]);
-			int numIndices = sizeof(indices) / sizeof(indices[0]);
+				// get number of entries
+				int numVertices = sizeof(vertices) / sizeof(vertices[0]);
+				int numIndices = sizeof(indices) / sizeof(indices[0]);
 
-			// add the data
-			for(int i = 0; i < numVertices; i++)
-				meshData.vertices.append(vertices[i].position, vertices[i].texCoord, vertices[i].color);
+				// add the data
+				for(int i = 0; i < numVertices; i++)
+					meshData.vertices.append(vertices[i].position, vertices[i].texCoord, vertices[i].color);
 
-			for(int i = 0; i <  numIndices; i++)
-				meshData.indices.push_back(indices[i]);
+				for(int i = 0; i <  numIndices; i++)
+					meshData.indices.push_back(indices[i]);
 
-			meshData.generateNormals();
+				meshData.generateNormals();
 
-			g_meshes["sprite"] = new Mesh(meshData); // NOTE: new Mesh remember to delete
+				g_meshes["sprite"] = new Mesh(meshData);
 
-			g_sprite.material = &g_materials["dunjunText"]; // apply material
-			g_sprite.mesh = g_meshes["sprite"];
+				g_sprite.material = &g_materials["dunjunText"]; // apply material
+				g_sprite.mesh = g_meshes["sprite"];
+			}
+
+			{
+				// Here is where you add vertice information
+				//
+				Vertex vertices[] = { // define vertexes for a triangle
+									  //  x	    y	  z		  s	    t	       r	 g	   b	 a		normals				// for triangle strips organize vertexes in a backwards Z
+					{ { +1.0f,  1.0f, 0.0f },{ 1.0f, 1.0f },{ 0xFF,0xFF,0xFF,0xFF },{ 0, 0, 0 } },	// 0 vertex         1 ---- 0        
+					{ { -1.0f,  1.0f, 0.0f },{ 0.0f, 1.0f },{ 0xFF,0xFF,0xFF,0xFF },{ 0, 0, 0 } },	// 1 vertex           \             
+					{ { +1.0f, -1.0f, 0.0f },{ 1.0f, 0.0f },{ 0xFF,0xFF,0xFF,0xFF },{ 0, 0, 0 } },	// 2 vertex              \           
+					{ { -1.0f, -1.0f, 0.0f },{ 0.0f, 0.0f },{ 0xFF,0xFF,0xFF,0xFF },{ 0, 0, 0 } },	// 3 vertex         3 -----2       
+				};
+
+				u32 indices[] = { 0, 1, 2, 1, 3, 2 }; // vertex draw order for GL_TRIANGLES
+
+				Mesh::Data meshData;
+
+				// get number of entries
+				int numVertices = sizeof(vertices) / sizeof(vertices[0]);
+				int numIndices = sizeof(indices) / sizeof(indices[0]);
+
+				// add the data
+				for (int i = 0; i < numVertices; i++)
+					meshData.vertices.append(vertices[i].position, vertices[i].texCoord, vertices[i].color);
+
+				for (int i = 0; i < numIndices; i++)
+					meshData.indices.push_back(indices[i]);
+
+				meshData.generateNormals();
+
+				g_meshes["quad"] = new Mesh(meshData);
+			}
 		}
 
 		// generate world objects
 		INTERNAL void generateWorld()
 		{
-			//g_level.material = &g_materials["terrain"];
-			
-			//// number of instances to create
-			//int mapSizeX = 24;
-			//int mapSizeY = 3;
-			//int mapSizeZ = 16;
-			//
-			//// location of texture in image map
-			//Level::TileId lightWoodTile = { 0, 11 };
-			//
-			//Level::RandomTileSet mossyStoneTiles;
-			//for (u32 i = 1; i <= 2; i++)
-			//	mossyStoneTiles.emplace_back(Level::TileId{ i, 15 });
-
-			// size of image map
-			//f32 tileWidth = 1.0f / 16.0f;
-			//f32 tileHeight = 1.0f / 16.0f;
-			//
-			//// location of texture in image
-			//int tileS = 0; // horizontal coordinate
-			//int tileT = 15; // vertical coordinate
-			//
-			//Vertex vertices[] = { // define vertexes for a square
-			//	//  x	    y	  z		  s	    t											r	   g	   b	 a	
-			//	{ { 0.5f, 0.0f, -0.5f },{ 1.0f, 1.0f },{ 0xFF, 0xFF, 0xFF, 0xFF } },
-			//	{ { -0.5f, 0.0f, -0.5f },{ 0.0f, 1.0f },{ 0xFF, 0xFF, 0xFF, 0xFF } },
-			//	{ { 0.5f, 0.0f,  0.5f },{ 1.0f, 0.0f },{ 0xFF, 0xFF, 0xFF, 0xFF } },
-			//	{ { -0.5f, 0.0f,  0.5f },{ 0.0f, 0.0f },{ 0xFF, 0xFF, 0xFF, 0xFF } },
-			//};
-			//
-			//u32 indices[] = { 0, 1, 2, 1, 3, 2 }; // vertex draw order for GL_TRIANGLES
-			//
-			//int numVertex = sizeof(vertices) / sizeof(vertices[0]);
-			//int numIndices = sizeof(indices) / sizeof(indices[0]);
-
-			//// create array of floor tiles
-			//for (int i = 0; i < mapSizeX; i++)
-			//{
-			//	for (int j = 0; j < mapSizeZ; j++)
-			//		g_level.addTileSurface({ (f32)i, 0, (f32)j }, Level::TileSurfaceFace::Up, lightWoodTile);
-			//
-			//	//size_t index = floorMD.vertices.size();
-				//
-				//// individual tile
-				//for (int k = 0; k < numVertex; k++)
-				//{
-				//	Dunjun::Vertex v = vertices[k]; // create vertex to carry data
-				//
-				//	v.position.x = v.position.x + i; // add mapSize increments to create a tile grid
-				//	v.position.z = v.position.z + j; // add mapSize increments to create a tile grid
-				//
-				//	floorMD.vertices.push_back(v);
-				//}
-				//
-				//for (int l = 0; l < numIndices; l++)
-				//	floorMD.indices.push_back(index + indices[l]);
-			//}
-			//
-			//// create array of wall tiles
-			//// first for loop moves upward from one row to the next
-			//for (int i = 0; i < mapSizeY; i++)
-			//{
-			//	// create row of back wall tiles
-			//	for (int j = 0; j < mapSizeX; j++)
-			//		g_level.addTileSurface({ (f32)j, (f32)i, 0 }, Level::TileSurfaceFace::Forward, mossyStoneTiles);
-			//
-			//	// create row of front wall tiles
-			//	for (int j = 0; j < mapSizeX; j++)
-			//		g_level.addTileSurface({ (f32)j, (f32)i, (f32)mapSizeZ }, Level::TileSurfaceFace::Backward, mossyStoneTiles);
-			//
-			//	// create row of left wall tiles
-			//	for (int j = 0; j < mapSizeZ; j++)
-			//		g_level.addTileSurface({ 0, (f32)i, (f32)j }, Level::TileSurfaceFace::Left, mossyStoneTiles);
-			//
-			//	// create row of right wall tiles
-			//	for (int j = 0; j < mapSizeZ; j++)
-			//		g_level.addTileSurface({ (f32)mapSizeX, (f32)i, (f32)j }, Level::TileSurfaceFace::Right, mossyStoneTiles);
-			//} // end create walls
-
-			//g_level.generate();
-
 			g_rootNode.onStart();
 		}
 
@@ -347,15 +315,6 @@ namespace Dunjun
 		{
 			generateWorld();
 
-			//{ // level scene node
-			//	SceneNode::u_ptr level = make_unique<SceneNode>();
-			//
-			//	level->name = "default";
-			//	level->addComponent<MeshRenderer>(*g_level.mesh, *g_level.material);
-			//
-			//	g_rootNode.attachChild(std::move(level));
-			//}
-
 			{ // player scene node
 				SceneNode::u_ptr player = make_unique<SceneNode>();
 
@@ -371,20 +330,6 @@ namespace Dunjun
 				g_rootNode.attachChild(std::move(player));
 			}
 
-
-			//{ // test room
-			//	Random random(1);
-			//
-			//	auto room = make_unique<Room>(random, Room::Size(10, 4, 15));
-			//
-			//	room->material = &g_materials["terrain"];
-			//
-			//	room->generate();
-			//	room->transform.position = Vector3(1, 0, 1);
-			//
-			//	g_rootNode.attachChild(std::move(room));
-			//}
-
 			{ // test level generation
 				auto level = make_unique<Level>();
 
@@ -398,9 +343,27 @@ namespace Dunjun
 				g_rootNode.attachChild(std::move(level));
 			}
 
-			g_light.position = { 2.5f, 2.0f, 2.5f };
-			g_light.brightness = 10.0f;
-			g_light.calculateRange();
+			// add lights
+			for(int i = 0; i < 50 ; i++)
+			{
+				PointLight light;
+
+				Random r;
+
+				light.position.x = r.getFloat(-25.0f, 25.0f);
+				light.position.y = r.getFloat(-25.0f, 25.0f);
+				light.position.z = r.getFloat(-25.0f, 25.0f);
+
+				light.color.r = r.getInt(10, 255);
+				light.color.g = r.getInt(10, 255);
+				light.color.b = r.getInt(10, 255);
+
+				light.brightness = 3.0f;
+
+				g_lights.push_back(light);
+			}
+			g_lights[0].color = defaultWhite;
+			g_lights[0].brightness = 20.0f;
 
 			{
 				//Initialize camera
@@ -720,7 +683,7 @@ namespace Dunjun
 
 				if (Input::isGamepadButtonPressed(Input::Gamepad_1, Input::XboxButton::A))
 				{
-					g_light.position = g_cameraWorld.transform.position;
+					g_lights[0].position = g_cameraWorld.transform.position;
 				}
 
 				// level regeneration button
@@ -916,12 +879,6 @@ namespace Dunjun
 					else
 						room->visible = false;
 				}
-
-				// move light around
-				g_light.position.z += dt * Math::cos(Radian(5.0f * Input::getTime()));
-				g_light.position.x += dt * Math::sin(Radian(5.0f * Input::getTime()));
-
-
 		} // end update
 
 		/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -943,6 +900,7 @@ namespace Dunjun
 				Vector2 viewSize = Window::getFramebufferSize();
 				f32 aspectRatio = viewSize.x / viewSize.y;
 
+				// TODO: change these to namespace Window:: 
 				g_cameraPlayer.viewportSize = viewSize;
 				g_cameraWorld.viewportSize = viewSize;
 
@@ -950,52 +908,39 @@ namespace Dunjun
 				g_cameraWorld.viewportAspectRatio = aspectRatio;
 			}
 
-			LOCAL_PERSIST RenderTexture* rt = new RenderTexture();
-			
 			g_renderer.reset();
 			g_renderer.clearAll();
 
 			g_renderer.addSceneGraph(g_rootNode);
-			g_renderer.addPointLight(&g_light);
-			g_renderer.currentCamera = g_currentCamera;
-			g_renderer.geometryPassShaders = g_defferedGeometryPassShader;
 
-			rt->create(Window::width, Window::height);
-			RenderTexture::bind(rt);
-			{
-				glViewport(0, 0, rt->width, rt->height);
-				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			for(const auto& light : g_lights)
+				g_renderer.addPointLight(&light);
 
-				g_renderer.renderAll();
+			g_renderer.camera = g_currentCamera;
 
-				glFlush();
-			}
-			RenderTexture::unbind(rt); // includes glFush()
-			g_renderer.reset();
+			g_renderer.geometryPassShaders = g_deferredGeometryPassShaders.get();
+			g_renderer.pointLightShaders = g_pointLightShaders.get();
 
+			g_renderer.quad = g_meshes["quad"];
 
 			g_renderer.createGBuffer(Window::width, Window::height);
-			
-			g_renderer.defferedGeometryPass();
 
+			g_renderer.deferredGeometryPass();
+			g_renderer.deferredLightPass();
 
 			g_materials["dunjunText"].diffuseMap = &g_renderer.getGBuffer().diffuse;
-
-			/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-			)	
-			%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
 			glViewport(0, 0, Window::width, Window::height);
 			glClearColor(0.02f, 0.02f, 0.02f, 1.0f); // set the default color (R,G,B,A)
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-			g_texPassShader->use();
-			g_texPassShader->setUniform("u_tex", 0);
-			g_texPassShader->setUniform("u_scale", Vector3(2.0f));
+			g_texPassShaders->use();
+			g_texPassShaders->setUniform("u_tex", 0);
+			g_texPassShaders->setUniform("u_scale", Vector3(1.0f));
 
-			Texture::bind(&rt->colorTexture, 0);
+			Texture::bind(&g_renderer.lightingTexture->colorTexture, 0);
 
-			g_renderer.draw(g_meshes["sprite"]);
+			g_renderer.draw(g_meshes["quad"]);
 
 			Window::swapBuffers(); // switches information between the front buffer and the back buffer
 		}
@@ -1115,6 +1060,9 @@ namespace Dunjun
 
 		void cleanUp()
 		{
+			for(auto& mesh : g_meshes)
+				delete mesh.second;
+
 			Input::cleanup();
 			Window::cleanup();
 		}

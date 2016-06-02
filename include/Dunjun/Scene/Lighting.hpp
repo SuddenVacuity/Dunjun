@@ -20,9 +20,9 @@ namespace Dunjun
 
 		Attenuation attenuation;
 
-		f32 range = 16.0f;
+		mutable f32 range = 16.0f;
 
-		inline void calculateRange()
+		inline void calculateRange() const
 		{
 			f32 i = brightness * (f32)std::max(color.r, std::max(color.g, color.b));
 
