@@ -6,9 +6,9 @@
 //#include <Dunjun/Scene/NodeComponent.hpp> // included in scenenode
 //#include <Dunjun/Scene/SceneNode.hpp> // included in meshrenderer
 //#include <Dunjun/Scene/MeshRenderer.hpp> // included in facecamera
+//#include <Dunjun/Scene/Lighting.hpp>
 #include <Dunjun/Scene/FaceCamera.hpp>
 
-#include <Dunjun/Scene/Lighting.hpp>
 
 namespace Dunjun
 {

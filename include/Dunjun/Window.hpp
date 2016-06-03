@@ -15,14 +15,19 @@ namespace Dunjun
 		namespace
 		{
 			// preset window sizes
+			const int windowSize_854_480[2] = { 854, 480 };
 			const int windowSize_1366_768[2] = {1366, 768};
 			const int windowSize_1280_600[2] = { 1280, 600 };
-			const int windowSize_854_480[2] = { 854, 480 };
+
+			// preset aspect ratios
+			f32 windowAspect_16_9 = 16.0f / 9.0f;
 
 			// default window variables
 			int width = windowSize_854_480[0];
 			int height = windowSize_854_480[1];
+			f32 aspectRatio = windowAspect_16_9;
 			bool isFullscreen = false;
+
 		} // end anon namespace
 
 		extern GLFWwindow* ptr;

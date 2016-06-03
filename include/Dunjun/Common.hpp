@@ -1,6 +1,8 @@
 #ifndef DUNJUN_COMMON_HPP // ifndef checks if this macro has been defined
 #define DUNJUN_COMMON_HPP // if not then define it
 
+#include <Dunjun/Config.hpp>
+
 // undef these for internal math library
 #ifdef min
 #undef min
@@ -31,6 +33,7 @@
 #include <sstream>
 #include <stack>
 #include <stdexcept>
+#include <string>
 //#include <typeindex> // SceneNode.hpp
 //#include <typeinfo> // SceneNode.hpp
 #include <vector>
@@ -76,6 +79,7 @@ namespace Dunjun
 		return to;
 	}
 
+	std::string resourcePath();
 } // END namespace Dunjun
 
 #endif

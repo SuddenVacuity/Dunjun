@@ -1,7 +1,7 @@
 #ifndef DUNJUN_RENDERER_HPP
 #define DUNJUN_RENDERER_HPP
 
-#include <Dunjun/Scene/Lighting.hpp>
+#include <Dunjun/ResourceHolder_objects.hpp>
 
 namespace Dunjun
 {
@@ -40,21 +40,17 @@ namespace Dunjun
 		inline void createGBuffer(u32 w, u32 h)
 		{
 			if (m_gBuffer == nullptr)
-			{
-				m_gBuffer = make_unique<GBuffer>();
-			}
+				m_gBuffer = new GBuffer();
 
 			m_gBuffer->create(w, h);
 		}
 
-		inline GBuffer& getGBuffer()
+		inline GBuffer* getGBuffer()
 		{
 			if(m_gBuffer == nullptr)
-			{
 				createGBuffer(Window::width, Window::height);
-			}
 
-			return *m_gBuffer.get();
+			return m_gBuffer;
 		}
 
 		void deferredGeometryPass();
@@ -66,9 +62,6 @@ namespace Dunjun
 		//void setUniforms(const Transform& t);
 
 		const Camera* camera = nullptr;
-
-		const ShaderProgram* geometryPassShaders = nullptr;
-		const ShaderProgram* pointLightShaders = nullptr;
 
 		const Mesh* quad;
 
@@ -82,8 +75,7 @@ namespace Dunjun
 		const ShaderProgram* m_currentShaders = nullptr;
 
 		const Texture* m_currentTexture = nullptr;
-		std::unique_ptr<GBuffer> m_gBuffer = nullptr;
-
+		GBuffer* m_gBuffer = nullptr;
 
 		bool isCurrentShaders(const ShaderProgram* shaders);
 		bool isCurrentTexture(const Texture* texture);

@@ -1,7 +1,7 @@
 #ifndef DUNJUN_READONLY_HPP
 #define DUNJUN_READONLY_HPP 
 
-#include <Dunjun/Types.hpp>
+#include <Dunjun/ResourceHolder.hpp>
 
 namespace Dunjun   
 {

@@ -63,7 +63,7 @@ namespace Dunjun
 		width = (GLfloat)image.width;
 		height = (GLfloat)image.height;
 
-		glGenTextures(1, &m_object);
+		//glGenTextures(1, &m_object);
 		glBindTexture(GL_TEXTURE_2D, m_object);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, static_cast<GLint>(wrapMode)); // set the s axis (x) to repeat
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, static_cast<GLint>(wrapMode)); // set the t axis (y) to repeat
@@ -94,7 +94,8 @@ namespace Dunjun
 
 	Texture::~Texture()
 	{
-		glDeleteTextures(1, &m_object);
+		if(m_object)
+			glDeleteTextures(1, &m_object);
 	}
 
 	void Texture::bind(const Texture* tex, GLuint position)

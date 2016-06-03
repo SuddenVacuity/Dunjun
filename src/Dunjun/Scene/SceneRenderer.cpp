@@ -1,6 +1,5 @@
 
 #include <Dunjun/Scene/SceneRenderer.hpp>
-
 #include <Dunjun/Scene/MeshRenderer.hpp>
 
 namespace Dunjun
@@ -122,25 +121,31 @@ namespace Dunjun
 		std::sort(std::begin(modelInstances), std::end(modelInstances),
 			[](const ModelInstance& a, const ModelInstance& b) -> bool
 		{
-			const auto& A = a.asset->material;
-			const auto& B = b.asset->material;
+			const auto* A = a.asset->material;
+			const auto* B = b.asset->material;
 
 			// if same shaders sort by texture else sort by shader
-			if (A->shaders == B->shaders)
-				return A->diffuseMap < B->diffuseMap;
-			else
+			if( A != B && A && B)
+			{
+				if (A->shaders == B->shaders)
+					return A->diffuseMap < B->diffuseMap;
+				else
 				return A->shaders < B->shaders;
+			}
+			return false;
 		});
 
-		GBuffer::bind(&getGBuffer());
+		auto& shaders = g_shaderHolder.get("deferredGeometryPass");
+
+		GBuffer::bind(getGBuffer());
 		{
-			glViewport(0, 0, getGBuffer().width, getGBuffer().height);
+			glViewport(0, 0, getGBuffer()->width, getGBuffer()->height);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-			geometryPassShaders->use();
+			shaders.use();
 
-			geometryPassShaders->setUniform("u_camera", camera->getMatrix()); // shaderprogram.cpp
-			geometryPassShaders->setUniform("u_cameraPosition", camera->transform.position); // shaderprogram.cpp
+			shaders.setUniform("u_camera", camera->getMatrix()); // shaderprogram.cpp
+			shaders.setUniform("u_cameraPosition", camera->transform.position); // shaderprogram.cpp
 
 			for (const auto& inst : modelInstances)
 			{
@@ -152,35 +157,35 @@ namespace Dunjun
 				const Material& material = *inst.asset->material;
 				//const PointLight* light = pointLights[0];
 
-				geometryPassShaders->setUniform("u_material.diffuseMap", (u32)0); // shaderprogram.cpp
-				geometryPassShaders->setUniform("u_material.diffuseColor", material.diffuseColor); // shaderprogram.cpp
-				geometryPassShaders->setUniform("u_material.specularColor", material.specularColor); // shaderprogram.cpp
-				geometryPassShaders->setUniform("u_material.specularExponent", material.specularExponent); // shaderprogram.cpp
+				shaders.setUniform("u_material.diffuseMap", (u32)0); // shaderprogram.cpp
+				shaders.setUniform("u_material.diffuseColor", material.diffuseColor); // shaderprogram.cpp
+				shaders.setUniform("u_material.specularColor", material.specularColor); // shaderprogram.cpp
+				shaders.setUniform("u_material.specularExponent", material.specularExponent); // shaderprogram.cpp
 
 				setTexture(inst.asset->material->diffuseMap, 0);
 
-				geometryPassShaders->setUniform("u_transform", inst.transform); // shaderprogram.cpp
+				shaders.setUniform("u_transform", inst.transform); // shaderprogram.cpp
 
 				draw(inst.asset->mesh);
 			}
 			glFlush();
 		}
-		GBuffer::unbind(&getGBuffer());
+		GBuffer::bind(nullptr);
 	} // end deferredGeometryPass()
 
 	void SceneRenderer::deferredLightPass()
 	{
-		assert(pointLightShaders != nullptr);
-
 		if(lightingTexture == nullptr)
 			lightingTexture = make_unique<RenderTexture>();
 
-		lightingTexture->create(getGBuffer().width, getGBuffer().height, RenderTexture::Color);
+		lightingTexture->create(getGBuffer()->width, getGBuffer()->height, RenderTexture::Color);
 
-		Texture::bind(&getGBuffer().diffuse,  0);
-		Texture::bind(&getGBuffer().specular, 1);
-		Texture::bind(&getGBuffer().normal,   2);
-		Texture::bind(&getGBuffer().depth,    3);
+		auto& shaders = g_shaderHolder.get("deferredPointLight");
+
+		Texture::bind(&getGBuffer()->diffuse,  0);
+		Texture::bind(&getGBuffer()->specular, 1);
+		Texture::bind(&getGBuffer()->normal,   2);
+		Texture::bind(&getGBuffer()->depth,    3);
 
 		RenderTexture::bind(lightingTexture.get());
 		{
@@ -188,14 +193,14 @@ namespace Dunjun
 			glViewport(0, 0, lightingTexture->width, lightingTexture->height);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-			pointLightShaders->use();
+			shaders.use();
 
-			pointLightShaders->setUniform("u_diffuse",  0);
-			pointLightShaders->setUniform("u_specular", 1);
-			pointLightShaders->setUniform("u_normal",   2);
-			pointLightShaders->setUniform("u_depth",    3);
+			shaders.setUniform("u_diffuse",  0);
+			shaders.setUniform("u_specular", 1);
+			shaders.setUniform("u_normal",   2);
+			shaders.setUniform("u_depth",    3);
 
-			pointLightShaders->setUniform("u_cameraInverse", inverse(camera->getMatrix()));
+			shaders.setUniform("u_cameraInverse", inverse(camera->getMatrix()));
 
 			for(const PointLight* light : pointLights)
 			{
@@ -207,14 +212,14 @@ namespace Dunjun
 				lightIntensities.b = light->color.b / 255.0f;
 				lightIntensities *= light->brightness;
 
-				pointLightShaders->setUniform("u_light.position", light->position); // shaderprogram.cpp
-				pointLightShaders->setUniform("u_light.intensities", lightIntensities); // shaderprogram.cpp
-
-				pointLightShaders->setUniform("u_light.attenuation.constant", light->attenuation.constant); // shaderprogram.cpp
-				pointLightShaders->setUniform("u_light.attenuation.linear", light->attenuation.linear); // shaderprogram.cpp
-				pointLightShaders->setUniform("u_light.attenuation.quadratic", light->attenuation.quadratic); // shaderprogram.cpp
-
-				pointLightShaders->setUniform("u_light.range", light->range); // shaderprogram.cpp
+				shaders.setUniform("u_light.position", light->position); // shaderprogram.cpp
+				shaders.setUniform("u_light.intensities", lightIntensities); // shaderprogram.cpp
+			
+				shaders.setUniform("u_light.attenuation.constant", light->attenuation.constant); // shaderprogram.cpp
+				shaders.setUniform("u_light.attenuation.linear", light->attenuation.linear); // shaderprogram.cpp
+				shaders.setUniform("u_light.attenuation.quadratic", light->attenuation.quadratic); // shaderprogram.cpp
+		
+				shaders.setUniform("u_light.range", light->range); // shaderprogram.cpp
 
 				glDepthMask(GL_FALSE);
 				glEnable(GL_BLEND);
@@ -225,7 +230,7 @@ namespace Dunjun
 				glDisable(GL_BLEND);
 				glDepthMask(GL_TRUE);
 			}
-			pointLightShaders->stopUsing();
+			shaders.stopUsing();
 		}
 		RenderTexture::unbind(lightingTexture.get());
 	} // end deferredLightPass()

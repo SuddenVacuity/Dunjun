@@ -3,9 +3,6 @@
 
 #include <Dunjun/Mesh.hpp>
 
-#include <map>
-#include <string>
-
 namespace Dunjun
 {
 	enum class ShaderType

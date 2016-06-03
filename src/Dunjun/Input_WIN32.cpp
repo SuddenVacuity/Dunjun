@@ -1,9 +1,12 @@
 
+#include <Dunjun/Config.hpp>
+#ifdef DUNJUN_SYSTEM_WINDOWS
 #include <Dunjun/Input.hpp>
 
-#define WINDOWS_MEAN_AND_LEAN // FIXME: remove Windows.h
-#define WINDOWS_LEAN_AND_MEAN // FIXME: remove Windows.h
-#include <Windows.h>		  // FIXME: remove Windows.h
+#define VC_EXTRALEAN
+#define WIN32_MEAN_AND_LEAN // FIXME: remove Windows.h
+#define WIN32_LEAN_AND_MEAN // FIXME: remove Windows.h
+#include <Windows.h>		// FIXME: remove Windows.h
 
 // this is using Windows 7 - XINPUT9_1_0.LIB
 // change in Linker -> Input -> Additional Dependencies
@@ -389,3 +392,4 @@ namespace Dunjun
 
 	} // end Input
 } // end Dunjun
+#endif
