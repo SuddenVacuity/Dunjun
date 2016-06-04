@@ -10,6 +10,10 @@ namespace Dunjun
 	class ResourceHolder
 	{
 	public:
+		using IdentifierType = Identifier;
+		using ResourceType = Resource;
+
+
 		void insert(Identifier id, std::unique_ptr<Resource> resource)
 		{
 			auto inserted = m_resources.insert(std::make_pair(id, std::move(resource)));
@@ -37,17 +41,27 @@ namespace Dunjun
 			return nullptr;
 		}
 
-
-		bool has(Identifier id)
+		std::unique_ptr<Resource> erase(Identifier id)
 		{
-			auto found = std::find_if(m_resources.begin(),
-				m_resources.end(),
-				[&resource](std::unique_ptr<Resource>& res)
-			{
-				return res.get();
-			});
+			auto found = m_resources.find(id);
 
 			if (found != m_resources.end())
+			{
+				auto result = std::move(*found);
+
+				m_resources.erase(found);
+
+				return result;
+			}
+			// resource not found
+			return nullptr;
+		}
+
+		bool exists(Identifier id)
+		{
+			auto found = m_resources.find(id);
+
+			if(found != m_resources.end();)
 				return true;
 
 			return false;

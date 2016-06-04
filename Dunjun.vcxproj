@@ -159,6 +159,8 @@
     </ProjectReference>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\Dunjun\Common_OSX.cpp" />
+    <ClCompile Include="src\Dunjun\Common_WIN32.cpp" />
     <ClCompile Include="src\Dunjun\ResourceHolders.cpp" />
     <ClCompile Include="src\Dunjun\GBuffer.cpp" />
     <ClCompile Include="src\Dunjun\Input_OSX.cpp" />

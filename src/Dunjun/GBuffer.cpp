@@ -5,12 +5,12 @@ namespace Dunjun
 {
 	GBuffer::GBuffer()
 	{
-		glGenFramebuffersEXT(1, &fbo);
 	}
 
 	GBuffer::~GBuffer()
 	{
-		glDeleteFramebuffersEXT(1, &fbo);
+		if(fbo)
+			glDeleteFramebuffersEXT(1, &fbo);
 	}
 
 
@@ -22,9 +22,12 @@ namespace Dunjun
 		width = w;
 		height = h;
 
+		if(!fbo)
+			glGenFramebuffersEXT(1, &fbo);
+
 		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo.data);
 
-		GLuint depthRenderBuffer;
+		GLuint depthRenderBuffer = 0;
 
 		glGenRenderbuffersEXT(1, &depthRenderBuffer);
 		glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, depthRenderBuffer);
@@ -40,12 +43,16 @@ namespace Dunjun
 
 		std::vector<GLenum> drawBuffers;
 
+		/* begin lambda */
 		auto addRT = [&drawBuffers, w, h](Texture& tex, 
 										  GLenum attachment, 
 										  GLint internalFormat, 
 										  GLenum format, 
 										  GLenum type)
 		{
+			if(!tex.m_object)
+				glGenTextures(1, &tex.m_object);
+
 			glBindTexture(GL_TEXTURE_2D, (GLuint)tex.m_object);
 
 			glTexImage2D(GL_TEXTURE_2D, 0, internalFormat,
@@ -66,7 +73,7 @@ namespace Dunjun
 
 			if(attachment != GL_DEPTH_ATTACHMENT_EXT)
 				drawBuffers.push_back(attachment);
-		};
+		};/* end lambda */	
 
 		addRT(diffuse,	GL_COLOR_ATTACHMENT0_EXT, GL_RGB8, GL_RGB, GL_UNSIGNED_BYTE);
 		addRT(specular, GL_COLOR_ATTACHMENT1_EXT, GL_RGBA8, GL_RGB, GL_UNSIGNED_BYTE);

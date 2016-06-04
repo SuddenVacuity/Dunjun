@@ -137,9 +137,9 @@ namespace Dunjun
 
 		auto& shaders = g_shaderHolder.get("deferredGeometryPass");
 
-		GBuffer::bind(getGBuffer());
+		GBuffer::bind(&gBuffer);
 		{
-			glViewport(0, 0, getGBuffer()->width, getGBuffer()->height);
+			glViewport(0, 0, gBuffer.width, gBuffer.height);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 			shaders.use();
@@ -175,22 +175,22 @@ namespace Dunjun
 
 	void SceneRenderer::deferredLightPass()
 	{
-		if(lightingTexture == nullptr)
-			lightingTexture = make_unique<RenderTexture>();
+		//if(lightingTexture == nullptr)
+		//	lightingTexture = make_unique<RenderTexture>();
 
-		lightingTexture->create(getGBuffer()->width, getGBuffer()->height, RenderTexture::Color);
+		lightingTexture.create(gBuffer.width, gBuffer.height, RenderTexture::Color);
 
 		auto& shaders = g_shaderHolder.get("deferredPointLight");
 
-		Texture::bind(&getGBuffer()->diffuse,  0);
-		Texture::bind(&getGBuffer()->specular, 1);
-		Texture::bind(&getGBuffer()->normal,   2);
-		Texture::bind(&getGBuffer()->depth,    3);
+		Texture::bind(&gBuffer.diffuse,  0);
+		Texture::bind(&gBuffer.specular, 1);
+		Texture::bind(&gBuffer.normal,   2);
+		Texture::bind(&gBuffer.depth,    3);
 
-		RenderTexture::bind(lightingTexture.get());
+		RenderTexture::bind(&lightingTexture);
 		{
 			glClearColor(0, 0, 0, 0);
-			glViewport(0, 0, lightingTexture->width, lightingTexture->height);
+			glViewport(0, 0, lightingTexture.width, lightingTexture.height);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 			shaders.use();
@@ -232,7 +232,7 @@ namespace Dunjun
 			}
 			shaders.stopUsing();
 		}
-		RenderTexture::unbind(lightingTexture.get());
+		RenderTexture::unbind(&lightingTexture);
 	} // end deferredLightPass()
 
 	//void SceneRenderer::setMaterial(const Material* material)

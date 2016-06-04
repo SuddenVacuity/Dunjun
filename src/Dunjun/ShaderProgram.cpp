@@ -39,7 +39,6 @@ namespace Dunjun
 			, isLinked(false)
 			, errorLog()
 		{
-			object = glCreateProgram(); // define m_object as shader the program
 		}
 
 		ShaderProgram::~ShaderProgram()

@@ -28,7 +28,6 @@ namespace Dunjun
 		, width(0)
 		, height(0)
 	{
-		glGenTextures(1, &m_object);
 	}
 	Texture::Texture(const Image& image,
 		TextureFilter minMagFilter,
@@ -62,6 +61,9 @@ namespace Dunjun
 
 		width = (GLfloat)image.width;
 		height = (GLfloat)image.height;
+
+		if(!m_object)
+			glGenTextures(1, &m_object);
 
 		//glGenTextures(1, &m_object);
 		glBindTexture(GL_TEXTURE_2D, m_object);
@@ -111,10 +113,7 @@ namespace Dunjun
 
 		glEnable(GL_TEXTURE_2D);
 
-		if (tex)
-			glBindTexture(GL_TEXTURE_2D, (tex->m_object ? tex->m_object : 0));
-		else
-			glBindTexture(GL_TEXTURE_2D, 0);
+		glBindTexture(GL_TEXTURE_2D, (tex && tex->m_object ? tex->m_object : 0));
 
 		glDisable(GL_TEXTURE_2D);
 	}

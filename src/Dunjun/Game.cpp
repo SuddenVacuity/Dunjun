@@ -119,106 +119,119 @@ namespace Dunjun
 		// File path for shader files and define and bind attributes
 		INTERNAL void loadShaders()
 		{
-			// defaultShader
-			{
-				auto shaders = make_unique<ShaderProgram>();
-				if (!shaders->attachShaderFromFile(Dunjun::ShaderType::Vertex, "data/shaders/default_vert.glsl")) // check if the file loaded
-					throw std::runtime_error(shaders->errorLog);
+			g_shaderHolder.insertFromFile("default", "data/shaders/default_vert.glsl", "data/shaders/default_frag.glsl");
+			g_shaderHolder.insertFromFile("texturePass", "data/shaders/texPass_vert.glsl", "data/shaders/texPass_frag.glsl");
+			g_shaderHolder.insertFromFile("deferredGeometryPass", "data/shaders/deferredGeometryPass_vert.glsl", "data/shaders/deferredGeometryPass_frag.glsl");
+			g_shaderHolder.insertFromFile("deferredPointLight", "data/shaders/deferredLightPass_vert.glsl", "data/shaders/deferredPointLightPass_frag.glsl");
 
-				if (!shaders->attachShaderFromFile(Dunjun::ShaderType::Fragment, "data/shaders/default_frag.glsl")) // check if the file loaded
-					throw std::runtime_error(shaders->errorLog);
-
-
-				shaders->bindAttribLocation((u32)AttribLocation::Position, "a_position"); // bind the position of 1st attribute in shaders
-				shaders->bindAttribLocation((u32)AttribLocation::TexCoord, "a_texCoord"); // bind the position of 3rd attribute in shaders
-				shaders->bindAttribLocation((u32)AttribLocation::Color, "a_color"); // bind the position of 2nd attribute in shaders
-				shaders->bindAttribLocation((u32)AttribLocation::Normal, "a_normal"); // bind the position of 2nd attribute in shaders
-
-				if (!shaders->link())
-					throw std::runtime_error(shaders->errorLog);
-
-				g_shaderHolder.insert("default", std::move(shaders));
-			}
-
-			// texPassShader
-			{
-				auto shaders = make_unique<ShaderProgram>();
-				if (!shaders->attachShaderFromFile(Dunjun::ShaderType::Vertex, "data/shaders/texPass_vert.glsl"))
-					throw std::runtime_error(shaders->errorLog);
-
-				if (!shaders->attachShaderFromFile(Dunjun::ShaderType::Fragment, "data/shaders/texPass_frag.glsl"))
-					throw std::runtime_error(shaders->errorLog);
-
-				shaders->bindAttribLocation((u32)AttribLocation::Position, "a_position");
-				shaders->bindAttribLocation((u32)AttribLocation::TexCoord, "a_texCoord");
-
-				if (!shaders->link())
-					throw std::runtime_error(shaders->errorLog);
-
-				g_shaderHolder.insert("texturePass", std::move(shaders));
-			}
-
-			// g_defferedGeometryPassShader
-			{
-				auto shaders = make_unique<ShaderProgram>();
-				if (!shaders->attachShaderFromFile(Dunjun::ShaderType::Vertex, "data/shaders/deferredGeometryPass_vert.glsl")) // check if the file loaded
-					throw std::runtime_error(shaders->errorLog);
-
-				if (!shaders->attachShaderFromFile(Dunjun::ShaderType::Fragment, "data/shaders/deferredGeometryPass_frag.glsl")) // check if the file loaded
-					throw std::runtime_error(shaders->errorLog);
-
-				shaders->bindAttribLocation((u32)AttribLocation::Position, "a_position"); // bind the position of 1st attribute in shaders
-				shaders->bindAttribLocation((u32)AttribLocation::TexCoord, "a_texCoord"); // bind the position of 3rd attribute in shaders
-				shaders->bindAttribLocation((u32)AttribLocation::Color, "a_color"); // bind the position of 2nd attribute in shaders
-				shaders->bindAttribLocation((u32)AttribLocation::Normal, "a_normal"); // bind the position of 2nd attribute in shaders
-
-				if (!shaders->link())
-					throw std::runtime_error(shaders->errorLog);
-
-				g_shaderHolder.insert("deferredGeometryPass", std::move(shaders));
-			}
-
-			// g_pointLightShader
-			{
-				auto shaders = make_unique<ShaderProgram>();
-				if (!shaders->attachShaderFromFile(Dunjun::ShaderType::Vertex, "data/shaders/deferredLightPass_vert.glsl")) // check if the file loaded
-					throw std::runtime_error(shaders->errorLog);
-
-				if (!shaders->attachShaderFromFile(Dunjun::ShaderType::Fragment, "data/shaders/deferredPointLightPass_frag.glsl")) // check if the file loaded
-					throw std::runtime_error(shaders->errorLog);
-
-				shaders->bindAttribLocation((u32)AttribLocation::Position, "a_position"); // bind the position of 1st attribute in shaders
-				shaders->bindAttribLocation((u32)AttribLocation::TexCoord, "a_texCoord"); // bind the position of 3rd attribute in shaders
-
-				if (!shaders->link())
-					throw std::runtime_error(shaders->errorLog);
-
-				g_shaderHolder.insert("deferredPointLight", std::move(shaders));
-			}
+	//
+	//		// defaultShader
+	//		{
+	//			auto shaders = make_unique<ShaderProgram>();
+	//			if (!shaders->attachShaderFromFile(Dunjun::ShaderType::Vertex, "data/shaders/default_vert.glsl")) // check if the file loaded
+	//				throw std::runtime_error(shaders->errorLog);
+	//
+	//			if (!shaders->attachShaderFromFile(Dunjun::ShaderType::Fragment, "data/shaders/default_frag.glsl")) // check if the file loaded
+	//				throw std::runtime_error(shaders->errorLog);
+	//			
+	//
+	//			shaders->bindAttribLocation((u32)AttribLocation::Position, "a_position"); // bind the position of 1st attribute in shaders
+	//			shaders->bindAttribLocation((u32)AttribLocation::TexCoord, "a_texCoord"); // bind the position of 3rd attribute in shaders
+	//			shaders->bindAttribLocation((u32)AttribLocation::Color, "a_color"); // bind the position of 2nd attribute in shaders
+	//			shaders->bindAttribLocation((u32)AttribLocation::Normal, "a_normal"); // bind the position of 2nd attribute in shaders
+	//
+	//			if (!shaders->link())
+	//				throw std::runtime_error(shaders->errorLog);
+	//
+	//			g_shaderHolder.insert("default", std::move(shaders));
+	//		}
+	//
+	//		// texPassShader
+	//		{
+	//			auto shaders = make_unique<ShaderProgram>();
+	//			if (!shaders->attachShaderFromFile(Dunjun::ShaderType::Vertex, "data/shaders/texPass_vert.glsl"))
+	//				throw std::runtime_error(shaders->errorLog);
+	//
+	//			if (!shaders->attachShaderFromFile(Dunjun::ShaderType::Fragment, "data/shaders/texPass_frag.glsl"))
+	//				throw std::runtime_error(shaders->errorLog);
+	//
+	//			shaders->bindAttribLocation((u32)AttribLocation::Position, "a_position");
+	//			shaders->bindAttribLocation((u32)AttribLocation::TexCoord, "a_texCoord");
+	//
+	//			if (!shaders->link())
+	//				throw std::runtime_error(shaders->errorLog);
+	//
+	//			g_shaderHolder.insert("texturePass", std::move(shaders));
+	//		}
+	//
+	//		// g_defferedGeometryPassShader
+	//		{
+	//			auto shaders = make_unique<ShaderProgram>();
+	//			if (!shaders->attachShaderFromFile(Dunjun::ShaderType::Vertex, "data/shaders/deferredGeometryPass_vert.glsl")) // check if the file loaded
+	//				throw std::runtime_error(shaders->errorLog);
+	//
+	//			if (!shaders->attachShaderFromFile(Dunjun::ShaderType::Fragment, "data/shaders/deferredGeometryPass_frag.glsl")) // check if the file loaded
+	//				throw std::runtime_error(shaders->errorLog);
+	//
+	//			shaders->bindAttribLocation((u32)AttribLocation::Position, "a_position"); // bind the position of 1st attribute in shaders
+	//			shaders->bindAttribLocation((u32)AttribLocation::TexCoord, "a_texCoord"); // bind the position of 3rd attribute in shaders
+	//			shaders->bindAttribLocation((u32)AttribLocation::Color, "a_color"); // bind the position of 2nd attribute in shaders
+	//			shaders->bindAttribLocation((u32)AttribLocation::Normal, "a_normal"); // bind the position of 2nd attribute in shaders
+	//
+	//			if (!shaders->link())
+	//				throw std::runtime_error(shaders->errorLog);
+	//
+	//			g_shaderHolder.insert("deferredGeometryPass", std::move(shaders));
+	//		}
+	//
+	//		// g_pointLightShader
+	//		{
+	//			auto shaders = make_unique<ShaderProgram>();
+	//			if (!shaders->attachShaderFromFile(Dunjun::ShaderType::Vertex, "data/shaders/deferredLightPass_vert.glsl")) // check if the file loaded
+	//				throw std::runtime_error(shaders->errorLog);
+	//
+	//			if (!shaders->attachShaderFromFile(Dunjun::ShaderType::Fragment, "data/shaders/deferredPointLightPass_frag.glsl")) // check if the file loaded
+	//				throw std::runtime_error(shaders->errorLog);
+	//
+	//			shaders->bindAttribLocation((u32)AttribLocation::Position, "a_position"); // bind the position of 1st attribute in shaders
+	//			shaders->bindAttribLocation((u32)AttribLocation::TexCoord, "a_texCoord"); // bind the position of 3rd attribute in shaders
+	//
+	//			if (!shaders->link())
+	//				throw std::runtime_error(shaders->errorLog);
+	//
+	//			g_shaderHolder.insert("deferredPointLight", std::move(shaders));
+	//		}
+	//
 		}
 
 		INTERNAL void loadMaterials()
 		{
-			{
-				auto tex = make_unique<Texture>();
-				tex->loadFromFile("data/textures/dunjunText.jpg");
-				g_textureHolder.insert("default", std::move(tex));
-			}
-			{
-				auto tex = make_unique<Texture>();
-				tex->loadFromFile("data/textures/dunjunText.jpg");
-				g_textureHolder.insert("dunjunText", std::move(tex));
-			}
-			{
-				auto tex = make_unique<Texture>();
-				tex->loadFromFile("data/textures/stone.png", TextureFilter::Nearest);
-				g_textureHolder.insert("stone", std::move(tex));
-			}
-			{
-				auto tex = make_unique<Texture>();
-				tex->loadFromFile("data/textures/terrain.png", TextureFilter::Nearest);
-				g_textureHolder.insert("terrain", std::move(tex));
-			}
+			g_textureHolder.insertFromFile("default", "data/textures/dunjunText.jpg");
+			g_textureHolder.insertFromFile("dunjunText", "data/textures/dunjunText.jpg");
+			g_textureHolder.insertFromFile("stone", "data/textures/stone.png");
+			g_textureHolder.insertFromFile("terrain", "data/textures/terrain.png", TextureFilter::Nearest);
+
+			//{
+			//	auto tex = make_unique<Texture>();
+			//	tex->loadFromFile("data/textures/dunjunText.jpg");
+			//	g_textureHolder.insert("default", std::move(tex));
+			//	g_textureHolder.insertFromFile("default", "d");
+			//}
+			//{
+			//	auto tex = make_unique<Texture>();
+			//	tex->loadFromFile("data/textures/dunjunText.jpg");
+			//	g_textureHolder.insert("dunjunText", std::move(tex));
+			//}
+			//{
+			//	auto tex = make_unique<Texture>();
+			//	tex->loadFromFile("data/textures/stone.png", TextureFilter::Nearest);
+			//	g_textureHolder.insert("stone", std::move(tex));
+			//}
+			//{
+			//	auto tex = make_unique<Texture>();
+			//	tex->loadFromFile("data/textures/terrain.png", TextureFilter::Nearest);
+			//	g_textureHolder.insert("terrain", std::move(tex));
+			//}
 
 			g_materials["default"].shaders = &g_shaderHolder.get("default"); // apply the default shader to sprite
 			g_materials["default"].diffuseMap = &g_textureHolder.get("default");
@@ -362,15 +375,15 @@ namespace Dunjun
 			}
 
 			// add lights
-			for(int i = 0; i < 50 ; i++)
+			for(int i = 0; i < 15 ; i++)
 			{
 				PointLight light;
 
 				Random r;
 
-				light.position.x = r.getFloat(-25.0f, 25.0f);
-				light.position.y = r.getFloat(-25.0f, 25.0f);
-				light.position.z = r.getFloat(-25.0f, 25.0f);
+				light.position.x = r.getFloat(-12.0f, 12.0f);
+				light.position.y = r.getFloat(-12.0f, 12.0f);
+				light.position.z = r.getFloat(-12.0f, 12.0f);
 
 				light.color.r = r.getInt(10, 255);
 				light.color.g = r.getInt(10, 255);
@@ -921,8 +934,8 @@ namespace Dunjun
 				Window::height = viewSize.y;
 				Window::aspectRatio = aspectRatio;
 
-				g_cameraPlayer.viewportAspectRatio = aspectRatio;
-				g_cameraWorld.viewportAspectRatio = aspectRatio;
+				//g_cameraPlayer.viewportAspectRatio = aspectRatio;
+				//g_cameraWorld.viewportAspectRatio = aspectRatio;
 			}
 
 			g_renderer.reset();
@@ -937,12 +950,12 @@ namespace Dunjun
 
 			g_renderer.quad = g_meshes["quad"];
 
-			g_renderer.createGBuffer(Window::width, Window::height);
+			g_renderer.gBuffer.create(Window::width, Window::height);
 
 			g_renderer.deferredGeometryPass();
 			g_renderer.deferredLightPass();
 
-			g_materials["dunjunText"].diffuseMap = &g_renderer.getGBuffer()->diffuse;
+			g_materials["dunjunText"].diffuseMap = &g_renderer.gBuffer.diffuse;
 
 			glViewport(0, 0, Window::width, Window::height);
 			glClearColor(0.02f, 0.02f, 0.02f, 1.0f); // set the default color (R,G,B,A)
@@ -952,7 +965,7 @@ namespace Dunjun
 			g_shaderHolder.get("texturePass").setUniform("u_tex", 0);
 			g_shaderHolder.get("texturePass").setUniform("u_scale", Vector3(1.0f));
 
-			Texture::bind(&g_renderer.lightingTexture->colorTexture, 0);
+			Texture::bind(&g_renderer.lightingTexture.colorTexture, 0);
 
 			g_renderer.draw(g_meshes["quad"]);
 
@@ -1065,7 +1078,7 @@ namespace Dunjun
 				render();
 
 				// framerate limiter
-				while (frameClock.getElapsedTime() < 1.0 / 240.0)
+				while (frameClock.getElapsedTime() < tickLimit)
 					;
 				frameClock.restart();
 

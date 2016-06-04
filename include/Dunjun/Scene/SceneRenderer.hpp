@@ -37,21 +37,21 @@ namespace Dunjun
 
 		//void renderAll();
 
-		inline void createGBuffer(u32 w, u32 h)
-		{
-			if (m_gBuffer == nullptr)
-				m_gBuffer = new GBuffer();
-
-			m_gBuffer->create(w, h);
-		}
-
-		inline GBuffer* getGBuffer()
-		{
-			if(m_gBuffer == nullptr)
-				createGBuffer(Window::width, Window::height);
-
-			return m_gBuffer;
-		}
+		//inline void createGBuffer(u32 w, u32 h)
+		//{
+		//	if (m_gBuffer == nullptr)
+		//		m_gBuffer = new GBuffer();
+		//
+		//	m_gBuffer->create(w, h);
+		//}
+		//
+		//inline GBuffer* getGBuffer()
+		//{
+		//	if(m_gBuffer == nullptr)
+		//		createGBuffer(Window::width, Window::height);
+		//
+		//	return m_gBuffer;
+		//}
 
 		void deferredGeometryPass();
 		void deferredLightPass();
@@ -61,11 +61,13 @@ namespace Dunjun
 
 		//void setUniforms(const Transform& t);
 
+		GBuffer gBuffer;
+
 		const Camera* camera = nullptr;
 
 		const Mesh* quad;
 
-		std::unique_ptr<RenderTexture> lightingTexture;
+		RenderTexture lightingTexture;
 
 		// cache of instances
 		std::deque<ModelInstance> modelInstances;
@@ -75,7 +77,6 @@ namespace Dunjun
 		const ShaderProgram* m_currentShaders = nullptr;
 
 		const Texture* m_currentTexture = nullptr;
-		GBuffer* m_gBuffer = nullptr;
 
 		bool isCurrentShaders(const ShaderProgram* shaders);
 		bool isCurrentTexture(const Texture* texture);
