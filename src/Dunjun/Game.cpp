@@ -34,8 +34,8 @@ namespace Dunjun
 
 	GLOBAL SceneRenderer g_renderer;
 
-	GLOBAL std::map<std::string, Material> g_materials;
-	GLOBAL std::map<std::string, Mesh*> g_meshes;
+	//GLOBAL std::map<std::string, Material> g_materials;
+	//GLOBAL std::map<std::string, Mesh*> g_meshes;
 
 	GLOBAL Level* g_level;
 
@@ -233,17 +233,43 @@ namespace Dunjun
 			//	g_textureHolder.insert("terrain", std::move(tex));
 			//}
 
-			g_materials["default"].shaders = &g_shaderHolder.get("default"); // apply the default shader to sprite
-			g_materials["default"].diffuseMap = &g_textureHolder.get("default");
+			{
+				auto mat = make_unique<Material>();
+				mat->shaders = &g_shaderHolder.get("default");
+				mat->diffuseMap = &g_textureHolder.get("default");
+				g_materialHolder.insert("default", std::move(mat));
+			}
+			{
+				auto mat = make_unique<Material>();
+				mat->shaders = &g_shaderHolder.get("deferredGeometryPass");
+				mat->diffuseMap = &g_textureHolder.get("dunjunText");
+				mat->specularExponent = 100000.0f;
+				g_materialHolder.insert("dunjunText", std::move(mat));
+			}
+			{
+				auto mat = make_unique<Material>();
+				mat->shaders = &g_shaderHolder.get("default");
+				mat->diffuseMap = &g_textureHolder.get("stone");
+				g_materialHolder.insert("stone", std::move(mat));
+			}
+			{
+				auto mat = make_unique<Material>();
+				mat->shaders = &g_shaderHolder.get("default");
+				mat->diffuseMap = &g_textureHolder.get("terrain");
+				g_materialHolder.insert("terrain", std::move(mat));
+			}
 
-			g_materials["dunjunText"].shaders = &g_shaderHolder.get("deferredGeometryPass"); // apply the default shader to sprite
-			g_materials["dunjunText"].diffuseMap = &g_textureHolder.get("dunjunText");
-
-			g_materials["stone"].shaders = &g_shaderHolder.get("default"); // apply the default shader to sprite
-			g_materials["stone"].diffuseMap = &g_textureHolder.get("stone");
-
-			g_materials["terrain"].shaders = &g_shaderHolder.get("default"); // apply the default shader to sprite
-			g_materials["terrain"].diffuseMap = &g_textureHolder.get("terrain");
+			//g_materials["default"].shaders = &g_shaderHolder.get("default"); // apply the default shader to sprite
+			//g_materials["default"].diffuseMap = &g_textureHolder.get("default");
+			//
+			//g_materials["dunjunText"].shaders = &g_shaderHolder.get("deferredGeometryPass"); // apply the default shader to sprite
+			//g_materials["dunjunText"].diffuseMap = &g_textureHolder.get("dunjunText");
+			//
+			//g_materials["stone"].shaders = &g_shaderHolder.get("default"); // apply the default shader to sprite
+			//g_materials["stone"].diffuseMap = &g_textureHolder.get("stone");
+			//
+			//g_materials["terrain"].shaders = &g_shaderHolder.get("default"); // apply the default shader to sprite
+			//g_materials["terrain"].diffuseMap = &g_textureHolder.get("terrain");
 		}
 
 		/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -287,9 +313,10 @@ namespace Dunjun
 
 				meshData.generateNormals();
 
-				g_meshes["sprite"] = new Mesh(meshData);
+				g_meshHolder.insert("sprite", make_unique<Mesh>(meshData));
+				//g_meshes["sprite"] = new Mesh(meshData);
 
-				g_sprite.mesh = g_meshes["sprite"];
+				g_sprite.mesh = &g_meshHolder.get("sprite");
 			}
 
 			{
@@ -320,7 +347,8 @@ namespace Dunjun
 
 				meshData.generateNormals();
 
-				g_meshes["quad"] = new Mesh(meshData);
+				g_meshHolder.insert("quad", make_unique<Mesh>(meshData));
+				//g_meshes["quad"] = new Mesh(meshData);
 			}
 		}
 
@@ -348,9 +376,9 @@ namespace Dunjun
 			{ // player scene node
 				SceneNode::u_ptr player = make_unique<SceneNode>();
 
-				player->transform.position = { 1.0f, 1.0f, 1.0f };
+				player->transform.position = { 2.5f, 1.0f, 2.5f };
 				player->transform.scale = { 2.0f, 2.0f, 2.0f };
-				g_sprite.material = &g_materials["dunjunText"]; // apply material
+				g_sprite.material = &g_materialHolder.get("dunjunText"); // apply material
 				player->name = "player";
 
 				player->addComponent<MeshRenderer>(g_sprite);
@@ -364,7 +392,7 @@ namespace Dunjun
 			{ // level generation
 				auto level = make_unique<Level>();
 
-				level->material = &g_materials["terrain"];
+				level->material = &g_materialHolder.get("terrain");
 				level->name = "level";
 
 				level->generate();
@@ -375,26 +403,29 @@ namespace Dunjun
 			}
 
 			// add lights
-			for(int i = 0; i < 15 ; i++)
 			{
-				PointLight light;
+			PointLight light;
 
-				Random r;
+				light.color = defaultWhite;
+				light.brightness = 20.0f;
+				light.position = { 0.0f, -300.0f, 0.0f };
+				g_lights.push_back(light);
 
-				light.position.x = r.getFloat(-12.0f, 12.0f);
-				light.position.y = r.getFloat(-12.0f, 12.0f);
-				light.position.z = r.getFloat(-12.0f, 12.0f);
+				light.color = defaultRed;
+				light.brightness = 5.0f;
+				light.position = { 3.0f, 0.5f, 3.0f };
+				g_lights.push_back(light);
 
-				light.color.r = r.getInt(10, 255);
-				light.color.g = r.getInt(10, 255);
-				light.color.b = r.getInt(10, 255);
+				light.color = defaultBlue;
+				light.brightness = 5.0f;
+				light.position = { 2.5f, 0.5f, 2.0f };
+				g_lights.push_back(light);
 
-				light.brightness = 3.0f;
-
+				light.color = defaultGreen;
+				light.brightness = 5.0f;
+				light.position = { 2.0f, 0.5f, 3.0f };
 				g_lights.push_back(light);
 			}
-			g_lights[0].color = defaultWhite;
-			g_lights[0].brightness = 20.0f;
 
 			{
 				//Initialize camera
@@ -599,7 +630,7 @@ namespace Dunjun
 				{ // test level generation
 					auto level = make_unique<Level>();
 
-					level->material = &g_materials["terrain"];
+					level->material = &g_materialHolder.get("terrain");
 					level->name = "level";
 					level->generate();
 
@@ -726,7 +757,7 @@ namespace Dunjun
 					{ // test level generation
 						auto level = make_unique<Level>();
 
-						level->material = &g_materials["terrain"];
+						level->material = &g_materialHolder.get("terrain");
 						level->name = "level";
 						level->generate();
 
@@ -948,14 +979,14 @@ namespace Dunjun
 
 			g_renderer.camera = g_currentCamera;
 
-			g_renderer.quad = g_meshes["quad"];
+			//g_renderer.quad = g_meshes["quad"];
 
 			g_renderer.gBuffer.create(Window::width, Window::height);
 
 			g_renderer.deferredGeometryPass();
 			g_renderer.deferredLightPass();
 
-			g_materials["dunjunText"].diffuseMap = &g_renderer.gBuffer.diffuse;
+			g_materialHolder.get("dunjunText").diffuseMap = &g_renderer.gBuffer.diffuse;
 
 			glViewport(0, 0, Window::width, Window::height);
 			glClearColor(0.02f, 0.02f, 0.02f, 1.0f); // set the default color (R,G,B,A)
@@ -967,7 +998,7 @@ namespace Dunjun
 
 			Texture::bind(&g_renderer.lightingTexture.colorTexture, 0);
 
-			g_renderer.draw(g_meshes["quad"]);
+			g_renderer.draw(&g_meshHolder.get("quad"));
 
 			Window::swapBuffers(); // switches information between the front buffer and the back buffer
 		}
@@ -1087,8 +1118,8 @@ namespace Dunjun
 
 		void cleanUp()
 		{
-			for(auto& mesh : g_meshes)
-				delete mesh.second;
+			//for(auto& mesh : g_meshes)
+			//	delete mesh.second;
 
 			Input::cleanup();
 			Window::cleanup();

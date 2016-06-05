@@ -17,7 +17,7 @@ struct PointLight
 	float range;
 };
 
-uniform sampler2D u_diffuse;
+//uniform sampler2D u_diffuse;
 uniform sampler2D u_specular;
 uniform sampler2D u_normal;
 uniform sampler2D u_depth;
@@ -68,7 +68,7 @@ vec4 calculatePointLight(vec3 surfaceToLight, float distanceToLight, vec3 normal
 
 void main()
 {
-	vec3 diffuseColor = texture2D(u_diffuse, v_texCoord).rgb;
+	//vec3 diffuseColor = texture2D(u_diffuse, v_texCoord).rgb;
 	vec3 specularColor = texture2D(u_specular, v_texCoord).rgb;
 	vec3 normalEncoded = texture2D(u_normal, v_texCoord).xyz;
 	float depth = texture2D(u_depth, v_texCoord).r;
@@ -82,5 +82,6 @@ void main()
 	vec4 lightColor = calculatePointLight(surfaceToLight, distanceToLight, normal);
 
 	vec3 gamma = vec3(1.0f / 2.2f);
-	gl_FragColor = vec4(pow(diffuseColor.rgb * lightColor.rgb, gamma), 1.0f);
+	gl_FragColor = vec4(pow(lightColor.rgb, gamma), 1.0f);
+	//gl_FragColor = vec4(pow(diffuseColor.rgb * lightColor.rgb, gamma), 1.0f);
 }

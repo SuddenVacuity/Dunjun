@@ -15,7 +15,8 @@ namespace Dunjun
 
 	RenderTexture::~RenderTexture()
 	{
-		glDeleteFramebuffersEXT(1, &fbo);
+		if(fbo)
+			glDeleteFramebuffersEXT(1, &fbo);
 	}
 
 	bool RenderTexture::create(u32 w, u32 h, TextureType t, TextureFilter minMagFilter, TextureWrapMode wrapMode)
@@ -53,9 +54,20 @@ namespace Dunjun
 
 			glBindTexture(GL_TEXTURE_2D, (GLuint)colorTexture.m_object);
 
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 
+			// light
+			if(type.data & Light)
+			{
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F,
+						(GLsizei)width, (GLsizei)height,
+						0, GL_RGBA, GL_FLOAT, 0);
+			}
+			else
+			{
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, 
 						 (GLsizei)width, (GLsizei)height, 
 						 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
+			}
+
 
 			colorTexture.width = width;
 			colorTexture.height = height;
@@ -75,7 +87,9 @@ namespace Dunjun
 				glGenTextures(1, &depthTexture.m_object);
 
 			glBindTexture(GL_TEXTURE_2D, (GLuint)depthTexture.m_object);
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, (GLsizei)width, (GLsizei)height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, 
+						(GLsizei)width, (GLsizei)height, 
+						0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
 
 			depthTexture.width = width;
 			depthTexture.height = height;
@@ -85,14 +99,14 @@ namespace Dunjun
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, (GLenum)wrapMode);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, (GLenum)wrapMode);
 
-			glFramebufferTextureEXT(GL_FRAMEBUFFER_EXT, 
-									GL_DEPTH_ATTACHMENT_EXT, 
-									depthTexture.m_object, 0);
+			glFramebufferTextureEXT(GL_FRAMEBUFFER_EXT,
+				GL_DEPTH_ATTACHMENT_EXT,
+				depthTexture.m_object, 0);
 		}
 
 		std::vector<GLenum> drawBuffers;
 
-		if (type.data & Color)
+		if (type.data & Color || type.data & Light)
 			drawBuffers.push_back(GL_COLOR_ATTACHMENT0_EXT);
 		if (type.data & Depth)
 			drawBuffers.push_back(GL_DEPTH_ATTACHMENT_EXT);
@@ -115,16 +129,18 @@ namespace Dunjun
 
 	void RenderTexture::bind(const RenderTexture* rt)
 	{
-		//glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, rt ? rt->fbo.data : 0);
+		if(!rt)
+			glFlush();
+
 		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, rt != nullptr ? rt->fbo : 0);
 	}
 
-	void RenderTexture::unbind(const RenderTexture* rt)
-	{
-		glFlush();
-		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
-	}
-
+	//void RenderTexture::unbind(const RenderTexture* rt)
+	//{
+	//	glFlush();
+	//	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+	//}
+	
 	//void RenderTexture::bindTexture(TextureType t, GLuint position) const
 	//{
 	//	if (position > 31)

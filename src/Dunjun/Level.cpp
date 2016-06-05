@@ -35,16 +35,28 @@ namespace Dunjun
 		if(0)
 			m_random.setSeed(142);
 
-		// 
+//#define DUNJUN_DEBUG_LEVEL // TODO: remove this for a preset test level
+#ifdef DUNJUN_DEBUG_LEVEL
+		// TODO: FIX: player doesn't line up with even/odd numbers correctly
+		const u32 levelSizeX = 5;
+		const u32 levelSizeY = 10;
+		const u32 levelSizeZ = 5;
+#else
 		// TODO: FIX: player doesn't line up with even/odd numbers correctly
 		const u32 levelSizeX = 50;
-		const u32 levelSizeY = 5;
+		const u32 levelSizeY = 8;
 		const u32 levelSizeZ = 50;
+#endif
 
 		//this large an area causes overflow when regenerating rooms
 		//const u32 levelSizeX = 305;
 		//const u32 levelSizeY = 11;
 		//const u32 levelSizeZ = 305;
+
+		// center of the level : used to center level in the world
+		f32 levelCenterOffsetX = levelSizeX / 2.0f;
+		f32 levelCenterOffsetY = levelSizeY / 2.0f;
+		f32 levelCenterOffsetZ = levelSizeZ / 2.0f;
 
 		// set room count range
 		// on average generates ~400 rooms in a 60*5*60 area with very high minRoom value
@@ -61,25 +73,23 @@ namespace Dunjun
 		bool testEnableWalls = true;
 		bool testEnableDoors = false;
 
-		// initialize grid as true for testing
-		bool testEnableRandomWalk = true;
-		if(0)
-		{
+// initialize grid as true for testing
+bool testEnableRandomWalk = true;
+#ifdef DUNJUN_DEBUG_LEVEL
 		for (int i = 0; i < levelSizeX; i++)
 			for (int j = 0; j < levelSizeY; j++)
 				for (int k = 0; k < levelSizeZ; k++)
-					grid[i][j][k] = true;
+				{
+					if(j > levelCenterOffsetY - 1)
+						grid[i][j][k] = true; // levelsize = {5, 10, 5} for a 125 room cube
+				}
 		testEnableRandomWalk = false;
-		}
+#endif
 
 		const Room::Size roomSize(5, 4, 5);
 
 		// number of steps take in each loop
 		const u32 numSteps = 10;
-		// center of the level : used to center level in the world
-		f32 levelCenterOffsetX = levelSizeX / 2.0f;
-		f32 levelCenterOffsetY = levelSizeY / 2.0f;
-		f32 levelCenterOffsetZ = levelSizeZ / 2.0f;
 
 		// starting point
 		u32 startX = levelCenterOffsetX;

@@ -178,7 +178,7 @@ namespace Dunjun
 		//if(lightingTexture == nullptr)
 		//	lightingTexture = make_unique<RenderTexture>();
 
-		lightingTexture.create(gBuffer.width, gBuffer.height, RenderTexture::Color);
+		lightingTexture.create(gBuffer.width, gBuffer.height, RenderTexture::Light);
 
 		auto& shaders = g_shaderHolder.get("deferredPointLight");
 
@@ -225,14 +225,14 @@ namespace Dunjun
 				glEnable(GL_BLEND);
 				glBlendFunc(GL_ONE, GL_ONE);
 
-				draw(quad);
+				draw(&g_meshHolder.get("quad"));
 
 				glDisable(GL_BLEND);
 				glDepthMask(GL_TRUE);
 			}
 			shaders.stopUsing();
 		}
-		RenderTexture::unbind(&lightingTexture);
+		RenderTexture::bind(nullptr);
 	} // end deferredLightPass()
 
 	//void SceneRenderer::setMaterial(const Material* material)

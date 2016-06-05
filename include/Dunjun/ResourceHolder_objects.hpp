@@ -79,10 +79,13 @@ namespace Dunjun
 	};
 
 	using MeshHolder = ResourceHolder<Mesh, std::string>;
+	using MaterialHolder = ResourceHolder<Material, std::string>;
+
 
 	extern TextureHolder g_textureHolder;
 	extern ShaderHolder g_shaderHolder;
 	extern MeshHolder g_meshHolder;
+	extern MaterialHolder g_materialHolder;
 } // end Dunjun
 
 #endif

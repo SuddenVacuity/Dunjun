@@ -13,6 +13,7 @@ namespace Dunjun
 			Color = 1,
 			Depth = 2,
 			ColorAndDepth = Color | Depth,
+			Light = 4 | Color,
 		};
 
 		RenderTexture();
@@ -27,7 +28,7 @@ namespace Dunjun
 		//void flush();
 
 		GLOBAL void bind(const RenderTexture* rt);
-		GLOBAL void unbind(const RenderTexture* rt);
+		//GLOBAL void unbind(const RenderTexture* rt);
 
 		//void bindTexture(TextureType t, GLuint position) const;
 

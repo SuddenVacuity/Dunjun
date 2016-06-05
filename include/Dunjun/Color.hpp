@@ -34,7 +34,10 @@ namespace Dunjun
 	};
 	
 	const Color defaultWhite(0xFFFFFFFF);
-	const Color defaultOrange(0xFF7F00FF); // orange
+	const Color defaultRed(0xFF0000FF);
+	const Color defaultBlue(0x00FF00FF);
+	const Color defaultGreen(0x0000FFFF); 
+	const Color defaultOrange(0xFF7F00FF);
 
 
 	//

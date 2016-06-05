@@ -12,6 +12,7 @@ namespace Dunjun
 		f32 quadratic = 1.0f;
 	};
 
+	// TODO: fix light fall off: it doens't fall off at the same rate on y axis as on the others
 	struct PointLight
 	{
 		Vector3 position = {0, 0, 0};

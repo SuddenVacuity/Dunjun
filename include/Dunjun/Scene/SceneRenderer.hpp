@@ -65,8 +65,6 @@ namespace Dunjun
 
 		const Camera* camera = nullptr;
 
-		const Mesh* quad;
-
 		RenderTexture lightingTexture;
 
 		// cache of instances
