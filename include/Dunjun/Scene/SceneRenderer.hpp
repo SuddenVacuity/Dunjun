@@ -34,6 +34,7 @@ namespace Dunjun
 
 		void addModelInstance(const MeshRenderer& meshRenderer, Transform t);
 		void addPointLight(const PointLight* light);
+		void addDirectionalLight(const DirectionalLight* light);
 
 		//void renderAll();
 
@@ -70,11 +71,16 @@ namespace Dunjun
 		// cache of instances
 		std::deque<ModelInstance> modelInstances;
 		std::deque<const PointLight*> pointLights;
+		std::deque<const DirectionalLight*> directionalLights;
 	private:
 		const Material* m_currentMaterial = nullptr;
 		const ShaderProgram* m_currentShaders = nullptr;
 
 		const Texture* m_currentTexture = nullptr;
+
+		void renderAmbientLight();
+		void renderDirectionalLights();
+		void renderPointLights();
 
 		bool isCurrentShaders(const ShaderProgram* shaders);
 		bool isCurrentTexture(const Texture* texture);

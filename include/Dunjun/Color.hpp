@@ -9,11 +9,10 @@ namespace Dunjun
 	{
 		GLOBAL const u32 COLOR_DEPTH = 256;
 
-
-		Color(u8 r, u8 b, u8 g, u8 a = 0xFF)
+		Color(u8 r, u8 g, u8 b, u8 a = 0xFF)
 			: r(r)
-			, b(b)
 			, g(g)
+			, b(b)
 			, a(a)
 		{
 		}
@@ -32,63 +31,60 @@ namespace Dunjun
 			u8 r, g, b, a;
 		};
 	};
-	
-	const Color defaultWhite(0xFFFFFFFF);
-	const Color defaultRed(0xFF0000FF);
-	const Color defaultBlue(0x00FF00FF);
-	const Color defaultGreen(0x0000FFFF); 
-	const Color defaultOrange(0xFF7F00FF);
 
+	namespace ColorLib
+	{
+		// Mix two colors evenly.
+		Color mix(Color c1, Color c2)
+		{
+			return{ (c1.r + c2.r) / 2,
+					(c1.g + c2.g) / 2,
+					(c1.b + c2.b) / 2,
+					(c1.a + c2.a) / 2 };
+		}
 
-	//
-	//Color ratioColor(f32 red, f32 green, f32 blue, f32 lightness, f32 alpha)
-	//{
-	//	f32 num = red + blue + green;
-	//
-	//	f32 color[3] = { red, green, blue };
-	//
-	//	f32 l = lightness;
-	//	f32 a = alpha;
-	//
-	//	// check values are valid
-	//	if(l > 1.00000000f)
-	//		l = 1.00000000f;
-	//	else if (l < 0.00000000f)
-	//		l = 0.00000000f;
-	//
-	//	if(a > 1.00000000f)
-	//		a = 1.00000000f;
-	//	else if (a < 0.00000000f)
-	//		a = 0.00000000f;
-	//
-	//	 for (int i = 0; i < 3; i++)
-	//		 if(color[i] < 0.00000000f)
-	//			 color[i] = 0.00000000f;
-	//
-	//	// start making color
-	//	if(num > 0)
-	//	{
-	//		color[0] = (red / num) * 255;
-	//		color[1] = (green / num) * 255;
-	//		color[2] = (blue / num) * 255;
-	//	}		
-	//	else
-	//	{
-	//		color[0] = 255;
-	//		color[1] = 255;
-	//		color[2] = 255;
-	//	}
-	//
-	//	color[0] = (color[0] * lightness);
-	//	color[1] = (color[1] * lightness);
-	//	color[2] = (color[2] * lightness);
-	//
-	//	a = a * 255;
-	//
-	//	return {(u8)color[0], (u8)color[1], (u8)color[2], (u8)a};
-	//}
-	//
+		// Mix two colors by ratio.
+		// Ratio range: 0.0f, 1.0f
+		// less effiecient than evenly mixing
+		// use when many mixes would be needed to reach desired result
+		Color mix(Color c1, Color c2, f32 ratio)
+		{
+			assert(!(ratio < Constants::ZERO || ratio > Constants::ONE));
 
-}
+			f32 r2 = 1.0f - ratio;
+
+			return{ (ratio * c1.r + r2 * c2.r) / 2,
+					(ratio * c1.g + r2 * c2.g) / 2,
+					(ratio * c1.b + r2 * c2.b) / 2,
+					(ratio * c1.a + r2 * c2.a) / 2 };
+		}
+
+	const Color White(0xFFFFFFFF);
+	const Color Grey (0x7F7F7FFF);
+	const Color Black(0x000000FF);
+
+	const Color Red  (0xFF0000FF);
+	const Color Blue (0x00FF00FF);
+	const Color Green(0x0000FFFF); 
+
+	const Color Yellow  (0xFFFF00FF);
+	const Color Magenta (0xFF00FFFF);
+	const Color Cyan	(0x00FFFFFF);
+
+	const Color Orange = mix(Red, Yellow);	   // 0xFF7F00 FF
+	const Color Rose   = mix(Red, Magenta);	   // 0xFF007F FF
+	const Color Acid   = mix(Green, Yellow);   // 0x7FFF00 FF
+	const Color Spring = mix(Green, Cyan);	   // 0x00FF7F FF
+	const Color Purple = mix(Blue, Magenta);   // 0x7F00FF FF
+	const Color Azure  = mix(Blue, Cyan);	   // 0x007FFF FF
+											   // 
+	const Color Pink  = mix(Red, White);	   // 0xFF7F7F FF
+	const Color Mint  = mix(Green, White);	   // 0x7FFF7F FF
+	const Color Berry = mix(Blue, White);	   // 0x7F7FFF FF
+											   // 
+	const Color Brown = mix(Orange, Black);	   // 0x7F4000 FF
+
+	} // end ColorLib
+} // end Dunjun
 
 #endif

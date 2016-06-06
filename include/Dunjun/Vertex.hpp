@@ -9,7 +9,7 @@ namespace Dunjun
 	{
 		Vector3 position = {0, 0, 0};
 		Vector2 texCoord = {0, 0};
-		Color color = Color(defaultWhite);
+		Color color = ColorLib::White;
 		Vector3 normal = {0, 0, 0};
 
 		Vertex() = default;

@@ -30,7 +30,8 @@ namespace Dunjun
 	GLOBAL SceneNode g_rootNode;
 	GLOBAL SceneNode* g_player;
 
-	GLOBAL std::vector<PointLight> g_lights;
+	GLOBAL std::vector<PointLight> g_pointLights;
+	GLOBAL std::vector<DirectionalLight> g_directionalLights;
 
 	GLOBAL SceneRenderer g_renderer;
 
@@ -122,7 +123,9 @@ namespace Dunjun
 			g_shaderHolder.insertFromFile("default", "data/shaders/default_vert.glsl", "data/shaders/default_frag.glsl");
 			g_shaderHolder.insertFromFile("texturePass", "data/shaders/texPass_vert.glsl", "data/shaders/texPass_frag.glsl");
 			g_shaderHolder.insertFromFile("deferredGeometryPass", "data/shaders/deferredGeometryPass_vert.glsl", "data/shaders/deferredGeometryPass_frag.glsl");
+			g_shaderHolder.insertFromFile("deferredAmbientLight", "data/shaders/deferredLightPass_vert.glsl", "data/shaders/deferredAmbientLightPass_frag.glsl");
 			g_shaderHolder.insertFromFile("deferredPointLight", "data/shaders/deferredLightPass_vert.glsl", "data/shaders/deferredPointLightPass_frag.glsl");
+			g_shaderHolder.insertFromFile("deferredDirectionalLight", "data/shaders/deferredLightPass_vert.glsl", "data/shaders/deferredDirectionalLightPass_frag.glsl");
 
 	//
 	//		// defaultShader
@@ -402,29 +405,34 @@ namespace Dunjun
 				g_rootNode.attachChild(std::move(level));
 			}
 
-			// add lights
+			// add point lights
 			{
 			PointLight light;
 
-				light.color = defaultWhite;
-				light.brightness = 20.0f;
+				light.setIntensities(ColorLib::White, 20.0f);
 				light.position = { 0.0f, -300.0f, 0.0f };
-				g_lights.push_back(light);
+				g_pointLights.push_back(light);
 
-				light.color = defaultRed;
-				light.brightness = 5.0f;
+				light.setIntensities(ColorLib::Red, 5.0f);
 				light.position = { 3.0f, 0.5f, 3.0f };
-				g_lights.push_back(light);
+				g_pointLights.push_back(light);
 
-				light.color = defaultBlue;
-				light.brightness = 5.0f;
+				light.setIntensities(ColorLib::Blue, 5.0f);
 				light.position = { 2.5f, 0.5f, 2.0f };
-				g_lights.push_back(light);
+				g_pointLights.push_back(light);
 
-				light.color = defaultGreen;
-				light.brightness = 5.0f;
+				light.setIntensities(ColorLib::Green, 5.0f);
 				light.position = { 2.0f, 0.5f, 3.0f };
-				g_lights.push_back(light);
+				g_pointLights.push_back(light);
+			}
+
+			// add directional lights
+			{
+				DirectionalLight light;
+
+				light.setIntensities(ColorLib::Orange, 0.5f);
+				light.direction = Vector3(-0.8, -1.0, -0.2);
+				g_directionalLights.push_back(light);
 			}
 
 			{
@@ -744,7 +752,7 @@ namespace Dunjun
 
 				if (Input::isGamepadButtonPressed(Input::Gamepad_1, Input::XboxButton::A))
 				{
-					g_lights[0].position = g_cameraWorld.transform.position;
+					g_pointLights[0].position = g_cameraWorld.transform.position;
 				}
 
 				// level regeneration button
@@ -974,7 +982,9 @@ namespace Dunjun
 
 			g_renderer.addSceneGraph(g_rootNode);
 
-			for(const auto& light : g_lights)
+			for (const auto& light : g_directionalLights)
+				g_renderer.addDirectionalLight(&light);
+			for (const auto& light : g_pointLights)
 				g_renderer.addPointLight(&light);
 
 			g_renderer.camera = g_currentCamera;

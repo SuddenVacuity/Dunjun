@@ -267,5 +267,7 @@
     <None Include="data\shaders\deferredLightPass_vert.glsl" />
     <None Include="data\shaders\deferredGeometryPass_frag.glsl" />
     <None Include="data\shaders\deferredGeometryPass_vert.glsl" />
+    <None Include="data\shaders\deferredDirectionalLightPass_frag.glsl" />
+    <None Include="data\shaders\deferredAmbientLightPass_frag.glsl" />
   </ItemGroup>
 </Project>
