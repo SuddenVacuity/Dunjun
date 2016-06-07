@@ -7,25 +7,73 @@
 
 namespace Dunjun
 {
+	std::vector<std::string> split(const std::string& s, char delim)
+	{
+		std::vector<std::string> elems;
+
+		const char* cstr = s.c_str();
+		size_t strLength = s.length();
+		size_t start = 0;
+		size_t end = 0;
+
+		while (end <= strLength)
+		{
+			while (end <= strLength)
+			{
+				if(cstr[end] == delim)
+					break;
+				end++;
+			}
+			elems.emplace_back(s.substr(start, end - start));
+			start = end + 1;
+			end = start;
+		}
+
+
+		return elems;
+	}
+
 	INTERNAL std::string stringFromFile(const std::string& filename) // function used to import strings from external files into code at compile
 	{
 		std::ifstream file; // declare a file stream
-		file.open(filename.c_str(), std::ios::in | std::ios::binary); // tell to open file.c_str()(to be defined later)
+		file.open(std::string(BaseDirectories::Shaders + filename.c_str()), std::ios::in | std::ios::binary); // tell to open file.c_str()(to be defined later)
 																	  // and to take input fromm the file
+		std::string fileDirectory = getFileDirectory(filename) + "/";
 
 		std::string output; // declares string output
 		std::string line; // declares string line
 
 		if (!file.is_open()) // check if there was an error finding/opening the file
 		{
-			std::runtime_error(std::string("Failed to open file: ") + filename);
+			throwRuntimeError(std::string("Failed to open File :") + filename);
 		}
 		else
 		{
 			while (file.good()) // while file is open
 			{
 				getline(file, line); // get a line from the file and define line as the string
-				output.append(line + "\n"); // add a new line to the string line
+
+				if(line.find("#include") == std::string::npos)
+				{
+					output.append(line + "\n");
+				}
+				else
+				{
+					std::string includeFilename = split(line, ' ')[1];
+
+					if(includeFilename[0] == '<') // absolute path
+					{
+						includeFilename = includeFilename.substr(1, includeFilename.length() - 3);
+					}
+					else if (includeFilename[0] == '\"') // relative path
+					{
+						includeFilename = fileDirectory + includeFilename.substr(1, includeFilename.length() - 3);
+					}
+
+					std::string toAppend = stringFromFile(includeFilename);
+					output.append(toAppend + "\n");
+				}
+
 			}
 		}
 
@@ -68,7 +116,7 @@ namespace Dunjun
 			else if (type == ShaderType::Fragment)
 				shader = glCreateShader(GL_FRAGMENT_SHADER); // create the shader
 			else
-				throw std::runtime_error("Shader Type Unknown - ShaderProgram::attachShaderFromMemory()");
+				throwRuntimeError("Shader Type Unknown - ShaderProgram::attachShaderFromMemory()");
 
 			glShaderSource(shader, 1, &shaderSource, nullptr);
 			glCompileShader(shader);

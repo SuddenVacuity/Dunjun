@@ -8,12 +8,12 @@ namespace Dunjun
 	class TextureHolder : public ResourceHolder<Texture, std::string>
 	{
 	public:
-		bool insertFromFile(IdentifierType id, const char* filename,
+		bool insertFromFile(IdentifierType id, const std::string& filename,
 			TextureFilter minMagFilter = TextureFilter::Linear,
 			TextureWrapMode wrapMode = TextureWrapMode::ClampToEdge)
 		{
 			auto tex = make_unique<Texture>();
-			bool t = tex->loadFromFile(filename, minMagFilter, wrapMode);
+			bool t = tex->loadFromFile(BaseDirectories::Texture + filename, minMagFilter, wrapMode);
 
 			if(t == true)
 				insert(id, std::move(tex));

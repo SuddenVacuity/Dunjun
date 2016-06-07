@@ -32,7 +32,7 @@ namespace Dunjun
 			TextureFilter minMagFilter = TextureFilter::Linear,
 			TextureWrapMode wrapMode = TextureWrapMode::ClampToEdge);
 
-		bool loadFromFile(const char* filename,
+		bool loadFromFile(const std::string& filename,
 			TextureFilter minMagFilter = TextureFilter::Linear,
 			TextureWrapMode wrapMode = TextureWrapMode::ClampToEdge);
 

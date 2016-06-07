@@ -96,13 +96,10 @@ namespace Dunjun
 					Window::destroyWindow();
 					Window::ptr = w;
 				}
-
 				Window::makeContextCurrent();
-		
 				//glfwDestroyWindow(Window::ptr); // destroys old window
 				Window::swapInterval(1);
-		
-				//glInit();
+				glInit();
 			}
 		}
 
@@ -120,125 +117,33 @@ namespace Dunjun
 		// File path for shader files and define and bind attributes
 		INTERNAL void loadShaders()
 		{
-			g_shaderHolder.insertFromFile("default", "data/shaders/default_vert.glsl", "data/shaders/default_frag.glsl");
-			g_shaderHolder.insertFromFile("texturePass", "data/shaders/texPass_vert.glsl", "data/shaders/texPass_frag.glsl");
-			g_shaderHolder.insertFromFile("deferredGeometryPass", "data/shaders/deferredGeometryPass_vert.glsl", "data/shaders/deferredGeometryPass_frag.glsl");
-			g_shaderHolder.insertFromFile("deferredAmbientLight", "data/shaders/deferredLightPass_vert.glsl", "data/shaders/deferredAmbientLightPass_frag.glsl");
-			g_shaderHolder.insertFromFile("deferredPointLight", "data/shaders/deferredLightPass_vert.glsl", "data/shaders/deferredPointLightPass_frag.glsl");
-			g_shaderHolder.insertFromFile("deferredDirectionalLight", "data/shaders/deferredLightPass_vert.glsl", "data/shaders/deferredDirectionalLightPass_frag.glsl");
+			g_shaderHolder.insertFromFile("default", "default_vert.glsl", 
+													 "default_frag.glsl");
+			g_shaderHolder.insertFromFile("texturePass", "texPass_vert.glsl", 
+														 "texPass_frag.glsl");
+			g_shaderHolder.insertFromFile("deferredGeometryPass", "deferredGeometryPass_vert.glsl", 
+																  "deferredGeometryPass_frag.glsl");
+			g_shaderHolder.insertFromFile("deferredAmbientLight", "deferredLightPass_vert.glsl", 
+																  "deferredAmbientLightPass_frag.glsl");
+			g_shaderHolder.insertFromFile("deferredPointLight", "deferredLightPass_vert.glsl", 
+																"deferredPointLightPass_frag.glsl");
+			g_shaderHolder.insertFromFile("deferredDirectionalLight", "deferredLightPass_vert.glsl", 
+																	  "deferredDirectionalLightPass_frag.glsl");
 
-	//
-	//		// defaultShader
-	//		{
-	//			auto shaders = make_unique<ShaderProgram>();
-	//			if (!shaders->attachShaderFromFile(Dunjun::ShaderType::Vertex, "data/shaders/default_vert.glsl")) // check if the file loaded
-	//				throw std::runtime_error(shaders->errorLog);
-	//
-	//			if (!shaders->attachShaderFromFile(Dunjun::ShaderType::Fragment, "data/shaders/default_frag.glsl")) // check if the file loaded
-	//				throw std::runtime_error(shaders->errorLog);
-	//			
-	//
-	//			shaders->bindAttribLocation((u32)AttribLocation::Position, "a_position"); // bind the position of 1st attribute in shaders
-	//			shaders->bindAttribLocation((u32)AttribLocation::TexCoord, "a_texCoord"); // bind the position of 3rd attribute in shaders
-	//			shaders->bindAttribLocation((u32)AttribLocation::Color, "a_color"); // bind the position of 2nd attribute in shaders
-	//			shaders->bindAttribLocation((u32)AttribLocation::Normal, "a_normal"); // bind the position of 2nd attribute in shaders
-	//
-	//			if (!shaders->link())
-	//				throw std::runtime_error(shaders->errorLog);
-	//
-	//			g_shaderHolder.insert("default", std::move(shaders));
-	//		}
-	//
-	//		// texPassShader
-	//		{
-	//			auto shaders = make_unique<ShaderProgram>();
-	//			if (!shaders->attachShaderFromFile(Dunjun::ShaderType::Vertex, "data/shaders/texPass_vert.glsl"))
-	//				throw std::runtime_error(shaders->errorLog);
-	//
-	//			if (!shaders->attachShaderFromFile(Dunjun::ShaderType::Fragment, "data/shaders/texPass_frag.glsl"))
-	//				throw std::runtime_error(shaders->errorLog);
-	//
-	//			shaders->bindAttribLocation((u32)AttribLocation::Position, "a_position");
-	//			shaders->bindAttribLocation((u32)AttribLocation::TexCoord, "a_texCoord");
-	//
-	//			if (!shaders->link())
-	//				throw std::runtime_error(shaders->errorLog);
-	//
-	//			g_shaderHolder.insert("texturePass", std::move(shaders));
-	//		}
-	//
-	//		// g_defferedGeometryPassShader
-	//		{
-	//			auto shaders = make_unique<ShaderProgram>();
-	//			if (!shaders->attachShaderFromFile(Dunjun::ShaderType::Vertex, "data/shaders/deferredGeometryPass_vert.glsl")) // check if the file loaded
-	//				throw std::runtime_error(shaders->errorLog);
-	//
-	//			if (!shaders->attachShaderFromFile(Dunjun::ShaderType::Fragment, "data/shaders/deferredGeometryPass_frag.glsl")) // check if the file loaded
-	//				throw std::runtime_error(shaders->errorLog);
-	//
-	//			shaders->bindAttribLocation((u32)AttribLocation::Position, "a_position"); // bind the position of 1st attribute in shaders
-	//			shaders->bindAttribLocation((u32)AttribLocation::TexCoord, "a_texCoord"); // bind the position of 3rd attribute in shaders
-	//			shaders->bindAttribLocation((u32)AttribLocation::Color, "a_color"); // bind the position of 2nd attribute in shaders
-	//			shaders->bindAttribLocation((u32)AttribLocation::Normal, "a_normal"); // bind the position of 2nd attribute in shaders
-	//
-	//			if (!shaders->link())
-	//				throw std::runtime_error(shaders->errorLog);
-	//
-	//			g_shaderHolder.insert("deferredGeometryPass", std::move(shaders));
-	//		}
-	//
-	//		// g_pointLightShader
-	//		{
-	//			auto shaders = make_unique<ShaderProgram>();
-	//			if (!shaders->attachShaderFromFile(Dunjun::ShaderType::Vertex, "data/shaders/deferredLightPass_vert.glsl")) // check if the file loaded
-	//				throw std::runtime_error(shaders->errorLog);
-	//
-	//			if (!shaders->attachShaderFromFile(Dunjun::ShaderType::Fragment, "data/shaders/deferredPointLightPass_frag.glsl")) // check if the file loaded
-	//				throw std::runtime_error(shaders->errorLog);
-	//
-	//			shaders->bindAttribLocation((u32)AttribLocation::Position, "a_position"); // bind the position of 1st attribute in shaders
-	//			shaders->bindAttribLocation((u32)AttribLocation::TexCoord, "a_texCoord"); // bind the position of 3rd attribute in shaders
-	//
-	//			if (!shaders->link())
-	//				throw std::runtime_error(shaders->errorLog);
-	//
-	//			g_shaderHolder.insert("deferredPointLight", std::move(shaders));
-	//		}
-	//
 		}
 
 		INTERNAL void loadMaterials()
 		{
-			g_textureHolder.insertFromFile("default", "data/textures/dunjunText.jpg");
-			g_textureHolder.insertFromFile("dunjunText", "data/textures/dunjunText.jpg");
-			g_textureHolder.insertFromFile("stone", "data/textures/stone.png");
-			g_textureHolder.insertFromFile("terrain", "data/textures/terrain.png", TextureFilter::Nearest);
+			// load textures
+			g_textureHolder.insertFromFile("default", "dunjunText.jpg");
+			g_textureHolder.insertFromFile("dunjunText", "dunjunText.jpg");
+			g_textureHolder.insertFromFile("stone", "stone.png");
+			g_textureHolder.insertFromFile("terrain", "terrain.png", TextureFilter::Nearest);
 
-			//{
-			//	auto tex = make_unique<Texture>();
-			//	tex->loadFromFile("data/textures/dunjunText.jpg");
-			//	g_textureHolder.insert("default", std::move(tex));
-			//	g_textureHolder.insertFromFile("default", "d");
-			//}
-			//{
-			//	auto tex = make_unique<Texture>();
-			//	tex->loadFromFile("data/textures/dunjunText.jpg");
-			//	g_textureHolder.insert("dunjunText", std::move(tex));
-			//}
-			//{
-			//	auto tex = make_unique<Texture>();
-			//	tex->loadFromFile("data/textures/stone.png", TextureFilter::Nearest);
-			//	g_textureHolder.insert("stone", std::move(tex));
-			//}
-			//{
-			//	auto tex = make_unique<Texture>();
-			//	tex->loadFromFile("data/textures/terrain.png", TextureFilter::Nearest);
-			//	g_textureHolder.insert("terrain", std::move(tex));
-			//}
-
+			// load materials
 			{
 				auto mat = make_unique<Material>();
-				mat->shaders = &g_shaderHolder.get("default");
+				mat->shaders = &g_shaderHolder.get("deferredGeometryPass");
 				mat->diffuseMap = &g_textureHolder.get("default");
 				g_materialHolder.insert("default", std::move(mat));
 			}
@@ -251,28 +156,16 @@ namespace Dunjun
 			}
 			{
 				auto mat = make_unique<Material>();
-				mat->shaders = &g_shaderHolder.get("default");
+				mat->shaders = &g_shaderHolder.get("deferredGeometryPass");
 				mat->diffuseMap = &g_textureHolder.get("stone");
 				g_materialHolder.insert("stone", std::move(mat));
 			}
 			{
 				auto mat = make_unique<Material>();
-				mat->shaders = &g_shaderHolder.get("default");
+				mat->shaders = &g_shaderHolder.get("deferredGeometryPass");
 				mat->diffuseMap = &g_textureHolder.get("terrain");
 				g_materialHolder.insert("terrain", std::move(mat));
 			}
-
-			//g_materials["default"].shaders = &g_shaderHolder.get("default"); // apply the default shader to sprite
-			//g_materials["default"].diffuseMap = &g_textureHolder.get("default");
-			//
-			//g_materials["dunjunText"].shaders = &g_shaderHolder.get("deferredGeometryPass"); // apply the default shader to sprite
-			//g_materials["dunjunText"].diffuseMap = &g_textureHolder.get("dunjunText");
-			//
-			//g_materials["stone"].shaders = &g_shaderHolder.get("default"); // apply the default shader to sprite
-			//g_materials["stone"].diffuseMap = &g_textureHolder.get("stone");
-			//
-			//g_materials["terrain"].shaders = &g_shaderHolder.get("default"); // apply the default shader to sprite
-			//g_materials["terrain"].diffuseMap = &g_textureHolder.get("terrain");
 		}
 
 		/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -351,7 +244,6 @@ namespace Dunjun
 				meshData.generateNormals();
 
 				g_meshHolder.insert("quad", make_unique<Mesh>(meshData));
-				//g_meshes["quad"] = new Mesh(meshData);
 			}
 		}
 
@@ -487,10 +379,6 @@ namespace Dunjun
 			// test scene node
 			//SceneNode* playerPtr = g_rootNode.findChildByName("player");
 			g_rootNode.update(dt);
-
-			//ModelInstance &player = g_instances[0];
-			//g_instances[0].transform.position.x = Math::sin(3.0f * Input::getTime());
-			//g_instances[0].transform.position.z = Math::cos(3.0f * Input::getTime());
 
 			f32 camVel = 20.0f; // multiplier for camera speed
 			f32 playerVelX = 5.5f;

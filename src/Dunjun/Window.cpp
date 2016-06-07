@@ -28,7 +28,7 @@ namespace Dunjun
 			}
 
 			glfwMakeContextCurrent(Window::ptr); // set the context for the window
-			//glfwSwapInterval(1);
+			glfwSwapInterval(1);
 
 			glfwSetErrorCallback(errorCallback);
 

@@ -29,7 +29,7 @@ namespace Dunjun
 		Image& operator=(const Image& other);
 		~Image(); // 
 
-		bool loadFromFile(const char* filename); // get the name of the file to be loaded
+		bool loadFromFile(const std::string& filename); // get the name of the file to be loaded
 		bool loadFromImage(u32 width, u32 height, ImageFormat format, const u8* pixels); // load info from memory
 
 		u8* getPixel(u32 column, u32 row) const; // make function and vairables to get a pixel from a specific spot

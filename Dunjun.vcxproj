@@ -159,6 +159,7 @@
     </ProjectReference>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\Dunjun\Common.cpp" />
     <ClCompile Include="src\Dunjun\Common_OSX.cpp" />
     <ClCompile Include="src\Dunjun\Common_WIN32.cpp" />
     <ClCompile Include="src\Dunjun\ResourceHolders.cpp" />
@@ -243,6 +244,8 @@
     <ClInclude Include="include\Dunjun\Window.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="data\shaders\light_head.glsl" />
+    <None Include="data\shaders\common_head.glsl" />
     <None Include="data\shaders\default_frag.glsl" />
     <None Include="data\shaders\default_vert.glsl" />
     <None Include="data\shaders\deferredAmbientLightPass_frag.glsl" />
@@ -251,8 +254,10 @@
     <None Include="data\shaders\deferredPointLightPass_frag.glsl" />
     <None Include="data\shaders\deferredGeometryPass_frag.glsl" />
     <None Include="data\shaders\deferredGeometryPass_vert.glsl" />
+    <None Include="data\shaders\material_head.glsl" />
     <None Include="data\shaders\texPass_frag.glsl" />
     <None Include="data\shaders\texPass_vert.glsl" />
+    <None Include="data\shaders\transform_head.glsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

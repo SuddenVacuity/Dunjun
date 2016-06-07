@@ -1,43 +1,11 @@
 #version 120
 
-struct Material
-{
-	sampler2D diffuseMap;
-	vec4 diffuseColor;
+#include <_head_material.glsl>
 
-	vec4 specularColor;
-	float specularExponent;
-};
+#include <_head_light.glsl>
 
-struct Attenuation
-{
-	float constant;
-	float linear;
-	float quadratic;
-};
+#include <_head_transform.glsl>
 
-struct PointLight
-{
-	vec3 position;
-	vec3 intensities; // color * brightness
-
-	Attenuation attenuation;
-
-	float range;
-};
-
-struct Transform
-{
-	vec3 position;
-	vec4 orientation;
-	vec3 scale;
-};
-
-vec3 quaternionRotate(vec4 q, vec3 v)
-{
-	vec3 t = 2.0 * cross(q.xyz, v);
-	return (v + q.w * t + cross(q.xyz, t));
-}
 uniform vec3 u_cameraPosition;
 uniform Transform u_transform; // transform function
 
@@ -72,7 +40,7 @@ void main()
 	// diffuse light
 	float diffuseCoefficient = max(0.0f, dot(normal, surfaceToLight));
 
-	vec3 diffuse = diffuseCoefficient * u_light.intensities.rgb;
+	vec3 diffuse = diffuseCoefficient * u_light.base.intensities.rgb;
 
 	// ambient light
 	vec3 ambient = vec3(0.001f, 0.001f, 0.001f);
@@ -91,7 +59,7 @@ void main()
 		specularCoefficient = pow(cosTheta, u_material.specularExponent); // increase 2nd value to sharpen reflection
 	}
 
-	vec3 specular = specularCoefficient * u_light.intensities.rgb * u_material.specularColor.rgb; // last value is specular color
+	vec3 specular = specularCoefficient * u_light.base.intensities.rgb * u_material.specularColor.rgb; // last value is specular color
 
 // end calculate light
 	float attenuation = (u_light.attenuation.constant + 

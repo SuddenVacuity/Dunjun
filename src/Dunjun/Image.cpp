@@ -43,10 +43,10 @@ namespace Dunjun
 			delete[] pixels; // if so delete them
 	}
 
-	bool Image::loadFromFile(const char* filename) // load info from a file
+	bool Image::loadFromFile(const std::string& filename) // load info from a file
 	{
 		int w, h, f; // declair variables to receive
-		u8* p = stbi_load(filename, &w, &h, &f, 0); // load them using stb library
+		u8* p = stbi_load(filename.c_str(), &w, &h, &f, 0); // load them using stb library
 
 			if (!p) // if there are no pixels error
 				{

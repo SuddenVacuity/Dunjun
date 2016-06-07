@@ -80,6 +80,19 @@ namespace Dunjun
 	}
 
 	std::string resourcePath();
+	std::string getFileDirectory(const std::string& filepath);
+
+	inline void throwRuntimeError(const std::string& str)
+	{
+		std::cerr << str.c_str() << std::endl;
+		std::runtime_error(str.c_str());
+	}
+
+	namespace BaseDirectories
+	{
+		extern const std::string Shaders;
+		extern const std::string Texture;
+	} // end BaseDirectories
 } // END namespace Dunjun
 
 #endif

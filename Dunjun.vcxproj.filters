@@ -257,6 +257,9 @@
     <ClCompile Include="src\Dunjun\Common_OSX.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\Dunjun\Common.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="data\shaders\default_vert.glsl" />
@@ -269,5 +272,9 @@
     <None Include="data\shaders\deferredGeometryPass_vert.glsl" />
     <None Include="data\shaders\deferredDirectionalLightPass_frag.glsl" />
     <None Include="data\shaders\deferredAmbientLightPass_frag.glsl" />
+    <None Include="data\shaders\common_head.glsl" />
+    <None Include="data\shaders\transform_head.glsl" />
+    <None Include="data\shaders\material_head.glsl" />
+    <None Include="data\shaders\light_head.glsl" />
   </ItemGroup>
 </Project>

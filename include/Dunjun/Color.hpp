@@ -34,13 +34,15 @@ namespace Dunjun
 
 	namespace ColorLib
 	{
+		namespace
+		{
 		// Mix two colors evenly.
 		Color mix(Color c1, Color c2)
 		{
-			return{ (c1.r + c2.r) / 2,
-					(c1.g + c2.g) / 2,
-					(c1.b + c2.b) / 2,
-					(c1.a + c2.a) / 2 };
+			return{ static_cast<u8>((c1.r + c2.r) / 2),
+					static_cast<u8>((c1.g + c2.g) / 2),
+					static_cast<u8>((c1.b + c2.b) / 2),
+					static_cast<u8>((c1.a + c2.a) / 2) };
 		}
 
 		// Mix two colors by ratio.
@@ -53,10 +55,10 @@ namespace Dunjun
 
 			f32 r2 = 1.0f - ratio;
 
-			return{ (ratio * c1.r + r2 * c2.r) / 2,
-					(ratio * c1.g + r2 * c2.g) / 2,
-					(ratio * c1.b + r2 * c2.b) / 2,
-					(ratio * c1.a + r2 * c2.a) / 2 };
+			return{ static_cast<u8>((ratio * c1.r + r2 * c2.r) / 2),
+					static_cast<u8>((ratio * c1.g + r2 * c2.g) / 2),
+					static_cast<u8>((ratio * c1.b + r2 * c2.b) / 2),
+					static_cast<u8>((ratio * c1.a + r2 * c2.a) / 2) };
 		}
 
 	const Color White(0xFFFFFFFF);
@@ -83,7 +85,7 @@ namespace Dunjun
 	const Color Berry = mix(Blue, White);	   // 0x7F7FFF FF
 											   // 
 	const Color Brown = mix(Orange, Black);	   // 0x7F4000 FF
-
+	} // end anon namespace
 	} // end ColorLib
 } // end Dunjun
 

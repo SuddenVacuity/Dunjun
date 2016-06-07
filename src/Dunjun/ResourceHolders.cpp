@@ -1,5 +1,4 @@
 
-#include <Dunjun/Common.hpp>
 #include <Dunjun/ResourceHolder_objects.hpp>
 
 namespace Dunjun
