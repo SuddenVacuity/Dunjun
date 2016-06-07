@@ -1,17 +1,18 @@
 #ifndef DUNJUN_CONFIG_HPP
 #define DUNJUN_CONFIG_HPP
 
-#if defined(_WIN32)
+#if defined(_WIN32) || defined(_WIN64)
 // windows
 	#define DUNJUN_SYSTEM_WINDOWS
 	#ifndef NOMINMAX
 		#define NOMINMAX
 	#endif
 
-#elif defined(__APPLE__)
+#elif defined(__APPLE__) && defined(__MACH__)
 	#define DUNJUN_SYSTEM_OSX
 
 #elif defined(__unix__)
+	#define DUNJUN_SYSTEM_UNIX
 	#if defined(__linux__)
 		#define DUNJUN_SYSTEM_LINUX
 

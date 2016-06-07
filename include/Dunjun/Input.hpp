@@ -1,7 +1,7 @@
 #ifndef DUNJUN_INPUT_HPP
 #define DUNJUN_INPUT_HPP
 
-#include <Dunjun/Game.hpp>
+#include <Dunjun/Time.hpp>
 
 namespace Dunjun
 {
@@ -248,8 +248,8 @@ namespace Dunjun
 		)				.
 		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-		f64 getTime();
-		void setTime(f64 time);
+		Time getTime();
+		//void setTime(Time time);
 
 		/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 		)				.

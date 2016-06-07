@@ -16,7 +16,7 @@ namespace Dunjun
 		virtual ~NodeComponent() {}
 
 		virtual void onStart() {}
-		virtual void update(f32 dt) {}
+		virtual void update(Time dt) {}
 		virtual void draw(SceneRenderer& renderer, Transform t) const {}
 
 		SceneNode* parent = nullptr;

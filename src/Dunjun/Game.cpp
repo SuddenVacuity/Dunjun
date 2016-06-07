@@ -1,7 +1,6 @@
 
 
-//#include <Dunjun/Game.hpp> // included in Input.hpp
-#include <Dunjun/Input.hpp>
+#include <Dunjun/Game.hpp>
 
 
 namespace Dunjun
@@ -21,7 +20,7 @@ namespace Dunjun
 
 	namespace
 	{
-		GLOBAL const f32 TIME_STEP = 1.0f / 60.0f;
+		GLOBAL const Time TIME_STEP = seconds(1.0f / 60.0f);
 		GLOBAL bool g_running = true;
 	} // end anon namespace
 
@@ -374,7 +373,7 @@ namespace Dunjun
 		)				.
 		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-		INTERNAL void update(f32 dt)
+		INTERNAL void update(Time dt)
 		{
 			// test scene node
 			//SceneNode* playerPtr = g_rootNode.findChildByName("player");
@@ -389,8 +388,8 @@ namespace Dunjun
 			//  y and z are not multipling correctly when transform * transform
 			if(Input::isKeyPressed(Input::Key::T)) // test multipling transforms
 			{
-				g_parentTest.scale = g_parentTest.scale * (1.0f + 0.05f * dt);
-				g_parentTest.position += {0.2f * dt, 0.0f * dt, 0.0f * dt};
+				g_parentTest.scale = g_parentTest.scale * (1.0f + 0.05f * dt.asSeconds());
+				g_parentTest.position += {0.2f * dt.asSeconds(), 0.0f * dt.asSeconds(), 0.0f * dt.asSeconds()};
 				
 				g_player->transform = g_player->transform * g_parentTest;
 
@@ -551,8 +550,8 @@ namespace Dunjun
 				if (Math::abs(rts.y) < deadZone)
 					rts.y = 0;
 		
-				g_cameraWorld.offsetOrientation(lookSensitivityX * Radian(-rts.x * dt)
-										  , lookSensitivityY * Radian(rts.y * dt));
+				g_cameraWorld.offsetOrientation(lookSensitivityX * Radian(-rts.x * dt.asSeconds())
+										  , lookSensitivityY * Radian(rts.y * dt.asSeconds()));
 		
 				// gamepad camera translation
 				Vector2 lts = axes.leftThumbStick;
@@ -585,7 +584,7 @@ namespace Dunjun
 				if(length(camVelocityDirection) > 1.0f)
 					camVelocityDirection = normalize(camVelocityDirection);
 		
-				g_cameraWorld.transform.position += camVel * camVelocityDirection * dt;
+				g_cameraWorld.transform.position += camVel * camVelocityDirection * dt.asSeconds();
 		
 				// gamepad player movement
 				if (buttons[(size_t)Input::XboxButton::DpadUp])
@@ -698,7 +697,7 @@ namespace Dunjun
 					velocityDirection = normalize(velocityDirection);
 				{
 					// update player position
-					g_player->transform.position += Vector3{playerVelX, playerVelY, playerVelZ} * velocityDirection * dt;
+					g_player->transform.position += Vector3{playerVelX, playerVelY, playerVelZ} * velocityDirection * dt.asSeconds();
 
 					// update pplayer orientation
 #if 0 // BillBoard
@@ -765,9 +764,9 @@ namespace Dunjun
 					//	}
 					//}
 
-					g_cameraPlayer.transform.position.x = Math::lerp(g_cameraPlayer.transform.position.x, g_player->transform.position.x + 8.0f * 3.0f, 12.0f * dt);
-					g_cameraPlayer.transform.position.y = Math::lerp(g_cameraPlayer.transform.position.y, g_player->transform.position.y + 8.0f * 2.0f, 12.0f * dt);
-					g_cameraPlayer.transform.position.z = Math::lerp(g_cameraPlayer.transform.position.z, g_player->transform.position.z + 8.0f * 3.0f, 12.0f * dt);
+					g_cameraPlayer.transform.position.x = Math::lerp(g_cameraPlayer.transform.position.x, g_player->transform.position.x + 8.0f * 3.0f, 12.0f * dt.asSeconds());
+					g_cameraPlayer.transform.position.y = Math::lerp(g_cameraPlayer.transform.position.y, g_player->transform.position.y + 8.0f * 2.0f, 12.0f * dt.asSeconds());
+					g_cameraPlayer.transform.position.z = Math::lerp(g_cameraPlayer.transform.position.z, g_player->transform.position.z + 8.0f * 3.0f, 12.0f * dt.asSeconds());
 
 				}
 				// make player face the camera
@@ -962,12 +961,12 @@ namespace Dunjun
 
 			TickCounter tc;
 			Clock frameClock;
-			f32 tickLimit = 1.0f / 240.0f;
+			Time tickLimit = seconds(1.0f / 240.0f);
 
 			Clock deltaClock;
 
-			f64 accumulator = 0;
-			f64 prevTime = Input::getTime();
+			Time accumulator;
+			Time prevTime = Input::getTime();
 
 			while (g_running) // create a loop that works until the window closes
 			{
@@ -975,14 +974,14 @@ namespace Dunjun
 
 				Window::makeContextCurrent();
 
-				f64 currentTime = Input::getTime();
-				f64 dt = currentTime - prevTime;
+				Time currentTime = Input::getTime();
+				Time dt = currentTime - prevTime;
 				prevTime = currentTime;
 				accumulator += dt;
 
 				// limit accumulator size
-				if (accumulator > 1.2f)
-					accumulator = 1.2f;
+				if (accumulator > seconds(1.2f))
+					accumulator = seconds(1.2f);
 
 				// render update
 				while (accumulator >= TIME_STEP)
@@ -995,7 +994,7 @@ namespace Dunjun
 
 				}
 
-				if (tc.update(0.5))
+				if (tc.update(seconds(0.5)))
 				{
 					//std::cout << tc.getTickRate() << std::endl;
 					titleStream.str("");
@@ -1007,8 +1006,8 @@ namespace Dunjun
 				render();
 
 				// framerate limiter
-				while (frameClock.getElapsedTime() < tickLimit)
-					;
+				if (frameClock.getElapsedTime() < tickLimit)
+					sleep(tickLimit - frameClock.getElapsedTime());
 				frameClock.restart();
 
 			}

@@ -109,7 +109,7 @@ namespace Dunjun
 		}
 	}
 
-	void SceneNode::update(f32 dt)
+	void SceneNode::update(Time dt)
 	{
 		updateCurrent(dt);
 		updateChildren(dt);
@@ -176,12 +176,12 @@ namespace Dunjun
 			child->onStart();
 	}
 
-	void SceneNode::updateCurrent(f32 dt)
+	void SceneNode::updateCurrent(Time dt)
 	{
 		// Do nothing by default
 	}
 
-	void SceneNode::updateChildren(f32 dt)
+	void SceneNode::updateChildren(Time dt)
 	{
 		for (u_ptr& child : m_children)
 			child->update(dt);

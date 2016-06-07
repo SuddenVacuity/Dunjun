@@ -14,7 +14,7 @@ namespace Dunjun
 		{
 		}
 
-		virtual void update(f32 dt) override;
+		virtual void update(Time dt) override;
 
 		const Camera* camera;
 		Vector3 up;

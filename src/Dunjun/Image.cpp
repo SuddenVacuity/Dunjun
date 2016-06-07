@@ -4,7 +4,7 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb/stb_image.h>
 
-#include <iostream>
+//#include <iostream> // included in Common.hpp
 
 namespace Dunjun
 {

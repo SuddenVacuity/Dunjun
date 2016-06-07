@@ -51,7 +51,7 @@ namespace Dunjun
 		Transform getGlobalTransform() const;
 
 		void onStart();
-		void update(f32 dt);
+		void update(Time dt);
 
 		using ID = u64;
 		const ID id;
@@ -129,7 +129,7 @@ namespace Dunjun
 		}
 
 		template <class ComponentType>
-		NodeComponent& getComponent()
+		ComponentType& getComponent()
 		{
 			//auto c = getComponents<ComponentType>();
 			//
@@ -162,8 +162,8 @@ namespace Dunjun
 		virtual void onStartCurrent();
 		void onStartChildren();
 
-		virtual void updateCurrent(f32 dt);
-		void updateChildren(f32 dt);
+		virtual void updateCurrent(Time dt);
+		void updateChildren(Time dt);
 
 		virtual void drawCurrent(SceneRenderer& renderer, Transform t) const;
 		void drawChildren(SceneRenderer& renderer, Transform t) const;

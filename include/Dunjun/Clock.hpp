@@ -1,31 +1,37 @@
 #ifndef DUNJUN_CLOCK_HPP
 #define DUNJUN_CLOCK_HPP
 
-#include <Dunjun/Window.hpp>
+#include <Dunjun/Input.hpp>
+
+//#include <thread> // included in Common.hpp
 
 namespace Dunjun
 {
 	class Clock
 	{
 	public:
-		inline f64 getElapsedTime() const
+		inline Time getElapsedTime() const
 		{
-			return glfwGetTime() - m_startTime;
+			return Input::getTime() - m_startTime;
 		}
 
-		inline f64 restart()
+		inline Time restart()
 		{
-			f64 now = glfwGetTime();
-			f64 elapsed = now - m_startTime;
+			Time now = Input::getTime();
+			Time elapsed = now - m_startTime;
 			m_startTime = now;
 
 			return elapsed;
 		}
 
 	private:
-		f64 m_startTime = glfwGetTime();
+		Time m_startTime = Input::getTime();
 	};
 
+	inline void sleep(Time time)
+	{
+		std::this_thread::sleep_for(std::chrono::microseconds(time.asMicroseconds()));
+	}
 }
 
 #endif

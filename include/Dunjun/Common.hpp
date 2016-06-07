@@ -1,7 +1,7 @@
 #ifndef DUNJUN_COMMON_HPP // ifndef checks if this macro has been defined
 #define DUNJUN_COMMON_HPP // if not then define it
 
-#include <Dunjun/Config.hpp>
+#include <Dunjun/Types.hpp>
 
 // undef these for internal math library
 #ifdef min
@@ -18,7 +18,7 @@
 #include <cassert>
 #include <chrono>
 //#include <cmath> replaced by internal math library
-#include <cstdint>
+//#include <cstdint> no longer needed by Types.hpp
 #include <cstdlib>
 #include <deque> // SceneNode.hpp
 #include <functional>
@@ -34,6 +34,7 @@
 #include <stack>
 #include <stdexcept>
 #include <string>
+#include <thread>
 //#include <typeindex> // SceneNode.hpp
 //#include <typeinfo> // SceneNode.hpp
 #include <vector>

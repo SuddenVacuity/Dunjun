@@ -2,7 +2,7 @@
 #ifndef DUNJUN_RESOURCE_HOLDER_HPP
 #define DUNJUN_RESOURCE_HOLDER_HPP
 
-#include <Dunjun/Types.hpp>
+#include <Dunjun/Common.hpp>
 
 namespace Dunjun
 {

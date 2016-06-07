@@ -1,4 +1,3 @@
-
 #include <Dunjun/Config.hpp>
 #ifdef DUNJUN_SYSTEM_WINDOWS
 #include <Dunjun/Input.hpp>
@@ -269,14 +268,18 @@ namespace Dunjun
 		)				.
 		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-		f64 getTime()
+		Time getTime()
 		{
-			return glfwGetTime();
+			auto now = std::chrono::high_resolution_clock::now().time_since_epoch();
+
+			return microseconds(std::chrono::duration_cast
+								<std::chrono::microseconds>(now).count());
 		}
-		void setTime(f64 time)
-		{
-			glfwSetTime(time);
-		}
+
+		//void setTime(Time time)
+		//{
+		//	glfwSetTime(time);
+		//}
 
 		/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 		)				.
