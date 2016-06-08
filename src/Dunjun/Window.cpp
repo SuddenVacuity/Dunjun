@@ -14,37 +14,47 @@ namespace Dunjun
 		INTERNAL void errorCallback(int error, const char* description);
 		INTERNAL void windowRefreshCallback(GLFWwindow* window);
 
+		GLFWwindow* getHandle()
+		{
+			return ptr;
+		}
+
+		void setHandle(GLFWwindow* w)
+		{
+			ptr = w;
+		}
+
 		bool init()
 		{
 			if(!glfwInit())
 				return false;
 
-			Window::ptr = createWindow(nullptr);
+			setHandle(createWindow(nullptr, Window::width, Window::height));
 
-			if(!Window::ptr)
+			if(!getHandle())
 			{
 				glfwTerminate();
 				return false;
 			}
 
-			glfwMakeContextCurrent(Window::ptr); // set the context for the window
-			glfwSwapInterval(1);
+			//glfwMakeContextCurrent(getHandle()); // set the context for the window
+			//glfwSwapInterval(1);
+			makeContextCurrent();
 
 			glfwSetErrorCallback(errorCallback);
-
 
 			return true;
 		}
 
 		void cleanup()
 		{
-			glfwDestroyWindow(Window::ptr);
+			glfwDestroyWindow(getHandle());
 			glfwTerminate();
 		}
 
 		void destroyWindow()
 		{
-			glfwDestroyWindow(Window::ptr);
+			glfwDestroyWindow(getHandle());
 		}
 
 		void destroyWindow(GLFWwindow* windowPtr)
@@ -83,7 +93,7 @@ namespace Dunjun
 				Window::isFullscreen = false;
 			}
 
-			GLFWwindow* w = glfwCreateWindow(Window::width, Window::height, "Title: Dunjun!", monitor, Window::ptr);
+			GLFWwindow* w = glfwCreateWindow(Window::width, Window::height, "Title: Dunjun!", monitor, getHandle());
 
 			// set GLFW specific Callbacks
 			glfwSetFramebufferSizeCallback(w, framebufferSizeCallback);
@@ -126,7 +136,7 @@ namespace Dunjun
 				Window::isFullscreen = false;
 			}
 
-			GLFWwindow* w = glfwCreateWindow(Window::width, Window::height, "Title: Dunjun!", monitor, Window::ptr);
+			GLFWwindow* w = glfwCreateWindow(Window::width, Window::height, "Title: Dunjun!", monitor, getHandle());
 
 			// set GLFW specific Callbacks
 			glfwSetFramebufferSizeCallback(w, framebufferSizeCallback);
@@ -140,7 +150,7 @@ namespace Dunjun
 
 		void makeContextCurrent()
 		{
-			glfwMakeContextCurrent(Window::ptr);
+			glfwMakeContextCurrent(getHandle());
 		}
 
 		void swapInterval(int i)
@@ -150,7 +160,7 @@ namespace Dunjun
 
 		void swapBuffers()
 		{
-			glfwSwapBuffers(Window::ptr);
+			glfwSwapBuffers(getHandle());
 		}
 
 		void pollEvents()
@@ -171,9 +181,9 @@ namespace Dunjun
 		//
 		//}
 
-		void setTitle(const char* title)
+		void setTitle(const std::string& title)
 		{
-			glfwSetWindowTitle(Window::ptr, title);
+			glfwSetWindowTitle(getHandle(), title.c_str());
 		}
 
 		Vector2 getWindowSize()
@@ -186,24 +196,24 @@ namespace Dunjun
 			int width;
 			int height;
 			
-			glfwGetFramebufferSize(Window::ptr, &width, &height);
+			glfwGetFramebufferSize(getHandle(), &width, &height);
 			
 			return Vector2(width, height);
 		}
 
 		bool shouldClose()
 		{
-			return glfwWindowShouldClose(Window::ptr) == 1;
+			return glfwWindowShouldClose(getHandle()) == 1;
 		}
 
 		bool isInFocus()
 		{
-			return glfwGetWindowAttrib(Window::ptr, GLFW_FOCUSED) == 1;
+			return glfwGetWindowAttrib(getHandle(), GLFW_FOCUSED) == 1;
 		}
 
 		bool isIconified()
 		{
-			return glfwGetWindowAttrib(Window::ptr, GLFW_ICONIFIED) == 1;
+			return glfwGetWindowAttrib(getHandle(), GLFW_ICONIFIED) == 1;
 		}
 
 		// callback functions

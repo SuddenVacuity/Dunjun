@@ -21,7 +21,7 @@ namespace Dunjun
 		u32 getHeight() const;
 
 		//ReadOnly<GLuint, GBuffer> fbo;
-		GLuint getNativeHandle() const;
+		u32 getNativeHandle() const;
 
 		Texture diffuse;   // diffuse color rgb
 		Texture specular;  // specular color rbg + smoothness
@@ -33,7 +33,7 @@ namespace Dunjun
 		u32 m_width;
 		u32 m_height;
 
-		GLuint m_fbo;
+		u32 m_fbo;
 	};
 } // end Dunjun
 

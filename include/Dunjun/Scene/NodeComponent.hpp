@@ -11,7 +11,7 @@ namespace Dunjun
 	public:
 		using u_ptr = std::unique_ptr<NodeComponent>;
 
-		NodeComponent() = default;
+		//NodeComponent() = default;
 
 		virtual ~NodeComponent() {}
 

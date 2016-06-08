@@ -15,12 +15,24 @@ namespace Dunjun
 		Normal = 3,
 	};
 
+	enum class DrawType : GLenum
+	{
+		Points = GL_POINTS,
+		Lines = GL_LINES,
+		LineStrip = GL_LINE_STRIP,
+		LineLoop = GL_LINE_LOOP,
+		Triangles = GL_TRIANGLES,
+		TriangleStrip = GL_TRIANGLE_STRIP,
+		TriangleFan = GL_TRIANGLE_FAN,
+		// Quads = GL_QUADS,
+	};
+
 	class Mesh
 	{
 	public:
 		struct Data
 		{
-			GLenum drawType = GL_TRIANGLES;
+			DrawType drawType = DrawType::Triangles;
 
 			//std::vector<Vertex> vertices;
 			VertexArray vertices;
@@ -61,26 +73,27 @@ namespace Dunjun
 
 		void generate() const;
 
-		inline void destroy() const
-		{
-			glDeleteBuffers(1, &m_vbo);
-			glDeleteBuffers(1, &m_ibo);
-		}
-
-
 	private:
 		friend class SceneRenderer;
+
+		inline void destroy() const
+		{
+			if (m_vbo)
+				glDeleteBuffers(1, &m_vbo);
+			if (m_ibo)
+				glDeleteBuffers(1, &m_ibo);
+		}
 
 		void draw() const;
 
 		Data m_data;
 
-		mutable b32 m_generated;
+		mutable b32 m_generated = false;
 
-		mutable GLuint m_vbo;
-		mutable GLuint m_ibo;
-		GLenum m_drawType;
-		GLint m_drawCount;
+		mutable u32 m_vbo = 0;
+		mutable u32 m_ibo = 0;
+		DrawType m_drawType = DrawType::Triangles;
+		s32 m_drawCount = 0;
 
 
 	};

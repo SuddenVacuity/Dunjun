@@ -24,7 +24,7 @@ namespace Dunjun
 	}
 
 	Texture::Texture() // Initialize texture
-		: m_object(0)
+		: m_handle(0)
 		, m_width(0)
 		, m_height(0)
 	{
@@ -32,12 +32,12 @@ namespace Dunjun
 	Texture::Texture(const Image& image,
 		TextureFilter minMagFilter,
 		TextureWrapMode wrapMode)
-		: m_object(0)
-		, m_width(image.getWidth())
-		, m_height(image.getHeight())
+		: m_handle(0)
+		, m_width((s32)image.getWidth())
+		, m_height((s32)image.getHeight())
 	{
 		if (!loadFromImage(image, minMagFilter, wrapMode))
-			throw std::runtime_error("Could not create texture from image.");
+			throwRuntimeError("Could not create texture from image.");
 	}
 
 	bool Texture::loadFromFile(const std::string& filename,
@@ -59,16 +59,16 @@ namespace Dunjun
 		if ((const ImageFormat&)image.getFormat() == ImageFormat::None )
 			return false;
 
-		m_width = (GLfloat)image.getWidth();
-		m_height = (GLfloat)image.getHeight();
+		m_width = image.getWidth();
+		m_height = image.getHeight();
 
-		if(!m_object)
-			glGenTextures(1, &m_object);
+		if(!m_handle)
+			glGenTextures(1, &m_handle);
 
 		//glGenTextures(1, &m_object);
-		glBindTexture(GL_TEXTURE_2D, m_object);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, static_cast<GLint>(wrapMode)); // set the s axis (x) to repeat
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, static_cast<GLint>(wrapMode)); // set the t axis (y) to repeat
+		glBindTexture(GL_TEXTURE_2D, m_handle);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, static_cast<s32>(wrapMode)); // set the s axis (x) to repeat
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, static_cast<s32>(wrapMode)); // set the t axis (y) to repeat
 																	  //glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL REPEAT); // set the r axis (z) to repeat
 
 																	  /* set the border color for GL_CLAMP_TO_BORDER
@@ -76,8 +76,8 @@ namespace Dunjun
 																	  glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, color); // apply the color to the border
 																	  */
 
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, static_cast<GLint>(minMagFilter)); // set the texture min filter type
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, static_cast<GLint>(minMagFilter)); // set the texture max filter type
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, static_cast<s32>(minMagFilter)); // set the texture min filter type
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, static_cast<s32>(minMagFilter)); // set the texture max filter type
 																		  // there are 3 types of texture filters
 																		  // GL_NEAREST	keeps it as close as possible pixel to pixel
 																		  // GL_LINEAR	blurs the pixels
@@ -86,7 +86,11 @@ namespace Dunjun
 
 
 	//	glTexImage2D(GL_TEXTURE_2D, 0, format, (GLsizei)m_width, (GLsizei)m_height, 0, image.getFormat(), GL_UNSIGNED_INT, image.getPixelPtr());
-		glTexImage2D(GL_TEXTURE_2D, 0, getInternalFormat(image.getFormat(), true), m_width, m_height, 0, getInternalFormat(image.getFormat(), false), GL_UNSIGNED_BYTE, image.getPixels());
+		glTexImage2D(GL_TEXTURE_2D, 0, 
+					 getInternalFormat(image.getFormat(), true), 
+					 m_width, m_height, 0, 
+					 getInternalFormat(image.getFormat(), false), 
+					 GL_UNSIGNED_BYTE, image.getPixels());
 
 		glBindTexture(GL_TEXTURE_2D, 0);
 		
@@ -96,11 +100,11 @@ namespace Dunjun
 
 	Texture::~Texture()
 	{
-		if(m_object)
-			glDeleteTextures(1, &m_object);
+		if(m_handle)
+			glDeleteTextures(1, &m_handle);
 	}
 
-	void Texture::bind(const Texture* tex, GLuint position)
+	void Texture::bind(const Texture* tex, u32 position)
 	{
 		if (position > 31)
 		{
@@ -113,7 +117,7 @@ namespace Dunjun
 
 		glEnable(GL_TEXTURE_2D);
 
-		glBindTexture(GL_TEXTURE_2D, (tex && tex->m_object ? tex->m_object : 0));
+		glBindTexture(GL_TEXTURE_2D, (tex && tex->m_handle ? tex->m_handle : 0));
 
 		glDisable(GL_TEXTURE_2D);
 	}
@@ -149,6 +153,6 @@ namespace Dunjun
 
 		GLuint Texture::getNativeHandle() const
 		{
-			return m_object;
+			return m_handle;
 		}
 } // End Namespace Dunjun

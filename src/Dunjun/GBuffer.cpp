@@ -27,33 +27,33 @@ namespace Dunjun
 
 		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, m_fbo);
 
-		GLuint depthRenderBuffer = 0;
-
-		glGenRenderbuffersEXT(1, &depthRenderBuffer);
-		glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, depthRenderBuffer);
-
-		glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT,
-			GL_DEPTH_COMPONENT,
-			(GLsizei)m_width, (GLsizei)m_height);
-
-		glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT,
-			GL_DEPTH_ATTACHMENT,
-			GL_RENDERBUFFER_EXT,
-			depthRenderBuffer);
+		//GLuint depthRenderBuffer = 0;
+		//
+		//glGenRenderbuffersEXT(1, &depthRenderBuffer);
+		//glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, depthRenderBuffer);
+		//
+		//glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT,
+		//	GL_DEPTH_COMPONENT,
+		//	(GLsizei)m_width, (GLsizei)m_height);
+		//
+		//glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT,
+		//	GL_DEPTH_ATTACHMENT,
+		//	GL_RENDERBUFFER_EXT,
+		//	depthRenderBuffer);
 
 		std::vector<GLenum> drawBuffers;
 
 		/* begin lambda */
 		auto addRT = [&drawBuffers, w, h](Texture& tex, 
 										  GLenum attachment, 
-										  GLint internalFormat, 
+										  s32 internalFormat, 
 										  GLenum format, 
 										  GLenum type)
 		{
-			if(!tex.m_object)
-				glGenTextures(1, &tex.m_object);
+			if(!tex.m_handle)
+				glGenTextures(1, &tex.m_handle);
 
-			glBindTexture(GL_TEXTURE_2D, (GLuint)tex.m_object);
+			glBindTexture(GL_TEXTURE_2D, (GLuint)tex.m_handle);
 
 			glTexImage2D(GL_TEXTURE_2D, 0, internalFormat,
 						(GLsizei)w, (GLsizei)h,
@@ -69,10 +69,10 @@ namespace Dunjun
 
 			glFramebufferTextureEXT(GL_FRAMEBUFFER_EXT,
 				attachment,
-				tex.m_object, 0);
+				tex.m_handle, 0);
 
 			if(attachment != GL_DEPTH_ATTACHMENT_EXT)
-				drawBuffers.push_back(attachment);
+				drawBuffers.emplace_back(attachment);
 		};/* end lambda */	
 
 		addRT(diffuse,	GL_COLOR_ATTACHMENT0_EXT, GL_RGB8, GL_RGB, GL_UNSIGNED_BYTE);

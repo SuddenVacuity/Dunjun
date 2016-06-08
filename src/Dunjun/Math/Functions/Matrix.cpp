@@ -90,7 +90,8 @@ namespace Math
 	// fov angle is in radians
 	Matrix4 perspective(const Radian& fovy, f32 aspect, f32 zNear, f32 zFar)
 	{
-		assert(Math::abs(aspect - std::numeric_limits<f32>::epsilon()) > 0.0f); // make sure aspect ratio is greater than 0
+		assert(Math::abs(aspect - std::numeric_limits<f32>::epsilon()) > 0.0f
+			   && "Math::perspective 'fovy' is 0/inf"); // make sure aspect ratio is greater than 0
 
 		Matrix4 result(0.0f);
 

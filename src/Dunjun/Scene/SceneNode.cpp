@@ -1,37 +1,32 @@
 
 #include <Dunjun/Scene/SceneNode.hpp>
 
+//#include <cstdio> // included in Common.hpp
+
 namespace Dunjun
 {
-	namespace Impl
+	namespace 
 	{
 		//GLOBAL size_t idCount = 0;
-		inline SceneNode::ID getUniqueSceneNodeId()
+		INTERNAL inline SceneNode::ID getUniqueSceneNodeId()
 		{
 			LOCAL_PERSIST SceneNode::ID lastId = 0;
 			return lastId++;
 		}
-	} // end Impl namespace
+	} // end anon namespace
 
 	// TODO idCount-- when destrucitng
 	SceneNode::SceneNode()
-		: m_children()
-		, id(Impl::getUniqueSceneNodeId())
-		, name("")
-		, transform()
-		, visible(true)
-		, m_parent(nullptr)
+		: id(getUniqueSceneNodeId())
 	{
-		std::stringstream ss;
-		ss << "node_" << id;
-		name = ss.str();
+		name = stringFormat("node_%llu", id);
 	}
 
-	SceneNode& SceneNode::attachChild(u_ptr child)
+	SceneNode& SceneNode::attachChild(u_ptr&& child)
 	{
 		// get the 
 		child->m_parent = this;
-		m_children.push_back(std::move(child));
+		m_children.emplace_back(std::move(child));
 
 		return *this;
 	}
@@ -39,7 +34,8 @@ namespace Dunjun
 	SceneNode::u_ptr SceneNode::detachChild(const SceneNode& node)
 	{
 		// check through all children to find if the one to detach exists
-		auto found = std::find_if(m_children.begin(), m_children.end(), 
+		auto found = std::find_if(std::begin(m_children), 
+								  std::end(m_children), 
 		// lambda function: [](){}
 		// leave square brackets blank to bring in no variables
 		// [&] or [&variable] bring in all varibles by reference or single variable by reference respectively
@@ -51,7 +47,7 @@ namespace Dunjun
 		);
 
 		// if child is found before the end of m_children allow it to be moved and return the pointer to it
-		if(found != m_children.end())
+		if(found != std::end(m_children))
 		{
 			u_ptr result = std::move(*found);
 
@@ -71,6 +67,11 @@ namespace Dunjun
 		{
 			if(child->name == name)
 				return child.get();
+
+			// check child nodes children as well
+			SceneNode* subChild = child->findChildByName(name);
+			if (subChild != nullptr)
+				return subChild;
 		}
 
 		return nullptr;
@@ -82,6 +83,11 @@ namespace Dunjun
 		{
 			if (child->id == id)
 				return child.get();
+
+			// check child nodes children as well
+			SceneNode* subChild = child->findChildById(id);
+			if(subChild != nullptr)
+				return subChild;
 		}
 
 		return nullptr;
@@ -91,6 +97,7 @@ namespace Dunjun
 	{
 		Transform result;
 
+		// go through all parents applying their transforms
 		for(const SceneNode* node = this; node != nullptr; node = node->getParent())
 			result *= node->transform;
 

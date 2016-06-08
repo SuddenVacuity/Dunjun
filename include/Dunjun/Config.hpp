@@ -1,6 +1,10 @@
 #ifndef DUNJUN_CONFIG_HPP
 #define DUNJUN_CONFIG_HPP
 
+///////////////////////
+//		SYSTEM OS
+///////////////////////
+
 #if defined(_WIN32) || defined(_WIN64)
 // windows
 	#define DUNJUN_SYSTEM_WINDOWS
@@ -29,5 +33,44 @@
 	#error This operating system is not supported by Dunjun
 
 #endif
+
+///////////////////////
+// ENVIRONMENT BIT SIZE
+///////////////////////
+
+#if defined(_WIN32) || defined(_WIN64)
+	#if defined(_WIN64)
+		#define DUNJUN_64_BIT
+	#else
+		#define DUNJUN_32_BIT
+	#endif
+#endif
+
+#if defined(__GNUC__)
+	#if defined(__x86_64__) || defined(__ppc54__)
+		#define DUNJUN_64_BIT
+	#else
+		#defined DUNJUN_32_BIT
+	#endif
+#endif
+
+///////////////////////
+//	   COMPILIER
+///////////////////////
+
+#if defined(_MSC_VER)
+	// Microsoft Visual Studio
+	#define DUNJUN_COMPILER_MSVC
+#elif defined(__clang__)
+	// Clang
+	#defined DUNJUN_COMPILER_CLANG
+#elif defined(__GNUC__) || defined(__GNUG__)
+	// GNU GCC/G++ Compiler
+	#defined DUNJUN_COMPILER_GNU_GCC
+#endif
+
+
+
+
 
 #endif

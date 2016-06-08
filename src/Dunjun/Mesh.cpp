@@ -31,7 +31,7 @@ namespace Dunjun
 		, m_generated(false)
 		, m_vbo(0)
 		, m_ibo(0)
-		, m_drawType(GL_TRIANGLES)
+		, m_drawType(DrawType::Triangles)
 		, m_drawCount(0)
 	{
 	}
@@ -42,7 +42,7 @@ namespace Dunjun
 		, m_vbo(0)
 		, m_ibo(0)
 		, m_drawType(data.drawType)
-		, m_drawCount(data.indices.size())
+		, m_drawCount((s32)data.indices.size())
 	{
 		generate();
 	}
@@ -95,24 +95,28 @@ namespace Dunjun
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ibo); // bind the buffer
 
 		// pointer for attribute position (att position[], size of vertices x/y/z, int type, normalized?, stride, pointer)
-		glVertexAttribPointer((u32)AttribLocation::Position, 3, 					// 
-			GL_FLOAT, GL_FALSE, sizeof(Vertex),  									// GL_FLOAT specifies they are floats
-			(const GLvoid*)0);														// GL_FALSE specifies they do not need to be normalized
-		glVertexAttribPointer((u32)AttribLocation::TexCoord, 2, 					// 
-			GL_FLOAT, GL_FALSE, sizeof(Vertex), 									// so first value is data type
-			(const GLvoid*)(sizeof(Dunjun::Vector3)));								// and second is if need normalize
-		glVertexAttribPointer((u32)AttribLocation::Color, 4,						// 
-			GL_UNSIGNED_BYTE, GL_TRUE, sizeof(Vertex),								// 
-			(const GLvoid*)(sizeof(Dunjun::Vector3) + sizeof(Dunjun::Vector2)));	// 
-		glVertexAttribPointer((u32)AttribLocation::Normal, 3,						// 
-			GL_FLOAT, GL_FALSE, sizeof(Vertex),
+		glVertexAttribPointer((u32)AttribLocation::Position, 3, 				
+			GL_FLOAT, false, 
+			sizeof(Vertex), 
+			(const GLvoid*)0);													
+		glVertexAttribPointer((u32)AttribLocation::TexCoord, 2, 				
+			GL_FLOAT, false, 
+			sizeof(Vertex), 								
+			(const GLvoid*)(sizeof(Dunjun::Vector3)));		
+		glVertexAttribPointer((u32)AttribLocation::Color, 4,
+			GL_UNSIGNED_BYTE, true, 
+			sizeof(Vertex),							
+			(const GLvoid*)(sizeof(Dunjun::Vector3) + sizeof(Dunjun::Vector2)));
+		glVertexAttribPointer((u32)AttribLocation::Normal, 3,					
+			GL_FLOAT, false, 
+			sizeof(Vertex),
 			(const GLvoid*)(sizeof(Dunjun::Vector3) + sizeof(Dunjun::Vector2) + sizeof(Dunjun::Color)));
 		// stride says how many floats there are per vertex
 		// const void *pointer says how far offset the information starts in the vertex
 
 		// get the draw info from ModelAsset asset
 		//glDrawArrays(asset->drawType, asset->drawStart, asset->drawCount); // (mode to draw in, first vertex, total vertices)
-		glDrawElements(m_drawType, m_drawCount, GL_UNSIGNED_INT, nullptr);
+		glDrawElements((GLenum)m_drawType, (s32)m_drawCount, GL_UNSIGNED_INT, nullptr);
 
 		glBindBuffer(GL_ARRAY_BUFFER, 0); // unbind the buffer
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0); // unbind the buffer

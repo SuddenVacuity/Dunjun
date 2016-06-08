@@ -16,7 +16,7 @@ namespace Dunjun
 			(UInt8*)path, PATH_MAX))
 		{
 			// POSIX
-			char executablePath[FILENAME_MAX];
+			char executablePath[FILENAME_MAX]{0};
 			if (!getcwd(executablePath, sizeof(executablePath)))
 				return "";
 

@@ -15,6 +15,13 @@ namespace Dunjun
 
 		struct ModelInstance
 		{
+			ModelInstance() = default;
+			ModelInstance(const MeshRenderer* asset, const Transform& transform)
+				: asset(asset)
+				, transform(transform)
+			{
+			}
+
 			const MeshRenderer* asset;
 			Transform transform;
 		};
@@ -86,7 +93,7 @@ namespace Dunjun
 		bool isCurrentTexture(const Texture* texture);
 
 		void setShaders(const ShaderProgram* shaders);
-		void setTexture(const Texture* texture, GLuint position);
+		void setTexture(const Texture* texture, u32 position);
 
 	};
 } // end Dunjun

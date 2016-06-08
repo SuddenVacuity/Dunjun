@@ -360,7 +360,8 @@ namespace Dunjun
 		break;
 		default: // should never get here
 		{
-			assert(false);
+			assert(false && 
+				   "Quaternion::matrix4ToQuaternion This should never happen");
 		}
 		break;
 		}

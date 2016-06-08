@@ -4,6 +4,8 @@
 
 #include <Dunjun/Common.hpp>
 
+//#include <unordered_map>
+
 namespace Dunjun
 {
 	template <class Resource, class Identifier>
@@ -17,19 +19,19 @@ namespace Dunjun
 		void insert(Identifier id, std::unique_ptr<Resource> resource)
 		{
 			auto inserted = m_resources.insert(std::make_pair(id, std::move(resource)));
-			assert(inserted.second);
+			assert(inserted.second && "ResourceHolder resource not inserted.");
 		}
 
 		std::unique_ptr<Resource> erase(const Resource& resource)
 		{
-			auto found = std::find_if(m_resources.begin(),
-				m_resources.end(),
-				[&resource](std::unique_ptr<Resource>& res)
+			auto found = std::find_if(std::begin(m_resources),
+									  std::end(m_resources),
+								 	  [&resource](std::unique_ptr<Resource>& res)
 			{
 				return res.get();
 			});
 
-			if (found != m_resources.end())
+			if (found != std::end(m_resources))
 			{
 				auto result = std::move(*found);
 
@@ -45,7 +47,7 @@ namespace Dunjun
 		{
 			auto found = m_resources.find(id);
 
-			if (found != m_resources.end())
+			if (found != std::end(m_resources))
 			{
 				auto result = std::move(*found);
 
@@ -70,7 +72,7 @@ namespace Dunjun
 		Resource& get(Identifier id)
 		{
 			auto found = m_resources.find(id);
-			assert(found != m_resources.end());
+			assert(found != std::end(m_resources) && "ResourceHolder::get resource not found.");
 
 			return *found->second;
 		}
@@ -78,13 +80,13 @@ namespace Dunjun
 		const Resource& get(Identifier id) const
 		{
 			auto found = m_resources.find(id);
-			assert(found != m_resources.end());
+			assert(found != std::end(m_resources) && "ResourceHolder::get resource not found.");
 
 			return *found->second;
 		}
 
 	private:
-		std::map<Identifier, std::unique_ptr<Resource>> m_resources;
+		std::unordered_map<Identifier, std::unique_ptr<Resource>> m_resources;
 
 	};
 } // end Dunjun

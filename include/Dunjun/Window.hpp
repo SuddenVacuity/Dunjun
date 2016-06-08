@@ -22,7 +22,7 @@ namespace Dunjun
 			// preset aspect ratios
 			f32 windowAspect_16_9 = 16.0f / 9.0f;
 
-			// default window variables
+			// window variables
 			int width = windowSize_854_480[0];
 			int height = windowSize_854_480[1];
 			f32 aspectRatio = windowAspect_16_9;
@@ -32,6 +32,9 @@ namespace Dunjun
 
 		extern GLFWwindow* ptr;
 
+		GLFWwindow* getHandle();
+		void setHandle(GLFWwindow* w);
+
 		//extern bool getIsFullscreen();
 		//void setFullscreen(bool fullscreen, GLFWmonitor* monitor);
 
@@ -39,7 +42,7 @@ namespace Dunjun
 		void cleanup();
 
 		void destroyWindow();
-		void destroyWindow(GLFWwindow* windowPtr);
+		void destroyWindow(GLFWwindow* w);
 
 		GLFWwindow* createWindow(GLFWmonitor* monitor);
 		GLFWwindow* createWindow(GLFWmonitor* monitor, u32 width, u32 height);
@@ -50,7 +53,10 @@ namespace Dunjun
 		void swapBuffers();
 		void pollEvents();
 
-		void setTitle(const char* title);
+		void setTitle(const std::string& title);
+
+		//bool isFullscreen();
+		//void setFullscreen(bool fullscreen);
 
 		Vector2 getWindowSize();
 		Vector2 getFramebufferSize();
@@ -58,6 +64,14 @@ namespace Dunjun
 		bool shouldClose();
 		bool isInFocus();
 		bool isIconified();
+
+		//void setIcon(const Image& image);
+		//void setFramerateLimit(u32 limit);
+		//void setVerticalSyncEnabled(bool enabled);
+		//bool hasFocus();
+		//
+		//bool pollEvent(Event& event);
+		//bool waitEvent(Event& event);
 
 	} // end Window
 } // end Dunjun

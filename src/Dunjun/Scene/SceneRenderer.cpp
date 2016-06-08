@@ -45,17 +45,17 @@ namespace Dunjun
 	void SceneRenderer::addModelInstance(const MeshRenderer& meshRenderer, Transform t)
 	{
 		if(meshRenderer.getParent()->visible == true)
-			modelInstances.push_back({&meshRenderer, t});
+			modelInstances.emplace_back(&meshRenderer, t);
 	}
 
 	void SceneRenderer::addPointLight(const PointLight* light)
 	{
-		pointLights.push_back(light);
+		pointLights.emplace_back(light);
 	}
 
 	void SceneRenderer::addDirectionalLight(const DirectionalLight* light)
 	{
-		directionalLights.push_back(light);
+		directionalLights.emplace_back(light);
 	}
 
 	void SceneRenderer::deferredGeometryPass()
@@ -133,7 +133,7 @@ namespace Dunjun
 			glViewport(0, 0, lightingTexture.getWidth(), lightingTexture.getHeight());
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-			glDepthMask(GL_FALSE);
+			glDepthMask(false);
 			glEnable(GL_BLEND);
 			glBlendFunc(GL_ONE, GL_ONE);
 
@@ -142,7 +142,7 @@ namespace Dunjun
 			renderPointLights();
 
 			glDisable(GL_BLEND);
-			glDepthMask(GL_TRUE);
+			glDepthMask(true);
 		}
 		RenderTexture::bind(nullptr);
 	} // end deferredLightPass()
@@ -263,7 +263,7 @@ namespace Dunjun
 		}
 	}
 
-	void SceneRenderer::setTexture(const Texture* texture, GLuint position)
+	void SceneRenderer::setTexture(const Texture* texture, u32 position)
 	{
 		//assert(m_currentTexture);
 

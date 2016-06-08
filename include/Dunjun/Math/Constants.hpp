@@ -9,9 +9,6 @@ namespace Dunjun
 namespace Constants
 {
 
-	//GLOBAL const f32 epsilon() {
-	//	return std::numeric_limits<f32>::epsilon(); }
-
 	extern const f32 EPSILON;
 
 	extern const f32  ZERO;

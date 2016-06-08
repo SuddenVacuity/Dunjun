@@ -28,7 +28,7 @@ namespace Dunjun
 	public:
 		inline VertexArray& append(const Vertex& vertex)
 		{
-			m_vertices.push_back(vertex);
+			m_vertices.emplace_back(vertex);
 			return *this;
 		}
 
@@ -54,6 +54,8 @@ namespace Dunjun
 		//const Vertex* getPtr() const { return &m_vertices[0]; }
 		//inline const std::vector<Vertex>& getVector() const { return m_vertices; }
 		inline const size_t size() const { return m_vertices.size(); }
+
+		inline void reserve(size_t size) { return m_vertices.reserve(size); }
 	private:
 		std::vector<Vertex> m_vertices;
 	};

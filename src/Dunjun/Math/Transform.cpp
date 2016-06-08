@@ -34,13 +34,22 @@ namespace Dunjun
 
 	Transform inverse(const Transform& t)
 	{
-		const Transform i;
-		return i / t;
+		const Quaternion invOrientation(conjugate(t.orientation));
+
+		Transform invTransform;
+
+		invTransform.position = (invOrientation * -t.position) / t.scale;
+		invTransform.orientation = invOrientation;
+		invTransform.scale = invOrientation * (Vector3(1) / t.scale);
+
+		return invTransform;
 	}
 
 	Matrix4 transformMatrix4(const Transform& t)
 	{
-		return Math::translate(t.position) * quaternionToMatrix4(t.orientation) * Math::scale(t.scale);
+		return Math::translate(t.position) * 
+			   quaternionToMatrix4(t.orientation) * 
+			   Math::scale(t.scale);
 	}
 
 }

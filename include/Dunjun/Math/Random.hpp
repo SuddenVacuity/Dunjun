@@ -8,13 +8,15 @@ namespace Dunjun
 	class Random
 	{
 	public:
+		using ResultType = std::mt19937::result_type;
+
 		Random() = default;
-		Random(std::mt19937::result_type seed) 
+		Random(ResultType seed)
 			: m_engine(seed)
 		{
 		}
 
-		void setSeed(std::mt19937::result_type seed)
+		void setSeed(ResultType seed)
 		{
 			m_engine.seed(seed);
 		}

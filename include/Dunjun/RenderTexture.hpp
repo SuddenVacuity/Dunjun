@@ -41,7 +41,7 @@ namespace Dunjun
 		TextureType getType() const;
 
 		//ReadOnly<GLuint, RenderTexture> fbo; //frame buffer object
-		GLuint getNativeHandle() const;
+		u32 getNativeHandle() const;
 
 		Texture colorTexture;
 		Texture depthTexture;
@@ -51,7 +51,7 @@ namespace Dunjun
 
 		TextureType m_type;
 
-		GLuint m_fbo;
+		u32 m_fbo;
 	};	
 
 

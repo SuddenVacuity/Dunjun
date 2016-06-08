@@ -25,11 +25,16 @@ namespace Dunjun
 		void checkInUse() const;
 
 		bool link();
+		bool isLinked() const;
 
-		void bindAttribLocation(GLuint location, const std::string& name);
+		const std::string& getErrorLog() const;
 
-		GLint getAttribLocation( const std::string& name) const;
-		GLint getUniformLocation( const std::string& name) const;
+		u32 getNativeHandle() const;
+
+		void bindAttribLocation(u32 location, const std::string& name);
+
+		s32 getAttribLocation( const std::string& name) const;
+		s32 getUniformLocation( const std::string& name) const;
 
 		void setUniform(const std::string& name, f32 x) const;
 		void setUniform(const std::string& name, f32 x, f32 y) const;
@@ -49,23 +54,19 @@ namespace Dunjun
 		void setUniform(const std::string& name, const Transform& t) const;
 		void setUniform(const std::string& name, const Color& c) const;
 
-		bool isLinked() const;
-		const std::string& getErrorLog() const;
 
 		//readonly       V the only class that can edit
 		//ReadOnly<GLuint, ShaderProgram>  object; // the file
 		//ReadOnly<bool, ShaderProgram> isLinked;
 		//ReadOnly<std::string, ShaderProgram> errorLog;
 
-		GLuint getNativeHandle() const;
-
 	private:
-		GLuint m_object;
+		u32 m_handle;
 		bool m_isLinked;
 		std::string m_errorLog;
 
-		mutable std::map<std::string, GLint> m_attribLocations;
-		mutable std::map<std::string, GLint> m_uniformLocations;
+		mutable std::map<std::string, s32> m_attribLocations;
+		mutable std::map<std::string, s32> m_uniformLocations;
 
 
 	};

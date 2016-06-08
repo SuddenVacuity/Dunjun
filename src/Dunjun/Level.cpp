@@ -515,7 +515,7 @@ bool testEnableRandomWalk = true;
 					
 					room->generate(northWall, westWall, southWall, eastWall, floor, ceiling);
 
-					rooms.push_back(room.get());
+					rooms.emplace_back(room.get());
 
 					attachChild(std::move(room));
 				}

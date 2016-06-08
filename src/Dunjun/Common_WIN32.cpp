@@ -13,7 +13,7 @@ namespace Dunjun
 		DWORD charsCopied = GetModuleFileName(nullptr, (LPWSTR)executablePath, 1024);
 
 		if(charsCopied > 0 && charsCopied < 1024)
-			return std::string(executablePath) + "\\..\\";
+			return std::string(executablePath) + std::string("\\..\\");
 	}
 } // end Dunjun
 

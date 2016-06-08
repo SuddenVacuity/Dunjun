@@ -51,7 +51,7 @@ namespace Dunjun
 		{
 			while (file.good()) // while file is open
 			{
-				getline(file, line); // get a line from the file and define line as the string
+				std::getline(file, line); // get a line from the file and define line as the string
 
 				if(line.find("#include") == std::string::npos)
 				{
@@ -61,17 +61,49 @@ namespace Dunjun
 				{
 					std::string includeFilename = split(line, ' ')[1];
 
-					if(includeFilename[0] == '<') // absolute path
+					// get path\name of #include file
+					if(includeFilename[0] == '<') // absolute library path
 					{
-						includeFilename = includeFilename.substr(1, includeFilename.length() - 3);
+						size_t closingBracketPos = 0;
+						for(size_t i = 1; i < includeFilename.length(); i++)
+						{
+							if(includeFilename[i] == '>')
+							{
+								closingBracketPos = i;
+								break;
+							}
+						}
+
+						if(closingBracketPos > 1)
+						{
+							includeFilename = includeFilename.substr(1, closingBracketPos - 1);
+						}
+						else
+						{
+							includeFilename = "";
+						}
 					}
 					else if (includeFilename[0] == '\"') // relative path
 					{
-						includeFilename = fileDirectory + includeFilename.substr(1, includeFilename.length() - 3);
+						size_t closingSpeechMarkPos = 0;
+						for(size_t i = 1; i < includeFilename.length(); i++)
+						{
+							if(includeFilename[i] == '\"')
+							{
+								closingSpeechMarkPos = i;
+								break;
+							}
+						}
+
+						if(closingSpeechMarkPos > 1)
+							includeFilename = includeFilename.substr(1, closingSpeechMarkPos - 1);
+						else
+							includeFilename = "";
+
 					}
 
-					std::string toAppend = stringFromFile(includeFilename);
-					output.append(toAppend + "\n");
+					if(includeFilename.length() > 0)
+						output.append(stringFromFile(includeFilename) + "\n");
 				}
 
 			}
@@ -83,7 +115,7 @@ namespace Dunjun
 
 
 		ShaderProgram::ShaderProgram()
-			: m_object(0) // set default values
+			: m_handle(0) // set default values
 			, m_isLinked(false)
 			, m_errorLog()
 		{
@@ -91,8 +123,8 @@ namespace Dunjun
 
 		ShaderProgram::~ShaderProgram()
 		{
-			if (m_object)
-				glDeleteProgram(m_object);
+			if (m_handle)
+				glDeleteProgram(m_handle);
 		}
 
 		// add shaders here
@@ -105,12 +137,12 @@ namespace Dunjun
 		bool ShaderProgram::attachShaderFromMemory(ShaderType type, const std::string& source)
 		{
 			// check if m_object got compiled
-			if (!m_object)
-				m_object = glCreateProgram();
+			if (!m_handle)
+				m_handle = glCreateProgram();
 
 			const char* shaderSource = source.c_str();
 
-			GLuint shader;
+			u32 shader;
 			if (type == ShaderType::Vertex) // check the shader type
 				shader = glCreateShader(GL_VERTEX_SHADER); // create the shader
 			else if (type == ShaderType::Fragment)
@@ -122,13 +154,13 @@ namespace Dunjun
 			glCompileShader(shader);
 
 			// check for compile error
-			GLint status; // declare var to check shader status
+			s32 status; // declare var to check shader status
 			glGetShaderiv(shader, GL_COMPILE_STATUS, &status); // define status as the compile status
 			if (status == GL_FALSE)
 			{
 			std::string msg("Compile failure in shader:\n");
 
-				GLint infoLogLength;
+				s32 infoLogLength;
 				glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &infoLogLength); // get shader information i for integer and v for vector
 				char* strInfoLog = new char[infoLogLength + 1];
 				glGetShaderInfoLog(shader, infoLogLength, nullptr, strInfoLog);
@@ -145,7 +177,7 @@ namespace Dunjun
 				return false;
 			}
 
-			glAttachShader(m_object, shader);
+			glAttachShader(m_handle, shader);
 
 			return true;
 		}
@@ -153,14 +185,14 @@ namespace Dunjun
 		void ShaderProgram::use() const
 		{
 			if(!isInUse()) // check that it's not in use already
-				glUseProgram(m_object);
+				glUseProgram(m_handle);
 		}
 		bool ShaderProgram::isInUse() const
 		{
-			GLint currentProgram = 0;
+			s32 currentProgram = 0;
 			glGetIntegerv(GL_CURRENT_PROGRAM, &currentProgram);
 
-			return (currentProgram == (GLint)m_object);
+			return (currentProgram == (s32)m_handle);
 		}
 		void ShaderProgram::stopUsing() const
 		{
@@ -177,33 +209,33 @@ namespace Dunjun
 		{
 
 			// check if m_object got compiled
-			if (!m_object)
-				m_object = glCreateProgram();
+			if (!m_handle)
+				m_handle = glCreateProgram();
 
 
 			if(!m_isLinked)
 			{
-				glLinkProgram(m_object);
+				glLinkProgram(m_handle);
 
-				GLint status; // check for link error
-				glGetProgramiv(m_object, GL_LINK_STATUS, &status);
+				s32 status; // check for link error
+				glGetProgramiv(m_handle, GL_LINK_STATUS, &status);
 
 				if (status == GL_FALSE)
 				{
 					std::string msg("Shader program linking failure:\n");
 
-					GLint infoLogLength;
-					glGetProgramiv(m_object, GL_INFO_LOG_LENGTH, &infoLogLength);
+					s32 infoLogLength;
+					glGetProgramiv(m_handle, GL_INFO_LOG_LENGTH, &infoLogLength);
 					char* strInfoLog = new char[infoLogLength +1];
-					glGetProgramInfoLog(m_object, infoLogLength, nullptr, strInfoLog);
+					glGetProgramInfoLog(m_handle, infoLogLength, nullptr, strInfoLog);
 					msg.append(strInfoLog);
 					delete[] strInfoLog;
 
 					msg.append("\n");
 					m_errorLog.append(msg);
 
-					glDeleteProgram(m_object);
-					m_object = 0;
+					glDeleteProgram(m_handle);
+					m_handle = 0;
 
 					m_isLinked = false;
 					return m_isLinked;
@@ -215,31 +247,46 @@ namespace Dunjun
 			return m_isLinked;
 		}
 
+		bool ShaderProgram::isLinked() const
+		{
+			return m_isLinked;
+		}
+
+		const std::string& ShaderProgram::getErrorLog() const
+		{
+			return m_errorLog;
+		}
+
+		GLuint ShaderProgram::getNativeHandle() const
+		{
+			return m_handle;
+		}
+
 		void ShaderProgram::bindAttribLocation(GLuint location, const std::string& name)
 		{
-			glBindAttribLocation(m_object, location, name.c_str());
+			glBindAttribLocation(m_handle, location, name.c_str());
 			m_attribLocations[name] = location;
 		}
-		GLint ShaderProgram::getAttribLocation(const std::string& name) const
+		s32 ShaderProgram::getAttribLocation(const std::string& name) const
 		{
 			auto found = m_attribLocations.find(name); // find the name of attrib location
 			if (found != m_attribLocations.end()) // check if location was found
 			{
 				return found->second; // if not return found second position
 			}
-			GLint loc = glGetAttribLocation(m_object, name.c_str());
+			s32 loc = glGetAttribLocation(m_handle, name.c_str());
 			m_attribLocations[name] = loc;
 			return loc;
 			
 		}
-		GLint ShaderProgram::getUniformLocation(const std::string& name) const
+		s32 ShaderProgram::getUniformLocation(const std::string& name) const
 		{
 			auto found = m_uniformLocations.find(name);
 			if (found != m_uniformLocations.end())
 			{
 				return found->second;
 			}
-			GLint loc = glGetUniformLocation(m_object, name.c_str());
+			s32 loc = glGetUniformLocation(m_handle, name.c_str());
 			m_uniformLocations[name] = loc;
 			return loc;
 		}
@@ -247,7 +294,7 @@ namespace Dunjun
 		void ShaderProgram::setUniform(const std::string& name, f32 x) const
 		{
 			checkInUse();
-			GLint loc = getUniformLocation(name);
+			s32 loc = getUniformLocation(name);
 			if (loc == -1) // check if getUniformLocation worked
 				return;
 			glUniform1f(loc, x);
@@ -255,7 +302,7 @@ namespace Dunjun
 		void ShaderProgram::setUniform(const std::string& name, f32 x, f32 y) const
 		{
 			checkInUse();
-			GLint loc = getUniformLocation(name);
+			s32 loc = getUniformLocation(name);
 			if (loc == -1)
 				return;
 			glUniform2f(loc, x, y);
@@ -263,7 +310,7 @@ namespace Dunjun
 		void ShaderProgram::setUniform(const std::string& name, f32 x, f32 y, f32 z) const
 		{
 			checkInUse();
-			GLint loc = getUniformLocation(name);
+			s32 loc = getUniformLocation(name);
 			if (loc == -1)
 				return;
 			glUniform3f(loc, x, y, z);
@@ -271,7 +318,7 @@ namespace Dunjun
 		void ShaderProgram::setUniform(const std::string& name, f32 x, f32 y, f32 z, f32 w) const
 		{
 			checkInUse();
-			GLint loc = getUniformLocation(name);
+			s32 loc = getUniformLocation(name);
 			if (loc == -1)
 				return;
 			glUniform4f(loc, x, y, z, w);
@@ -280,7 +327,7 @@ namespace Dunjun
 		void ShaderProgram::setUniform(const std::string& name, u32 x) const
 		{
 			checkInUse();
-			GLint loc = getUniformLocation(name);
+			s32 loc = getUniformLocation(name);
 			if (loc == -1)
 				return;
 			glUniform1i(loc, x);
@@ -288,7 +335,7 @@ namespace Dunjun
 		void ShaderProgram::setUniform(const std::string& name, s32 x) const
 		{
 			checkInUse();
-			GLint loc = getUniformLocation(name);
+			s32 loc = getUniformLocation(name);
 			if (loc == -1)
 				return;
 			glUniform1i(loc, (s32)x);
@@ -296,7 +343,7 @@ namespace Dunjun
 		void ShaderProgram::setUniform(const std::string& name, bool x) const
 		{
 			checkInUse();
-			GLint loc = getUniformLocation(name);
+			s32 loc = getUniformLocation(name);
 			if (loc == -1)
 				return;
 			glUniform1i(loc, static_cast<int>(x));
@@ -305,7 +352,7 @@ namespace Dunjun
 		void ShaderProgram::setUniform(const std::string& name, const Vector2& v) const
 		{
 			checkInUse();
-			GLint loc = getUniformLocation(name);
+			s32 loc = getUniformLocation(name);
 			if (loc == -1)
 				return;
 			glUniform2fv(loc, 1, &v[0]);
@@ -314,7 +361,7 @@ namespace Dunjun
 		void ShaderProgram::setUniform(const std::string& name, const Vector3& v) const
 		{
 			checkInUse();
-			GLint loc = getUniformLocation(name);
+			s32 loc = getUniformLocation(name);
 			if (loc == -1)
 				return;
 			glUniform3fv(loc, 1, &v[0]);
@@ -322,7 +369,7 @@ namespace Dunjun
 		void ShaderProgram::setUniform(const std::string& name, const Vector4& v) const
 		{
 			checkInUse();
-			GLint loc = getUniformLocation(name);
+			s32 loc = getUniformLocation(name);
 			if (loc == -1)
 				return;
 			glUniform4fv(loc, 1, &v[0]);
@@ -330,7 +377,7 @@ namespace Dunjun
 		void ShaderProgram::setUniform(const std::string& name, const Matrix4& m) const
 		{
 			checkInUse();
-			GLint loc = getUniformLocation(name);
+			s32 loc = getUniformLocation(name);
 			if (loc == -1)
 				return;
 			glUniformMatrix4fv(loc, 1, GL_FALSE, &m[0][0]);
@@ -340,7 +387,7 @@ namespace Dunjun
 		void ShaderProgram::setUniform(const std::string& name, const Quaternion& q) const
 		{
 			checkInUse();
-			GLint loc = getUniformLocation(name);
+			s32 loc = getUniformLocation(name);
 			if (loc == -1)
 				return;
 
@@ -366,20 +413,5 @@ namespace Dunjun
 			a = c.a / 255.0f;
 
 			setUniform(name, r, g, b, a);
-		}
-
-		bool ShaderProgram::isLinked() const
-		{
-			return m_isLinked;
-		}
-
-		const std::string& ShaderProgram::getErrorLog() const
-		{
-			return m_errorLog;
-		}
-
-		GLuint ShaderProgram::getNativeHandle() const
-		{
-			return m_object;
 		}
 } // end Dunjun

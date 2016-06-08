@@ -21,14 +21,14 @@ namespace Dunjun
 	namespace
 	{
 		GLOBAL const Time TIME_STEP = seconds(1.0f / 60.0f);
-		GLOBAL const Time MaxFrameTime = seconds(1.0f / (288.0f + 1.0f));
+		GLOBAL const Time MaxFrameTime = seconds(1.0f / (2.0f * 1440.f + 1.0f));
 		GLOBAL bool g_running = true;
 	} // end anon namespace
 
 	GLOBAL ModelAsset g_sprite;
 
 	GLOBAL SceneNode g_rootNode;
-	GLOBAL SceneNode* g_player;
+	GLOBAL SceneNode* g_player = nullptr;
 
 	GLOBAL std::vector<PointLight> g_pointLights;
 	GLOBAL std::vector<DirectionalLight> g_directionalLights;
@@ -38,7 +38,7 @@ namespace Dunjun
 	//GLOBAL std::map<std::string, Material> g_materials;
 	//GLOBAL std::map<std::string, Mesh*> g_meshes;
 
-	GLOBAL Level* g_level;
+	GLOBAL Level* g_level = nullptr;
 
 	GLOBAL Transform g_parentTest;
 
@@ -83,22 +83,22 @@ namespace Dunjun
 		
 			if (Input::isKeyPressed(Input::Key::F11)) // press F11 to toggle between default and fullscreen
 			{
+				// TODO: hide isFullscreen
 				Window::isFullscreen = !Window::isFullscreen; // toggles true/false boolean for fullscreen
 				if (Window::isFullscreen) // action to take if fullscreen is true
 				{
 					GLFWwindow* w = Window::createWindow(glfwGetPrimaryMonitor());
 					Window::destroyWindow();
-					Window::ptr = w;
+					Window::setHandle(w);
 				}
 				else // action to take if fullsscreen is not true
 				{
 					GLFWwindow* w = Window::createWindow(nullptr);
 					Window::destroyWindow();
-					Window::ptr = w;
+					Window::setHandle(w);
 				}
 				Window::makeContextCurrent();
-				//glfwDestroyWindow(Window::ptr); // destroys old window
-				Window::swapInterval(1);
+				Window::swapInterval(0);
 				glInit();
 			}
 		}
@@ -194,11 +194,14 @@ namespace Dunjun
 
 				u32 indices[] = { 0, 1, 2, 1, 3, 2 }; // vertex draw order for GL_TRIANGLES
 
+				// get number of entries
+				u32 numVertices = sizeof(vertices) / sizeof(vertices[0]);
+				u32 numIndices = sizeof(indices) / sizeof(indices[0]);
+
 				Mesh::Data meshData;
 
-				// get number of entries
-				int numVertices = sizeof(vertices) / sizeof(vertices[0]);
-				int numIndices = sizeof(indices) / sizeof(indices[0]);
+				meshData.vertices.reserve(numVertices);
+				meshData.indices.reserve(numIndices);
 
 				// add the data
 				for(int i = 0; i < numVertices; i++)
@@ -228,11 +231,14 @@ namespace Dunjun
 
 				u32 indices[] = { 0, 1, 2, 1, 3, 2 }; // vertex draw order for GL_TRIANGLES
 
-				Mesh::Data meshData;
-
 				// get number of entries
 				int numVertices = sizeof(vertices) / sizeof(vertices[0]);
 				int numIndices = sizeof(indices) / sizeof(indices[0]);
+
+				Mesh::Data meshData;
+
+				meshData.vertices.reserve(numVertices);
+				meshData.indices.reserve(numIndices);
 
 				// add the data
 				for (int i = 0; i < numVertices; i++)
@@ -245,12 +251,6 @@ namespace Dunjun
 
 				g_meshHolder.insert("quad", make_unique<Mesh>(meshData));
 			}
-		}
-
-		// generate world objects
-		INTERNAL void generateWorld()
-		{
-			g_rootNode.onStart();
 		}
 
 		/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -266,7 +266,7 @@ namespace Dunjun
 		// create instances of vertex info
 		INTERNAL void loadInstances()
 		{
-			generateWorld();
+			g_rootNode.onStart();
 
 			{ // player scene node
 				SceneNode::u_ptr player = make_unique<SceneNode>();
@@ -303,19 +303,19 @@ namespace Dunjun
 
 				light.setIntensities(ColorLib::White, 20.0f);
 				light.position = { 0.0f, -300.0f, 0.0f };
-				g_pointLights.push_back(light);
+				g_pointLights.emplace_back(light);
 
 				light.setIntensities(ColorLib::Red, 5.0f);
 				light.position = { 3.0f, 0.5f, 3.0f };
-				g_pointLights.push_back(light);
+				g_pointLights.emplace_back(light);
 
 				light.setIntensities(ColorLib::Blue, 5.0f);
 				light.position = { 2.5f, 0.5f, 2.0f };
-				g_pointLights.push_back(light);
+				g_pointLights.emplace_back(light);
 
 				light.setIntensities(ColorLib::Green, 5.0f);
 				light.position = { 2.0f, 0.5f, 3.0f };
-				g_pointLights.push_back(light);
+				g_pointLights.emplace_back(light);
 			}
 
 			// add directional lights
@@ -324,7 +324,7 @@ namespace Dunjun
 
 				light.setIntensities(ColorLib::Orange, 0.5f);
 				light.direction = Vector3(-0.8, -1.0, -0.2);
-				g_directionalLights.push_back(light);
+				g_directionalLights.emplace_back(light);
 			}
 
 			{
@@ -778,7 +778,7 @@ namespace Dunjun
 				g_level->roomsRendered = 0;
 				const Vector3 viewPos = g_cameraWorld.transform.position;
 				const Vector3 cameraOrientation = g_cameraWorld.forward();
-				const f32 viewDistance = 50;
+				const f32 viewDistance = g_currentCamera->farPlane;
 				if (toggleCulling == true)
 				for( auto& room : g_level->rooms)
 				{
@@ -890,14 +890,20 @@ namespace Dunjun
 			glClearColor(0.02f, 0.02f, 0.02f, 1.0f); // set the default color (R,G,B,A)
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-			g_shaderHolder.get("texturePass").use();
-			g_shaderHolder.get("texturePass").setUniform("u_tex", 0);
-			g_shaderHolder.get("texturePass").setUniform("u_scale", Vector3(1.0f));
+			{
+				ShaderProgram& shaders = g_shaderHolder.get("texturePass");
+				shaders.use();
 
-			Texture::bind(&g_renderer.lightingTexture.colorTexture, 0);
+				shaders.use();
+				shaders.setUniform("u_tex", 0);
+				shaders.setUniform("u_scale", Vector3(1.0f));
 
-			g_renderer.draw(&g_meshHolder.get("quad"));
+				Texture::bind(&g_renderer.lightingTexture.colorTexture, 0);
 
+				g_renderer.draw(&g_meshHolder.get("quad"));
+
+				shaders.stopUsing();
+			}
 			Window::swapBuffers(); // switches information between the front buffer and the back buffer
 		}
 
@@ -998,11 +1004,10 @@ namespace Dunjun
 
 				if (tc.update(milliseconds(500)))
 				{
-					//std::cout << tc.getTickRate() << std::endl;
-					titleStream.str("");
-					titleStream.clear();
-					titleStream << "Dunjun - F/S: ~" <<  tc.getTickRate() << " - Your current speed"; // dynamic window title
-					Window::setTitle(titleStream.str().c_str());
+					// dynamic window title
+					Window::setTitle(stringFormat("Dunjun - %.3f ms - %d fps",
+												  1000.f / tc.getTickRate(), 
+												  (u32)tc.getTickRate()));
 				}
 
 				render();
