@@ -53,11 +53,16 @@ namespace Dunjun
 		void onStart();
 		void update(Time dt);
 
+		SceneNode* getParent() const
+		{
+			return m_parent;
+		}
+
 		using ID = u64;
 		const ID id;
 		std::string name;
 		Transform transform;
-		ReadOnly<SceneNode*, SceneNode> parent;
+		//ReadOnly<SceneNode*, SceneNode> parent;
 		bool visible = true;
 
 		/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -84,7 +89,7 @@ namespace Dunjun
 			assert(!hasComponent<ComponentType>());
 
 			ComponentType* component = new ComponentType(std::forward<Args>(args)...);
-			component->parent = this;
+			component->m_parent = this;
 
 			m_components.push_back(std::unique_ptr<NodeComponent>(component));
 
@@ -167,6 +172,8 @@ namespace Dunjun
 
 		virtual void drawCurrent(SceneRenderer& renderer, Transform t) const;
 		void drawChildren(SceneRenderer& renderer, Transform t) const;
+
+		SceneNode* m_parent;
 
 		std::deque<u_ptr> m_children;
 		// A GroupedComponentMap groups components of the same type together by type_index(...).hash_code()

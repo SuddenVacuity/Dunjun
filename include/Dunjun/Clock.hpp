@@ -12,12 +12,13 @@ namespace Dunjun
 	public:
 		inline Time getElapsedTime() const
 		{
-			return Input::getTime() - m_startTime;
+			return Time::now() - m_startTime;
 		}
 
 		inline Time restart()
 		{
-			Time now = Input::getTime();
+			//Time now = Input::getTime();
+			Time now = Time::now();
 			Time elapsed = now - m_startTime;
 			m_startTime = now;
 
@@ -25,13 +26,8 @@ namespace Dunjun
 		}
 
 	private:
-		Time m_startTime = Input::getTime();
+		Time m_startTime = Time::now();
 	};
-
-	inline void sleep(Time time)
-	{
-		std::this_thread::sleep_for(std::chrono::microseconds(time.asMicroseconds()));
-	}
 }
 
 #endif

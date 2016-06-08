@@ -12,7 +12,7 @@ namespace Dunjun
 			TextureFilter minMagFilter = TextureFilter::Linear,
 			TextureWrapMode wrapMode = TextureWrapMode::ClampToEdge)
 		{
-			auto tex = make_unique<Texture>();
+			std::unique_ptr<Texture> tex = make_unique<Texture>();
 			bool t = tex->loadFromFile(BaseDirectories::Texture + filename, minMagFilter, wrapMode);
 
 			if(t == true)
@@ -25,7 +25,7 @@ namespace Dunjun
 			TextureFilter minMagFilter = TextureFilter::Linear,
 			TextureWrapMode wrapMode = TextureWrapMode::ClampToEdge)
 		{
-			auto tex = make_unique<Texture>();
+			std::unique_ptr<Texture> tex = make_unique<Texture>();
 			bool t = tex->loadFromImage(image, minMagFilter, wrapMode);
 
 			if (t == true)
@@ -43,17 +43,17 @@ namespace Dunjun
 			const std::string& fragmentFilename,
 			bool bindDefaultAttribLocation = true)
 		{
-			auto shaders = make_unique<ShaderProgram>();
+			std::unique_ptr<ShaderProgram> shaders = make_unique<ShaderProgram>();
 
 			if (!shaders->attachShaderFromFile(Dunjun::ShaderType::Vertex, vertexFilename)) // check if the file loaded
 			{
-				std::cerr << (const std::string&)shaders->errorLog << std::endl;
+				std::cerr << shaders->getErrorLog() << std::endl;
 				return false;
 			}
 
 			if (!shaders->attachShaderFromFile(Dunjun::ShaderType::Fragment, fragmentFilename)) // check if the file loaded
 			{
-				std::cerr << (const std::string&)shaders->errorLog << std::endl;
+				std::cerr << shaders->getErrorLog() << std::endl;
 				return false;
 			}
 
@@ -67,7 +67,7 @@ namespace Dunjun
 
 			if (!shaders->link())
 			{
-				std::cerr << (const std::string&)shaders->errorLog << std::endl;
+				std::cerr << (const std::string&)shaders->getErrorLog() << std::endl;
 				return false;
 			}
 

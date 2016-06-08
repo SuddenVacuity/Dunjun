@@ -238,7 +238,8 @@ namespace Dunjun
 			f64 x, y;
 			glfwGetCursorPos(Window::ptr, &x, &y);
 
-			return Vector2(x, y);
+			return Vector2(static_cast<f32>(x), 
+						   static_cast<f32>(y));
 		}
 		void setCursorPosition(const Vector2& pos)
 		{
@@ -267,14 +268,6 @@ namespace Dunjun
 		)
 		)				.
 		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
-
-		Time getTime()
-		{
-			auto now = std::chrono::high_resolution_clock::now().time_since_epoch();
-
-			return microseconds(std::chrono::duration_cast
-								<std::chrono::microseconds>(now).count());
-		}
 
 		//void setTime(Time time)
 		//{

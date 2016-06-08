@@ -116,8 +116,8 @@ namespace Dunjun
 		return !operator==(b);
 	}
 
-	const Vector3 Quaternion::vector() const { return (const Vector3&)(data); }
-	Vector3& Quaternion::vector() { return (Vector3&)(data); }
+	const Vector3 Quaternion::vector() const { return reinterpret_cast<const Vector3&>(data); }
+	Vector3& Quaternion::vector() { return reinterpret_cast<Vector3&>(data); }
 
 	f32 Quaternion::scaler() const { return w; }
 	f32& Quaternion::scaler() { return w; }

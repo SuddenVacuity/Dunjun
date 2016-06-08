@@ -10,219 +10,69 @@ namespace Dunjun
 	class Time
 	{
 	public:
-		Time()
-			: m_microseconds{std::chrono::microseconds{0}}
-		{
-		}
+		Time() = default;
 
-		//GLOBAL const Time Zero;
+		GLOBAL const Time Zero;
 
-		inline f32 asSeconds() const
-		{
-			return m_microseconds.count() / 1000000.0f;
-		}
+		f32 asSeconds() const;
+		s32 asMilliseconds() const;
+		s64 asMicroseconds() const;
 
-		inline s32 asMilliseconds() const
-		{
-			return static_cast<s32>(m_microseconds.count() / 1000);
-		}
-
-		inline s64 asMicroseconds() const
-		{
-			return m_microseconds.count();
-		}
-
+		GLOBAL Time now();
+		GLOBAL void sleep(Time time);
 
 	private:
 		friend Time seconds(f32);
 		friend Time milliseconds(s32);
 		friend Time microseconds(s64);
 
-		explicit Time(s64 microseconds)
-			: m_microseconds{ std::chrono::microseconds{ microseconds } }
-		{
-		}
+		explicit Time(s64 microseconds);
 
-		std::chrono::microseconds m_microseconds;
+		std::chrono::microseconds m_microseconds = std::chrono::microseconds(0);
 	}; // end Time
 
 	//const Time Zero = seconds(0);
 
-	inline Time seconds(f32 amount)
-	{
-		return Time(static_cast<s64>(amount * 1000000));
-	}
+	Time seconds(f32 amount);
+	Time milliseconds(s32 amount);
+	Time microseconds(s64 amount);
 
-	inline Time milliseconds(s32 amount)
-	{
-		return Time(static_cast<s64>(amount * 1000));
-	}
+	//
+	//OPERATORS
+	bool operator==(Time left, Time right);
+	bool operator!=(Time left, Time right);
 
-	inline Time microseconds(s64 amount)
-	{
-		return Time(amount);
-	}
+	bool operator>(Time left, Time right);
+	bool operator<(Time left, Time right);
+	bool operator>=(Time left, Time right);
+	bool operator<=(Time left, Time right);
 
-	/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-	)				.
-	)					OPERATORS
-	)
-	)				.
-	)					.
-	)
-	)				.
-	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+	inline Time operator-(Time right);
 
+	//ADDITION AND SUBTRACTION
+	Time operator+(Time left, Time right);
+	Time operator-(Time left, Time right);
+	Time& operator+=(Time& left, Time right);
+	Time& operator-=(Time& left, Time right);
 
-	inline bool operator==(Time left, Time right)
-	{
-		return left.asMicroseconds() == right.asMicroseconds();
-	}
+	//MULTIPLICATION
+	Time operator*(Time left, f32 right);
+	Time operator*(f32 left, Time right);
+	Time operator*(Time left, s64 right);
+	Time operator*(s64 left, Time right);
 
-	inline bool operator!=(Time left, Time right)
-	{
-		return left.asMicroseconds() != right.asMicroseconds();
-	}
+	Time& operator*=(Time& left, f32 right);
+	Time& operator*=(Time& left, s64 right);
+			
+	//DIVISION
+	Time operator/(Time left, f32 right);
+	Time operator/(Time left, s64 right);
+	Time& operator/=(Time& left, f32 right);
+	Time& operator/=(Time& left, s64 right);
+	f32 operator/(Time left, Time right);
 
-	inline bool operator>(Time left, Time right)
-	{
-		return left.asMicroseconds() > right.asMicroseconds();
-	}
-
-	inline bool operator<(Time left, Time right)
-	{
-		return left.asMicroseconds() < right.asMicroseconds();
-	}
-
-	inline bool operator>=(Time left, Time right)
-	{
-		return left.asMicroseconds() >= right.asMicroseconds();
-	}
-
-	inline bool operator<=(Time left, Time right)
-	{
-		return left.asMicroseconds() <= right.asMicroseconds();
-	}
-
-	inline Time operator-(Time right)
-	{
-		return microseconds(-right.asMicroseconds());
-	}
-
-	/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-	)				.
-	)					ADDITION AND SUBTRACTION
-	)
-	)				.
-	)					.
-	)
-	)				.
-	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
-
-	inline Time operator+(Time left, Time right)
-	{
-		return microseconds(left.asMicroseconds() + right.asMicroseconds());
-	}
-
-	inline Time operator-(Time left, Time right)
-	{
-		return microseconds(left.asMicroseconds() - right.asMicroseconds());
-	}
-
-	inline Time& operator+=(Time& left, Time right)
-	{
-		return left = left + right;
-	}
-
-	inline Time& operator-=(Time& left, Time right)
-	{
-		return left = left - right;
-	}
-
-	/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-	)				.
-	)					MULTIPLICATION
-	)
-	)				.
-	)					.
-	)
-	)				.
-	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
-
-	inline Time operator*(Time left, f32 right)
-	{
-		return microseconds(left.asMicroseconds() * right);
-	}
-
-	inline Time operator*(f32 left, Time right)
-	{
-		return microseconds(left * right.asMicroseconds());
-	}
-
-	inline Time operator*(Time left, s64 right)
-	{
-		return microseconds(left.asMicroseconds() * right);
-	}
-	inline Time operator*(s64 left, Time right)
-	{
-		return microseconds(left * right.asMicroseconds());
-	}
-
-	inline Time& operator*=(Time& left, f32 right)
-	{
-		return left = left * right;
-	}
-
-	inline Time& operator*=(Time& left, s64 right)
-	{
-		return left = left * right;
-	}
-
-	/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-	)				.
-	)					DIVISION
-	)
-	)				.
-	)					.
-	)
-	)				.
-	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
-
-	inline Time operator/(Time left, f32 right)
-	{
-		return microseconds(left.asMicroseconds() / right);
-	}
-
-	inline Time operator/(Time left, s64 right)
-	{
-		return microseconds(left.asMicroseconds() / right);
-	}
-
-	inline Time& operator/=(Time& left, f32 right)
-	{
-		return left = left / right;
-	}
-
-	inline Time& operator/=(Time& left, s64 right)
-	{
-		return left = left / right;
-	}
-
-	inline f32 operator/(Time left, Time right)
-	{
-		return left.asSeconds() / right.asSeconds();
-	}
-
-	inline Time operator%(Time left, Time right)
-	{
-		return microseconds(left.asMicroseconds() % right.asMicroseconds());
-	}
-
-	inline Time& operator%=(Time& left, Time right)
-	{
-		return left = left % right;
-	}
-
+	Time operator%(Time left, Time right);
+	Time& operator%=(Time& left, Time right);
 
 } // end Dunjun
 

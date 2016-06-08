@@ -4,34 +4,34 @@
 namespace Dunjun
 {
 	RenderTexture::RenderTexture()
-		: width(0)
-		, height(0)
-		, type(Color)
-		, colorTexture()
+		: colorTexture()
 		, depthTexture()
-		, fbo(0)
+		, m_width(0)
+		, m_height(0)
+		, m_type(Color)
+		, m_fbo(0)
 	{
 	}
 
 	RenderTexture::~RenderTexture()
 	{
-		if(fbo)
-			glDeleteFramebuffersEXT(1, &fbo);
+		if(m_fbo)
+			glDeleteFramebuffersEXT(1, &m_fbo);
 	}
 
 	bool RenderTexture::create(u32 w, u32 h, TextureType t, TextureFilter minMagFilter, TextureWrapMode wrapMode)
 	{
-		if(w == width.data && h == height.data && t == type)
+		if(w == m_width && h == m_height && t == m_type)
 			return true;
 
-		type = t;
-		width = w;
-		height = h;
+		m_type = t;
+		m_width = w;
+		m_height = h;
+		
+		if(!m_fbo)
+			glGenFramebuffersEXT(1, &m_fbo);
 
-		if(!fbo)
-			glGenFramebuffersEXT(1, &fbo);
-
-		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo.data);
+		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, m_fbo);
 
 		GLuint depthRenderBuffer = 0;
 
@@ -40,14 +40,14 @@ namespace Dunjun
 
 		glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, 
 								 GL_DEPTH_COMPONENT, 
-								 (GLsizei)width, (GLsizei)height);
+								 (GLsizei)m_width, (GLsizei)m_height);
 
 		glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, 
 									 GL_DEPTH_ATTACHMENT, 
 									 GL_RENDERBUFFER_EXT, 
 									 depthRenderBuffer);
 
-		if (type.data & Color)
+		if (m_type & Color)
 		{
 			if(!colorTexture.m_object)
 				glGenTextures(1, &colorTexture.m_object);
@@ -55,22 +55,22 @@ namespace Dunjun
 			glBindTexture(GL_TEXTURE_2D, (GLuint)colorTexture.m_object);
 
 			// light
-			if(type.data & Light)
+			if(m_type & Light)
 			{
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F,
-						(GLsizei)width, (GLsizei)height,
+						(GLsizei)m_width, (GLsizei)m_height,
 						0, GL_RGBA, GL_FLOAT, 0);
 			}
 			else
 			{
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, 
-						 (GLsizei)width, (GLsizei)height, 
+						 (GLsizei)m_width, (GLsizei)m_height,
 						 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
 			}
 
 
-			colorTexture.width = width;
-			colorTexture.height = height;
+			colorTexture.m_width = m_width;
+			colorTexture.m_height = m_height;
 
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, (GLenum)minMagFilter);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, (GLenum)minMagFilter);
@@ -81,18 +81,18 @@ namespace Dunjun
 									GL_COLOR_ATTACHMENT0_EXT, 
 									colorTexture.m_object, 0);
 		}
-		if (type.data & Depth)
+		if (m_type & Depth)
 		{
 			if (!depthTexture.m_object)
 				glGenTextures(1, &depthTexture.m_object);
 
 			glBindTexture(GL_TEXTURE_2D, (GLuint)depthTexture.m_object);
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, 
-						(GLsizei)width, (GLsizei)height, 
+						(GLsizei)m_width, (GLsizei)m_height,
 						0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
 
-			depthTexture.width = width;
-			depthTexture.height = height;
+			depthTexture.m_width = m_width;
+			depthTexture.m_height = m_height;
 
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, (GLenum)minMagFilter);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, (GLenum)minMagFilter);
@@ -106,9 +106,9 @@ namespace Dunjun
 
 		std::vector<GLenum> drawBuffers;
 
-		if (type.data & Color || type.data & Light)
+		if (m_type & Color || m_type & Light)
 			drawBuffers.push_back(GL_COLOR_ATTACHMENT0_EXT);
-		if (type.data & Depth)
+		if (m_type & Depth)
 			drawBuffers.push_back(GL_DEPTH_ATTACHMENT_EXT);
 		
 
@@ -132,7 +132,7 @@ namespace Dunjun
 		if(!rt)
 			glFlush();
 
-		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, rt != nullptr ? rt->fbo : 0);
+		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, rt != nullptr ? rt->m_fbo : 0);
 	}
 
 	//void RenderTexture::unbind(const RenderTexture* rt)
@@ -160,4 +160,23 @@ namespace Dunjun
 	//		Texture::bind(nullptr, position);
 	//}
 
+	u32 RenderTexture::getWidth() const
+	{
+		return m_width;
+	}
+
+	u32 RenderTexture::getHeight() const
+	{
+		return m_height;
+	}
+
+	RenderTexture::TextureType RenderTexture::getType() const
+	{
+		return m_type;
+	}
+
+	GLuint RenderTexture::getNativeHandle() const
+	{
+		return m_fbo;
+	}
 } // end Dunjun

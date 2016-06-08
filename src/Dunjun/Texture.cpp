@@ -25,16 +25,16 @@ namespace Dunjun
 
 	Texture::Texture() // Initialize texture
 		: m_object(0)
-		, width(0)
-		, height(0)
+		, m_width(0)
+		, m_height(0)
 	{
 	}
 	Texture::Texture(const Image& image,
 		TextureFilter minMagFilter,
 		TextureWrapMode wrapMode)
 		: m_object(0)
-		, width(image.width)
-		, height(image.height)
+		, m_width(image.getWidth())
+		, m_height(image.getHeight())
 	{
 		if (!loadFromImage(image, minMagFilter, wrapMode))
 			throw std::runtime_error("Could not create texture from image.");
@@ -56,11 +56,11 @@ namespace Dunjun
 		TextureFilter minMagFilter,
 		TextureWrapMode wrapMode)
 	{
-		if ((const ImageFormat&)image.format == ImageFormat::None )
+		if ((const ImageFormat&)image.getFormat() == ImageFormat::None )
 			return false;
 
-		width = (GLfloat)image.width;
-		height = (GLfloat)image.height;
+		m_width = (GLfloat)image.getWidth();
+		m_height = (GLfloat)image.getHeight();
 
 		if(!m_object)
 			glGenTextures(1, &m_object);
@@ -86,7 +86,7 @@ namespace Dunjun
 
 
 	//	glTexImage2D(GL_TEXTURE_2D, 0, format, (GLsizei)m_width, (GLsizei)m_height, 0, image.getFormat(), GL_UNSIGNED_INT, image.getPixelPtr());
-		glTexImage2D(GL_TEXTURE_2D, 0, getInternalFormat(image.format, true), width, height, 0, getInternalFormat(image.format, false), GL_UNSIGNED_BYTE, image.pixels);
+		glTexImage2D(GL_TEXTURE_2D, 0, getInternalFormat(image.getFormat(), true), m_width, m_height, 0, getInternalFormat(image.getFormat(), false), GL_UNSIGNED_BYTE, image.getPixels());
 
 		glBindTexture(GL_TEXTURE_2D, 0);
 		
@@ -136,4 +136,19 @@ namespace Dunjun
 	//	glDisable(GL_TEXTURE_2D);
 	//
 	//}
+
+		s32 Texture::getWidth() const
+		{
+			return m_width;
+		}
+
+		s32 Texture::getHeight() const
+		{
+			return m_height;
+		}
+
+		GLuint Texture::getNativeHandle() const
+		{
+			return m_object;
+		}
 } // End Namespace Dunjun

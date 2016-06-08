@@ -258,14 +258,6 @@ namespace Dunjun
 		)				.
 		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-		Time getTime()
-		{
-			auto now = std::chrono::high_resolution_clock::now().time_since_epoch();
-
-			return microseconds(std::chrono::duration_cast
-				<std::chrono::microseconds>(now).count);
-		}
-
 		//void setTime(Time time)
 		//{
 		//	glfwSetTime(time);

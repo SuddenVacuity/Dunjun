@@ -1,7 +1,7 @@
 #ifndef DUNJUN_NONCOPYABLE_HPP
 #define DUNJUN_NONCOPYABLE_HPP
 
-#include <Dunjun/ReadOnly.hpp>
+#include <Dunjun/ResourceHolder.hpp>
 
 // this keeps shaders and texture from being copied
 namespace Dunjun
@@ -14,8 +14,8 @@ namespace Dunjun
 		NonCopyable(const NonCopyable&) = delete;
 		NonCopyable& operator=(const NonCopyable&) = delete;
 
-		NonCopyable(NonCopyable&&) = delete;
-		NonCopyable& operator=(NonCopyable&&) = delete;
+		//NonCopyable(NonCopyable&&) = delete;
+		//NonCopyable& operator=(NonCopyable&&) = delete;
 
 	};
 }

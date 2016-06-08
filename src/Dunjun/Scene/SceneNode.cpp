@@ -19,8 +19,8 @@ namespace Dunjun
 		, id(Impl::getUniqueSceneNodeId())
 		, name("")
 		, transform()
-		, parent(nullptr)
 		, visible(true)
+		, m_parent(nullptr)
 	{
 		std::stringstream ss;
 		ss << "node_" << id;
@@ -30,7 +30,7 @@ namespace Dunjun
 	SceneNode& SceneNode::attachChild(u_ptr child)
 	{
 		// get the 
-		child->parent = this;
+		child->m_parent = this;
 		m_children.push_back(std::move(child));
 
 		return *this;
@@ -55,7 +55,7 @@ namespace Dunjun
 		{
 			u_ptr result = std::move(*found);
 
-			result->parent = nullptr; // remove parent pointer form result
+			result->m_parent = nullptr; // remove parent pointer form result
 			m_children.erase(found); // remove child pointer from m_children
 
 			return result;
@@ -91,7 +91,7 @@ namespace Dunjun
 	{
 		Transform result;
 
-		for(const SceneNode* node = this; node != nullptr; node = node->parent)
+		for(const SceneNode* node = this; node != nullptr; node = node->getParent())
 			result *= node->transform;
 
 		return result;

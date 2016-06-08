@@ -44,7 +44,7 @@ namespace Dunjun
 	
 	void SceneRenderer::addModelInstance(const MeshRenderer& meshRenderer, Transform t)
 	{
-		if(meshRenderer.parent->visible == true)
+		if(meshRenderer.getParent()->visible == true)
 			modelInstances.push_back({&meshRenderer, t});
 	}
 
@@ -81,7 +81,7 @@ namespace Dunjun
 
 		GBuffer::bind(&gBuffer);
 		{
-			glViewport(0, 0, gBuffer.width, gBuffer.height);
+			glViewport(0, 0, gBuffer.getWidth(), gBuffer.getHeight());
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 			shaders.use();
@@ -120,7 +120,7 @@ namespace Dunjun
 		//if(lightingTexture == nullptr)
 		//	lightingTexture = make_unique<RenderTexture>();
 
-		lightingTexture.create(gBuffer.width, gBuffer.height, RenderTexture::Light);
+		lightingTexture.create(gBuffer.getWidth(), gBuffer.getHeight(), RenderTexture::Light);
 
 		Texture::bind(&gBuffer.diffuse,  0);
 		Texture::bind(&gBuffer.specular, 1);
@@ -130,7 +130,7 @@ namespace Dunjun
 		RenderTexture::bind(&lightingTexture);
 		{
 			glClearColor(0, 0, 0, 0);
-			glViewport(0, 0, lightingTexture.width, lightingTexture.height);
+			glViewport(0, 0, lightingTexture.getWidth(), lightingTexture.getHeight());
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 			glDepthMask(GL_FALSE);

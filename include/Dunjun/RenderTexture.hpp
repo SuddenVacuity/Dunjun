@@ -32,15 +32,27 @@ namespace Dunjun
 
 		//void bindTexture(TextureType t, GLuint position) const;
 
+		//ReadOnly<u32, RenderTexture> width;
+		//ReadOnly<u32, RenderTexture> height;
+		u32 getWidth() const;
+		u32 getHeight() const;
+
+		//ReadOnly<TextureType, RenderTexture> type;
+		TextureType getType() const;
+
+		//ReadOnly<GLuint, RenderTexture> fbo; //frame buffer object
+		GLuint getNativeHandle() const;
+
 		Texture colorTexture;
 		Texture depthTexture;
+	private:
+		u32 m_width;
+		u32 m_height;
 
-		ReadOnly<TextureType, RenderTexture> type;
+		TextureType m_type;
 
-		ReadOnly<u32, RenderTexture> width;
-		ReadOnly<u32, RenderTexture> height;
-		ReadOnly<GLuint, RenderTexture> fbo; //frame buffer object
-	};
+		GLuint m_fbo;
+	};	
 
 
 } // end Dunjun

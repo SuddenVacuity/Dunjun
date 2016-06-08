@@ -21,6 +21,7 @@ namespace Dunjun
 	namespace
 	{
 		GLOBAL const Time TIME_STEP = seconds(1.0f / 60.0f);
+		GLOBAL const Time MaxFrameTime = seconds(1.0f / (288.0f + 1.0f));
 		GLOBAL bool g_running = true;
 	} // end anon namespace
 
@@ -959,29 +960,30 @@ namespace Dunjun
 			//=================================================================================================
 			//=================================================================================================
 
+			const Time tickLimit = seconds(1.0 / (2.0f * 144.0f + 1.0f));
+
 			TickCounter tc;
 			Clock frameClock;
-			Time tickLimit = seconds(1.0f / 240.0f);
-
-			Clock deltaClock;
 
 			Time accumulator;
-			Time prevTime = Input::getTime();
+			Time prevTime = Time::now();
+
+			Window::makeContextCurrent();
 
 			while (g_running) // create a loop that works until the window closes
 			{
 				//Window::pollEvents();
-
 				Window::makeContextCurrent();
 
-				Time currentTime = Input::getTime();
+				Time currentTime = Time::now();
 				Time dt = currentTime - prevTime;
+
 				prevTime = currentTime;
 				accumulator += dt;
 
 				// limit accumulator size
-				if (accumulator > seconds(1.2f))
-					accumulator = seconds(1.2f);
+				if (accumulator >= milliseconds(1200))
+					accumulator = milliseconds(1200);
 
 				// render update
 				while (accumulator >= TIME_STEP)
@@ -994,7 +996,7 @@ namespace Dunjun
 
 				}
 
-				if (tc.update(seconds(0.5)))
+				if (tc.update(milliseconds(500)))
 				{
 					//std::cout << tc.getTickRate() << std::endl;
 					titleStream.str("");
@@ -1005,9 +1007,12 @@ namespace Dunjun
 
 				render();
 
+
 				// framerate limiter
-				if (frameClock.getElapsedTime() < tickLimit)
-					sleep(tickLimit - frameClock.getElapsedTime());
+				const Time framelimitTime = MaxFrameTime - frameClock.getElapsedTime();
+
+				if (framelimitTime > Time::Zero)
+					Time::sleep(framelimitTime);
 				frameClock.restart();
 
 			}

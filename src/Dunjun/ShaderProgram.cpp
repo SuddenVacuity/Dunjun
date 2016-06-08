@@ -83,16 +83,16 @@ namespace Dunjun
 
 
 		ShaderProgram::ShaderProgram()
-			: object(0) // set default values
-			, isLinked(false)
-			, errorLog()
+			: m_object(0) // set default values
+			, m_isLinked(false)
+			, m_errorLog()
 		{
 		}
 
 		ShaderProgram::~ShaderProgram()
 		{
-			if (object)
-				glDeleteProgram(object);
+			if (m_object)
+				glDeleteProgram(m_object);
 		}
 
 		// add shaders here
@@ -105,8 +105,8 @@ namespace Dunjun
 		bool ShaderProgram::attachShaderFromMemory(ShaderType type, const std::string& source)
 		{
 			// check if m_object got compiled
-			if (!object)
-				object = glCreateProgram();
+			if (!m_object)
+				m_object = glCreateProgram();
 
 			const char* shaderSource = source.c_str();
 
@@ -137,7 +137,7 @@ namespace Dunjun
 				delete[] strInfoLog;
 
 				msg.append("\n");
-				errorLog.data.append(msg);
+				m_errorLog.append(msg);
 
 				glDeleteShader(shader);
 
@@ -145,7 +145,7 @@ namespace Dunjun
 				return false;
 			}
 
-			glAttachShader(object, shader);
+			glAttachShader(m_object, shader);
 
 			return true;
 		}
@@ -153,14 +153,14 @@ namespace Dunjun
 		void ShaderProgram::use() const
 		{
 			if(!isInUse()) // check that it's not in use already
-				glUseProgram(object);
+				glUseProgram(m_object);
 		}
 		bool ShaderProgram::isInUse() const
 		{
 			GLint currentProgram = 0;
 			glGetIntegerv(GL_CURRENT_PROGRAM, &currentProgram);
 
-			return (currentProgram == (GLint)object);
+			return (currentProgram == (GLint)m_object);
 		}
 		void ShaderProgram::stopUsing() const
 		{
@@ -177,47 +177,47 @@ namespace Dunjun
 		{
 
 			// check if m_object got compiled
-			if (!object)
-				object = glCreateProgram();
+			if (!m_object)
+				m_object = glCreateProgram();
 
 
-			if(!isLinked)
+			if(!m_isLinked)
 			{
-				glLinkProgram(object);
+				glLinkProgram(m_object);
 
 				GLint status; // check for link error
-				glGetProgramiv(object, GL_LINK_STATUS, &status);
+				glGetProgramiv(m_object, GL_LINK_STATUS, &status);
 
 				if (status == GL_FALSE)
 				{
 					std::string msg("Shader program linking failure:\n");
 
 					GLint infoLogLength;
-					glGetProgramiv(object, GL_INFO_LOG_LENGTH, &infoLogLength);
+					glGetProgramiv(m_object, GL_INFO_LOG_LENGTH, &infoLogLength);
 					char* strInfoLog = new char[infoLogLength +1];
-					glGetProgramInfoLog(object, infoLogLength, nullptr, strInfoLog);
+					glGetProgramInfoLog(m_object, infoLogLength, nullptr, strInfoLog);
 					msg.append(strInfoLog);
 					delete[] strInfoLog;
 
 					msg.append("\n");
-					errorLog.data.append(msg);
+					m_errorLog.append(msg);
 
-					glDeleteProgram(object);
-					object = 0;
+					glDeleteProgram(m_object);
+					m_object = 0;
 
-					isLinked = false;
-					return isLinked;
+					m_isLinked = false;
+					return m_isLinked;
 				}
 
-				isLinked = true;
+				m_isLinked = true;
 			}
 
-			return isLinked;
+			return m_isLinked;
 		}
 
 		void ShaderProgram::bindAttribLocation(GLuint location, const std::string& name)
 		{
-			glBindAttribLocation(object, location, name.c_str());
+			glBindAttribLocation(m_object, location, name.c_str());
 			m_attribLocations[name] = location;
 		}
 		GLint ShaderProgram::getAttribLocation(const std::string& name) const
@@ -227,7 +227,7 @@ namespace Dunjun
 			{
 				return found->second; // if not return found second position
 			}
-			GLint loc = glGetAttribLocation(object, name.c_str());
+			GLint loc = glGetAttribLocation(m_object, name.c_str());
 			m_attribLocations[name] = loc;
 			return loc;
 			
@@ -239,7 +239,7 @@ namespace Dunjun
 			{
 				return found->second;
 			}
-			GLint loc = glGetUniformLocation(object, name.c_str());
+			GLint loc = glGetUniformLocation(m_object, name.c_str());
 			m_uniformLocations[name] = loc;
 			return loc;
 		}
@@ -366,5 +366,20 @@ namespace Dunjun
 			a = c.a / 255.0f;
 
 			setUniform(name, r, g, b, a);
+		}
+
+		bool ShaderProgram::isLinked() const
+		{
+			return m_isLinked;
+		}
+
+		const std::string& ShaderProgram::getErrorLog() const
+		{
+			return m_errorLog;
+		}
+
+		GLuint ShaderProgram::getNativeHandle() const
+		{
+			return m_object;
 		}
 } // end Dunjun

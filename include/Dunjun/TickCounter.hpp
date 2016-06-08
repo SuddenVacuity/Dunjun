@@ -13,7 +13,7 @@ namespace Dunjun
 			bool reset = false;
 			if (m_clock.getElapsedTime() >= frequency)
 			{
-				m_tickRate = m_tick / frequency.asSeconds();
+				m_tickRate = m_tick * (1.0f / frequency.asSeconds());
 				m_tick = 0;
 				reset = true;
 				m_clock.restart();

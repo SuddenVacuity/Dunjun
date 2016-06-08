@@ -1,5 +1,16 @@
-#ifndef DUNJUN_READONLY_HPP
+/*#ifndef DUNJUN_READONLY_HPP
 #define DUNJUN_READONLY_HPP 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+)				REMOVED FROM PROJECT
+)				REMOVED FROM PROJECT
+)				REMOVED FROM PROJECT
+)				REMOVED FROM PROJECT
+)				REMOVED FROM PROJECT
+)				REMOVED FROM PROJECT
+)				REMOVED FROM PROJECT
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 
 #include <Dunjun/ResourceHolder.hpp>
 
@@ -71,7 +82,7 @@ namespace Dunjun
 
 	};
 } // end Dunjun   
-
+*/
 /*EXAMPLE
 =========================
 #include <cstdio>
@@ -109,4 +120,5 @@ void func()
 
 
 */// end EXAMPLE
-#endif
+//#endif
+
