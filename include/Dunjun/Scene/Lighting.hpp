@@ -54,6 +54,11 @@ namespace Dunjun
 		}
 	};
 
+	struct SpotLight : PointLight
+	{
+		Radian coneAngle = Radian(0.35f);
+		Vector3 direction = {0, 0, -1};
+	};
 
 
 } // end Dunjun

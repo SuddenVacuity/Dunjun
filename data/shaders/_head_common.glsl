@@ -2,7 +2,7 @@
 #define HEAD_COMMON_GLSL
 
 
-float square(float x) { return x; }
+float square(float x) { return x * x; }
 
 vec3 calculatePositionFromDepth(vec2 st, float depth, mat4 inverseMatrix)
 {

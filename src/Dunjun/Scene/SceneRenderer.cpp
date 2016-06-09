@@ -26,9 +26,10 @@ namespace Dunjun
 
 	void SceneRenderer::clearAll()
 	{
-		modelInstances.clear();
-		pointLights.clear();
-		directionalLights.clear();
+		m_modelInstances.clear();
+		m_directionalLights.clear();
+		m_pointLights.clear();
+		m_spotLights.clear();
 	}
 
 	void SceneRenderer::addSceneGraph(const SceneNode& node, const Transform& t)
@@ -45,22 +46,27 @@ namespace Dunjun
 	void SceneRenderer::addModelInstance(const MeshRenderer& meshRenderer, Transform t)
 	{
 		if(meshRenderer.getParent()->visible == true)
-			modelInstances.emplace_back(&meshRenderer, t);
-	}
-
-	void SceneRenderer::addPointLight(const PointLight* light)
-	{
-		pointLights.emplace_back(light);
+			m_modelInstances.emplace_back(&meshRenderer, t);
 	}
 
 	void SceneRenderer::addDirectionalLight(const DirectionalLight* light)
 	{
-		directionalLights.emplace_back(light);
+		m_directionalLights.emplace_back(light);
+	}
+
+	void SceneRenderer::addPointLight(const PointLight* light)
+	{
+		m_pointLights.emplace_back(light);
+	}
+
+	void SceneRenderer::addSpotLight(const SpotLight* light)
+	{
+		m_spotLights.emplace_back(light);
 	}
 
 	void SceneRenderer::deferredGeometryPass()
 	{
-		std::sort(std::begin(modelInstances), std::end(modelInstances),
+		std::sort(std::begin(m_modelInstances), std::end(m_modelInstances),
 			[](const ModelInstance& a, const ModelInstance& b) -> bool
 		{
 			const auto* A = a.asset->material;
@@ -89,7 +95,7 @@ namespace Dunjun
 			shaders.setUniform("u_camera", camera->getMatrix()); // shaderprogram.cpp
 			shaders.setUniform("u_cameraPosition", camera->transform.position); // shaderprogram.cpp
 
-			for (const auto& inst : modelInstances)
+			for (const auto& inst : m_modelInstances)
 			{
 				if (!inst.asset->mesh)
 					continue;
@@ -97,7 +103,6 @@ namespace Dunjun
 					//setShaders(inst.asset->material->shaders);
 
 				const Material& material = *inst.asset->material;
-				//const PointLight* light = pointLights[0];
 
 				shaders.setUniform("u_material.diffuseMap", (u32)0); // shaderprogram.cpp
 				shaders.setUniform("u_material.diffuseColor", material.diffuseColor); // shaderprogram.cpp
@@ -131,7 +136,7 @@ namespace Dunjun
 		{
 			glClearColor(0, 0, 0, 0);
 			glViewport(0, 0, lightingTexture.getWidth(), lightingTexture.getHeight());
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			glClear(GL_COLOR_BUFFER_BIT);
 
 			glDepthMask(false);
 			glEnable(GL_BLEND);
@@ -140,6 +145,7 @@ namespace Dunjun
 			renderAmbientLight();
 			renderDirectionalLights();
 			renderPointLights();
+			renderSpotLights();
 
 			glDisable(GL_BLEND);
 			glDepthMask(true);
@@ -147,13 +153,41 @@ namespace Dunjun
 		RenderTexture::bind(nullptr);
 	} // end deferredLightPass()
 
+	void SceneRenderer::deferredFinalPass()
+	{
+		finalTexture.create(gBuffer.getWidth(), gBuffer.getHeight(), RenderTexture::Color);
+
+		Texture::bind(&gBuffer.diffuse, 0);
+		Texture::bind(&lightingTexture.colorTexture, 1);
+
+		RenderTexture::bind(&finalTexture);
+		{
+			glClearColor(1, 0, 1, 1);
+			glViewport(0, 0, finalTexture.getWidth(), finalTexture.getHeight());
+			glClear(GL_COLOR_BUFFER_BIT);
+
+			auto& shaders = g_shaderHolder.get("deferredFinalPass");
+
+			shaders.use();
+
+			shaders.setUniform("u_diffuse", 0);
+			shaders.setUniform("u_lighting", 1);
+
+			draw(&g_meshHolder.get("quad"));
+
+			shaders.stopUsing();
+		}
+		RenderTexture::bind(nullptr);
+
+	}
+
 	void SceneRenderer::renderAmbientLight()
 	{
 		auto& shaders = g_shaderHolder.get("deferredAmbientLight");
 
 		shaders.use();
 
-		shaders.setUniform("u_light.intensities", Vector3(0, 0, 0.02f));	
+		shaders.setUniform("u_light.intensities", Vector3(0, 0, 0.002f));	
 		
 		draw(&g_meshHolder.get("quad"));
 
@@ -169,20 +203,13 @@ namespace Dunjun
 		shaders.setUniform("u_specular", 1);
 		shaders.setUniform("u_normal", 2);
 
-		for (const DirectionalLight* light : directionalLights)
+		for (const DirectionalLight* light : m_directionalLights)
 		{
-			//Vector3 colorIntensities;
-			//
-			//colorIntensities.r = light->color.r / 255.0f;
-			//colorIntensities.g = light->color.g / 255.0f;
-			//colorIntensities.b = light->color.b / 255.0f;
-			//colorIntensities *= light->intensity;
+			shaders.setUniform("u_light.base.intensities", light->colorIntensity); // shaderprogram.cpp
 
-		shaders.setUniform("u_light.base.intensities", light->colorIntensity); // shaderprogram.cpp
+			shaders.setUniform("u_light.direction", normalize(light->direction));
 
-		shaders.setUniform("u_light.direction", normalize(light->direction));
-
-		draw(&g_meshHolder.get("quad"));
+			draw(&g_meshHolder.get("quad"));
 		}
 		shaders.stopUsing();
 	}
@@ -200,7 +227,7 @@ namespace Dunjun
 
 		shaders.setUniform("u_cameraInverse", inverse(camera->getMatrix()));
 
-		for (const PointLight* light : pointLights)
+		for (const PointLight* light : m_pointLights)
 		{
 			light->calculateRange();
 
@@ -219,6 +246,49 @@ namespace Dunjun
 			shaders.setUniform("u_light.attenuation.constant", light->attenuation.constant); // shaderprogram.cpp
 			shaders.setUniform("u_light.attenuation.linear", light->attenuation.linear); // shaderprogram.cpp
 			shaders.setUniform("u_light.attenuation.quadratic", light->attenuation.quadratic); // shaderprogram.cpp
+
+			draw(&g_meshHolder.get("quad"));
+
+		}
+		shaders.stopUsing();
+	}
+
+	void SceneRenderer::renderSpotLights()
+	{
+		auto& shaders = g_shaderHolder.get("deferredSpotLight");
+
+		shaders.use();
+
+		shaders.setUniform("u_diffuse", 0);
+		shaders.setUniform("u_specular", 1);
+		shaders.setUniform("u_normal", 2);
+		shaders.setUniform("u_depth", 3);
+
+		shaders.setUniform("u_cameraInverse", inverse(camera->getMatrix()));
+
+		for (const SpotLight* light : m_spotLights)
+		{
+			light->calculateRange();
+
+			//Vector3 colorIntensities;
+			//
+			//colorIntensities.r = light->color.r / 255.0f;
+			//colorIntensities.g = light->color.g / 255.0f;
+			//colorIntensities.b = light->color.b / 255.0f;
+			//colorIntensities *= light->intensity;
+
+
+			shaders.setUniform("u_light.coneAngle", static_cast<f32>(light->coneAngle)); // shaderprogram.cpp
+			shaders.setUniform("u_light.direction", light->direction); // shaderprogram.cpp
+
+			shaders.setUniform("u_light.pointLight.base.intensities", light->colorIntensity); // shaderprogram.cpp
+									
+			shaders.setUniform("u_light.pointLight.position", light->position); // shaderprogram.cpp
+			shaders.setUniform("u_light.pointLight.range", light->range); // shaderprogram.cpp
+									
+			shaders.setUniform("u_light.pointLight.attenuation.constant", light->attenuation.constant); // shaderprogram.cpp
+			shaders.setUniform("u_light.pointLight.attenuation.linear", light->attenuation.linear); // shaderprogram.cpp
+			shaders.setUniform("u_light.pointLight.attenuation.quadratic", light->attenuation.quadratic); // shaderprogram.cpp
 
 			draw(&g_meshHolder.get("quad"));
 

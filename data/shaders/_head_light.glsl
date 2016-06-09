@@ -31,4 +31,12 @@ struct PointLight
 	float range;
 };
 
+struct SpotLight
+{
+	PointLight pointLight;
+
+	float coneAngle;
+	vec3 direction;
+};
+
 #endif

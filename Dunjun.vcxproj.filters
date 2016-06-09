@@ -132,9 +132,6 @@
     <ClInclude Include="include\Dunjun\Level\Room.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Dunjun\Drawable.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\Dunjun\Level.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -282,5 +279,11 @@
     <None Include="data\shaders\transform_head.glsl" />
     <None Include="data\shaders\material_head.glsl" />
     <None Include="data\shaders\light_head.glsl" />
+    <None Include="data\shaders\_head_common.glsl" />
+    <None Include="data\shaders\_head_light.glsl" />
+    <None Include="data\shaders\_head_material.glsl" />
+    <None Include="data\shaders\_head_transform.glsl" />
+    <None Include="data\shaders\deferredSpotLightPass_frag.glsl" />
+    <None Include="data\shaders\deferredFinalPass_frag.glsl" />
   </ItemGroup>
 </Project>

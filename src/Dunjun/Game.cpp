@@ -30,8 +30,9 @@ namespace Dunjun
 	GLOBAL SceneNode g_rootNode;
 	GLOBAL SceneNode* g_player = nullptr;
 
-	GLOBAL std::vector<PointLight> g_pointLights;
 	GLOBAL std::vector<DirectionalLight> g_directionalLights;
+	GLOBAL std::vector<PointLight> g_pointLights;
+	GLOBAL std::vector<SpotLight> g_spotLights;
 
 	GLOBAL SceneRenderer g_renderer;
 
@@ -117,19 +118,34 @@ namespace Dunjun
 		// File path for shader files and define and bind attributes
 		INTERNAL void loadShaders()
 		{
+			u32 shaderCounter = 0;
+			std::cout << "Loading shader " << shaderCounter++ << std::endl;
 			g_shaderHolder.insertFromFile("default", "default_vert.glsl", 
 													 "default_frag.glsl");
+			std::cout << "Loading shader " << shaderCounter++ << std::endl;
 			g_shaderHolder.insertFromFile("texturePass", "texPass_vert.glsl", 
 														 "texPass_frag.glsl");
+			std::cout << "Loading shader " << shaderCounter++ << std::endl;
 			g_shaderHolder.insertFromFile("deferredGeometryPass", "deferredGeometryPass_vert.glsl", 
 																  "deferredGeometryPass_frag.glsl");
+			std::cout << "Loading shader " << shaderCounter++ << std::endl;
+			g_shaderHolder.insertFromFile("deferredDirectionalLight", "deferredLightPass_vert.glsl",
+																	  "deferredDirectionalLightPass_frag.glsl");
+			std::cout << "Loading shader " << shaderCounter++ << std::endl;
 			g_shaderHolder.insertFromFile("deferredAmbientLight", "deferredLightPass_vert.glsl", 
 																  "deferredAmbientLightPass_frag.glsl");
-			g_shaderHolder.insertFromFile("deferredPointLight", "deferredLightPass_vert.glsl", 
+			std::cout << "Loading shader " << shaderCounter++ << std::endl;
+			g_shaderHolder.insertFromFile("deferredPointLight", "deferredLightPass_vert.glsl",
 																"deferredPointLightPass_frag.glsl");
-			g_shaderHolder.insertFromFile("deferredDirectionalLight", "deferredLightPass_vert.glsl", 
-																	  "deferredDirectionalLightPass_frag.glsl");
+			std::cout << "Loading shader " << shaderCounter++ << std::endl;
+			g_shaderHolder.insertFromFile("deferredSpotLight", "deferredLightPass_vert.glsl",
+															   "deferredSpotLightPass_frag.glsl");
 
+
+
+			std::cout << "Loading shader " << shaderCounter++ << std::endl;
+			g_shaderHolder.insertFromFile("deferredFinalPass", "deferredLightPass_vert.glsl",
+														 "deferredFinalPass_frag.glsl");
 		}
 
 		INTERNAL void loadMaterials()
@@ -322,9 +338,18 @@ namespace Dunjun
 			{
 				DirectionalLight light;
 
-				light.setIntensities(ColorLib::Orange, 0.5f);
+				light.setIntensities(ColorLib::Orange, 0.02f);
 				light.direction = Vector3(-0.8, -1.0, -0.2);
 				g_directionalLights.emplace_back(light);
+			}
+
+			// add spot lights
+			{
+				SpotLight light;
+
+				light.position = {2.5f, 2.0f, 2.5f};
+				light.setIntensities(ColorLib::White, 50.0f);
+				g_spotLights.emplace_back(light);
 			}
 
 			{
@@ -640,7 +665,10 @@ namespace Dunjun
 
 				if (Input::isGamepadButtonPressed(Input::Gamepad_1, Input::XboxButton::A))
 				{
-					g_pointLights[0].position = g_cameraWorld.transform.position;
+					g_spotLights[0].position.x = g_cameraWorld.transform.position.x;
+					g_spotLights[0].position.y = g_cameraWorld.transform.position.y - 0.5f;
+					g_spotLights[0].position.z = g_cameraWorld.transform.position.z;
+					g_spotLights[0].direction = g_cameraWorld.forward();
 				}
 
 				// level regeneration button
@@ -778,7 +806,7 @@ namespace Dunjun
 				g_level->roomsRendered = 0;
 				const Vector3 viewPos = g_cameraWorld.transform.position;
 				const Vector3 cameraOrientation = g_cameraWorld.forward();
-				const f32 viewDistance = g_currentCamera->farPlane;
+				const f32 viewDistance = 50;
 				if (toggleCulling == true)
 				for( auto& room : g_level->rooms)
 				{
@@ -874,6 +902,8 @@ namespace Dunjun
 				g_renderer.addDirectionalLight(&light);
 			for (const auto& light : g_pointLights)
 				g_renderer.addPointLight(&light);
+			for (const auto& light : g_spotLights)
+				g_renderer.addSpotLight(&light);
 
 			g_renderer.camera = g_currentCamera;
 
@@ -883,6 +913,7 @@ namespace Dunjun
 
 			g_renderer.deferredGeometryPass();
 			g_renderer.deferredLightPass();
+			g_renderer.deferredFinalPass();
 
 			g_materialHolder.get("dunjunText").diffuseMap = &g_renderer.gBuffer.diffuse;
 
@@ -898,7 +929,7 @@ namespace Dunjun
 				shaders.setUniform("u_tex", 0);
 				shaders.setUniform("u_scale", Vector3(1.0f));
 
-				Texture::bind(&g_renderer.lightingTexture.colorTexture, 0);
+				Texture::bind(&g_renderer.finalTexture.colorTexture, 0);
 
 				g_renderer.draw(&g_meshHolder.get("quad"));
 

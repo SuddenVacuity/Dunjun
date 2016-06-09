@@ -40,8 +40,9 @@ namespace Dunjun
 		void draw(const Mesh* mesh) const;
 
 		void addModelInstance(const MeshRenderer& meshRenderer, Transform t);
-		void addPointLight(const PointLight* light);
 		void addDirectionalLight(const DirectionalLight* light);
+		void addPointLight(const PointLight* light);
+		void addSpotLight(const SpotLight* light);
 
 		//void renderAll();
 
@@ -63,6 +64,7 @@ namespace Dunjun
 
 		void deferredGeometryPass();
 		void deferredLightPass();
+		void deferredFinalPass();
 
 		//void setMaterial(const Material* material);
 		void setCamera(const Camera& camera);
@@ -74,11 +76,8 @@ namespace Dunjun
 		const Camera* camera = nullptr;
 
 		RenderTexture lightingTexture;
+		RenderTexture finalTexture;
 
-		// cache of instances
-		std::deque<ModelInstance> modelInstances;
-		std::deque<const PointLight*> pointLights;
-		std::deque<const DirectionalLight*> directionalLights;
 	private:
 		const Material* m_currentMaterial = nullptr;
 		const ShaderProgram* m_currentShaders = nullptr;
@@ -88,6 +87,14 @@ namespace Dunjun
 		void renderAmbientLight();
 		void renderDirectionalLights();
 		void renderPointLights();
+		void renderSpotLights();
+
+		// cache of instances
+		std::deque<ModelInstance> m_modelInstances;
+
+		std::deque<const DirectionalLight*> m_directionalLights;
+		std::deque<const PointLight*> m_pointLights;
+		std::deque<const SpotLight*> m_spotLights;
 
 		bool isCurrentShaders(const ShaderProgram* shaders);
 		bool isCurrentTexture(const Texture* texture);
