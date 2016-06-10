@@ -1,8 +1,10 @@
 #ifndef DUNJUN_INPUT_HPP
 #define DUNJUN_INPUT_HPP
 
+
 #include <Dunjun/Time.hpp>
 
+#if 0
 namespace Dunjun
 {
 	namespace Input
@@ -276,5 +278,7 @@ namespace Dunjun
 
 	} // end Input
 } // end Dunjun
+
+#endif
 
 #endif

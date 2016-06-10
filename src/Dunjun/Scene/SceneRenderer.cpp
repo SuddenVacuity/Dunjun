@@ -100,8 +100,6 @@ namespace Dunjun
 				if (!inst.asset->mesh)
 					continue;
 
-					//setShaders(inst.asset->material->shaders);
-
 				const Material& material = *inst.asset->material;
 
 				shaders.setUniform("u_material.diffuseMap", (u32)0); // shaderprogram.cpp
@@ -122,9 +120,6 @@ namespace Dunjun
 
 	void SceneRenderer::deferredLightPass()
 	{
-		//if(lightingTexture == nullptr)
-		//	lightingTexture = make_unique<RenderTexture>();
-
 		lightingTexture.create(gBuffer.getWidth(), gBuffer.getHeight(), RenderTexture::Light);
 
 		Texture::bind(&gBuffer.diffuse,  0);
@@ -231,13 +226,6 @@ namespace Dunjun
 		{
 			light->calculateRange();
 
-			//Vector3 colorIntensities;
-			//
-			//colorIntensities.r = light->color.r / 255.0f;
-			//colorIntensities.g = light->color.g / 255.0f;
-			//colorIntensities.b = light->color.b / 255.0f;
-			//colorIntensities *= light->intensity;
-
 			shaders.setUniform("u_light.base.intensities", light->colorIntensity); // shaderprogram.cpp
 
 			shaders.setUniform("u_light.position", light->position); // shaderprogram.cpp
@@ -269,14 +257,6 @@ namespace Dunjun
 		for (const SpotLight* light : m_spotLights)
 		{
 			light->calculateRange();
-
-			//Vector3 colorIntensities;
-			//
-			//colorIntensities.r = light->color.r / 255.0f;
-			//colorIntensities.g = light->color.g / 255.0f;
-			//colorIntensities.b = light->color.b / 255.0f;
-			//colorIntensities *= light->intensity;
-
 
 			shaders.setUniform("u_light.coneAngle", static_cast<f32>(light->coneAngle)); // shaderprogram.cpp
 			shaders.setUniform("u_light.direction", light->direction); // shaderprogram.cpp

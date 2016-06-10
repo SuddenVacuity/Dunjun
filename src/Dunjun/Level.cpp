@@ -35,7 +35,7 @@ namespace Dunjun
 		if(0)
 			m_random.setSeed(142);
 
-//#define DUNJUN_DEBUG_LEVEL // TODO: remove this for a preset test level
+#define DUNJUN_DEBUG_LEVEL // TODO: remove this for a preset test level
 #ifdef DUNJUN_DEBUG_LEVEL
 		// TODO: FIX: player doesn't line up with even/odd numbers correctly
 		const u32 levelSizeX = 5;

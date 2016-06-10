@@ -1,7 +1,7 @@
 #ifndef DUNJUN_TIME_HPP
 #define DUNJUN_TIME_HPP
 
-#include <Dunjun/Window.hpp>
+#include <Dunjun/OpenGL.hpp>
 
 //#include <chrono> // included in Common.hpp
 

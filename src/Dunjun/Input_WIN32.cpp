@@ -11,6 +11,7 @@
 // change in Linker -> Input -> Additional Dependencies
 #include <xinput.h>
 
+#if 0
 namespace Dunjun
 {
 	namespace Input
@@ -388,4 +389,7 @@ namespace Dunjun
 
 	} // end Input
 } // end Dunjun
+
+#endif
+
 #endif

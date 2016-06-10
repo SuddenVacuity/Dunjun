@@ -25,16 +25,36 @@ main.cpp
 */
 
 
-#include <Dunjun/Game.hpp>
+//#include <Dunjun/Game.hpp>
+//
+//int main(int argc, char** argv)
+//{
+//	Dunjun::Game::init();
+//
+//	Dunjun::Game::run();
+//
+//	Dunjun::Game::cleanUp();
+//
+//	return 0;
+//}
 
+#include <Dunjun/Window.hpp>
+
+using namespace Dunjun;
 
 int main(int argc, char** argv)
 {
-	Dunjun::Game::init();
+	SDL_Init(SDL_INIT_EVERYTHING);
 
-	Dunjun::Game::run();
+	Window window;
+	window.create("Dunjun", 800, 600, Style::Default);
 
-	Dunjun::Game::cleanUp();
+	Dunjun::Time::sleep(seconds(2));
 
-	return EXIT_SUCCESS;
+	window.close();
+
+	SDL_Quit();
+
+	return 0;
 }
+

@@ -30,9 +30,9 @@ void main()
 	gl_FragData[0].rgb = surfaceColor.rgb;
 
 	gl_FragData[1].rgb = u_material.specularColor.rgb;
-	gl_FragData[1].a = 1.0f / (1.0f + u_material.specularExponent); // 0.001 to never divide by 0
+	//gl_FragData[1].a = 1.0f / (1.0f + u_material.specularExponent);
 
-	gl_FragData[2].xyz = 0.5f * (0.001 + normal + vec3(1.0f));
+	gl_FragData[2].xyz = 0.5f * (0.001 + normal + vec3(1.0f)); // +0.001 to never divide by 0
 	//gl_FragData[3].xyz = 
 
 }

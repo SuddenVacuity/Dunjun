@@ -1,7 +1,8 @@
 #ifndef DUNJUN_CLOCK_HPP
 #define DUNJUN_CLOCK_HPP
 
-#include <Dunjun/Input.hpp>
+//#include <Dunjun/Input.hpp>
+#include <Dunjun/Time.hpp>
 
 //#include <thread> // included in Common.hpp
 

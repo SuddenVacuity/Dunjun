@@ -25,13 +25,15 @@ vec4 calculateSpotLight(float lightToSurfaceAngle,
 						 u_light.pointLight.attenuation.quadratic * distanceToLight * distanceToLight);
 	attenuation = 1.0f / attenuation;
 
+	// light fall off from distance
 	attenuation *= square(1 - clamp(square(square(
 						  distanceToLight / u_light.pointLight.range
 						  )), 0.0f, 1.0f));
 
-	attenuation *= square(1 - clamp(square(square(
+	// this part removes the hard edges from the spot light
+	attenuation *= square(1 - clamp(square(square(square(
 						  lightToSurfaceAngle / u_light.coneAngle
-						  )), 0.0f, 1.0f));
+						  ))), 0.0f, 1.0f));
 
 	vec4 diffuse = vec4(0.0f);
 
@@ -43,7 +45,6 @@ vec4 calculateSpotLight(float lightToSurfaceAngle,
 
 void main()
 {
-	//vec3 diffuseColor = texture2D(u_diffuse, v_texCoord).rgb;
 	vec3 specularColor = texture2D(u_specular, v_texCoord).rgb;
 	vec3 normalEncoded = texture2D(u_normal, v_texCoord).xyz;
 	float depth = texture2D(u_depth, v_texCoord).r;
@@ -57,9 +58,6 @@ void main()
 
 	vec4 lightColor = calculateSpotLight(lightToSurfaceAngle, surfaceToLight, distanceToLight, normal);
 
-	//vec3 gamma = vec3(1.0f / 2.2f);
 	gl_FragColor = vec4(lightColor.rgb, 1.0f);
-	//gl_FragColor = vec4(pow(lightColor.rgb, gamma), 1.0f);
-	//gl_FragColor = vec4(pow(diffuseColor.rgb * lightColor.rgb, gamma), 1.0f);
 }
 

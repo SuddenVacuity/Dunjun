@@ -118,6 +118,13 @@ namespace Dunjun
 		// File path for shader files and define and bind attributes
 		INTERNAL void loadShaders()
 		{
+			std::cout << "Using Grapics Card:\n-------------------" << std::endl;
+			std::cout << glGetString(GL_VENDOR) << std::endl;
+			std::cout << glGetString(GL_RENDERER) << std::endl;
+			std::cout << "version: " << glGetString(GL_VERSION) << std::endl;
+
+			std::cout << "\n\n";
+
 			u32 shaderCounter = 0;
 			std::cout << "Loading shader " << shaderCounter++ << std::endl;
 			g_shaderHolder.insertFromFile("default", "default_vert.glsl", 
@@ -915,7 +922,7 @@ namespace Dunjun
 			g_renderer.deferredLightPass();
 			g_renderer.deferredFinalPass();
 
-			g_materialHolder.get("dunjunText").diffuseMap = &g_renderer.gBuffer.diffuse;
+			g_materialHolder.get("dunjunText").diffuseMap = &g_renderer.finalTexture.colorTexture;
 
 			glViewport(0, 0, Window::width, Window::height);
 			glClearColor(0.02f, 0.02f, 0.02f, 1.0f); // set the default color (R,G,B,A)
@@ -923,7 +930,6 @@ namespace Dunjun
 
 			{
 				ShaderProgram& shaders = g_shaderHolder.get("texturePass");
-				shaders.use();
 
 				shaders.use();
 				shaders.setUniform("u_tex", 0);
