@@ -11,35 +11,39 @@
 
 namespace Dunjun
 {
-	struct Var2_u32
+	struct Var2_int
 	{
-		Var2_u32();
+		Var2_int()
+			: x(0)
+			, y(0)
+		{
+		}
 
-		explicit Var2_u32(u32 xy)
+		explicit Var2_int(int xy)
 			: x(xy)
 			, y(xy)
 		{
 		}
 
-		Var2_u32(u32 x, u32 y)
+		Var2_int(int x, int y)
 			: x(x)
 			, y(y)
 		{
 		}
 
-		Var2_u32(u32 xy[2])
+		Var2_int(int xy[2])
 			: x(xy[0])
 			, y(xy[1])
 		{
 		}
 
-		Var2_u32(const Var2_u32& other) = default; // copy constructor
+		Var2_int(const Var2_int& other) = default; // copy constructor
 												 
 		// operators
-		inline u32& operator[](size_t index) { return data[index]; }
-		inline const u32& operator[](size_t index) const { return data[index]; } // this lets you call informatino in v[0] = 1; format
+		inline int& operator[](size_t index) { return data[index]; }
+		inline const int& operator[](size_t index) const { return data[index]; } // this lets you call informatino in v[0] = 1; format
 
-		inline bool operator==(const Var2_u32& other) const
+		inline bool operator==(const Var2_int& other) const
 		{
 			for (size_t i = 0; i < 2; i++)
 			{
@@ -48,29 +52,29 @@ namespace Dunjun
 			}
 			return true;
 		}
-		inline bool operator!=(const Var2_u32& other) const
+		inline bool operator!=(const Var2_int& other) const
 		{
 			return !operator==(other);
 		}
 
 		union // call info as v.x = 1;
 		{
-			u32 data[2];
+			int data[2];
 			struct
 			{
-				u32 x, y;
+				int x, y;
 			};
 			struct
 			{
-				u32 r, g;
+				int r, g;
 			};
 			struct
 			{
-				u32 s, t;
+				int s, t;
 			};
 			struct
 			{
-				u32 u, v;
+				int u, v;
 			};
 		}; // end union
 	}; // end Var2_u32
@@ -79,14 +83,14 @@ namespace Dunjun
 	{
 		enum : u32
 		{
-			Borderless    =   1,
-			Windowed	  =   2,
-			Fullscreen	  =   4,
-			Visible		  =   8,
-			Hidden		  =  16,
-			Minimized	  =  32,
-			Maximized	  =  64,
-			Resizable     = 128,
+			Fullscreen =   1,
+			Visible    =   2,
+			Hidden 	   =   4,
+			Borderless =   8,   
+			Resizable  =  16,
+			Minimized  =  32,
+			Maximized  =  64,
+			Windowed   = 128,
 
 			Default = Windowed | Visible | Resizable,
 		};
@@ -100,13 +104,13 @@ namespace Dunjun
 
 		explicit Window(const std::string& title, 
 						const u32& width, const u32& height, 
-						u32 style);
+						u32 style = Style::Default);
 
 		virtual ~Window();
 
 		void create(const std::string& title,
 					const u32& width, const u32& height,
-					u32 style);
+					u32 style = Style::Default);
 
 		void close();
 		bool isOpen() const;
@@ -114,8 +118,8 @@ namespace Dunjun
 		Vector2 getPosition() const;
 		Window& setPosition(const Vector2& position);
 
-		Var2_u32 getSize() const;
-		Window& setSize(u32 width, u32 height);
+		Var2_int getSize() const;
+		Window& setSize(const u32 width, const u32 height);
 
 		Window& setTitle(std::string& title);
 		Window& setVisible(bool visible);
@@ -124,6 +128,10 @@ namespace Dunjun
 
 		void display();
 
+		inline SDL_Window* getNaticeHandle() const
+		{
+			return m_impl;
+		}
 	private:
 		void init();
 
@@ -131,7 +139,7 @@ namespace Dunjun
 		SDL_GLContext m_context;
 		Clock m_clock;
 		Time m_frameTimeLimit;
-		Var2_u32 m_size;
+		Var2_int m_size;
 
 
 

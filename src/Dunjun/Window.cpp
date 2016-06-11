@@ -92,14 +92,16 @@ namespace Dunjun
 
 		m_context = SDL_GL_CreateContext(m_impl);
 
-		m_size = {width, height};
+		m_size = Var2_int(width, height);
 
 		init();
 	}
 
 	void Window::init()
 	{
-
+		setVisible(true);
+		setFramerateLimit(0);
+		SDL_GetWindowSize(m_impl, &m_size.x, &m_size.y);
 	}
 
 	void Window::close()
@@ -120,7 +122,10 @@ namespace Dunjun
 	{
 		if(m_impl)
 		{
+			int x, y;
+			SDL_GetWindowPosition(m_impl, &x, &y);
 
+			return Vector2(x, y);
 		}
 		
 		return {0, 0};
@@ -128,21 +133,28 @@ namespace Dunjun
 
 	Window& Window::setPosition(const Vector2& position)
 	{
+		SDL_SetWindowPosition(m_impl, position.x, position.y);
+
 		return *this;
 	}
 
-	Var2_u32 Window::getSize() const
+	Var2_int Window::getSize() const
 	{
-		return {0, 0};
+		return m_size;
 	}
 
-	Window& Window::setSize(u32 width, u32 height)
+	Window& Window::setSize(const u32 width, const u32 height)
 	{
+		SDL_SetWindowSize(m_impl, width, height);
+		SDL_GetWindowSize(m_impl, &m_size.x, &m_size.y);
+
 		return *this;
 	}
 
 	Window& Window::setTitle(std::string& title)
 	{
+		SDL_SetWindowTitle(m_impl, title.c_str());
+
 		return *this;
 	}
 
@@ -158,12 +170,23 @@ namespace Dunjun
 
 	Window& Window::setFramerateLimit(u32 limit)
 	{
+		if (limit > 0)
+			m_frameTimeLimit = seconds(1.0f / (f32)limit);
+		else
+			m_frameTimeLimit = Time::Zero;
+
 		return *this;
 	}
 
 	void Window::display()
 	{
+		SDL_GL_SwapWindow(m_impl);
 
+		if(m_frameTimeLimit != Time::Zero)
+		{
+			Time::sleep(m_frameTimeLimit - m_clock.getElapsedTime());
+			m_clock.restart();
+		}
 	}
 
 

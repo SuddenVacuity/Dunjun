@@ -2,9 +2,8 @@
 #define DUNJUN_INPUT_HPP
 
 
-#include <Dunjun/Time.hpp>
+#include <Dunjun/Window.hpp>
 
-#if 0
 namespace Dunjun
 {
 	namespace Input
@@ -122,14 +121,14 @@ namespace Dunjun
 
 		enum MouseButton 
 		{
-			MouseButton_1 = 0,
-			MouseButton_2 = 1,
-			MouseButton_3 = 2,
-			MouseButton_4 = 3,
-			MouseButton_5 = 4,
-			MouseButton_6 = 5,
-			MouseButton_7 = 6,
-			MouseButton_8 = 7,
+			MouseButton_1 = 1,
+			MouseButton_2 = 2,
+			MouseButton_3 = 3,
+			MouseButton_4 = 4,
+			MouseButton_5 = 5,
+			MouseButton_6 = 6,
+			MouseButton_7 = 7,
+			MouseButton_8 = 8,
 
 			//MouseButton_Last = MouseButton_8,
 
@@ -234,7 +233,10 @@ namespace Dunjun
 		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
 		Vector2 getCursorPosition();
+		Vector2 getCursorPosition(const Window& relativeTo);
+
 		void setCursorPosition(const Vector2& pos);
+		void setCursorPosition(const Vector2& pos, const Window& relativeTo);
 
 		bool isMouseButtonPressed(MouseButton button);
 
@@ -279,6 +281,5 @@ namespace Dunjun
 	} // end Input
 } // end Dunjun
 
-#endif
 
 #endif
