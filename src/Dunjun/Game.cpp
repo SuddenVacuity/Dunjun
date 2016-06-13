@@ -11,7 +11,7 @@ namespace Dunjun
 	//	ModelAsset* asset;
 	//	Transform transform;
 	//};
-
+	GLOBAL Window g_window;
 
 	GLOBAL Camera g_cameraPlayer;
 	GLOBAL Camera g_cameraWorld;
@@ -21,7 +21,7 @@ namespace Dunjun
 	namespace
 	{
 		GLOBAL const Time TIME_STEP = seconds(1.0f / 60.0f);
-		GLOBAL const Time MaxFrameTime = seconds(1.0f / (2.0f * 1440.f + 1.0f));
+		GLOBAL const u32 FrameLimit = 60;
 		GLOBAL bool g_running = true;
 	} // end anon namespace
 
@@ -44,6 +44,10 @@ namespace Dunjun
 	GLOBAL Transform g_parentTest;
 
 	GLOBAL bool toggleCulling = true;
+
+	INTERNAL std::string textBuffer = "";
+	INTERNAL bool acceptInput = true;
+	INTERNAL bool checkForCommand = false;
 
 	namespace Game
 	{
@@ -78,28 +82,117 @@ namespace Dunjun
 		//
 		INTERNAL void handleInput()
 		{
-			if (Window::shouldClose() || // check if window was closed
+			Input::updateGamepads();
+
+			Event event;
+			while (g_window.pollEvent(event))
+			{
+				if (event.type == Event::Closed)
+				{
+					g_running = false;
+					g_window.close();
+				}
+				if(event.type == Event::Resized)
+				{
+					glViewport(0, 0, event.size.width, event.size.height);
+				}
+
+				if(event.type == Event::KeyPressed && acceptInput == true)
+				{		
+					//std::cout << "\n\n\n" << std::endl;
+					// check for a command
+					if (Input::isKeyPressed(Input::Key::Return))
+					{
+						checkForCommand = true;
+					}
+				
+					// Erase letters
+					if (Input::isKeyPressed(Input::Key::Backspace))
+						if(textBuffer.size() > 0)
+							textBuffer.erase(textBuffer.size() - 1);
+
+					if (Input::isKeyPressed(Input::Key::Up))
+						textBuffer.append(" ");
+					if (Input::isKeyPressed(Input::Key::Down))
+						textBuffer.append(" ");
+
+				
+					// Add letters TODO: do this without ififififififififififififififififififififififif
+					if (Input::isKeyPressed(Input::Key::Space))
+						textBuffer.append(" ");
+					if (Input::isKeyPressed(Input::Key::A))
+						textBuffer.append("A");
+					if (Input::isKeyPressed(Input::Key::B))
+						textBuffer.append("B");
+					if (Input::isKeyPressed(Input::Key::C))
+						textBuffer.append("C");
+					if (Input::isKeyPressed(Input::Key::D))
+						textBuffer.append("D");
+					if (Input::isKeyPressed(Input::Key::E))
+						textBuffer.append("E");
+					if (Input::isKeyPressed(Input::Key::F))
+						textBuffer.append("F");
+					if (Input::isKeyPressed(Input::Key::G))
+						textBuffer.append("G");
+					if (Input::isKeyPressed(Input::Key::H))
+						textBuffer.append("H");
+					if (Input::isKeyPressed(Input::Key::I))
+						textBuffer.append("I");
+					if (Input::isKeyPressed(Input::Key::J))
+						textBuffer.append("J");
+					if (Input::isKeyPressed(Input::Key::K))
+						textBuffer.append("K");
+					if (Input::isKeyPressed(Input::Key::L))
+						textBuffer.append("L");
+					if (Input::isKeyPressed(Input::Key::M))
+						textBuffer.append("M");
+					if (Input::isKeyPressed(Input::Key::N))
+						textBuffer.append("N");
+					if (Input::isKeyPressed(Input::Key::O))
+						textBuffer.append("O");
+					if (Input::isKeyPressed(Input::Key::P))
+						textBuffer.append("P");
+					if (Input::isKeyPressed(Input::Key::Q))
+						textBuffer.append("Q");
+					if (Input::isKeyPressed(Input::Key::R))
+						textBuffer.append("R");
+					if (Input::isKeyPressed(Input::Key::S))
+						textBuffer.append("S");
+					if (Input::isKeyPressed(Input::Key::T))
+						textBuffer.append("T");
+					if (Input::isKeyPressed(Input::Key::U))
+						textBuffer.append("U");
+					if (Input::isKeyPressed(Input::Key::V))
+						textBuffer.append("V");
+					if (Input::isKeyPressed(Input::Key::W))
+						textBuffer.append("W");
+					if (Input::isKeyPressed(Input::Key::X))
+						textBuffer.append("X");
+					if (Input::isKeyPressed(Input::Key::Y))
+						textBuffer.append("Y");
+					if (Input::isKeyPressed(Input::Key::Z))
+						textBuffer.append("Z");
+
+					std::cout << "\n\nType in a command and press enter. [HELP] [QUIT]" << std::endl;
+					std::cout << ">> [" << textBuffer << "]";
+					//acceptInput = false;
+				}
+				//else if(acceptInput == false)
+				//{
+				//	acceptInput = true;
+				//}
+			}
+
+			if (!g_window.isOpen() || // check if window was closed
 				Input::isKeyPressed(Input::Key::Escape)) // checks if the escape key is pressed in window
+			{
 				g_running = false;
-		
+				g_window.close();
+			}
+
 			if (Input::isKeyPressed(Input::Key::F11)) // press F11 to toggle between default and fullscreen
 			{
-				// TODO: hide isFullscreen
-				Window::isFullscreen = !Window::isFullscreen; // toggles true/false boolean for fullscreen
-				if (Window::isFullscreen) // action to take if fullscreen is true
-				{
-					GLFWwindow* w = Window::createWindow(glfwGetPrimaryMonitor());
-					Window::destroyWindow();
-					Window::setHandle(w);
-				}
-				else // action to take if fullsscreen is not true
-				{
-					GLFWwindow* w = Window::createWindow(nullptr);
-					Window::destroyWindow();
-					Window::setHandle(w);
-				}
-				Window::makeContextCurrent();
-				Window::swapInterval(0);
+				// TODO: Fullscreen
 				glInit();
 			}
 		}
@@ -121,7 +214,7 @@ namespace Dunjun
 			std::cout << "Using Grapics Card:\n-------------------" << std::endl;
 			std::cout << glGetString(GL_VENDOR) << std::endl;
 			std::cout << glGetString(GL_RENDERER) << std::endl;
-			std::cout << "version: " << glGetString(GL_VERSION) << std::endl;
+			std::cout << "Version: " << glGetString(GL_VERSION) << std::endl;
 
 			std::cout << "\n\n";
 
@@ -362,8 +455,8 @@ namespace Dunjun
 			{
 				//Initialize camera
 				// aspect ratio
-				g_cameraPlayer.viewportSize = Window::getFramebufferSize();
-				g_cameraPlayer.viewportAspectRatio = Window::aspectRatio;
+				g_cameraPlayer.viewportSize = g_window.getSize();
+				g_cameraPlayer.viewportAspectRatio = g_window.getSize().x / g_window.getSize().y;
 
 				g_cameraPlayer.transform.position = g_player->transform.position + Vector3(8 * 3, 8 * 2, 8 * 3);
 				//g_cameraPlayer.transform.orientation = angleAxis(Degree(45), {0, 1, 0}) * angleAxis(Degree(-30), {1, 0, 0});
@@ -417,156 +510,229 @@ namespace Dunjun
 			f32 playerVelY = 3.5f;
 			f32 playerVelZ = 5.5f;
 
+			if(checkForCommand == true)
+			{
+				std::cout << "\n";
+				if (textBuffer == "HELP")
+				{
+					std::cout << "\n" << std::endl;
+					std::cout << "Commands suck for now.\n--------------------" << std::endl;
+
+					std::cout << "GamePad::Left Stick = Move camera" << std::endl;
+					std::cout << "GamePad::Right Stick = Turn camera" << std::endl;
+					std::cout << "GamePad::D-Pad Move = sprite" << std::endl;
+					std::cout << "GamePad::Shoulder Buttons = Move camera up/down" << std::endl;
+					std::cout << "GamePad::X = Test vibration" << std::endl;
+					//std::cout << "GamePad::B = Render Texture on sprite" << std::endl;
+					std::cout << "GamePad::A = Move Light to current Camera location" << std::endl;
+					std::cout << "\n";
+					std::cout << "Keyboard::ArrowKeys = Move sprite" << std::endl;
+					std::cout << "Keyboard::L/R Ctrl = Move sprite up/down" << std::endl;
+					std::cout << "\n";
+					std::cout << "[REGEN] = Regenerate level with culling" << std::endl;
+					std::cout << "[REGENNC] = Regenerate level without culling" << std::endl;
+					std::cout << "[DIR] = Return views cardinal direction and vertical angle" << std::endl;
+					std::cout << "[ROOMS] = Return number of rooms currently rendering" << std::endl;
+					std::cout << "[HELP] = Show help" << std::endl;
+					std::cout << "[QUIT] = Close Program" << std::endl;
+					//std::cout << "Keyboard::T = Test multiply transforms" << std::endl;
+					//std::cout << "Keyboard::R = Reset sprite position, orientation and scale" << std::endl;
+					//std::cout << "Keyboard::L = Change to orthographic camera" << std::endl;
+					//std::cout << "Keyboard::K = Change to perspective camera" << std::endl;
+
+
+				}
+				else if (textBuffer == "TODO")
+				{
+					std::cout << "stuff" << std::endl;
+				}
+				// room visibility test
+				else if (textBuffer == "ROOMS")
+				{
+					std::cout << "Rendering " << g_level->roomsRendered << " Rooms" << std::endl;
+				}
+				// return direction
+				else if (textBuffer == "DIR")
+				{
+					Vector3 f = g_cameraWorld.forward();
+
+					s32 angle = f.y * 90;
+
+					std::string direction;
+
+					if (f.x > 0) // right side
+					{
+						if (f.z > 0) // right-bottom quadrant
+						{
+							if (f.x > f.z)
+								direction = "East";
+							else
+								direction = "South";
+						}
+						else // right-top quadrant
+						{
+							if (f.x > -f.z)
+								direction = "East";
+							else
+								direction = "North";
+						}
+					}
+					else // left side
+					{
+						if (f.z > 0) // left-bottom quadrant
+						{
+							if (-f.x > f.z)
+								direction = "West";
+							else
+								direction = "South";
+						}
+						else // left-top quadrant
+						{
+							if (f.z > f.x)
+								direction = "West";
+							else
+								direction = "North";
+						}
+					}
+
+					std::cout << "You are facing " << direction << " and looking " << angle << " degrees vertically." << std::endl;
+
+				}
+				// cout test iterator
+				else if (textBuffer == "ITERATOR")
+				{
+					std::cout << "Test Iterator 0: " << testIterator_5[0] << std::endl;
+					std::cout << "Test Iterator 1: " << testIterator_5[1] << std::endl;
+					std::cout << "Test Iterator 2: " << testIterator_5[2] << std::endl;
+					std::cout << "Test Iterator 3: " << testIterator_5[3] << std::endl;
+					std::cout << "Test Iterator 4: " << testIterator_5[4] << std::endl;
+				}
+				// regenerate world without culling
+				else if (textBuffer == "REGENNC")
+				{
+					toggleCulling = false;
+
+					SceneNode* level = g_rootNode.findChildByName("level");
+					g_rootNode.detachChild(*level);
+
+					{ // test level generation
+						auto level = make_unique<Level>();
+
+						level->material = &g_materialHolder.get("terrain");
+						level->name = "level";
+						level->generate();
+
+						g_level = level.get();
+
+						g_rootNode.attachChild(std::move(level));
+					}
+				}
+				// level regeneration
+				else if (textBuffer == "REGEN")
+				{
+					toggleCulling = true;
+					SceneNode* level = g_rootNode.findChildByName("level");
+					g_rootNode.detachChild(*level);
+
+					{ // test level generation
+						auto level = make_unique<Level>();
+
+						level->material = &g_materialHolder.get("terrain");
+						level->name = "level";
+						level->generate();
+
+						g_level = level.get();
+
+						g_rootNode.attachChild(std::move(level));
+					}
+				}
+
+
+
+
+				else if (textBuffer == "QUIT")
+				{
+					g_window.close();
+					g_running = false;
+				}
+				else
+				{
+					std::cout << "Invalid command." << std::endl;
+				}
+				textBuffer.clear();
+				checkForCommand = false;
+			}
+
 			// TEST FUNCTION: delete this
 			//  y and z are not multipling correctly when transform * transform
-			if(Input::isKeyPressed(Input::Key::T)) // test multipling transforms
-			{
-				g_parentTest.scale = g_parentTest.scale * (1.0f + 0.05f * dt.asSeconds());
-				g_parentTest.position += {0.2f * dt.asSeconds(), 0.0f * dt.asSeconds(), 0.0f * dt.asSeconds()};
-				
-				g_player->transform = g_player->transform * g_parentTest;
-
-				std::cout << "Scale: " << g_player->transform.scale << std::endl;
-				std::cout << "Oreintation: " << g_player->transform.orientation << std::endl;
-				std::cout << "\n";
-			}
-			else if (Input::isKeyPressed(Input::Key::R)) // test multipling transforms
-			{
-				g_player->transform.position = { 0.0f, 1.0f, 0.0f }; // translation
-				g_player->transform.scale = { 1.0f, 2.0f, 1.0f };
-			}
-
-			// room visibility test
-			if (Input::isKeyPressed(Input::Key::B))
-			{
-				std::cout << "Rendering " << g_level->roomsRendered << " Rooms" << std::endl;
-			}
-
-			// return direction
-			if (Input::isKeyPressed(Input::Key::Space))
-			{
-				Vector3 f = g_cameraWorld.forward();
-
-				s32 angle = f.y * 90;
-
-				std::string direction;
-
-				if(f.x > 0) // right side
-				{
-					if(f.z > 0) // right-bottom quadrant
-					{
-						if(f.x > f.z)
-							direction = "East";
-						else
-							direction = "South";
-					}
-					else // right-top quadrant
-					{
-						if (f.x > -f.z)
-							direction = "East";
-						else
-							direction = "North";
-					}
-				}
-				else // left side
-				{
-					if (f.z > 0) // left-bottom quadrant
-					{
-						if (-f.x > f.z)
-							direction = "West";
-						else
-							direction = "South";
-					}
-					else // left-top quadrant
-					{
-						if (f.z > f.x)
-							direction = "West";
-						else
-							direction = "North";
-					}
-				}
-
-				std::cout << "You are facing " << direction << " and looking " << angle << " degrees vertically." << std::endl;
-	
-			}
-
-			// cout test iterator
-			if (Input::isKeyPressed(Input::Key::I))
-			{
-				std::cout << "Test Iterator 0: " << testIterator_5[0] << std::endl;
-				std::cout << "Test Iterator 1: " << testIterator_5[1] << std::endl;
-				std::cout << "Test Iterator 2: " << testIterator_5[2] << std::endl;
-				std::cout << "Test Iterator 3: " << testIterator_5[3] << std::endl;
-				std::cout << "Test Iterator 4: " << testIterator_5[4] << std::endl;
-			}
-
-			// help
-			if(Input::isKeyPressed(Input::Key::H))
-			{
-				std::cout << "\n\n\n\n\n\n\n\n\n\n" << std::endl;
-				std::cout << "/////////////////////////////////////" << std::endl;
-
-				std::cout << "GamePad::Left Stick = Move camera" << std::endl;
-				std::cout << "GamePad::Right Stick = Turn camera" << std::endl;
-				std::cout << "GamePad::D-Pad Move = sprite" << std::endl;
-				std::cout << "GamePad::Shoulder Buttons = Move camera up/down" << std::endl;
-				std::cout << "GamePad::X = Test vibration" << std::endl;
-				std::cout << "GamePad::Y = Regenerate level with culling" << std::endl;
-				//std::cout << "GamePad::B = Render Texture on sprite" << std::endl;
-				std::cout << "GamePad::A = Move Light to current Camera location" << std::endl;
-				std::cout << "\n" << std::endl;
-				std::cout << "Keyboard::ArrowKeys = Move sprite" << std::endl;
-				std::cout << "Keyboard::L/R Ctrl = Move sprite up/down" << std::endl;
-				std::cout << "Keyboard::C = Regenerate level without culling" << std::endl;
-				std::cout << "Keyboard::Space = Return views cardinal direction and vertical angle" << std::endl;
-				std::cout << "Keyboard::B = Return number of rooms currently rendering" << std::endl;
-				std::cout << "Keyboard::T = Test multiply transforms" << std::endl;
-				std::cout << "Keyboard::R = Reset sprite position, orientation and scale" << std::endl;
-				std::cout << "Keyboard::L = Change to orthographic camera" << std::endl;
-				std::cout << "Keyboard::K = Change to perspective camera" << std::endl;
+			//if(Input::isKeyPressed(Input::Key::T)) // test multipling transforms
+			//{
+			//	g_parentTest.scale = g_parentTest.scale * (1.0f + 0.05f * dt.asSeconds());
+			//	g_parentTest.position += {0.2f * dt.asSeconds(), 0.0f * dt.asSeconds(), 0.0f * dt.asSeconds()};
+			//	
+			//	g_player->transform = g_player->transform * g_parentTest;
+			//
+			//	std::cout << "Scale: " << g_player->transform.scale << std::endl;
+			//	std::cout << "Oreintation: " << g_player->transform.orientation << std::endl;
+			//	std::cout << "\n";
+			//}
+			//else if (Input::isKeyPressed(Input::Key::R)) // test multipling transforms
+			//{
+			//	g_player->transform.position = { 0.0f, 1.0f, 0.0f }; // translation
+			//	g_player->transform.scale = { 1.0f, 2.0f, 1.0f };
+			//}
 
 
-			}
-
-			if (Input::isKeyPressed(Input::Key::L))
-			{
-				// test camera swap
-				g_cameraWorld.transform = g_cameraPlayer.transform;
-				g_currentCamera = &g_cameraPlayer;
-				//g_projectionTest = lerp(pp, op, 0.95f);
-			}
 
 
-			if (Input::isKeyPressed(Input::Key::K))
-			{
-				// test camera swap
-				// TODO: reset forward vector when pressed
-				g_cameraWorld.transform = g_cameraPlayer.transform;
-				g_cameraWorld.lookAt(g_player->transform.position);
-				g_currentCamera = &g_cameraWorld;
-				//g_projectionTest = lerp(pp, op, 0.01f);
-			}
+			//// help
+			//if(Input::isKeyPressed(Input::Key::H))
+			//{
+			//	std::cout << "\n\n\n\n\n\n\n\n\n\n" << std::endl;
+			//	std::cout << "/////////////////////////////////////" << std::endl;
+			//
+			//	std::cout << "GamePad::Left Stick = Move camera" << std::endl;
+			//	std::cout << "GamePad::Right Stick = Turn camera" << std::endl;
+			//	std::cout << "GamePad::D-Pad Move = sprite" << std::endl;
+			//	std::cout << "GamePad::Shoulder Buttons = Move camera up/down" << std::endl;
+			//	std::cout << "GamePad::X = Test vibration" << std::endl;
+			//	std::cout << "GamePad::Y = Regenerate level with culling" << std::endl;
+			//	//std::cout << "GamePad::B = Render Texture on sprite" << std::endl;
+			//	std::cout << "GamePad::A = Move Light to current Camera location" << std::endl;
+			//	std::cout << "\n" << std::endl;
+			//	std::cout << "Keyboard::ArrowKeys = Move sprite" << std::endl;
+			//	std::cout << "Keyboard::L/R Ctrl = Move sprite up/down" << std::endl;
+			//	std::cout << "Keyboard::C = Regenerate level without culling" << std::endl;
+			//	std::cout << "Keyboard::Space = Return views cardinal direction and vertical angle" << std::endl;
+			//	std::cout << "Keyboard::B = Return number of rooms currently rendering" << std::endl;
+			//	std::cout << "Keyboard::T = Test multiply transforms" << std::endl;
+			//	std::cout << "Keyboard::R = Reset sprite position, orientation and scale" << std::endl;
+			//	std::cout << "Keyboard::L = Change to orthographic camera" << std::endl;
+			//	std::cout << "Keyboard::K = Change to perspective camera" << std::endl;
+			//
+			//
+			//}
 
-			// regenerate world without culling
-			if (Input::isKeyPressed(Input::Key::C))
-			{
-				toggleCulling = false;
+			//if (Input::isKeyPressed(Input::Key::L))
+			//{
+			//	// test camera swap
+			//	g_cameraWorld.transform = g_cameraPlayer.transform;
+			//	g_currentCamera = &g_cameraPlayer;
+			//	//g_projectionTest = lerp(pp, op, 0.95f);
+			//}
 
-				SceneNode* level = g_rootNode.findChildByName("level");
-				g_rootNode.detachChild(*level);
 
-				{ // test level generation
-					auto level = make_unique<Level>();
+			//if (Input::isKeyPressed(Input::Key::K))
+			//{
+			//	// test camera swap
+			//	// TODO: reset forward vector when pressed
+			//	g_cameraWorld.transform = g_cameraPlayer.transform;
+			//	g_cameraWorld.lookAt(g_player->transform.position);
+			//	g_currentCamera = &g_cameraWorld;
+			//	//g_projectionTest = lerp(pp, op, 0.01f);
+			//}
 
-					level->material = &g_materialHolder.get("terrain");
-					level->name = "level";
-					level->generate();
 
-					g_level = level.get();
-
-					g_rootNode.attachChild(std::move(level));
-				}
-			}
 		
 			// game pad input
 				Input::GamepadAxes axes = Input::getGamepadAxes(Input::Gamepad_1);
@@ -678,25 +844,7 @@ namespace Dunjun
 					g_spotLights[0].direction = g_cameraWorld.forward();
 				}
 
-				// level regeneration button
-				if (Input::isGamepadButtonPressed(Input::Gamepad_1, Input::XboxButton::Y))
-				{
-					toggleCulling = true;
-					SceneNode* level = g_rootNode.findChildByName("level");
-					g_rootNode.detachChild(*level);
 
-					{ // test level generation
-						auto level = make_unique<Level>();
-
-						level->material = &g_materialHolder.get("terrain");
-						level->name = "level";
-						level->generate();
-
-						g_level = level.get();
-
-						g_rootNode.attachChild(std::move(level));
-					}
-				}
 			// end Gamepad Input
 		//
 		//
@@ -886,16 +1034,14 @@ namespace Dunjun
 		INTERNAL void render()
 		{
 
-			// check whether to update aspect ratio each cycle
-			if (g_currentCamera->viewportSize != Window::getFramebufferSize())
+			// check whether to update aspectratio and size each cycle
+			if (g_window.currentSize != g_window.getSize())
 			{
-				Vector2 viewSize = Window::getFramebufferSize();
-				f32 aspectRatio = viewSize.x / viewSize.y;
+				Vector2 viewSize = g_window.getSize();
 
-				Window::width = viewSize.x;
-				Window::height = viewSize.y;
-				Window::aspectRatio = aspectRatio;
-
+				g_window.currentSize = viewSize;
+				g_window.currentAspectRatio = viewSize.x / viewSize.y;
+			
 				//g_cameraPlayer.viewportAspectRatio = aspectRatio;
 				//g_cameraWorld.viewportAspectRatio = aspectRatio;
 			}
@@ -916,15 +1062,15 @@ namespace Dunjun
 
 			//g_renderer.quad = g_meshes["quad"];
 
-			g_renderer.gBuffer.create(Window::width, Window::height);
+			g_renderer.gBuffer.create(g_window.currentSize.x, g_window.currentSize.y);
 
 			g_renderer.deferredGeometryPass();
 			g_renderer.deferredLightPass();
 			g_renderer.deferredFinalPass();
 
-			g_materialHolder.get("dunjunText").diffuseMap = &g_renderer.finalTexture.colorTexture;
+			//g_materialHolder.get("dunjunText").diffuseMap = &g_renderer.finalTexture.colorTexture;
 
-			glViewport(0, 0, Window::width, Window::height);
+			glViewport(0, 0, g_window.currentSize.x, g_window.currentSize.y);
 			glClearColor(0.02f, 0.02f, 0.02f, 1.0f); // set the default color (R,G,B,A)
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -941,7 +1087,9 @@ namespace Dunjun
 
 				shaders.stopUsing();
 			}
-			Window::swapBuffers(); // switches information between the front buffer and the back buffer
+
+
+			g_window.display(); // switches information between the front buffer and the back buffer
 		}
 
 		/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -957,9 +1105,20 @@ namespace Dunjun
 		void init()
 		{
 
-			if(!Window::init())
-				return;
+			if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_GAMECONTROLLER | 
+						SDL_INIT_HAPTIC | SDL_INIT_JOYSTICK) != 0)
+			{
+				std::cerr << "SDL Faild to initialize. Error: ";
+				std::cerr << SDL_GetError;
+				std::cerr << std::endl;
 
+				std::exit(EXIT_FAILURE);
+			}
+
+			
+
+			g_window.create("blank", {854, 480});
+			g_window.setFramerateLimit(FrameLimit);
 
 			glewInit();
 
@@ -970,7 +1129,7 @@ namespace Dunjun
 
 			Input::setUp();
 
-			//Input::setCursorPosition({ 0, 0 });
+			Input::setCursorPosition({ 0, 0 });
 			//Input::setCursorMode(Input::CursorMode::Disabled);
 
 			//glEnable(GL_CULL_FACE); // enable culling faces
@@ -990,8 +1149,6 @@ namespace Dunjun
 
 			// load instances
 			loadInstances();
-
-			std::cout << " Press H to see controls." << std::endl;
 		}
 
 		void run()
@@ -1006,17 +1163,19 @@ namespace Dunjun
 			const Time tickLimit = seconds(1.0 / (2.0f * 144.0f + 1.0f));
 
 			TickCounter tc;
-			Clock frameClock;
+			//Clock frameClock;
 
 			Time accumulator;
 			Time prevTime = Time::now();
 
-			Window::makeContextCurrent();
+			std::cout << "\n\n\n\n" << std::endl;
+			std::cout << "Type in a command and press enter. [HELP] [QUIT]" << std::endl;
+			std::cout << ">> []" << std::endl;
 
 			while (g_running) // create a loop that works until the window closes
 			{
 				//Window::pollEvents();
-				Window::makeContextCurrent();
+				//Window::makeContextCurrent();
 
 				Time currentTime = Time::now();
 				Time dt = currentTime - prevTime;
@@ -1032,41 +1191,36 @@ namespace Dunjun
 				while (accumulator >= TIME_STEP)
 				{
 					accumulator -= TIME_STEP;
-					Window::pollEvents();
 					handleInput(); // input handler
-					Input::updateGamepads();
 					update(TIME_STEP);
 
 				}
 
-				if (tc.update(milliseconds(500)))
+				if (tc.update(milliseconds(500)) && (g_running == true))
 				{
 					// dynamic window title
-					Window::setTitle(stringFormat("Dunjun - %.3f ms - %d fps",
+					g_window.setTitle(stringFormat("Dunjun - %.3f ms - %d fps",
 												  1000.f / tc.getTickRate(), 
 												  (u32)tc.getTickRate()));
 				}
 
-				render();
+				if(g_running)
+					render();
 
 
 				// framerate limiter
-				const Time framelimitTime = MaxFrameTime - frameClock.getElapsedTime();
-
-				if (framelimitTime > Time::Zero)
-					Time::sleep(framelimitTime);
-				frameClock.restart();
+				//const Time framelimitTime = MaxFrameTime - frameClock.getElapsedTime();
+				//
+				//if (framelimitTime > Time::Zero)
+				//	Time::sleep(framelimitTime);
+				//frameClock.restart();
 
 			}
 		}
 
 		void cleanUp()
 		{
-			//for(auto& mesh : g_meshes)
-			//	delete mesh.second;
-
 			Input::cleanup();
-			Window::cleanup();
 		}
 
 	} // end Game

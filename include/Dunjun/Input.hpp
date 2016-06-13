@@ -4,6 +4,7 @@
 
 #include <Dunjun/Window.hpp>
 
+
 namespace Dunjun
 {
 	namespace Input
@@ -190,7 +191,7 @@ namespace Dunjun
 			Disabled,
 		};
 
-		void scrollCallback(GLFWwindow* window, f64 xOffset, f64 yOffset);
+		//void scrollCallback(GLFWwindow* window, f64 xOffset, f64 yOffset);
 
 		void setUp();
 		void cleanup();

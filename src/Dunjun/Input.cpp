@@ -29,11 +29,11 @@ namespace Dunjun
 		GLOBAL f64 g_scrollX = 0;
 		GLOBAL f64 g_scrollY = 0;
 
-		void scrollCallback(GLFWwindow* window, f64 offsetX, f64 offsetY)
-		{
-			g_scrollX = offsetX;
-			g_scrollY = offsetY;
-		}
+		//void scrollCallback(GLFWwindow* window, f64 offsetX, f64 offsetY)
+		//{
+		//	g_scrollX = offsetX;
+		//	g_scrollY = offsetY;
+		//}
 
 		void setUp() // set up gamepads
 		{
@@ -281,7 +281,7 @@ namespace Dunjun
 			//glfwSetCursorPos(Window::getHandle(),
 			//				 static_cast<f64>(pos.x), 
 			//				 static_cast<f64>(pos.y));
-			SDL_WarpMouseInWindow(relativeTo.getNaticeHandle(), pos.x, pos.y);
+			SDL_WarpMouseInWindow(relativeTo.getNativeHandle(), pos.x, pos.y);
 
 		}
 
@@ -400,10 +400,10 @@ namespace Dunjun
 			return getGamepadButtons(gamepadId)[(size_t)button];
 		}
 
-		std::string getGamepadName(GamepadId gamepadId)
-		{
-			return glfwGetJoystickName(gamepadId);
-		}
+		//std::string getGamepadName(GamepadId gamepadId)
+		//{
+		//	return glfwGetJoystickName(gamepadId);
+		//}
 
 		void setGamepadVibration(GamepadId gamepadId, f32 leftMotor, f32 rightMotor)
 		{

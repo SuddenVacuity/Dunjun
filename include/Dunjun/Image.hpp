@@ -6,7 +6,7 @@
 
 // Define functions are variables to be used in Image.cpp and main.cpp
 
-#include <Dunjun/Input.hpp>
+#include <Dunjun/Event.hpp>
 
 
 namespace Dunjun
