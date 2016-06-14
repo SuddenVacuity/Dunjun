@@ -129,9 +129,8 @@ namespace Dunjun
 		return {s_buf, strlen(s_buf)};
 	}
 
-
-	std::string resourcePath();
-	std::string getFileDirectory(const std::string& filepath);
+	//std::string resourcePath();
+	//std::string getFileDirectory(const std::string& filepath);
 
 	//inline void throwRuntimeError(const std::string& str)
 	//{

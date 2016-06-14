@@ -4,11 +4,11 @@
 
 namespace Dunjun
 {
-	std::string getFileDirectory(const std::string& filepath)
-	{
-		size_t found = filepath.find_last_of("/\\");
-		return filepath.substr(0, found);
-	}
+	//std::string getFileDirectory(const std::string& filepath)
+	//{
+	//	size_t found = filepath.find_last_of("/\\");
+	//	return filepath.substr(0, found);
+	//}
 
 	namespace BaseDirectories
 	{

@@ -95,7 +95,7 @@
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>$(ProjectDir)/external/glew-1.13.0/lib/Release/Win32;$(ProjectDir)/external/glfw-3.1.2.bin.WIN32/lib-vc2015;$(ProjectDir)/external/SDL2-2.0.4/lib/x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>glew32s.lib;opengl32.lib;SDL2.lib;SDL2main.lib;glfw3.lib;glfw3dll.lib;XINPUT9_1_0.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>glew32s.lib;opengl32.lib;SDL2.lib;SDL2main.lib;glfw3.lib;glfw3dll.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Console</SubSystem>
     </Link>
     <ProjectReference>
@@ -113,7 +113,7 @@
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>$(ProjectDir)/external/glew-1.13.0/lib/Release/Win32;$(ProjectDir)/external/glfw-3.1.2.bin.WIN32/lib-vc2015;$(ProjectDir)/external/SDL2-2.0.4/lib/x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>glew32s.lib;opengl32.lib;SDL2.lib;SDL2main.lib;glfw3.lib;glfw3dll.lib;XINPUT9_1_0.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>glew32s.lib;opengl32.lib;SDL2.lib;SDL2main.lib;glfw3.lib;glfw3dll.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Console</SubSystem>
     </Link>
     <ProjectReference>
@@ -162,12 +162,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\Dunjun\Common.cpp" />
-    <ClCompile Include="src\Dunjun\Common_OSX.cpp" />
-    <ClCompile Include="src\Dunjun\Common_WIN32.cpp" />
+    <ClCompile Include="src\Dunjun\FileSystemcpp.cpp" />
     <ClCompile Include="src\Dunjun\Game.cpp" />
     <ClCompile Include="src\Dunjun\GBuffer.cpp" />
     <ClCompile Include="src\Dunjun\Image.cpp" />
-    <ClCompile Include="src\Dunjun\Input_OSX.cpp" />
     <ClCompile Include="src\Dunjun\Input.cpp" />
     <ClCompile Include="src\Dunjun\Level.cpp" />
     <ClCompile Include="src\Dunjun\Level\Room.cpp" />
@@ -202,6 +200,7 @@
     <ClInclude Include="include\Dunjun\Common.hpp" />
     <ClInclude Include="include\Dunjun\Config.hpp" />
     <ClInclude Include="include\Dunjun\Event.hpp" />
+    <ClInclude Include="include\Dunjun\FileSystem.hpp" />
     <ClInclude Include="include\Dunjun\Game.hpp" />
     <ClInclude Include="include\Dunjun\GBuffer.hpp" />
     <ClInclude Include="include\Dunjun\Image.hpp" />

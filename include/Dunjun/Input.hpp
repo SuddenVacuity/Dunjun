@@ -138,49 +138,92 @@ namespace Dunjun
 			MouseButton_Middle = MouseButton_3,
 		};
 
-		struct GamepadAxes // for gamepad
-		{
-			Vector2 leftThumbStick;
-			Vector2 rightThumbStick;
+		//struct GamepadAxes // for gamepad
+		//{
+		//	Vector2 leftThumbStick;
+		//	Vector2 rightThumbStick;
+		//
+		//	f32 leftTrigger;
+		//	f32 rightTrigger;
+		//};
+		//
+		//enum class XboxButton
+		//{
+		//	// values for direct input
+		//	DpadUp    = 0,
+		//	DpadDown  = 1,
+		//	DpadLeft  = 2,
+		//	DpadRight = 3,
+		//
+		//	Start = 4,
+		//	Back  = 5,
+		//
+		//	LeftThumb  = 6,
+		//	RightThumb = 7,
+		//
+		//	LeftShoulder  = 8,
+		//	RightShoulder = 9,
+		//
+		//	A = 10,
+		//	B = 11,
+		//	X = 12,
+		//	Y = 13,
+		//
+		//	Count = 14,
+		//}; // GamepadButtons
 
-			f32 leftTrigger;
-			f32 rightTrigger;
+		enum class GamepadButton : u32
+		{
+			Invalid		  = -1,	 
+								 
+			A			  ,	 
+			B			  ,	 
+			X			  ,	 
+			Y			  ,	 
+								 
+			Back		  ,	 
+			Guide		  ,	 
+			Start		  ,	 
+								 
+			LeftStick	  ,	 
+			RightStick	  ,	 
+								 
+			LeftShoulder  ,	 
+			RightShoulder ,	 
+								 
+			DpadUp 		  ,	 
+			DpadDown	  ,	 
+			DpadLeft 	  ,	 
+			DpadRight 	  ,	 
+
+			MaxCount
 		};
 
-		enum class XboxButton
+		enum class GamepadAxis
 		{
-			// values for direct input
-			DpadUp = 0,
-			DpadDown = 1,
-			DpadLeft = 2,
-			DpadRight = 3,
+			Invalid = -1,
 
-			Start = 4,
-			Back = 5,
+			LeftX,
+			LeftY,
 
-			LeftThumb = 6,
-			RightThumb = 7,
+			RightX,
+			RightY,
 
-			LeftShoulder = 8,
-			RightShoulder = 9,
+			LeftTrigger,
+			RightTrigger,
 
-			A = 10,
-			B = 11,
-			X = 12,
-			Y = 13,
-
-			Count = 14,
-		}; // GamepadButtons
-
-		enum GamepadId
-		{
-			Gamepad_1 = 0,
-			Gamepad_2 = 1,
-			Gamepad_3 = 2,
-			Gamepad_4 = 3,
-
-			Gamepad_MaxCount = 4,
+			MaxCount
 		};
+
+		//enum GamepadId
+		//{
+		//	Gamepad_1 = 0,
+		//	Gamepad_2 = 1,
+		//	Gamepad_3 = 2,
+		//	Gamepad_4 = 3,
+		//
+		//	Gamepad_MaxCount = 4,
+		//};
 
 		using GamepadButtons = std::vector<b8>;
 
@@ -265,15 +308,14 @@ namespace Dunjun
 		)				.
 		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-		void updateGamepads();
+		//void updateGamepads();
 
-		bool isGamepadPresent(GamepadId gamepadId);
-		GamepadAxes getGamepadAxes(GamepadId gamepadId);
-		GamepadButtons getGamepadButtons(GamepadId gamepadId);
-		b8 isGamepadButtonPressed(GamepadId gamepadId, XboxButton button);
+		bool isGamepadPresent(u32 gamepadId);
+		b8 isGamepadButtonPressed(u32 gamepadId, GamepadButton button);
+		f32 getGamepadAxis(u32 gamepadId, GamepadAxis axis);
 
-		std::string getGamepadName(GamepadId gamepadId);
-		void setGamepadVibration(GamepadId gamepadId, f32 leftMotor, f32 rightMotor);
+		std::string getGamepadName(u32 gamepadId);
+		void setGamepadVibration(u32 gamepadId, f32 leftMotor, f32 rightMotor);
 
 		std::string getClipboardString();
 		void setClipboardString(const std::string& str);

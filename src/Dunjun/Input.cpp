@@ -1,15 +1,14 @@
 #include <Dunjun/Config.hpp>
-#ifdef DUNJUN_SYSTEM_WINDOWS
 #include <Dunjun/Input.hpp>
 
-#define VC_EXTRALEAN
-#define WIN32_MEAN_AND_LEAN // FIXME: remove Windows.h
-#define WIN32_LEAN_AND_MEAN // FIXME: remove Windows.h
-#include <Windows.h>		// FIXME: remove Windows.h
-
-// this is using Windows 7 - XINPUT9_1_0.LIB
-// change in Linker -> Input -> Additional Dependencies
-#include <xinput.h>
+//#define VC_EXTRALEAN
+//#define WIN32_MEAN_AND_LEAN // FIXME: remove Windows.h
+//#define WIN32_LEAN_AND_MEAN // FIXME: remove Windows.h
+//#include <Windows.h>		// FIXME: remove Windows.h
+//
+//// this is using Windows 7 - XINPUT9_1_0.LIB
+//// change in Linker -> Input -> Additional Dependencies
+//#include <xinput.h>
 										  
 //#include <SDL/SDL_keyboard.h>		  // included in Windows.hpp (SDL.h)
 //#include <SDL/SDL_keycode.h>		  // included in Windows.hpp (SDL.h)
@@ -23,26 +22,36 @@ namespace Dunjun
 {
 	namespace Input
 	{
-		// 
+		GLOBAL const size_t Gamepad_MaxCount = 4;
 
-		GLOBAL std::array<XINPUT_STATE, Gamepad_MaxCount> g_gamepadStates;
+		//GLOBAL std::array<XINPUT_STATE, Gamepad_MaxCount> g_gamepadStates;
 		GLOBAL f64 g_scrollX = 0;
 		GLOBAL f64 g_scrollY = 0;
 
-		//void scrollCallback(GLFWwindow* window, f64 offsetX, f64 offsetY)
-		//{
-		//	g_scrollX = offsetX;
-		//	g_scrollY = offsetY;
-		//}
-
+		GLOBAL std::array<SDL_GameController*, Gamepad_MaxCount> g_controllerHandles;
+	
 		void setUp() // set up gamepads
 		{
-			for(int i = 0; i < Gamepad_MaxCount; i++) // cycle through and check if they're present
+			//for(int i = 0; i < Gamepad_MaxCount; i++) // cycle through and check if they're present
+			//{
+			//	memset(&g_gamepadStates[i], 0, sizeof(XINPUT_STATE));
+			//	if(isGamepadPresent((GamepadId)i))
+			//		setGamepadVibration((GamepadId)i, 0, 0); // if isPresent set vibration to 0
+			//}
+
+			int maxJoySticks = SDL_NumJoysticks();
+			int controllerIndex = 0;
+			for (int joystickIndex = 0; joystickIndex < maxJoySticks; joystickIndex++)
 			{
-				memset(&g_gamepadStates[i], 0, sizeof(XINPUT_STATE));
-				if(isGamepadPresent((GamepadId)i))
-					setGamepadVibration((GamepadId)i, 0, 0); // if isPresent set vibration to 0
+				if (!SDL_IsGameController(joystickIndex))
+					continue;
+				if(controllerIndex >= Gamepad_MaxCount)
+					break;
+
+				g_controllerHandles[controllerIndex] = SDL_GameControllerOpen(joystickIndex);
+				controllerIndex++;
 			}
+
 			setStickyKeys(true); // sticky assumes the button is held until it is checked again
 			setStickyMouseButtons(true);
 		}
@@ -51,8 +60,14 @@ namespace Dunjun
 		{
 			for(int i = 0; i < Gamepad_MaxCount; i++)
 			{
-				if(isGamepadPresent((GamepadId)i))
-					setGamepadVibration((GamepadId)i, 0, 0); // make sure vibration is set to 0 when disconnecting
+				if(isGamepadPresent(i))
+					setGamepadVibration(i, 0, 0); // make sure vibration is set to 0 when disconnecting
+			}
+
+			for(SDL_GameController* gamepad : g_controllerHandles)
+			{
+				if(gamepad)
+					SDL_GameControllerClose(gamepad);
 			}
 		}
 
@@ -323,96 +338,116 @@ namespace Dunjun
 		)				.
 		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-		void updateGamepads()
-		{
-			for(size_t i = 0; i < Gamepad_MaxCount; i++)
-			{
-				isGamepadPresent((GamepadId)i);
-			}
-		}
+		//void updateGamepads()
+		//{
+		//	for(size_t i = 0; i < Gamepad_MaxCount; i++)
+		//	{
+		//		isGamepadPresent(i);
+		//	}
+		//}
 
-		bool isGamepadPresent(GamepadId gamepadId)
+		bool isGamepadPresent(u32 gamepadId)
 		{
 			if(gamepadId < Gamepad_MaxCount)
-				return XInputGetState(gamepadId, &g_gamepadStates[gamepadId]) == 0;
-
+				return 0;// XInputGetState(gamepadId, &g_gamepadStates[gamepadId]) == 0;
+		
 			return false;
 		}
 
-		GamepadAxes getGamepadAxes(GamepadId gamepadId)
+//
+//		GamepadAxes getGamepadAxes(GamepadId gamepadId)
+//		{
+//			GamepadAxes axes;
+//
+			//axes.leftTrigger = g_gamepadStates[gamepadId].Gamepad.bLeftTrigger / 255.0f; // convert to correct size
+			//axes.rightTrigger = g_gamepadStates[gamepadId].Gamepad.bRightTrigger / 255.0f;
+			//
+			//axes.leftThumbStick.x = g_gamepadStates[gamepadId].Gamepad.sThumbLX / 32767.0f; // convert to correct size
+			//axes.leftThumbStick.y = g_gamepadStates[gamepadId].Gamepad.sThumbLY / 32767.0f;
+			//
+			//axes.rightThumbStick.x = g_gamepadStates[gamepadId].Gamepad.sThumbRX / 32767.0f; // convert to correct size
+			//axes.rightThumbStick.y = g_gamepadStates[gamepadId].Gamepad.sThumbRY / 32767.0f;
+//
+//			return axes;
+//		}
+//
+//		GamepadButtons getGamepadButtons(GamepadId gamepadId)
+//		{
+//			GamepadButtons buttons((size_t)XboxButton::Count);
+//
+			//buttons[(int)XboxButton::DpadUp] =
+			//	(g_gamepadStates[gamepadId].Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_UP) != 0;
+			//buttons[(int)XboxButton::DpadDown] =
+			//	(g_gamepadStates[gamepadId].Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_DOWN) != 0;
+			//buttons[(int)XboxButton::DpadLeft] =
+			//	(g_gamepadStates[gamepadId].Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_LEFT) != 0;
+			//buttons[(int)XboxButton::DpadRight] =
+			//	(g_gamepadStates[gamepadId].Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_RIGHT) != 0;
+			//
+			//buttons[(int)XboxButton::Start] =
+			//	(g_gamepadStates[gamepadId].Gamepad.wButtons & XINPUT_GAMEPAD_START) != 0;
+			//buttons[(int)XboxButton::Back] =
+			//	(g_gamepadStates[gamepadId].Gamepad.wButtons & XINPUT_GAMEPAD_BACK) != 0;
+			//
+			//buttons[(int)XboxButton::LeftThumb] =
+			//	(g_gamepadStates[gamepadId].Gamepad.wButtons & XINPUT_GAMEPAD_LEFT_THUMB) != 0;
+			//buttons[(int)XboxButton::RightThumb] =
+			//	(g_gamepadStates[gamepadId].Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_THUMB) != 0;
+			//
+			//buttons[(int)XboxButton::LeftShoulder] =
+			//	(g_gamepadStates[gamepadId].Gamepad.wButtons & XINPUT_GAMEPAD_LEFT_SHOULDER) != 0;
+			//buttons[(int)XboxButton::RightShoulder] =
+			//	(g_gamepadStates[gamepadId].Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_SHOULDER) != 0;
+			//
+			//buttons[(int)XboxButton::A] =
+			//	(g_gamepadStates[gamepadId].Gamepad.wButtons & XINPUT_GAMEPAD_A) != 0;
+			//buttons[(int)XboxButton::B] =
+			//	(g_gamepadStates[gamepadId].Gamepad.wButtons & XINPUT_GAMEPAD_B) != 0;
+			//buttons[(int)XboxButton::X] =
+			//	(g_gamepadStates[gamepadId].Gamepad.wButtons & XINPUT_GAMEPAD_X) != 0;
+			//buttons[(int)XboxButton::Y] =
+			//	(g_gamepadStates[gamepadId].Gamepad.wButtons & XINPUT_GAMEPAD_Y) != 0;
+//
+//			return buttons;
+//		}
+
+		b8 isGamepadButtonPressed(u32 gamepadId, GamepadButton button)
 		{
-			GamepadAxes axes;
+			SDL_GameController* gamepad = g_controllerHandles[gamepadId];
 
-			axes.leftTrigger = g_gamepadStates[gamepadId].Gamepad.bLeftTrigger / 255.0f; // convert to correct size
-			axes.rightTrigger = g_gamepadStates[gamepadId].Gamepad.bRightTrigger / 255.0f;
-			
-			axes.leftThumbStick.x = g_gamepadStates[gamepadId].Gamepad.sThumbLX / 32767.0f; // convert to correct size
-			axes.leftThumbStick.y = g_gamepadStates[gamepadId].Gamepad.sThumbLY / 32767.0f;
-			
-			axes.rightThumbStick.x = g_gamepadStates[gamepadId].Gamepad.sThumbRX / 32767.0f; // convert to correct size
-			axes.rightThumbStick.y = g_gamepadStates[gamepadId].Gamepad.sThumbRY / 32767.0f;
+			if(gamepad && SDL_GameControllerGetAttached(gamepad))
+				return SDL_GameControllerGetButton(gamepad, (SDL_GameControllerButton)button) != 0;
 
-			return axes;
+			return false;//getGamepadButtons(gamepadId)[(size_t)button];
 		}
 
-		GamepadButtons getGamepadButtons(GamepadId gamepadId)
+		f32 getGamepadAxis(u32 gamepadId, GamepadAxis axis)
 		{
-			GamepadButtons buttons((size_t)XboxButton::Count);
+			SDL_GameController* gamepad = g_controllerHandles[gamepadId];
 
-			buttons[(int)XboxButton::DpadUp] =
-				(g_gamepadStates[gamepadId].Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_UP) != 0;
-			buttons[(int)XboxButton::DpadDown] =
-				(g_gamepadStates[gamepadId].Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_DOWN) != 0;
-			buttons[(int)XboxButton::DpadLeft] =
-				(g_gamepadStates[gamepadId].Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_LEFT) != 0;
-			buttons[(int)XboxButton::DpadRight] =
-				(g_gamepadStates[gamepadId].Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_RIGHT) != 0;
+			if (gamepad && SDL_GameControllerGetAttached(gamepad))
+			{
+				s16 value = SDL_GameControllerGetAxis(gamepad, (SDL_GameControllerAxis)axis);
 
-			buttons[(int)XboxButton::Start] =
-				(g_gamepadStates[gamepadId].Gamepad.wButtons & XINPUT_GAMEPAD_START) != 0;
-			buttons[(int)XboxButton::Back] =
-				(g_gamepadStates[gamepadId].Gamepad.wButtons & XINPUT_GAMEPAD_BACK) != 0;
+				return static_cast<f32>(value) / 32767.0f;
+			}
 
-			buttons[(int)XboxButton::LeftThumb] =
-				(g_gamepadStates[gamepadId].Gamepad.wButtons & XINPUT_GAMEPAD_LEFT_THUMB) != 0;
-			buttons[(int)XboxButton::RightThumb] =
-				(g_gamepadStates[gamepadId].Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_THUMB) != 0;
-
-			buttons[(int)XboxButton::LeftShoulder] =
-				(g_gamepadStates[gamepadId].Gamepad.wButtons & XINPUT_GAMEPAD_LEFT_SHOULDER) != 0;
-			buttons[(int)XboxButton::RightShoulder] =
-				(g_gamepadStates[gamepadId].Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_SHOULDER) != 0;
-
-			buttons[(int)XboxButton::A] =
-				(g_gamepadStates[gamepadId].Gamepad.wButtons & XINPUT_GAMEPAD_A) != 0;
-			buttons[(int)XboxButton::B] =
-				(g_gamepadStates[gamepadId].Gamepad.wButtons & XINPUT_GAMEPAD_B) != 0;
-			buttons[(int)XboxButton::X] =
-				(g_gamepadStates[gamepadId].Gamepad.wButtons & XINPUT_GAMEPAD_X) != 0;
-			buttons[(int)XboxButton::Y] =
-				(g_gamepadStates[gamepadId].Gamepad.wButtons & XINPUT_GAMEPAD_Y) != 0;
-
-			return buttons;
+			return 0;
 		}
 
-		b8 isGamepadButtonPressed(GamepadId gamepadId, XboxButton button)
+		std::string getGamepadName(u32 gamepadId)
 		{
-			return getGamepadButtons(gamepadId)[(size_t)button];
+			return SDL_GameControllerName(g_controllerHandles[gamepadId]);
 		}
 
-		//std::string getGamepadName(GamepadId gamepadId)
-		//{
-		//	return glfwGetJoystickName(gamepadId);
-		//}
-
-		void setGamepadVibration(GamepadId gamepadId, f32 leftMotor, f32 rightMotor)
+		void setGamepadVibration(u32 gamepadId, f32 leftMotor, f32 rightMotor)
 		{
-			XINPUT_VIBRATION vibration;
-
-			vibration.wLeftMotorSpeed = static_cast<WORD>(leftMotor * 0xFFFF);
-			vibration.wRightMotorSpeed = static_cast<WORD>(rightMotor * 0xFFFF);
-
-			XInputSetState((u32)gamepadId, &vibration);
+			//XINPUT_VIBRATION vibration;
+			//
+			//vibration.wLeftMotorSpeed = static_cast<WORD>(leftMotor * 0xFFFF);
+			//vibration.wRightMotorSpeed = static_cast<WORD>(rightMotor * 0xFFFF);
+			//
+			//XInputSetState((u32)gamepadId, &vibration);
 		}
 
 		std::string getClipboardString()
@@ -428,6 +463,3 @@ namespace Dunjun
 
 	} // end Input
 } // end Dunjun
-
-
-#endif

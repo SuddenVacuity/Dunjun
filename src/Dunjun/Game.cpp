@@ -48,6 +48,7 @@ namespace Dunjun
 	INTERNAL std::string textBuffer = "";
 	INTERNAL bool acceptInput = true;
 	INTERNAL bool checkForCommand = false;
+	INTERNAL bool useConsole = false;
 
 	namespace Game
 	{
@@ -82,13 +83,12 @@ namespace Dunjun
 		//
 		INTERNAL void handleInput()
 		{
-			Input::updateGamepads();
-
 			Event event;
 			while (g_window.pollEvent(event))
 			{
 				if (event.type == Event::Closed)
 				{
+					// TODO: fix inconsistant delay/ignore for this event
 					g_running = false;
 					g_window.close();
 				}
@@ -96,6 +96,16 @@ namespace Dunjun
 				{
 					glViewport(0, 0, event.size.width, event.size.height);
 				}
+
+				/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+				)				.
+				)					HANDLE KEYBOARD
+				)
+				)				.
+				)					.
+				)
+				)				.
+				%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
 				if(event.type == Event::KeyPressed && acceptInput == true)
 				{		
@@ -116,8 +126,16 @@ namespace Dunjun
 					if (Input::isKeyPressed(Input::Key::Down))
 						textBuffer.append(" ");
 
-				
+					// console
+					if(useConsole == true)
+					{
+						if (Input::isKeyPressed(Input::Key::Tab))
+						{
+							useConsole = false;
+						}
+
 					// Add letters TODO: do this without ififififififififififififififififififififififif
+					{
 					if (Input::isKeyPressed(Input::Key::Space))
 						textBuffer.append(" ");
 					if (Input::isKeyPressed(Input::Key::A))
@@ -172,16 +190,44 @@ namespace Dunjun
 						textBuffer.append("Y");
 					if (Input::isKeyPressed(Input::Key::Z))
 						textBuffer.append("Z");
-
+					}
 					std::cout << "\n\nType in a command and press enter. [HELP] [QUIT]" << std::endl;
 					std::cout << ">> [" << textBuffer << "]";
-					//acceptInput = false;
+					}
+					// normal input
+					else 
+					{
+						if (Input::isKeyPressed(Input::Key::Tab))
+						{
+							useConsole = true;
+						}
+					}
 				}
-				//else if(acceptInput == false)
-				//{
-				//	acceptInput = true;
-				//}
-			}
+
+
+			} // end while (g_window.pollEvent(event))
+
+			/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+			)				.
+			)					HANDLE GAMEPADS
+			)
+			)				.
+			)					.
+			)
+			)				.
+			%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+
+
+
+			/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+			)				.
+			)					HANDLE CLOSE WINDOW
+			)
+			)				.
+			)					.
+			)
+			)				.
+			%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
 			if (!g_window.isOpen() || // check if window was closed
 				Input::isKeyPressed(Input::Key::Escape)) // checks if the escape key is pressed in window
@@ -211,13 +257,6 @@ namespace Dunjun
 		// File path for shader files and define and bind attributes
 		INTERNAL void loadShaders()
 		{
-			std::cout << "Using Grapics Card:\n-------------------" << std::endl;
-			std::cout << glGetString(GL_VENDOR) << std::endl;
-			std::cout << glGetString(GL_RENDERER) << std::endl;
-			std::cout << "Version: " << glGetString(GL_VERSION) << std::endl;
-
-			std::cout << "\n\n";
-
 			u32 shaderCounter = 0;
 			std::cout << "Loading shader " << shaderCounter++ << std::endl;
 			g_shaderHolder.insertFromFile("default", "default_vert.glsl", 
@@ -320,10 +359,10 @@ namespace Dunjun
 				meshData.indices.reserve(numIndices);
 
 				// add the data
-				for(int i = 0; i < numVertices; i++)
+				for(u32 i = 0; i < numVertices; i++)
 					meshData.vertices.append(vertices[i].position, vertices[i].texCoord, vertices[i].color);
 
-				for(int i = 0; i <  numIndices; i++)
+				for(u32 i = 0; i <  numIndices; i++)
 					meshData.indices.push_back(indices[i]);
 
 				meshData.generateNormals();
@@ -348,8 +387,8 @@ namespace Dunjun
 				u32 indices[] = { 0, 1, 2, 1, 3, 2 }; // vertex draw order for GL_TRIANGLES
 
 				// get number of entries
-				int numVertices = sizeof(vertices) / sizeof(vertices[0]);
-				int numIndices = sizeof(indices) / sizeof(indices[0]);
+				u32 numVertices = sizeof(vertices) / sizeof(vertices[0]);
+				u32 numIndices = sizeof(indices) / sizeof(indices[0]);
 
 				Mesh::Data meshData;
 
@@ -357,10 +396,10 @@ namespace Dunjun
 				meshData.indices.reserve(numIndices);
 
 				// add the data
-				for (int i = 0; i < numVertices; i++)
+				for (u32 i = 0; i < numVertices; i++)
 					meshData.vertices.append(vertices[i].position, vertices[i].texCoord, vertices[i].color);
 
-				for (int i = 0; i < numIndices; i++)
+				for (u32 i = 0; i < numIndices; i++)
 					meshData.indices.push_back(indices[i]);
 
 				meshData.generateNormals();
@@ -529,6 +568,7 @@ namespace Dunjun
 					std::cout << "Keyboard::ArrowKeys = Move sprite" << std::endl;
 					std::cout << "Keyboard::L/R Ctrl = Move sprite up/down" << std::endl;
 					std::cout << "\n";
+					std::cout << "[SYSTEM] = Shwo system information" << std::endl;
 					std::cout << "[REGEN] = Regenerate level with culling" << std::endl;
 					std::cout << "[REGENNC] = Regenerate level without culling" << std::endl;
 					std::cout << "[DIR] = Return views cardinal direction and vertical angle" << std::endl;
@@ -550,6 +590,16 @@ namespace Dunjun
 				else if (textBuffer == "ROOMS")
 				{
 					std::cout << "Rendering " << g_level->roomsRendered << " Rooms" << std::endl;
+				}
+				// room visibility test
+				else if (textBuffer == "SYSTEM")
+				{
+					std::cout << "Using Grapics Card:\n-------------------" << std::endl;
+					std::cout << glGetString(GL_VENDOR) << std::endl;
+					std::cout << glGetString(GL_RENDERER) << std::endl;
+					std::cout << "Version: " << glGetString(GL_VERSION) << std::endl;
+
+					std::cout << "\n\n";
 				}
 				// return direction
 				else if (textBuffer == "DIR")
@@ -735,108 +785,113 @@ namespace Dunjun
 
 		
 			// game pad input
-				Input::GamepadAxes axes = Input::getGamepadAxes(Input::Gamepad_1);
-		
+				//Input::GamepadAxes axes = Input::getGamepadAxes(Input::Gamepad_1);
+				//
 				const f32 lookSensitivityX = 2.0f;
 				const f32 lookSensitivityY = 1.5f;
 				const f32 deadZone = 0.21f;
-		
-				// gamepad camera rotation
-				Vector2 rts = axes.rightThumbStick;
-		
+
+				//// gamepad camera rotation
+				//Vector2 rts = axes.rightThumbStick;
+
+				Vector2 rts = {-Input::getGamepadAxis(0, Input::GamepadAxis::RightX),
+							   -Input::getGamepadAxis(0, Input::GamepadAxis::RightY)};
+				
 				if (Math::abs(rts.x) < deadZone) // ignore anything in the deadZone
 					rts.x = 0;
 				if (Math::abs(rts.y) < deadZone)
 					rts.y = 0;
-		
-				g_cameraWorld.offsetOrientation(lookSensitivityX * Radian(-rts.x * dt.asSeconds())
+				
+				g_cameraWorld.offsetOrientation(lookSensitivityX * Radian(rts.x * dt.asSeconds())
 										  , lookSensitivityY * Radian(rts.y * dt.asSeconds()));
-		
+				
 				// gamepad camera translation
-				Vector2 lts = axes.leftThumbStick;
-		
+				//Vector2 lts = axes.leftThumbStick;
+
+				Vector2 lts = {Input::getGamepadAxis(0, Input::GamepadAxis::LeftX),
+							   -Input::getGamepadAxis(0, Input::GamepadAxis::LeftY)};
+
 				if (Math::abs(lts.x) < deadZone) // ignore anything in the deadZone
 					lts.x = 0;
 				if (Math::abs(lts.y) < deadZone)
 					lts.y = 0;
-		
-				if(length(lts) > 1.0f) // keep diagonals from being faster then straight x, y or z
+				
+				if(length(Vector2(lts.x, lts.y)) > 1.0f) // keep diagonals from being faster then straight x, y or z
 					lts = normalize(lts);
-
+				
 				Vector3 velocityDirection = { 0, 0, 0 };
 				Vector3 camVelocityDirection = { 0, 0, 0 };
-		
+				
 				Vector3 forward = g_cameraWorld.forward();
-				forward.y = 0;
 				forward = normalize(forward);
-		
+				
 				camVelocityDirection += lts.x * g_cameraWorld.right();
 				camVelocityDirection += lts.y * forward;
-		
-				Input::GamepadButtons buttons = Input::getGamepadButtons(Input::Gamepad_1);
-		
-				if (buttons[(size_t)Input::XboxButton::RightShoulder])
+				
+				//Input::GamepadButtons buttons = Input::getGamepadButtons(Input::Gamepad_1);
+				
+				if (Input::isGamepadButtonPressed(0, Input::GamepadButton::RightShoulder))
 					camVelocityDirection.y += 1;
-				if (buttons[(size_t)Input::XboxButton::LeftShoulder])
+				if (Input::isGamepadButtonPressed(0, Input::GamepadButton::LeftShoulder))
 					camVelocityDirection.y -= 1;
-
+				
 				if(length(camVelocityDirection) > 1.0f)
 					camVelocityDirection = normalize(camVelocityDirection);
-		
+				
 				g_cameraWorld.transform.position += camVel * camVelocityDirection * dt.asSeconds();
-		
+				
 				// gamepad player movement
-				if (buttons[(size_t)Input::XboxButton::DpadUp])
+				if (Input::isGamepadButtonPressed(0, Input::GamepadButton::DpadUp))
 				{
 					Vector3 f = g_cameraWorld.forward();
 					f.y = 0;
 					f = normalize(f);
 					velocityDirection += f;
 				}
-				if (buttons[(size_t)Input::XboxButton::DpadDown])
+				if (Input::isGamepadButtonPressed(0, Input::GamepadButton::DpadDown))
 				{
 					Vector3 b = g_cameraWorld.backward();
 					b.y = 0;
 					b = normalize(b);
 					velocityDirection += b;
 				}
-				if (buttons[(size_t)Input::XboxButton::DpadLeft])
+				if (Input::isGamepadButtonPressed(0, Input::GamepadButton::DpadLeft))
 				{
 					Vector3 l = g_cameraWorld.left();
 					l.y = 0;
 					l = normalize(l);
 					velocityDirection += l;
 				}
-				if (buttons[(size_t)Input::XboxButton::DpadRight])
+				if (Input::isGamepadButtonPressed(0, Input::GamepadButton::DpadRight))
 				{
 					Vector3 r = g_cameraWorld.right();
 					r.y = 0;
 					r = normalize(r);
 					velocityDirection += r;
 				}
-
-				// vibration test
-				if(Input::isGamepadButtonPressed(Input::Gamepad_1, Input::XboxButton::X))
-					Input::setGamepadVibration(Input::Gamepad_1, 0.5f, 0.5f);
-				else
-					Input::setGamepadVibration(Input::Gamepad_1, 0.0f, 0.0f);
-
-
-				// temp variables used in lerp()
-				//g_cameraWorld.projectionType = ProjectionType::Perspective;
-				//const Matrix4 pp = g_cameraWorld.getProjection(); // perspective projection
+				
+				//// vibration test
+				//if(Input::isGamepadButtonPressed(Input::Gamepad_1, Input::XboxButton::X))
+				//	Input::setGamepadVibration(Input::Gamepad_1, 0.5f, 0.5f);
+				//else
+				//	Input::setGamepadVibration(Input::Gamepad_1, 0.0f, 0.0f);
 				//
-				//g_cameraWorld.projectionType = ProjectionType::Orthographic;
-				//const Matrix4 op = g_cameraWorld.getProjection(); // perspective projection
-
-
-				// 
-				if (Input::isGamepadButtonPressed(Input::Gamepad_1, Input::XboxButton::B))
-				{
-					std::cout << "un-mapped button." << std::endl;
-				}
-
-				if (Input::isGamepadButtonPressed(Input::Gamepad_1, Input::XboxButton::A))
+				//
+				//// temp variables used in lerp()
+				////g_cameraWorld.projectionType = ProjectionType::Perspective;
+				////const Matrix4 pp = g_cameraWorld.getProjection(); // perspective projection
+				////
+				////g_cameraWorld.projectionType = ProjectionType::Orthographic;
+				////const Matrix4 op = g_cameraWorld.getProjection(); // perspective projection
+				//
+				//
+				//// 
+				//if (Input::isGamepadButtonPressed(Input::Gamepad_1, Input::XboxButton::B))
+				//{
+				//	std::cout << "un-mapped button." << std::endl;
+				//}
+				//
+				if (Input::isGamepadButtonPressed(0, Input::GamepadButton::A))
 				{
 					g_spotLights[0].position.x = g_cameraWorld.transform.position.x;
 					g_spotLights[0].position.y = g_cameraWorld.transform.position.y - 0.5f;

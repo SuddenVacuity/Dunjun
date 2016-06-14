@@ -38,7 +38,7 @@ namespace Dunjun
 		std::ifstream file; // declare a file stream
 		file.open(std::string(BaseDirectories::Shaders + filename.c_str()), std::ios::in | std::ios::binary); // tell to open file.c_str()(to be defined later)
 																	  // and to take input fromm the file
-		std::string fileDirectory = getFileDirectory(filename) + "/";
+		std::string fileDirectory = FileSystem::getFileDirectory(filename) + "/";
 
 		std::string output; // declares string output
 		std::string line; // declares string line
