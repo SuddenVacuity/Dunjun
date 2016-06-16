@@ -24,9 +24,6 @@
     <ClInclude Include="include\Dunjun\NonCopyable.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Dunjun\OpenGL.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\Dunjun\Clock.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -168,6 +165,15 @@
     <ClInclude Include="include\Dunjun\FileSystem.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\Dunjun\VideoMode.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Dunjun\OpenGL_SDL.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Dunjun\ContextSettings.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
@@ -215,9 +221,6 @@
     <ClCompile Include="src\Dunjun\Time.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Dunjun\OpenGL.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\Dunjun\Texture.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -261,6 +264,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Dunjun\FileSystemcpp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Dunjun\VideoMode.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Dunjun\OpenGL_SDL.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

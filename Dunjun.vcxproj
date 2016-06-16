@@ -95,7 +95,7 @@
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>$(ProjectDir)/external/glew-1.13.0/lib/Release/Win32;$(ProjectDir)/external/glfw-3.1.2.bin.WIN32/lib-vc2015;$(ProjectDir)/external/SDL2-2.0.4/lib/x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>glew32s.lib;opengl32.lib;SDL2.lib;SDL2main.lib;glfw3.lib;glfw3dll.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>glew32s.lib;opengl32.lib;SDL2.lib;SDL2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Console</SubSystem>
     </Link>
     <ProjectReference>
@@ -113,7 +113,7 @@
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>$(ProjectDir)/external/glew-1.13.0/lib/Release/Win32;$(ProjectDir)/external/glfw-3.1.2.bin.WIN32/lib-vc2015;$(ProjectDir)/external/SDL2-2.0.4/lib/x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>glew32s.lib;opengl32.lib;SDL2.lib;SDL2main.lib;glfw3.lib;glfw3dll.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>glew32s.lib;opengl32.lib;SDL2.lib;SDL2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Console</SubSystem>
     </Link>
     <ProjectReference>
@@ -170,7 +170,7 @@
     <ClCompile Include="src\Dunjun\Level.cpp" />
     <ClCompile Include="src\Dunjun\Level\Room.cpp" />
     <ClCompile Include="src\Dunjun\Mesh.cpp" />
-    <ClCompile Include="src\Dunjun\OpenGL.cpp" />
+    <ClCompile Include="src\Dunjun\OpenGL_SDL.cpp" />
     <ClCompile Include="src\Dunjun\Math\Functions\MathLib.cpp" />
     <ClCompile Include="src\Dunjun\Camera.cpp" />
     <ClCompile Include="src\Dunjun\Math\Constants.cpp" />
@@ -190,6 +190,7 @@
     <ClCompile Include="src\Dunjun\ShaderProgram.cpp" />
     <ClCompile Include="src\Dunjun\Texture.cpp" />
     <ClCompile Include="src\Dunjun\Time.cpp" />
+    <ClCompile Include="src\Dunjun\VideoMode.cpp" />
     <ClCompile Include="src\Dunjun\Window.cpp" />
     <ClCompile Include="src\main.cpp" />
   </ItemGroup>
@@ -199,6 +200,7 @@
     <ClInclude Include="include\Dunjun\Color.hpp" />
     <ClInclude Include="include\Dunjun\Common.hpp" />
     <ClInclude Include="include\Dunjun\Config.hpp" />
+    <ClInclude Include="include\Dunjun\ContextSettings.hpp" />
     <ClInclude Include="include\Dunjun\Event.hpp" />
     <ClInclude Include="include\Dunjun\FileSystem.hpp" />
     <ClInclude Include="include\Dunjun\Game.hpp" />
@@ -226,7 +228,7 @@
     <ClInclude Include="include\Dunjun\Mesh.hpp" />
     <ClInclude Include="include\Dunjun\ModelAsset.hpp" />
     <ClInclude Include="include\Dunjun\NonCopyable.hpp" />
-    <ClInclude Include="include\Dunjun\OpenGL.hpp" />
+    <ClInclude Include="include\Dunjun\OpenGL_SDL.hpp" />
     <ClInclude Include="include\Dunjun\RenderTexture.hpp" />
     <ClInclude Include="include\Dunjun\ResourceHolder.hpp" />
     <ClInclude Include="include\Dunjun\ResourceHolder_objects.hpp" />
@@ -244,6 +246,7 @@
     <ClInclude Include="include\Dunjun\Transform.hpp" />
     <ClInclude Include="include\Dunjun\Types.hpp" />
     <ClInclude Include="include\Dunjun\Vertex.hpp" />
+    <ClInclude Include="include\Dunjun\VideoMode.hpp" />
     <ClInclude Include="include\Dunjun\Window.hpp" />
   </ItemGroup>
   <ItemGroup>

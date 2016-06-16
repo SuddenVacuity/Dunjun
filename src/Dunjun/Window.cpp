@@ -46,13 +46,14 @@ namespace Dunjun
 	}
 
 	Window::Window(const std::string& title,
-				   const Vector2& size,
-				   u32 style)
+				   VideoMode mode,
+				   u32 style,
+				   const ContextSettings& context)
 		: m_impl(nullptr)
 		, m_context()
 		, m_frameTimeLimit(Time::Zero)
 	{
-		create(title, size, style);
+		create(title, mode, style, context);
 	}
 
 	Window::~Window()
@@ -62,13 +63,14 @@ namespace Dunjun
 	}
 
 	void Window::create(const std::string& title,
-						const  Vector2& size,
-						u32 style)
+						VideoMode mode,
+						u32 style,
+						const ContextSettings& context)
 	{
 		// destroy the original window
 		// possibly need to make it this->close();
 
-		assert((size.x > 0 && size.y > 0) && "Window::create width and height must be greater that 0");
+		//assert((size.x > 0 && size.y > 0) && "Window::create width and height must be greater that 0");
 
 		close();
 
@@ -82,6 +84,16 @@ namespace Dunjun
 			else
 			{
 				// check fullscreen dimenstions are valid
+				if (!mode.isValid())
+				{
+					std::cerr << "VideoMode " << mode.width << "x" << mode.height << "x" << mode.bitsPerPixel <<
+								 " is not valid." << std::endl;
+
+					mode = VideoMode::getFullscreenModes()[0];
+
+					std::cerr << "Switching to VideoMode " << mode.width << "x" << mode.height << "x" << mode.bitsPerPixel << std::endl;
+						
+				}
 
 				fullscreenWindow = this;
 			}
@@ -92,14 +104,17 @@ namespace Dunjun
 		assert(windowFlags && "Window::create windowFlass is nullptr");
 
 		m_impl = SDL_CreateWindow(title.c_str(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-								  (int)size.x, (int)size.y, windowFlags);
+								  (int)mode.width, (int)mode.height, windowFlags);
 
 		assert(m_impl && "Window::create m_impl is nullptr");
 
-		currentSize = size;
-		currentAspectRatio = size.x / size.y;
+		currentSize = {static_cast<f32>(mode.width), static_cast<f32>(mode.height)};
+		currentAspectRatio = currentSize.x / currentSize.y;
 
 		m_context = SDL_GL_CreateContext(m_impl);
+
+		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
+		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
 
 		init();
 	}

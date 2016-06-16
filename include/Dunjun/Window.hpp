@@ -3,11 +3,6 @@
 
 #include <Dunjun/TickCounter.hpp>
 
-#include <SDL/SDL.h>
-
-//struct GLFWwindow;
-//struct GLFWmonitor;
-
 namespace Dunjun
 {
 	struct Var2_int
@@ -123,14 +118,16 @@ namespace Dunjun
 		Window();
 
 		explicit Window(const std::string& title, 
-						const  Vector2& size,
-						u32 style = Style::Default);
+						VideoMode mode,
+						u32 style = Style::Default,
+						const ContextSettings& context = ContextSettings());
 
 		virtual ~Window();
 
 		void create(const std::string& title,
-					const  Vector2& size,
-					u32 style = Style::Default);
+					VideoMode mode,
+					u32 style = Style::Default,
+					const ContextSettings& context = ContextSettings());
 
 		void close();
 		bool isOpen() const;

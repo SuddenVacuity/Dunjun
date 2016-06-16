@@ -2,7 +2,7 @@
 #define DUNJUN_OPENGL_HPP
 
 #include <Dunjun/Camera.hpp>
-// this hpp file includes open glew for various operating systems
+// this hpp file includes open glew and sdl for various operating systems
 
 #ifndef GLFW_STATIC
 #define GLFW_STATIC
@@ -35,7 +35,8 @@
 #include <GL/gl.h>
 //#include <GLFW/glfw3.h>
 
-
 #endif
+
+#include <SDL/SDL.h>
 
 #endif

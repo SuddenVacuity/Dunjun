@@ -1162,7 +1162,7 @@ namespace Dunjun
 			if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_GAMECONTROLLER | 
 						SDL_INIT_HAPTIC | SDL_INIT_JOYSTICK) != 0)
 			{
-				std::cerr << "SDL Faild to initialize. Error: ";
+				std::cerr << "SDL Failed to initialize. Error: ";
 				std::cerr << SDL_GetError;
 				std::cerr << std::endl;
 
@@ -1171,7 +1171,7 @@ namespace Dunjun
 
 			
 
-			g_window.create("blank", {854, 480});
+			g_window.create("Loading...", {854, 480});
 			g_window.setFramerateLimit(FrameLimit);
 
 			glewInit();
