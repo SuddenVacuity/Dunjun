@@ -348,10 +348,9 @@ namespace Dunjun
 
 		bool isGamepadPresent(u32 gamepadId)
 		{
-			if(gamepadId < Gamepad_MaxCount)
-				return 0;// XInputGetState(gamepadId, &g_gamepadStates[gamepadId]) == 0;
-		
-			return false;
+			SDL_GameController* gamepad = g_controllerHandles[gamepadId];
+
+			return (gamepad && SDL_GameControllerGetAttached(gamepad));
 		}
 
 //
@@ -429,7 +428,11 @@ namespace Dunjun
 			{
 				s16 value = SDL_GameControllerGetAxis(gamepad, (SDL_GameControllerAxis)axis);
 
-				return static_cast<f32>(value) / 32767.0f;
+			// account for signed 0
+				if(value >= 0)
+					return static_cast<f32>(value) / 32767.0f;
+
+				return static_cast<f32>(value) / 32768.0f;
 			}
 
 			return 0;

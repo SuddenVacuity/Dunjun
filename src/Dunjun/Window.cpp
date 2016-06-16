@@ -340,31 +340,30 @@ namespace Dunjun
 			{
 				event.type = Event::Resized;
 				event.size.width = e.window.data1;
-				event.size.height = e.window.data2;
-
-				return true;
+				event.size.height = e.window.data2; 
+				std::cout << "Event - Window Resized" << std::endl;
 			}
 			if (e.window.event == SDL_WINDOWEVENT_CLOSE)
 			{
 				event.type = Event::Closed;
-				return true;
+				std::cout << "Event - Window Closed" << std::endl;
 			}
 			if (e.window.event == SDL_WINDOWEVENT_FOCUS_GAINED)
 			{
 				event.type = Event::GainedFocus;
-				return true;
+				std::cout << "Event - Window Gained Focus" << std::endl;
 			}
-			if (e.window.event == SDL_WINDOWEVENT_FOCUS_GAINED)
+			if (e.window.event == SDL_WINDOWEVENT_FOCUS_LOST)
 			{
 				event.type = Event::LostFocus;
-				return true;
+				std::cout << "Event - Window Lost Focus" << std::endl;
 			}
 			if (e.window.event == SDL_WINDOWEVENT_MOVED)
 			{
 				event.type = Event::Moved;
 				event.move.x = e.window.data1;
 				event.move.y = e.window.data2;
-				return true;
+				std::cout << "Event - Window Moved" << std::endl;
 			}
 		}
 
@@ -383,11 +382,10 @@ namespace Dunjun
 			event.type = Event::MouseMoved;
 			event.mouseMove.x = e.motion.x;
 			event.mouseMove.y = e.motion.y;
-
-			return true;
+			//std::cout << "Event - Mouse Moved" << std::endl;
 		}
 
-		if(e.type == SDL_MOUSEBUTTONDOWN)
+		if (e.type == SDL_MOUSEBUTTONDOWN)
 		{
 			event.type = Event::MouseButtonPressed;
 			event.mouseButton.button = (Input::MouseButton)e.button.button;
@@ -395,8 +393,18 @@ namespace Dunjun
 
 			event.mouseMove.x = e.button.x;
 			event.mouseMove.y = e.button.y;
+			std::cout << "Event - Mouse Button Pressed: " << (int)e.button.button << std::endl;
+		}
 
-			return true;
+		if (e.type == SDL_MOUSEBUTTONUP)
+		{
+			event.type = Event::MouseButtonReleased;
+			event.mouseButton.button = (Input::MouseButton)e.button.button;
+			event.mouseButton.clicks = e.button.clicks;
+
+			event.mouseMove.x = e.button.x;
+			event.mouseMove.y = e.button.y;
+			std::cout << "Event - Mouse Button \206: " << (int)e.button.button << std::endl;
 		}
 
 		if(e.type == SDL_MOUSEWHEEL)
@@ -404,8 +412,7 @@ namespace Dunjun
 			event.type = Event::MouseWheelScrolled;
 			event.mouseScrollWheel.deltaX = e.wheel.x;
 			event.mouseScrollWheel.deltaY = e.wheel.y;
-
-			return true;
+			std::cout << "Event - Mouse Wheel Scrolled:" << std::endl;
 		}
 
 		/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -436,12 +443,12 @@ namespace Dunjun
 				event.key.capsLock = true;
 			if (mod & KMOD_NUM)
 				event.key.numLock = true;
-
-			return true;
+			std::cout << "Event - Key Pressed:" << (int)e.button.button << std::endl;
 		}
+
 		if (e.type == SDL_KEYUP)
 		{
-			event.type = Event::KeyPressed;
+			event.type = Event::KeyReleased;
 			event.key.code = convertFromSDL_ScanCode(e.key.keysym.scancode);
 			u16 mod = e.key.keysym.mod;
 
@@ -457,11 +464,75 @@ namespace Dunjun
 				event.key.capsLock = true;
 			if (mod & KMOD_NUM)
 				event.key.numLock = true;
-
-			return true;
+			std::cout << "Event - Key Released: " << (int)e.button.button << std::endl;
 		}
-		return false;
-	}
+
+		/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+		)				.
+		)					GAMEPAD EVENTS
+		)
+		)				.
+		)					.
+		)
+		)				.
+		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+
+		if (e.type == SDL_CONTROLLERBUTTONDOWN)
+		{
+			event.type = Event::GamepadButtonPressed;
+			event.gamepadButton.id = e.button.which;
+			event.gamepadButton.button = (Input::GamepadButton)e.cbutton.button;
+			std::cout << "Event - Gamepad Button Pressed:" << (int)e.cbutton.button << std::endl;
+		}
+
+		if (e.type == SDL_CONTROLLERBUTTONUP)
+		{
+			event.type = Event::GamepadButtonReleased;
+			event.gamepadButton.id = e.button.which;
+			event.gamepadButton.button = (Input::GamepadButton)e.cbutton.button;
+			std::cout << "Event - Gamepad Button Released:" << (int)e.cbutton.button << std::endl;
+		}
+
+		if (e.type == SDL_CONTROLLERDEVICEADDED)
+		{
+			event.type = Event::GamepadAdded;
+			event.gamepad.id = e.cdevice.which;
+			std::cout << "Event - Gamepad Device Added: " << (int)e.cdevice.which << std::endl;
+		}
+
+		if (e.type == SDL_CONTROLLERDEVICEREMOVED)
+		{
+			event.type = Event::GamepadRemoved;
+			event.gamepad.id = e.cdevice.which;
+			std::cout << "Event - Gamepad Device Removed: " << (int)e.cdevice.which << std::endl;
+		}
+
+		if (e.type == SDL_CONTROLLERDEVICEREMAPPED)
+		{
+			event.type = Event::GamepadRemapped;
+			event.gamepad.id = e.cdevice.which;
+			std::cout << "Event - Gamepad Device Remapped: " << (int)e.cdevice.which << std::endl;
+		}
+		
+		if(e.type == SDL_CONTROLLERAXISMOTION)
+		{
+			event.type = Event::GamepadAxisChanged;
+			event.gamepadAxis.id = e.caxis.which;
+			event.gamepadAxis.axis = (Input::GamepadAxis)e.caxis.axis;
+			
+			s16 value = e.caxis.value;
+			// account for signed 0
+			if (value >= 0)
+				event.gamepadAxis.value =  static_cast<f32>(value) / 32767.0f;
+			else
+				event.gamepadAxis.value = static_cast<f32>(value) / 32768.0f;
+
+			if(Math::abs(event.gamepadAxis.value) > 0.2f)
+				std::cout << "Event - Gamepad " << (int)event.gamepadAxis.id << " Axis " << (int)e.caxis.axis << " Changed:  " << (f32)event.gamepadAxis.value << std::endl;
+		}
+
+		return true;
+	} // end converEvent()
 
 	bool Window::pollEvent(Event& event)
 	{

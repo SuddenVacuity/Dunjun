@@ -50,6 +50,24 @@ namespace Dunjun
 			int deltaY;
 		};
 
+		struct Gamepad
+		{
+			u32 id;
+		};
+
+		struct GamepadButton
+		{
+			u32 id;
+			Input::GamepadButton button;
+		};
+
+		struct GamepadAxis
+		{
+			u32 id;
+			Input::GamepadAxis axis;
+			f32 value;
+		};
+
 		enum EventType
 		{
 			Closed				 ,
@@ -67,7 +85,15 @@ namespace Dunjun
 			MouseMoved			 ,
 			MouseEntered		 ,
 			MouseLeft			 ,
-								 
+
+			GamepadAdded		 ,
+			GamepadRemoved		 ,
+			GamepadRemapped		 ,
+
+			GamepadButtonPressed ,
+			GamepadButtonReleased,
+		 
+			GamepadAxisChanged	 ,
 
 
 			Count
@@ -79,11 +105,16 @@ namespace Dunjun
 		{
 			Size			 size;
 			Move			 move;
+
 			Key				 key;
+
 			MouseMove		 mouseMove;
 			MouseButton		 mouseButton;
 			MouseScrollWheel mouseScrollWheel;
 
+			Gamepad			 gamepad;
+			GamepadButton	 gamepadButton;
+			GamepadAxis		 gamepadAxis;
 		};
 
 	};

@@ -45,7 +45,8 @@ namespace Dunjun
 
 	GLOBAL bool toggleCulling = true;
 
-	INTERNAL std::string textBuffer = "";
+	INTERNAL std::string consoleText = "";
+	INTERNAL std::string consoleBuffer = "";
 	INTERNAL bool acceptInput = true;
 	INTERNAL bool checkForCommand = false;
 	INTERNAL bool useConsole = false;
@@ -109,103 +110,75 @@ namespace Dunjun
 
 				if(event.type == Event::KeyPressed && acceptInput == true)
 				{		
-					//std::cout << "\n\n\n" << std::endl;
-					// check for a command
-					if (Input::isKeyPressed(Input::Key::Return))
-					{
-						checkForCommand = true;
-					}
-				
-					// Erase letters
-					if (Input::isKeyPressed(Input::Key::Backspace))
-						if(textBuffer.size() > 0)
-							textBuffer.erase(textBuffer.size() - 1);
-
-					if (Input::isKeyPressed(Input::Key::Up))
-						textBuffer.append(" ");
-					if (Input::isKeyPressed(Input::Key::Down))
-						textBuffer.append(" ");
-
 					// console
 					if(useConsole == true)
 					{
+						// exit console
 						if (Input::isKeyPressed(Input::Key::Tab))
 						{
 							useConsole = false;
 						}
 
-					// Add letters TODO: do this without ififififififififififififififififififififififif
-					{
-					if (Input::isKeyPressed(Input::Key::Space))
-						textBuffer.append(" ");
-					if (Input::isKeyPressed(Input::Key::A))
-						textBuffer.append("A");
-					if (Input::isKeyPressed(Input::Key::B))
-						textBuffer.append("B");
-					if (Input::isKeyPressed(Input::Key::C))
-						textBuffer.append("C");
-					if (Input::isKeyPressed(Input::Key::D))
-						textBuffer.append("D");
-					if (Input::isKeyPressed(Input::Key::E))
-						textBuffer.append("E");
-					if (Input::isKeyPressed(Input::Key::F))
-						textBuffer.append("F");
-					if (Input::isKeyPressed(Input::Key::G))
-						textBuffer.append("G");
-					if (Input::isKeyPressed(Input::Key::H))
-						textBuffer.append("H");
-					if (Input::isKeyPressed(Input::Key::I))
-						textBuffer.append("I");
-					if (Input::isKeyPressed(Input::Key::J))
-						textBuffer.append("J");
-					if (Input::isKeyPressed(Input::Key::K))
-						textBuffer.append("K");
-					if (Input::isKeyPressed(Input::Key::L))
-						textBuffer.append("L");
-					if (Input::isKeyPressed(Input::Key::M))
-						textBuffer.append("M");
-					if (Input::isKeyPressed(Input::Key::N))
-						textBuffer.append("N");
-					if (Input::isKeyPressed(Input::Key::O))
-						textBuffer.append("O");
-					if (Input::isKeyPressed(Input::Key::P))
-						textBuffer.append("P");
-					if (Input::isKeyPressed(Input::Key::Q))
-						textBuffer.append("Q");
-					if (Input::isKeyPressed(Input::Key::R))
-						textBuffer.append("R");
-					if (Input::isKeyPressed(Input::Key::S))
-						textBuffer.append("S");
-					if (Input::isKeyPressed(Input::Key::T))
-						textBuffer.append("T");
-					if (Input::isKeyPressed(Input::Key::U))
-						textBuffer.append("U");
-					if (Input::isKeyPressed(Input::Key::V))
-						textBuffer.append("V");
-					if (Input::isKeyPressed(Input::Key::W))
-						textBuffer.append("W");
-					if (Input::isKeyPressed(Input::Key::X))
-						textBuffer.append("X");
-					if (Input::isKeyPressed(Input::Key::Y))
-						textBuffer.append("Y");
-					if (Input::isKeyPressed(Input::Key::Z))
-						textBuffer.append("Z");
-					}
-					std::cout << "\n\nType in a command and press enter. [HELP] [QUIT]" << std::endl;
-					std::cout << ">> [" << textBuffer << "]";
+						// check for a command
+						if (Input::isKeyPressed(Input::Key::Return))
+						{
+							checkForCommand = true;
+						}
+
+						// Erase letters
+						if (Input::isKeyPressed(Input::Key::Backspace))
+							if (consoleText.size() > 0)
+								consoleText.erase(consoleText.size() - 1);
+
+						if (Input::isKeyPressed(Input::Key::Delete))
+						{
+							consoleText.clear();
+							consoleBuffer.clear();
+						}
+
+						// TODO: press up or down to cycle previous commands
+						if (Input::isKeyPressed(Input::Key::Up))
+							consoleText.append(" ");
+						if (Input::isKeyPressed(Input::Key::Down))
+							consoleText.append(" ");
+
+						// add letters
+						for(int i = 0; i < 26; i++)
+						{
+							std::string s = ""; // can't initialize as i or cast in .append()
+
+							if(event.key.capsLock == true || event.key.shift == true)
+								s = i + 65; // capital letters
+							else
+								s = i + 97; // lower case letters
+
+							if (Input::isKeyPressed(Input::Key(i)))
+								if ((consoleBuffer.find(s) == consoleBuffer.npos)) // only add if letter is not already in buffer
+									consoleBuffer.append(s);
+						}
+
+						if (1)
+						{
+							// TODO: make this only happen when a key is released and while no keys are pressed
+							// SDL UP/DOWN events don't seem to work for this
+							// buffer is added twice when this happens here
+							consoleText.append(consoleBuffer);
+							consoleBuffer.clear();
+						}
+
+						std::cout << "\n\nType in a command and press enter. [HELP] [QUIT]" << std::endl;
+						std::cout << ">> [" << consoleText << "." << consoleBuffer << "]" << std::endl;
+
 					}
 					// normal input
 					else 
 					{
 						if (Input::isKeyPressed(Input::Key::Tab))
-						{
 							useConsole = true;
-						}
 					}
+
 				}
-
-
-			} // end while (g_window.pollEvent(event))
+				
 
 			/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 			)				.
@@ -217,7 +190,20 @@ namespace Dunjun
 			)				.
 			%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
+				if (event.type == Event::GamepadAdded)
+				{
+					// cout from window.cpp
+				}
+				if (event.type == Event::GamepadRemoved)
+				{
+					// cout from window.cpp
+				}
+				if (event.type == Event::GamepadRemapped)
+				{
+					// cout from window.cpp
+				}
 
+			} // end while (g_window.pollEvent(event))
 
 			/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 			)				.
@@ -552,7 +538,7 @@ namespace Dunjun
 			if(checkForCommand == true)
 			{
 				std::cout << "\n";
-				if (textBuffer == "HELP")
+				if (consoleText == "HELP")
 				{
 					std::cout << "\n" << std::endl;
 					std::cout << "Commands suck for now.\n--------------------" << std::endl;
@@ -582,17 +568,30 @@ namespace Dunjun
 
 
 				}
-				else if (textBuffer == "TODO")
+				else if (consoleText == "TODO")
 				{
 					std::cout << "stuff" << std::endl;
 				}
 				// room visibility test
-				else if (textBuffer == "ROOMS")
+				else if (consoleText == "ROOMS")
 				{
 					std::cout << "Rendering " << g_level->roomsRendered << " Rooms" << std::endl;
 				}
 				// room visibility test
-				else if (textBuffer == "SYSTEM")
+				else if (consoleText == "CHAR")
+				{
+					for(int i = 0; i < 255; i++)
+					{
+						// skip the beep
+						if(i == 7)
+							continue;
+
+						std::cout << "char# " << i << " - " << (char)i << std::endl;
+					}
+
+				}
+				// room visibility test
+				else if (consoleText == "SYSTEM")
 				{
 					std::cout << "Using Grapics Card:\n-------------------" << std::endl;
 					std::cout << glGetString(GL_VENDOR) << std::endl;
@@ -602,7 +601,7 @@ namespace Dunjun
 					std::cout << "\n\n";
 				}
 				// return direction
-				else if (textBuffer == "DIR")
+				else if (consoleText == "DIR")
 				{
 					Vector3 f = g_cameraWorld.forward();
 
@@ -649,7 +648,7 @@ namespace Dunjun
 
 				}
 				// cout test iterator
-				else if (textBuffer == "ITERATOR")
+				else if (consoleText == "ITERATOR")
 				{
 					std::cout << "Test Iterator 0: " << testIterator_5[0] << std::endl;
 					std::cout << "Test Iterator 1: " << testIterator_5[1] << std::endl;
@@ -658,7 +657,7 @@ namespace Dunjun
 					std::cout << "Test Iterator 4: " << testIterator_5[4] << std::endl;
 				}
 				// regenerate world without culling
-				else if (textBuffer == "REGENNC")
+				else if (consoleText == "REGENNC")
 				{
 					toggleCulling = false;
 
@@ -678,7 +677,7 @@ namespace Dunjun
 					}
 				}
 				// level regeneration
-				else if (textBuffer == "REGEN")
+				else if (consoleText == "REGEN")
 				{
 					toggleCulling = true;
 					SceneNode* level = g_rootNode.findChildByName("level");
@@ -700,7 +699,7 @@ namespace Dunjun
 
 
 
-				else if (textBuffer == "QUIT")
+				else if (consoleText == "QUIT")
 				{
 					g_window.close();
 					g_running = false;
@@ -709,7 +708,7 @@ namespace Dunjun
 				{
 					std::cout << "Invalid command." << std::endl;
 				}
-				textBuffer.clear();
+				consoleText.clear();
 				checkForCommand = false;
 			}
 
@@ -783,10 +782,12 @@ namespace Dunjun
 			//}
 
 
+			Vector3 velocityDirection = { 0, 0, 0 };
 		
 			// game pad input
-				//Input::GamepadAxes axes = Input::getGamepadAxes(Input::Gamepad_1);
-				//
+			//Input::GamepadAxes axes = Input::getGamepadAxes(Input::Gamepad_1);
+			if(Input::isGamepadPresent(0))
+			{
 				const f32 lookSensitivityX = 2.0f;
 				const f32 lookSensitivityY = 1.5f;
 				const f32 deadZone = 0.21f;
@@ -802,8 +803,8 @@ namespace Dunjun
 				if (Math::abs(rts.y) < deadZone)
 					rts.y = 0;
 				
-				g_cameraWorld.offsetOrientation(lookSensitivityX * Radian(rts.x * dt.asSeconds())
-										  , lookSensitivityY * Radian(rts.y * dt.asSeconds()));
+				g_cameraWorld.offsetOrientation(lookSensitivityX * Radian(rts.x * dt.asSeconds()),
+												lookSensitivityY * Radian(rts.y * dt.asSeconds()));
 				
 				// gamepad camera translation
 				//Vector2 lts = axes.leftThumbStick;
@@ -819,7 +820,6 @@ namespace Dunjun
 				if(length(Vector2(lts.x, lts.y)) > 1.0f) // keep diagonals from being faster then straight x, y or z
 					lts = normalize(lts);
 				
-				Vector3 velocityDirection = { 0, 0, 0 };
 				Vector3 camVelocityDirection = { 0, 0, 0 };
 				
 				Vector3 forward = g_cameraWorld.forward();
@@ -869,7 +869,6 @@ namespace Dunjun
 					r = normalize(r);
 					velocityDirection += r;
 				}
-				
 				//// vibration test
 				//if(Input::isGamepadButtonPressed(Input::Gamepad_1, Input::XboxButton::X))
 				//	Input::setGamepadVibration(Input::Gamepad_1, 0.5f, 0.5f);
@@ -899,7 +898,7 @@ namespace Dunjun
 					g_spotLights[0].direction = g_cameraWorld.forward();
 				}
 
-
+			}
 			// end Gamepad Input
 		//
 		//
