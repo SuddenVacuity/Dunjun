@@ -1,7 +1,7 @@
 #ifndef DUNJUN_COMMON_HPP // ifndef checks if this macro has been defined
 #define DUNJUN_COMMON_HPP // if not then define it
 
-#include <Dunjun/Types.hpp>
+#include <Dunjun/System/Types.hpp>
 
 // undef these for internal math library
 #ifdef min

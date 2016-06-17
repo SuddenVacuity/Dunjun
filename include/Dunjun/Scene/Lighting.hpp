@@ -1,7 +1,7 @@
 #ifndef DUNJUN_SCENE_LIGHTING_HPP 
 #define DUNJUN_SCENE_LIGHTING_HPP 
 
-#include <Dunjun/ModelAsset.hpp>
+#include <Dunjun/Graphics/ModelAsset.hpp>
 
 namespace Dunjun
 {
