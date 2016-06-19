@@ -104,15 +104,15 @@ namespace Dunjun
 		return result;
 	}
 
-	void SceneNode::onStart()
+	void SceneNode::init()
 	{
-		onStartCurrent();
-		onStartChildren();
+		initCurrent();
+		initChildren();
 
 		// check node components
 		for(auto& component : m_components)
 		{
-			component->onStart();
+			component->init();
 		}
 	}
 
@@ -125,6 +125,15 @@ namespace Dunjun
 		{
 			component->update(dt);
 		}
+	}
+
+	void SceneNode::handleEvent(const Event& event)
+	{
+		handleEventCurrent(event);
+		handleEventChildren(event);
+
+		for(auto& component : m_components)
+			component->handleEvent(event);
 	}
 
 	void SceneNode::draw(SceneRenderer& renderer, Transform t) const
@@ -172,15 +181,15 @@ namespace Dunjun
 	)				.
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-	void SceneNode::onStartCurrent()
+	void SceneNode::initCurrent()
 	{
 		// Do nothing by default
 	}
 
-	void SceneNode::onStartChildren()
+	void SceneNode::initChildren()
 	{
 		for(u_ptr& child : m_children)
-			child->onStart();
+			child->init();
 	}
 
 	void SceneNode::updateCurrent(Time dt)
@@ -192,6 +201,17 @@ namespace Dunjun
 	{
 		for (u_ptr& child : m_children)
 			child->update(dt);
+	}
+
+	void SceneNode::handleEventCurrent(const Event& event)
+	{
+		// do nothing by default
+	}
+
+	void SceneNode::handleEventChildren(const Event& event)
+	{
+		for(u_ptr& child : m_children)
+			child->handleEvent(event);
 	}
 
 	void SceneNode::drawCurrent(SceneRenderer& renderer, Transform t) const

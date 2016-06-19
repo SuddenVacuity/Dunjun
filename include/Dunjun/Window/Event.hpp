@@ -70,6 +70,8 @@ namespace Dunjun
 
 		enum EventType
 		{
+			Unknown				 ,
+
 			Closed				 ,
 			Resized				 ,
 			LostFocus			 ,

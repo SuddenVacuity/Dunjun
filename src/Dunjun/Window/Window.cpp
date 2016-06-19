@@ -357,7 +357,7 @@ namespace Dunjun
 
 		switch(e.type)
 		{
-		default: return;
+		default: event.type = Event::Unknown; return;
 		case SDL_WINDOWEVENT:
 		{
 			if (e.window.event == SDL_WINDOWEVENT_SIZE_CHANGED || e.window.event == SDL_WINDOWEVENT_RESIZED)

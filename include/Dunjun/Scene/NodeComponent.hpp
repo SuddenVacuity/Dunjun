@@ -15,8 +15,10 @@ namespace Dunjun
 
 		virtual ~NodeComponent() {}
 
-		virtual void onStart() {}
+		virtual void init() {}
 		virtual void update(Time dt) {}
+		virtual void handleEvent(const Event& event) {}
+
 		virtual void draw(SceneRenderer& renderer, Transform t) const {}
 
 		SceneNode* getParent() const

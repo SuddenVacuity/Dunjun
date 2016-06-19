@@ -50,8 +50,9 @@ namespace Dunjun
 
 		Transform getGlobalTransform() const;
 
-		void onStart();
+		void init();
 		void update(Time dt);
+		void handleEvent(const Event& event);
 
 		const SceneNode* getParent() const
 		{
@@ -167,11 +168,14 @@ namespace Dunjun
 
 		void draw(SceneRenderer& renderer, Transform t = Transform()) const;
 
-		virtual void onStartCurrent();
-		void onStartChildren();
+		virtual void initCurrent();
+		void initChildren();
 
 		virtual void updateCurrent(Time dt);
 		void updateChildren(Time dt);
+
+		virtual void handleEventCurrent(const Event& event);
+		void handleEventChildren(const Event& event);
 
 		virtual void drawCurrent(SceneRenderer& renderer, Transform t) const;
 		void drawChildren(SceneRenderer& renderer, Transform t) const;

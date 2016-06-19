@@ -41,6 +41,8 @@ namespace Dunjun
 
 	GLOBAL Level* g_level = nullptr;
 
+	GLOBAL std::unique_ptr<World> g_world;
+
 	GLOBAL Transform g_parentTest;
 
 	GLOBAL bool toggleCulling = true;
@@ -87,15 +89,20 @@ namespace Dunjun
 			Event event;
 			while (g_window.pollEvent(event))
 			{
-				if (event.type == Event::Closed)
+				switch(event.type)
+				{
+				default: break;
+				case Event::Closed:
 				{
 					// TODO: fix inconsistant delay/ignore for this event
 					g_running = false;
 					g_window.close();
+					break;
 				}
-				if(event.type == Event::Resized)
+				case Event::Resized:
 				{
 					glViewport(0, 0, event.size.width, event.size.height);
+					break;
 				}
 
 				/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -108,7 +115,7 @@ namespace Dunjun
 				)				.
 				%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-				if(event.type == Event::KeyPressed && acceptInput == true)
+				case Event::KeyPressed:// && acceptInput == true
 				{		
 					// console
 					if(useConsole == true)
@@ -176,9 +183,8 @@ namespace Dunjun
 						if (Input::isKeyPressed(Input::Key::Tab))
 							useConsole = true;
 					}
-
+					break;
 				}
-				
 
 			/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 			)				.
@@ -190,19 +196,24 @@ namespace Dunjun
 			)				.
 			%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-				if (event.type == Event::GamepadAdded)
+				case Event::GamepadAdded:
 				{
 					// cout from window.cpp
+					break;
 				}
-				if (event.type == Event::GamepadRemoved)
+				case Event::GamepadRemoved:
 				{
 					// cout from window.cpp
+					break;
 				}
-				if (event.type == Event::GamepadRemapped)
+				case Event::GamepadRemapped:
 				{
 					// cout from window.cpp
+					break;
 				}
+				} // end switch(event.type)
 
+				g_rootNode.handleEvent(event);
 			} // end while (g_window.pollEvent(event))
 
 			/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -404,10 +415,10 @@ namespace Dunjun
 		)				.
 		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-		// create instances of vertex info
+		// create instances
 		INTERNAL void loadInstances()
 		{
-			g_rootNode.onStart();
+			//g_rootNode.init();
 
 			{ // player scene node
 				SceneNode::u_ptr player = make_unique<SceneNode>();
@@ -510,8 +521,8 @@ namespace Dunjun
 				g_projection = lerp(pp, op, 0.01f); // mostly perspective
 				g_cameraWorld.getView() * g_projection; */
 
-				g_rootNode.onStart();
 			}
+			g_rootNode.init();
 		}
 
 		/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1203,6 +1214,12 @@ namespace Dunjun
 
 			// load instances
 			loadInstances();
+
+			g_world = make_unique<World>(Context{g_window,
+												 g_textureHolder,
+												 g_shaderHolder,
+												 g_meshHolder,
+												 g_materialHolder});
 		}
 
 		void run()
