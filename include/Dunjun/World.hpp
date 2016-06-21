@@ -8,14 +8,14 @@ namespace Dunjun
 	class World : private NonCopyable
 	{
 	public:
-		explicit World(Context context);
+		World();
 		virtual ~World();
 
-		void init();
+		void init(Context context);
 
 		void update(Time dt);
 		void handleEvent(const Event& event);
-		void draw();
+		void render();
 
 		SceneNode& getSceneGraph();
 		const SceneNode& getSceneGraph() const;
@@ -37,7 +37,7 @@ namespace Dunjun
 
 		Camera m_mainCamera;
 		Camera m_playerCamera;
-		Camera* m_currentCamera = &m_playerCamera;
+		Camera* m_currentCamera = nullptr;
 
 		SceneNode * m_player = nullptr;
 		Level* m_level = nullptr;

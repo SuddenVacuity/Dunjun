@@ -7,27 +7,27 @@ namespace Dunjun
 {
 	struct Context
 	{
-		explicit Context(Window& window,
+		Context() {}
+
+		Context(Window& window,
 						 TextureHolder& textureHolder,
 						 ShaderHolder& shaderHolder,
 						 MeshHolder& meshHolder,
 						 MaterialHolder& materialHolder)
-			: window(window)
-			, textureHolder(textureHolder)
-			, shaderHolder(shaderHolder)
-			, meshHolder(meshHolder)
-			, materialHolder(materialHolder)
+			: window(&window)
+			, textureHolder(&textureHolder)
+			, shaderHolder(&shaderHolder)
+			, meshHolder(&meshHolder)
+			, materialHolder(&materialHolder)
 		{
 		}
 
-		Context(const Context&) = default;
+		Window* window = nullptr;
 
-		Window& window;
-
-		TextureHolder& textureHolder;
-		ShaderHolder& shaderHolder;
-		MeshHolder& meshHolder;
-		MaterialHolder& materialHolder;
+		TextureHolder* textureHolder = nullptr;
+		ShaderHolder* shaderHolder = nullptr;
+		MeshHolder* meshHolder = nullptr;
+		MaterialHolder* materialHolder = nullptr;
 	};
 } // end Dunjun
 

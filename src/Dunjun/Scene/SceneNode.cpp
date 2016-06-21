@@ -18,6 +18,7 @@ namespace Dunjun
 	// TODO idCount-- when destrucitng
 	SceneNode::SceneNode()
 		: id(getUniqueSceneNodeId())
+		, m_componentArray()
 	{
 		name = stringFormat("node_%llu", id);
 	}
