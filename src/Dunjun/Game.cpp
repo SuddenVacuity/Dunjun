@@ -409,8 +409,6 @@ namespace Dunjun
 				std::exit(EXIT_FAILURE);
 			}
 
-			
-
 			g_window.create("Loading...", {854, 480});
 			g_window.setFramerateLimit(FrameLimit);
 
@@ -419,31 +417,16 @@ namespace Dunjun
 			// Initial OpenGL settings
 			glInit();
 
-			//glfwSetErrorCallback(errorCallback);
-
+			// initialize input
 			Input::setUp();
-
 			Input::setCursorPosition({ 0, 0 });
-			//Input::setCursorMode(Input::CursorMode::Disabled);
-
-			//glEnable(GL_CULL_FACE); // enable culling faces
-			//glCullFace(GL_BACK); // specify to cull the back face
-			//
-			//glEnable(GL_DEPTH_TEST);
-			//glDepthFunc(GL_LEQUAL);
-
-			// load internal render functions
-			loadShaders();
-
-			loadMaterials();
 
 			// load assets
+			loadShaders();
+			loadMaterials();
 			loadSpriteAsset();
-			//loadFloorAsset();
 
-			// load instances
-			//loadInstances();
-
+			// pass context to world
 			g_world.init(Context{ g_window,
 								  g_textureHolder,
 								  g_shaderHolder,

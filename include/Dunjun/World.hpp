@@ -30,6 +30,8 @@ namespace Dunjun
 		const Camera& getCurrentCamera() const;
 
 	private:
+		friend class SceneRenderer;
+
 		Context m_context;
 
 		SceneNode m_sceneGraph;
