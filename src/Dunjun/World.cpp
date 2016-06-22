@@ -5,7 +5,6 @@ namespace Dunjun
 {
 	World::World()
 		: m_context(Context())
-		, m_renderer(*this)
 	{
 	}
 
@@ -338,7 +337,6 @@ namespace Dunjun
 		Vector3 velocityDirection = { 0, 0, 0 };
 
 		// game pad input
-		{
 		//Input::GamepadAxes axes = Input::getGamepadAxes(Input::Gamepad_1);
 		if (Input::isGamepadPresent(0))
 		{
@@ -423,16 +421,12 @@ namespace Dunjun
 				r = normalize(r);
 				velocityDirection += r;
 			}
-
-			// vibration test
-			if(Input::isGamepadButtonPressed(0, Input::GamepadButton::X))
-			{
-				std::cout << "X" << std::endl;
-				Input::setGamepadVibration(0, 1.0f);
-			}
-			else
-				Input::setGamepadVibration(0, 0.0f);
-			
+			//// vibration test
+			//if(Input::isGamepadButtonPressed(Input::Gamepad_1, Input::XboxButton::X))
+			//	Input::setGamepadVibration(Input::Gamepad_1, 0.5f, 0.5f);
+			//else
+			//	Input::setGamepadVibration(Input::Gamepad_1, 0.0f, 0.0f);
+			//
 			//
 			//// temp variables used in lerp()
 			////g_cameraWorld.projectionType = ProjectionType::Perspective;
@@ -441,7 +435,13 @@ namespace Dunjun
 			////g_cameraWorld.projectionType = ProjectionType::Orthographic;
 			////const Matrix4 op = g_cameraWorld.getProjection(); // perspective projection
 			//
-			
+			//
+			//// 
+			//if (Input::isGamepadButtonPressed(Input::Gamepad_1, Input::XboxButton::B))
+			//{
+			//	std::cout << "un-mapped button." << std::endl;
+			//}
+			//
 			if (Input::isGamepadButtonPressed(0, Input::GamepadButton::A))
 			{
 				m_spotLights[0].position.x = m_currentCamera->transform.position.x;
@@ -451,9 +451,7 @@ namespace Dunjun
 			}
 
 		}
-		} // end Gamepad Input
-
-
+		// end Gamepad Input
 		//
 		//
 		//
@@ -485,16 +483,41 @@ namespace Dunjun
 		if (Input::isKeyPressed(Input::Key::RControl))
 			velocityDirection += {0, -1, 0};
 
-		// update player position
-		if (velocityDirection.x != 0.0f || 
-			velocityDirection.y != 0.0f || 
-			velocityDirection.z != 0.0f)
-		{
+		if (length(velocityDirection) > 0)
 			velocityDirection = normalize(velocityDirection);
-			m_player->transform.position += Vector3(playerVelX, playerVelY, playerVelZ) * velocityDirection * dt.asSeconds();
+		{
+			// update player position
+			m_player->transform.position += Vector3{ playerVelX, playerVelY, playerVelZ } *velocityDirection * dt.asSeconds();
 
-			// camera follow movement
+			// update pplayer orientation
+#if 0 // BillBoard
+			Quaternion pRot =
+				conjugate(quaternionLookAt(g_player->transform.position,
+					g_cameraWorld.transform.position, { 0, 1, 0 }));
+
+			g_player->transform.orientation = pRot;
+#elif 0 // Billboard fixed Y axis
+			Vector3 f = g_player->transform.position - g_cameraWorld.transform.position;
+			f.y = 0;
+
+			if (f.x == 0 && f.z == 0)
+				g_player->transform.orientation = Quaternion();
+			else
 			{
+				Radian a(Math::atan(f.z / f.x));
+				a += Radian(Constants::TAU / 4);
+
+				if (f.x < 0) // prevent flipping
+					a += Radian(Constants::TAU / 2);
+
+				g_player->transform.orientation = angleAxis(-a, { 0, 1, 0 });
+			}
+#endif // end billboard
+
+		}
+
+		// camera follow movement
+		{
 			//// delta between player and camera movement
 			//// this only works correctly if player and camera have 
 			//// the same coordinate in the axis being changed
@@ -535,13 +558,11 @@ namespace Dunjun
 			m_playerCamera.transform.position.y = Math::lerp(m_playerCamera.transform.position.y, m_player->transform.position.y + 8.0f * 2.0f, 12.0f * dt.asSeconds());
 			m_playerCamera.transform.position.z = Math::lerp(m_playerCamera.transform.position.z, m_player->transform.position.z + 8.0f * 3.0f, 12.0f * dt.asSeconds());
 
-			}
-		// make playerCamera face player
-		m_playerCamera.lookAt({ m_player->transform.position });
 		}
-
-		// make player face currentCamera 
+		// make player face the camera
+		m_playerCamera.lookAt({ m_player->transform.position });
 		m_player->transform.orientation = -m_currentCamera->transform.orientation;
+
 	} // end update()
 
 	void World::handleEvent(const Event& event)
@@ -580,12 +601,12 @@ namespace Dunjun
 
 		m_renderer.addSceneGraph(m_sceneGraph);
 
-		//for (const auto& light : m_directionalLights)
-		//	m_renderer.addDirectionalLight(&light);
-		//for (const auto& light : m_pointLights)
-		//	m_renderer.addPointLight(&light);
-		//for (const auto& light : m_spotLights)
-		//	m_renderer.addSpotLight(&light);
+		for (const auto& light : m_directionalLights)
+			m_renderer.addDirectionalLight(&light);
+		for (const auto& light : m_pointLights)
+			m_renderer.addPointLight(&light);
+		for (const auto& light : m_spotLights)
+			m_renderer.addSpotLight(&light);
 
 		m_renderer.camera = m_currentCamera;
 

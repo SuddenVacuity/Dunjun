@@ -5,7 +5,6 @@
 
 namespace Dunjun
 {
-	class World;
 	class SceneNode;
 	//class Drawable;
 	class MeshRenderer;
@@ -27,7 +26,7 @@ namespace Dunjun
 			Transform transform;
 		};
 
-		SceneRenderer(World& world);
+		SceneRenderer();
 
 		virtual ~SceneRenderer();
 
@@ -41,9 +40,9 @@ namespace Dunjun
 		void draw(const Mesh* mesh) const;
 
 		void addModelInstance(const MeshRenderer& meshRenderer, Transform t);
-		//void addDirectionalLight(const DirectionalLight* light);
-		//void addPointLight(const PointLight* light);
-		//void addSpotLight(const SpotLight* light);
+		void addDirectionalLight(const DirectionalLight* light);
+		void addPointLight(const PointLight* light);
+		void addSpotLight(const SpotLight* light);
 
 		//void renderAll();
 
@@ -80,9 +79,10 @@ namespace Dunjun
 		RenderTexture finalTexture;
 
 	private:
-		const ShaderProgram* m_currentShaders = nullptr;
-		const Texture* m_currentTexture = nullptr;
 		const Material* m_currentMaterial = nullptr;
+		const ShaderProgram* m_currentShaders = nullptr;
+
+		const Texture* m_currentTexture = nullptr;
 
 		void renderAmbientLight();
 		void renderDirectionalLights();
@@ -92,11 +92,9 @@ namespace Dunjun
 		// cache of instances
 		std::deque<ModelInstance> m_modelInstances;
 
-		//std::deque<const DirectionalLight*> m_directionalLights;
-		//std::deque<const PointLight*> m_pointLights;
-		//std::deque<const SpotLight*> m_spotLights;
-
-		World& m_world;
+		std::deque<const DirectionalLight*> m_directionalLights;
+		std::deque<const PointLight*> m_pointLights;
+		std::deque<const SpotLight*> m_spotLights;
 
 		bool isCurrentShaders(const ShaderProgram* shaders);
 		bool isCurrentTexture(const Texture* texture);
