@@ -419,30 +419,14 @@ namespace Dunjun
 			// Initial OpenGL settings
 			glInit();
 
-			//glfwSetErrorCallback(errorCallback);
-
 			Input::setUp();
 
 			Input::setCursorPosition({ 0, 0 });
-			//Input::setCursorMode(Input::CursorMode::Disabled);
-
-			//glEnable(GL_CULL_FACE); // enable culling faces
-			//glCullFace(GL_BACK); // specify to cull the back face
-			//
-			//glEnable(GL_DEPTH_TEST);
-			//glDepthFunc(GL_LEQUAL);
-
-			// load internal render functions
-			loadShaders();
-
-			loadMaterials();
 
 			// load assets
+			loadShaders();
+			loadMaterials();
 			loadSpriteAsset();
-			//loadFloorAsset();
-
-			// load instances
-			//loadInstances();
 
 			g_world.init(Context{ g_window,
 								  g_textureHolder,

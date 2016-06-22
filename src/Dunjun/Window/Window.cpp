@@ -341,8 +341,6 @@ namespace Dunjun
 			return Input::Key::Unknown;
 	}
 
-
-
 	INTERNAL void convertEvent(SDL_Event& e, Event& event)
 	{
 		/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

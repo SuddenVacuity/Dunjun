@@ -1,15 +1,6 @@
 
 #include <Dunjun/Window/Input.hpp>
-
-//#define VC_EXTRALEAN
-//#define WIN32_MEAN_AND_LEAN // FIXME: remove Windows.h
-//#define WIN32_LEAN_AND_MEAN // FIXME: remove Windows.h
-//#include <Windows.h>		// FIXME: remove Windows.h
-//
-//// this is using Windows 7 - XINPUT9_1_0.LIB
-//// change in Linker -> Input -> Additional Dependencies
-//#include <xinput.h>
-										  
+									  
 //#include <SDL/SDL_keyboard.h>		  // included in Windows.hpp (SDL.h)
 //#include <SDL/SDL_keycode.h>		  // included in Windows.hpp (SDL.h)
 //#include <SDL/SDL_mouse.h>		  // included in Windows.hpp (SDL.h)
@@ -28,28 +19,47 @@ namespace Dunjun
 		GLOBAL f64 g_scrollX = 0;
 		GLOBAL f64 g_scrollY = 0;
 
-		GLOBAL std::array<SDL_GameController*, Gamepad_MaxCount> g_controllerHandles;
-	
+		GLOBAL std::array<SDL_GameController*, Gamepad_MaxCount> g_gamepadHandles;
+		GLOBAL std::array<SDL_Haptic*, Gamepad_MaxCount> g_runbleHandles;
+
 		void setUp() // set up gamepads
 		{
-			//for(int i = 0; i < Gamepad_MaxCount; i++) // cycle through and check if they're present
-			//{
-			//	memset(&g_gamepadStates[i], 0, sizeof(XINPUT_STATE));
-			//	if(isGamepadPresent((GamepadId)i))
-			//		setGamepadVibration((GamepadId)i, 0, 0); // if isPresent set vibration to 0
-			//}
-
 			int maxJoySticks = SDL_NumJoysticks();
-			int controllerIndex = 0;
+			int gamepadId = 0;
 			for (int joystickIndex = 0; joystickIndex < maxJoySticks; joystickIndex++)
 			{
 				if (!SDL_IsGameController(joystickIndex))
 					continue;
-				if(controllerIndex >= Gamepad_MaxCount)
+				if(gamepadId >= Gamepad_MaxCount)
 					break;
 
-				g_controllerHandles[controllerIndex] = SDL_GameControllerOpen(joystickIndex);
-				controllerIndex++;
+				std::cout << "Adding gamepad: " << gamepadId << std::endl;
+
+				g_gamepadHandles[gamepadId] = SDL_GameControllerOpen(joystickIndex);
+
+				SDL_Joystick* joystickHandle = SDL_GameControllerGetJoystick(g_gamepadHandles[gamepadId]);
+
+				g_runbleHandles[gamepadId] = SDL_HapticOpenFromJoystick(joystickHandle);
+
+				if(SDL_HapticRumbleSupported(g_runbleHandles[gamepadId]) != true)
+				{
+					std::cout << "Input::setUp() " << "Gamepad " << gamepadId <<
+								 " -Rumble device not supported-SDL(" <<
+								 SDL_GetError() << ")" << std::endl;
+				}
+
+				if(SDL_HapticRumbleInit(g_runbleHandles[gamepadId]) == -1);
+				{
+					std::cout << "Input::setUp() " << "Gamepad " << gamepadId << 
+								 " -Rumble initialization failed-SDL(" << 
+								 SDL_GetError() << ")" << std::endl;
+
+					SDL_HapticClose(g_runbleHandles[gamepadId]);
+					g_runbleHandles[gamepadId] = nullptr;
+				}
+
+				std::cout << "Gamepad " << gamepadId << " Added\n" << std::endl;
+				gamepadId++;
 			}
 
 			setStickyKeys(true); // sticky assumes the button is held until it is checked again
@@ -61,28 +71,21 @@ namespace Dunjun
 			for(int i = 0; i < Gamepad_MaxCount; i++)
 			{
 				if(isGamepadPresent(i))
-					setGamepadVibration(i, 0, 0); // make sure vibration is set to 0 when disconnecting
+					setGamepadVibration(i, 0, Time::Zero); // make sure vibration is set to 0 when disconnecting
 			}
 
-			for(SDL_GameController* gamepad : g_controllerHandles)
+			for(SDL_GameController* gamepad : g_gamepadHandles)
 			{
 				if(gamepad)
 					SDL_GameControllerClose(gamepad);
 			}
-		}
 
-		//void setInputMode(InputMode mode, int value)
-		//{
-		//	int m = 0;
-		//	if (mode == InputMode::Cursor)
-		//		m = GLFW_CURSOR;
-		//	if (mode == InputMode::StickyKeys)
-		//		m = GLFW_STICKY_KEYS;
-		//	if (mode == InputMode::StickyMouseButtons)
-		//		m = GLFW_STICKY_MOUSE_BUTTONS;
-		//
-		//	glfwSetInputMode(Window::getHandle(), m, value);
-		//}
+			for(SDL_Haptic* rumble : g_runbleHandles)
+			{
+				if(rumble)
+					SDL_HapticClose(rumble);
+			}
+		}
 
 		/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 		)				.
@@ -246,7 +249,6 @@ namespace Dunjun
 			const u8* state = SDL_GetKeyboardState(nullptr);
  
 			return state[code];
-			//return glfwGetKey(Window::getHandle(), code) == 1;
 		}
 
 		/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -263,7 +265,6 @@ namespace Dunjun
 		{
 			s32 x = 0, y = 0;
 
-			//glfwGetCursorPos(Window::getHandle(), &x, &y);
 			SDL_GetMouseState(&x, &y);
 
 			return Vector2(static_cast<f32>(x),
@@ -274,7 +275,6 @@ namespace Dunjun
 		{
 			s32 x = 0, y = 0;
 
-			//glfwGetCursorPos(Window::getHandle(), &x, &y);
 			SDL_GetGlobalMouseState(&x, &y);
 
 			auto pos = relativeTo.getPosition();
@@ -284,18 +284,11 @@ namespace Dunjun
 
 		void setCursorPosition(const Vector2& pos)
 		{
-			//glfwSetCursorPos(Window::getHandle(),
-			//				 static_cast<f64>(pos.x), 
-			//				 static_cast<f64>(pos.y));
 			SDL_WarpMouseInWindow(nullptr, pos.x, pos.y);
-
 		}
 
 		void setCursorPosition(const Vector2& pos, const Window& relativeTo)
 		{
-			//glfwSetCursorPos(Window::getHandle(),
-			//				 static_cast<f64>(pos.x), 
-			//				 static_cast<f64>(pos.y));
 			SDL_WarpMouseInWindow(relativeTo.getNativeHandle(), pos.x, pos.y);
 
 		}
@@ -303,29 +296,12 @@ namespace Dunjun
 		bool isMouseButtonPressed(MouseButton button)
 		{
 			return SDL_GetMouseState(nullptr, nullptr) & SDL_BUTTON((int)button);
-			//return glfwGetMouseButton(Window::getHandle(), (int)button) == 1;
-			//return false;
 		}
 
 		// get scroll wheel movement
 		//Vector2 getScrollOffset()
 		//{
 		//	return Vector2(g_scrollX, g_scrollY);
-		//}
-
-		/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-		)				.
-		)					TIME
-		)
-		)				.
-		)					.
-		)
-		)				.
-		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
-
-		//void setTime(Time time)
-		//{
-		//	glfwSetTime(time);
 		//}
 
 		/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -338,91 +314,26 @@ namespace Dunjun
 		)				.
 		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-		//void updateGamepads()
-		//{
-		//	for(size_t i = 0; i < Gamepad_MaxCount; i++)
-		//	{
-		//		isGamepadPresent(i);
-		//	}
-		//}
-
 		bool isGamepadPresent(u32 gamepadId)
 		{
-			SDL_GameController* gamepad = g_controllerHandles[gamepadId];
+			SDL_GameController* gamepad = g_gamepadHandles[gamepadId];
 
 			return (gamepad && SDL_GameControllerGetAttached(gamepad));
 		}
 
-//
-//		GamepadAxes getGamepadAxes(GamepadId gamepadId)
-//		{
-//			GamepadAxes axes;
-//
-			//axes.leftTrigger = g_gamepadStates[gamepadId].Gamepad.bLeftTrigger / 255.0f; // convert to correct size
-			//axes.rightTrigger = g_gamepadStates[gamepadId].Gamepad.bRightTrigger / 255.0f;
-			//
-			//axes.leftThumbStick.x = g_gamepadStates[gamepadId].Gamepad.sThumbLX / 32767.0f; // convert to correct size
-			//axes.leftThumbStick.y = g_gamepadStates[gamepadId].Gamepad.sThumbLY / 32767.0f;
-			//
-			//axes.rightThumbStick.x = g_gamepadStates[gamepadId].Gamepad.sThumbRX / 32767.0f; // convert to correct size
-			//axes.rightThumbStick.y = g_gamepadStates[gamepadId].Gamepad.sThumbRY / 32767.0f;
-//
-//			return axes;
-//		}
-//
-//		GamepadButtons getGamepadButtons(GamepadId gamepadId)
-//		{
-//			GamepadButtons buttons((size_t)XboxButton::Count);
-//
-			//buttons[(int)XboxButton::DpadUp] =
-			//	(g_gamepadStates[gamepadId].Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_UP) != 0;
-			//buttons[(int)XboxButton::DpadDown] =
-			//	(g_gamepadStates[gamepadId].Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_DOWN) != 0;
-			//buttons[(int)XboxButton::DpadLeft] =
-			//	(g_gamepadStates[gamepadId].Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_LEFT) != 0;
-			//buttons[(int)XboxButton::DpadRight] =
-			//	(g_gamepadStates[gamepadId].Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_RIGHT) != 0;
-			//
-			//buttons[(int)XboxButton::Start] =
-			//	(g_gamepadStates[gamepadId].Gamepad.wButtons & XINPUT_GAMEPAD_START) != 0;
-			//buttons[(int)XboxButton::Back] =
-			//	(g_gamepadStates[gamepadId].Gamepad.wButtons & XINPUT_GAMEPAD_BACK) != 0;
-			//
-			//buttons[(int)XboxButton::LeftThumb] =
-			//	(g_gamepadStates[gamepadId].Gamepad.wButtons & XINPUT_GAMEPAD_LEFT_THUMB) != 0;
-			//buttons[(int)XboxButton::RightThumb] =
-			//	(g_gamepadStates[gamepadId].Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_THUMB) != 0;
-			//
-			//buttons[(int)XboxButton::LeftShoulder] =
-			//	(g_gamepadStates[gamepadId].Gamepad.wButtons & XINPUT_GAMEPAD_LEFT_SHOULDER) != 0;
-			//buttons[(int)XboxButton::RightShoulder] =
-			//	(g_gamepadStates[gamepadId].Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_SHOULDER) != 0;
-			//
-			//buttons[(int)XboxButton::A] =
-			//	(g_gamepadStates[gamepadId].Gamepad.wButtons & XINPUT_GAMEPAD_A) != 0;
-			//buttons[(int)XboxButton::B] =
-			//	(g_gamepadStates[gamepadId].Gamepad.wButtons & XINPUT_GAMEPAD_B) != 0;
-			//buttons[(int)XboxButton::X] =
-			//	(g_gamepadStates[gamepadId].Gamepad.wButtons & XINPUT_GAMEPAD_X) != 0;
-			//buttons[(int)XboxButton::Y] =
-			//	(g_gamepadStates[gamepadId].Gamepad.wButtons & XINPUT_GAMEPAD_Y) != 0;
-//
-//			return buttons;
-//		}
-
 		b8 isGamepadButtonPressed(u32 gamepadId, GamepadButton button)
 		{
-			SDL_GameController* gamepad = g_controllerHandles[gamepadId];
+			SDL_GameController* gamepad = g_gamepadHandles[gamepadId];
 
 			if(gamepad && SDL_GameControllerGetAttached(gamepad))
 				return SDL_GameControllerGetButton(gamepad, (SDL_GameControllerButton)button) != 0;
 
-			return false;//getGamepadButtons(gamepadId)[(size_t)button];
+			return false;
 		}
 
 		f32 getGamepadAxis(u32 gamepadId, GamepadAxis axis)
 		{
-			SDL_GameController* gamepad = g_controllerHandles[gamepadId];
+			SDL_GameController* gamepad = g_gamepadHandles[gamepadId];
 
 			if (gamepad && SDL_GameControllerGetAttached(gamepad))
 			{
@@ -440,17 +351,16 @@ namespace Dunjun
 
 		std::string getGamepadName(u32 gamepadId)
 		{
-			return SDL_GameControllerName(g_controllerHandles[gamepadId]);
+			return SDL_GameControllerName(g_gamepadHandles[gamepadId]);
 		}
 
-		void setGamepadVibration(u32 gamepadId, f32 leftMotor, f32 rightMotor)
+		void setGamepadVibration(u32 gamepadId, f32 strength, Time duration)
 		{
-			//XINPUT_VIBRATION vibration;
-			//
-			//vibration.wLeftMotorSpeed = static_cast<WORD>(leftMotor * 0xFFFF);
-			//vibration.wRightMotorSpeed = static_cast<WORD>(rightMotor * 0xFFFF);
-			//
-			//XInputSetState((u32)gamepadId, &vibration);
+			strength = Math::clamp(strength, 0.0f, 1.0f);
+			if(g_runbleHandles[gamepadId])
+			{
+				SDL_HapticRumblePlay(g_runbleHandles[gamepadId], strength, duration.asMilliseconds());
+			}
 		}
 
 		std::string getClipboardString()
