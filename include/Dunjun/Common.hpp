@@ -138,12 +138,35 @@ namespace Dunjun
 	//	std::runtime_error(str.c_str());
 	//}
 
+	// len() currently unused
+	template <typename T>
+	inline usize len(const T& t)
+	{
+		return t.size();
+	}
+	template <typename T, usize N>
+	inline usize len(const T(&array)[N])
+	{
+		return N;
+	}
+
 	inline void throwRuntimeError(const std::string& str)
 	{
 		std::cerr << str.c_str() << std::endl;
 		std::runtime_error(str.c_str());
 		std::exit(EXIT_FAILURE);
 	}
+
+	enum class MessageBoxType
+	{
+		Error,
+		Warning,
+		Information,
+	};
+
+	bool showSimpleMessageBox(MessageBoxType type, 
+							  const std::string& title, 
+							  const std::string& message);
 
 	namespace BaseDirectories
 	{

@@ -44,6 +44,7 @@ namespace Dunjun
 		SceneNode * m_player = nullptr;
 		Level* m_level = nullptr;
 
+		BaseLight m_ambientLight = BaseLight();
 		std::vector<DirectionalLight> m_directionalLights;
 		std::vector<PointLight> m_pointLights;
 		std::vector<SpotLight> m_spotLights;

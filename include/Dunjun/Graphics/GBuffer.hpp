@@ -8,6 +8,16 @@ namespace Dunjun
 	class GBuffer
 	{
 	public:
+		enum TextureType
+		{
+			Diffuse,
+			Specular,
+			Normal,
+			Depth,
+
+			Count,
+		};
+
 		GBuffer();
 		virtual ~GBuffer();
 
@@ -23,15 +33,19 @@ namespace Dunjun
 		//ReadOnly<GLuint, GBuffer> fbo;
 		u32 getNativeHandle() const;
 
-		Texture diffuse;   // diffuse color rgb
-		Texture specular;  // specular color rbg + smoothness
-		Texture normal;	   // world normals rgb
+		const Texture& getTexture(TextureType type) const;
 
-		Texture depth;
+		//Texture diffuse;   // diffuse color rgb
+		//Texture specular;  // specular color rbg + smoothness
+		//Texture normal;	   // world normals rgb
+		//
+		//Texture depth;
 
 	private:
 		u32 m_width;
 		u32 m_height;
+
+		Texture m_textures[TextureType::Count];
 
 		u32 m_fbo;
 	};

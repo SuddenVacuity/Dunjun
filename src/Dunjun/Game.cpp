@@ -90,7 +90,7 @@ namespace Dunjun
 
 			std::cout << "Loading shader " << shaderCounter++ << std::endl;
 			g_shaderHolder.insertFromFile("deferredFinalPass", "deferredLightPass_vert.glsl",
-														 "deferredFinalPass_frag.glsl");
+															   "deferredFinalPass_frag.glsl");
 		}
 
 		INTERNAL void loadMaterials()

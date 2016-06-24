@@ -75,10 +75,10 @@ namespace Dunjun
 				drawBuffers.emplace_back(attachment);
 		};/* end lambda */	
 
-		addRT(diffuse,	GL_COLOR_ATTACHMENT0_EXT, GL_RGB8, GL_RGB, GL_UNSIGNED_BYTE);
-		addRT(specular, GL_COLOR_ATTACHMENT1_EXT, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE);
-		addRT(normal,	GL_COLOR_ATTACHMENT2_EXT, GL_RGB10_A2, GL_RGBA, GL_FLOAT);
-		addRT(depth,	GL_DEPTH_ATTACHMENT_EXT, GL_DEPTH_COMPONENT24, GL_DEPTH_COMPONENT, GL_FLOAT);
+		addRT(m_textures[Diffuse],	GL_COLOR_ATTACHMENT0_EXT, GL_RGB8	 , GL_RGB , GL_UNSIGNED_BYTE);
+		addRT(m_textures[Specular], GL_COLOR_ATTACHMENT1_EXT, GL_RGBA8	 , GL_RGBA, GL_UNSIGNED_BYTE);
+		addRT(m_textures[Normal],	GL_COLOR_ATTACHMENT2_EXT, GL_RGB10_A2, GL_RGBA, GL_FLOAT);
+		addRT(m_textures[Depth],	GL_DEPTH_ATTACHMENT_EXT , GL_DEPTH_COMPONENT24, GL_DEPTH_COMPONENT, GL_FLOAT);
 
 		glDrawBuffers(drawBuffers.size(), &drawBuffers[0]);
 
@@ -116,5 +116,13 @@ namespace Dunjun
 	GLuint GBuffer::getNativeHandle() const
 	{
 		return m_fbo;
+	}
+
+	const Texture& GBuffer::getTexture(TextureType type) const
+	{
+		if(type < 0 || type > TextureType::Count)
+			assert(0 && "GBuffer::getTexrure() >> TextureType out of bounds.");
+
+		return m_textures[type];
 	}
 } // end Dunjun

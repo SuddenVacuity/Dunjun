@@ -14,7 +14,7 @@ namespace Dunjun
 	{
 	}
 
-	void SceneRenderer::reset()
+	SceneRenderer& SceneRenderer::reset()
 	{
 		if (m_currentShaders)
 			m_currentShaders->stopUsing();
@@ -24,19 +24,24 @@ namespace Dunjun
 		Texture::bind(nullptr, 0);
 		m_currentMaterial = nullptr; // commenting this out makes the top right corner of the window white
 
+		return *this;
 	}
 
-	void SceneRenderer::clearAll()
+	SceneRenderer& SceneRenderer::clearAll()
 	{
 		m_modelInstances.clear();
 		//m_directionalLights.clear();
 		//m_pointLights.clear();
 		//m_spotLights.clear();
+
+		return *this;
 	}
 
-	void SceneRenderer::addSceneGraph(const SceneNode& node, const Transform& t)
+	SceneRenderer& SceneRenderer::addSceneGraph(const SceneNode& node, const Transform& t)
 	{
 		node.draw(*this, t);
+
+		return *this;
 	}
 
 	void SceneRenderer::draw(const Mesh* mesh) const
@@ -66,7 +71,30 @@ namespace Dunjun
 	//	m_spotLights.emplace_back(light);
 	//}
 
-	void SceneRenderer::deferredGeometryPass()
+	SceneRenderer& SceneRenderer::setFrameBufferSize(Vector2 size)
+	{
+		m_world.m_context.window->setSize(size);
+
+		return *this;
+	}
+
+	void SceneRenderer::render()
+	{
+		reset();
+		clearAll();
+		addSceneGraph(m_world.m_sceneGraph);
+
+		setCamera(*m_world.m_currentCamera);
+
+		m_gBuffer.create(m_world.m_context.window->currentSize.x, 
+						 m_world.m_context.window->currentSize.y);
+
+		deferredGeometryPass();
+		deferredLightPass();
+		deferredFinalPass();
+	}
+
+	SceneRenderer& SceneRenderer::deferredGeometryPass()
 	{
 		std::sort(std::begin(m_modelInstances), std::end(m_modelInstances),
 			[](const ModelInstance& a, const ModelInstance& b) -> bool
@@ -87,15 +115,15 @@ namespace Dunjun
 
 		auto& shaders = g_shaderHolder.get("deferredGeometryPass");
 
-		GBuffer::bind(&gBuffer);
+		GBuffer::bind(&m_gBuffer);
 		{
-			glViewport(0, 0, gBuffer.getWidth(), gBuffer.getHeight());
+			glViewport(0, 0, m_gBuffer.getWidth(), m_gBuffer.getHeight());
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 			shaders.use();
 
-			shaders.setUniform("u_camera", camera->getMatrix()); // shaderprogram.cpp
-			shaders.setUniform("u_cameraPosition", camera->transform.position); // shaderprogram.cpp
+			shaders.setUniform("u_camera", m_camera->getMatrix()); // shaderprogram.cpp
+			shaders.setUniform("u_cameraPosition", m_camera->transform.position); // shaderprogram.cpp
 
 			for (const auto& inst : m_modelInstances)
 			{
@@ -118,27 +146,30 @@ namespace Dunjun
 			glFlush();
 		}
 		GBuffer::bind(nullptr);
+
+		return *this;
 	} // end deferredGeometryPass()
 
-	void SceneRenderer::deferredLightPass()
+	SceneRenderer& SceneRenderer::deferredLightPass()
 	{
-		lightingTexture.create(gBuffer.getWidth(), gBuffer.getHeight(), RenderTexture::Light);
+		m_lightingTexture.create(m_gBuffer.getWidth(), m_gBuffer.getHeight(), RenderTexture::Light);
 
-		Texture::bind(&gBuffer.diffuse,  0);
-		Texture::bind(&gBuffer.specular, 1);
-		Texture::bind(&gBuffer.normal,   2);
-		Texture::bind(&gBuffer.depth,    3);
+		Texture::bind(&m_gBuffer.getTexture(GBuffer::Diffuse),  0);
+		Texture::bind(&m_gBuffer.getTexture(GBuffer::Specular), 1);
+		Texture::bind(&m_gBuffer.getTexture(GBuffer::Normal),   2);
+		Texture::bind(&m_gBuffer.getTexture(GBuffer::Depth),    3);
 
-		RenderTexture::bind(&lightingTexture);
+		RenderTexture::bind(&m_lightingTexture);
 		{
 			glClearColor(0, 0, 0, 0);
-			glViewport(0, 0, lightingTexture.getWidth(), lightingTexture.getHeight());
+			glViewport(0, 0, m_lightingTexture.getWidth(), m_lightingTexture.getHeight());
 			glClear(GL_COLOR_BUFFER_BIT);
 
 			glDepthMask(false);
 			glEnable(GL_BLEND);
 			glBlendFunc(GL_ONE, GL_ONE);
 
+			// TODO: make lights overwrite other lights
 			renderAmbientLight();
 			renderDirectionalLights();
 			renderPointLights();
@@ -148,19 +179,21 @@ namespace Dunjun
 			glDepthMask(true);
 		}
 		RenderTexture::bind(nullptr);
+
+		return *this;
 	} // end deferredLightPass()
 
-	void SceneRenderer::deferredFinalPass()
+	SceneRenderer& SceneRenderer::deferredFinalPass()
 	{
-		finalTexture.create(gBuffer.getWidth(), gBuffer.getHeight(), RenderTexture::Color);
+		m_finalTexture.create(m_gBuffer.getWidth(), m_gBuffer.getHeight(), RenderTexture::Color);
 
-		Texture::bind(&gBuffer.diffuse, 0);
-		Texture::bind(&lightingTexture.colorTexture, 1);
+		Texture::bind(&m_gBuffer.getTexture(GBuffer::Diffuse), 0);
+		Texture::bind(&m_lightingTexture.colorTexture, 1);
 
-		RenderTexture::bind(&finalTexture);
+		RenderTexture::bind(&m_finalTexture);
 		{
 			glClearColor(1, 0, 1, 1);
-			glViewport(0, 0, finalTexture.getWidth(), finalTexture.getHeight());
+			glViewport(0, 0, m_finalTexture.getWidth(), m_finalTexture.getHeight());
 			glClear(GL_COLOR_BUFFER_BIT);
 
 			auto& shaders = g_shaderHolder.get("deferredFinalPass");
@@ -176,6 +209,7 @@ namespace Dunjun
 		}
 		RenderTexture::bind(nullptr);
 
+		return *this;
 	}
 
 	void SceneRenderer::renderAmbientLight()
@@ -184,7 +218,7 @@ namespace Dunjun
 
 		shaders.use();
 
-		shaders.setUniform("u_light.intensities", Vector3(0, 0, 0.002f));	
+		shaders.setUniform("u_light.intensities", m_world.m_ambientLight.colorIntensity);
 		
 		draw(&g_meshHolder.get("quad"));
 
@@ -222,7 +256,7 @@ namespace Dunjun
 		shaders.setUniform("u_normal", 2);
 		shaders.setUniform("u_depth", 3);
 
-		shaders.setUniform("u_cameraInverse", inverse(camera->getMatrix()));
+		shaders.setUniform("u_cameraInverse", inverse(m_camera->getMatrix()));
 
 		for (const PointLight& light : m_world.m_pointLights)
 		{
@@ -254,7 +288,7 @@ namespace Dunjun
 		shaders.setUniform("u_normal", 2);
 		shaders.setUniform("u_depth", 3);
 
-		shaders.setUniform("u_cameraInverse", inverse(camera->getMatrix()));
+		shaders.setUniform("u_cameraInverse", inverse(m_camera->getMatrix()));
 
 		for (const SpotLight& light : m_world.m_spotLights)
 		{
@@ -326,20 +360,10 @@ namespace Dunjun
 		}
 	}
 
-	void SceneRenderer::setCamera(const Camera& c)
+	SceneRenderer& SceneRenderer::setCamera(const Camera& camera)
 	{
-		camera = &c;
+		m_camera = &camera;
+
+		return *this;
 	}
-	
-	//void SceneRenderer::setUniforms(const Transform& t)
-	//{
-	//	if(!m_currentShaders)
-	//		return;
-	//	else if(!m_currentShaders->isInUse())
-	//		m_currentShaders->use();
-	//
-	//	m_currentShaders->setUniform("u_camera", m_currentCamera->getMatrix()); // shaderprogram.cpp
-	//	m_currentShaders->setUniform("u_transform", t); // shaderprogram.cpp
-	//	m_currentShaders->setUniform("u_tex", (Dunjun::u32)0); // shaderprogram.cpp
-	//}
 } // end Dunjun

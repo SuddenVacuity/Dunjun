@@ -120,14 +120,14 @@ namespace Dunjun
 		explicit Window(const std::string& title, 
 						VideoMode mode,
 						u32 style = Style::Default,
-						const ContextSettings& context = ContextSettings());
+						const GLContextSettings& context = GLContextSettings());
 
 		virtual ~Window();
 
 		void create(const std::string& title,
 					VideoMode mode,
 					u32 style = Style::Default,
-					const ContextSettings& context = ContextSettings());
+					const GLContextSettings& context = GLContextSettings());
 
 		void close();
 		bool isOpen() const;
@@ -138,6 +138,7 @@ namespace Dunjun
 		Vector2 getSize() const;
 		Window& setSize(const Vector2& size);
 
+		const std::string& getTitle() const;
 		Window& setTitle(std::string& title);
 		Window& setVisible(bool visible);
 		Window& setVerticalSyncEnabled(bool enabled);
@@ -148,7 +149,9 @@ namespace Dunjun
 		bool pollEvent(Event& event);
 		bool waitEvent(Event& event);
 
-		inline SDL_Window* getNativeHandle() const
+		void makeGLContextCurrent() const;
+
+		inline SDL_Window* getSDLHandle() const
 		{
 			return m_impl;
 		}
@@ -159,7 +162,7 @@ namespace Dunjun
 		void init();
 
 		SDL_Window* m_impl;
-		SDL_GLContext m_context;
+		SDL_GLContext m_glContext;
 		Clock m_clock;
 		Time m_frameTimeLimit;
 

@@ -65,9 +65,9 @@ namespace Dunjun
 	const Color Grey (0x7F7F7FFF);
 	const Color Black(0x000000FF);
 
-	const Color Red  (0xFF0000FF);
-	const Color Blue (0x00FF00FF);
-	const Color Green(0x0000FFFF); 
+	const Color Red   (0xFF0000FF);
+	const Color Green (0x00FF00FF);
+	const Color Blue  (0x0000FFFF);
 
 	const Color Yellow  (0xFFFF00FF);
 	const Color Magenta (0xFF00FFFF);

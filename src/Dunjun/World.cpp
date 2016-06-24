@@ -57,6 +57,12 @@ namespace Dunjun
 			m_sceneGraph.attachChild(std::move(level));
 		}
 
+		// add ambient light
+		{
+			m_ambientLight.setIntensities(ColorLib::Blue, 0.002f);
+		}
+
+
 		// add point lights
 		{
 			PointLight light;
@@ -577,43 +583,31 @@ namespace Dunjun
 	void World::render()
 	{
 
-		Vector2 viewSize = m_context.window->getSize();
+		Vector2 fbSize = m_context.window->getSize();
 
 		// check whether to update aspectratio and size each cycle
-		if (m_context.window->currentSize != viewSize)
+		if (m_context.window->currentSize != fbSize)
 		{
-			m_context.window->currentSize = viewSize;
-			m_context.window->currentAspectRatio = viewSize.x / viewSize.y;
-
-			//g_cameraPlayer.viewportAspectRatio = aspectRatio;
-			//g_cameraWorld.viewportAspectRatio = aspectRatio;
+			m_renderer.setFrameBufferSize(fbSize);
 		}
 
-		m_renderer.reset();
-		m_renderer.clearAll();
+		//m_renderer.reset();
+		//m_renderer.clearAll();
 
-		m_renderer.addSceneGraph(m_sceneGraph);
+		//m_renderer.addSceneGraph(m_sceneGraph);
 
-		//for (const auto& light : m_directionalLights)
-		//	m_renderer.addDirectionalLight(&light);
-		//for (const auto& light : m_pointLights)
-		//	m_renderer.addPointLight(&light);
-		//for (const auto& light : m_spotLights)
-		//	m_renderer.addSpotLight(&light);
+		//m_renderer.setCamera(*m_currentCamera);
 
-		m_renderer.camera = m_currentCamera;
+		//m_renderer.getGBuffer().create(viewSize.x, viewSize.y);
 
-		//g_renderer.quad = g_meshes["quad"];
+		//m_renderer.deferredGeometryPass();
+		//m_renderer.deferredLightPass();
+		//m_renderer.deferredFinalPass();
 
-		m_renderer.gBuffer.create(viewSize.x, viewSize.y);
+		//m_renderer.setFrameBufferSize(fbSize);
+		m_renderer.render();
 
-		m_renderer.deferredGeometryPass();
-		m_renderer.deferredLightPass();
-		m_renderer.deferredFinalPass();
-
-		//g_materialHolder.get("dunjunText").diffuseMap = &g_renderer.finalTexture.colorTexture;
-
-		glViewport(0, 0, viewSize.x, viewSize.y);
+		glViewport(0, 0, fbSize.x, fbSize.y);
 		glClearColor(0.02f, 0.02f, 0.02f, 1.0f); // set the default color (R,G,B,A)
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -624,7 +618,7 @@ namespace Dunjun
 			shaders.setUniform("u_tex", 0);
 			shaders.setUniform("u_scale", Vector3(1.0f));
 
-			Texture::bind(&m_renderer.finalTexture.colorTexture, 0);
+			Texture::bind(&m_renderer.getFinalTexture(), 0);
 
 			m_renderer.draw(&m_context.meshHolder->get("quad"));
 

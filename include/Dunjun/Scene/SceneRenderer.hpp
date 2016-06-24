@@ -32,12 +32,12 @@ namespace Dunjun
 		virtual ~SceneRenderer();
 
 		// clear all pointers
-		void reset();
+		SceneRenderer& reset();
 
 		// clear double ended queues
-		void clearAll();
+		SceneRenderer& clearAll();
 
-		void addSceneGraph(const SceneNode& node, const Transform& t = Transform());
+		SceneRenderer& addSceneGraph(const SceneNode& node, const Transform& t = Transform());
 		void draw(const Mesh* mesh) const;
 
 		void addModelInstance(const MeshRenderer& meshRenderer, Transform t);
@@ -45,7 +45,9 @@ namespace Dunjun
 		//void addPointLight(const PointLight* light);
 		//void addSpotLight(const SpotLight* light);
 
-		//void renderAll();
+		SceneRenderer& setFrameBufferSize(Vector2 size);
+
+		void render();
 
 		//inline void createGBuffer(u32 w, u32 h)
 		//{
@@ -63,26 +65,40 @@ namespace Dunjun
 		//	return m_gBuffer;
 		//}
 
-		void deferredGeometryPass();
-		void deferredLightPass();
-		void deferredFinalPass();
+		SceneRenderer& deferredGeometryPass();
+		SceneRenderer& deferredLightPass();
+		SceneRenderer& deferredFinalPass();
 
 		//void setMaterial(const Material* material);
-		void setCamera(const Camera& camera);
+		SceneRenderer& setCamera(const Camera& camera);
+		const Camera& getCamera() const 
+		{
+			return *m_camera;
+		}
 
 		//void setUniforms(const Transform& t);
 
-		GBuffer gBuffer;
+		const GBuffer& getGBuffer() const
+		{
+			return m_gBuffer;
+		}
 
-		const Camera* camera = nullptr;
+		//const Texture& getFinalTexture() const
+		//{
+		//}
 
-		RenderTexture lightingTexture;
-		RenderTexture finalTexture;
+		const Texture& getFinalTexture() const
+		{
+			return m_finalTexture.colorTexture;
+		}
 
 	private:
 		const Texture* m_currentTexture = nullptr;
 		const ShaderProgram* m_currentShaders = nullptr;
 		const Material* m_currentMaterial = nullptr;
+
+		const Camera* m_camera = nullptr;
+		//Vector2 m_fbSize = Vector2(512, 512);
 
 		void renderAmbientLight();
 		void renderDirectionalLights();
@@ -97,14 +113,18 @@ namespace Dunjun
 		//std::deque<const SpotLight*> m_spotLights;
 
 		World& m_world;
+		GBuffer m_gBuffer;
 
-		bool isCurrentShaders(const ShaderProgram* shaders);
-		bool isCurrentTexture(const Texture* texture);
+		RenderTexture m_lightingTexture;
+		RenderTexture m_finalTexture;
+
+		inline bool isCurrentShaders(const ShaderProgram* shaders);
+		inline bool isCurrentTexture(const Texture* texture);
 
 		void setShaders(const ShaderProgram* shaders);
 		void setTexture(const Texture* texture, u32 position);
 
-	};
+	}; // end SceneRenderer
 } // end Dunjun
 
 #endif

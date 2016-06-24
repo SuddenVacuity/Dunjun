@@ -40,7 +40,7 @@ namespace Dunjun
 
 	Window::Window()
 		: m_impl(nullptr)
-		, m_context()
+		, m_glContext()
 		, m_frameTimeLimit(Time::Zero)
 	{
 	}
@@ -48,9 +48,9 @@ namespace Dunjun
 	Window::Window(const std::string& title,
 				   VideoMode mode,
 				   u32 style,
-				   const ContextSettings& context)
+				   const GLContextSettings& context)
 		: m_impl(nullptr)
-		, m_context()
+		, m_glContext()
 		, m_frameTimeLimit(Time::Zero)
 	{
 		create(title, mode, style, context);
@@ -65,7 +65,7 @@ namespace Dunjun
 	void Window::create(const std::string& title,
 						VideoMode mode,
 						u32 style,
-						const ContextSettings& context)
+						const GLContextSettings& context)
 	{
 		// destroy the original window
 		// possibly need to make it this->close();
@@ -108,10 +108,7 @@ namespace Dunjun
 
 		assert(m_impl && "Window::create m_impl is nullptr");
 
-		currentSize = {static_cast<f32>(mode.width), static_cast<f32>(mode.height)};
-		currentAspectRatio = currentSize.x / currentSize.y;
-
-		m_context = SDL_GL_CreateContext(m_impl);
+		m_glContext = SDL_GL_CreateContext(m_impl);
 
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, context.majorVersion);
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, context.minorVersion);
@@ -129,6 +126,9 @@ namespace Dunjun
 	{
 		setVisible(true);
 		setFramerateLimit(0);
+
+		currentSize = getSize();
+		currentAspectRatio = currentSize.x / currentSize.y;
 	}
 
 	void Window::close()
@@ -183,6 +183,11 @@ namespace Dunjun
 		return *this;
 	}
 
+	const std::string& Window::getTitle() const
+	{
+		return SDL_GetWindowTitle(m_impl);
+	}
+
 	Window& Window::setTitle(std::string& title)
 	{
 		SDL_SetWindowTitle(m_impl, title.c_str());
@@ -202,7 +207,7 @@ namespace Dunjun
 
 	Window& Window::setVerticalSyncEnabled(bool enabled)
 	{
-
+		SDL_GL_SetSwapInterval((int)enabled);
 
 		return *this;
 	}
@@ -221,7 +226,8 @@ namespace Dunjun
 	{
 		SDL_GL_SwapWindow(m_impl);
 
-		if (m_frameTimeLimit != Time::Zero)
+		if (m_frameTimeLimit != Time::Zero &&
+			m_frameTimeLimit > m_clock.getElapsedTime())
 		{
 			Time::sleep(m_frameTimeLimit - m_clock.getElapsedTime());
 			m_clock.restart();
