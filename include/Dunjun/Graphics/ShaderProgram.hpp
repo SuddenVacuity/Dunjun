@@ -13,7 +13,11 @@ namespace Dunjun
 	class ShaderProgram : public NonCopyable
 	{
 	public:
-		ShaderProgram(); // Progarm for the shader
+		u32 handle = 0;
+		bool isLinked = false;
+		std::string errorLog = "";
+
+		ShaderProgram() = default; // Progarm for the shader
 		virtual ~ShaderProgram();
 
 		bool attachShaderFromFile(ShaderType type, const std::string& filename); // get shader info from file
@@ -25,11 +29,6 @@ namespace Dunjun
 		void checkInUse() const;
 
 		bool link();
-		bool isLinked() const;
-
-		const std::string& getErrorLog() const;
-
-		u32 getNativeHandle() const;
 
 		void bindAttribLocation(u32 location, const std::string& name);
 
@@ -54,21 +53,9 @@ namespace Dunjun
 		void setUniform(const std::string& name, const Transform& t) const;
 		void setUniform(const std::string& name, const Color& c) const;
 
-
-		//readonly       V the only class that can edit
-		//ReadOnly<GLuint, ShaderProgram>  object; // the file
-		//ReadOnly<bool, ShaderProgram> isLinked;
-		//ReadOnly<std::string, ShaderProgram> errorLog;
-
 	private:
-		u32 m_handle;
-		bool m_isLinked;
-		std::string m_errorLog;
-
-		mutable std::map<std::string, s32> m_attribLocations;
-		mutable std::map<std::string, s32> m_uniformLocations;
-
-
+		mutable std::unordered_map<std::string, s32> m_attribLocations;
+		mutable std::unordered_map<std::string, s32> m_uniformLocations;
 	};
 }
 

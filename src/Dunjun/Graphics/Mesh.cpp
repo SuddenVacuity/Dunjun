@@ -27,72 +27,72 @@ namespace Dunjun
 	}
 
 	Mesh::Mesh()
-		: m_data()
-		, m_generated(false)
-		, m_vbo(0)
-		, m_ibo(0)
-		, m_drawType(DrawType::Triangles)
-		, m_drawCount(0)
+		: data()
+		, generated(false)
+		, vbo(0)
+		, ibo(0)
+		, drawType(DrawType::Triangles)
+		, drawCount(0)
 	{
 	}
 
 	Mesh::Mesh(const Data& data)
-		: m_data(data)
-		, m_generated(false)
-		, m_vbo(0)
-		, m_ibo(0)
-		, m_drawType(data.drawType)
-		, m_drawCount((s32)data.indices.size())
+		: data(data)
+		, generated(false)
+		, vbo(0)
+		, ibo(0)
+		, drawType(data.drawType)
+		, drawCount((s32)data.indices.size())
 	{
 		generate();
 	}
 
-	void Mesh::addData(const Data& data)
+	void Mesh::addData(const Data& d)
 	{
-		m_data = data;
-		m_drawType = m_data.drawType;
-		m_drawCount = m_data.indices.size();
-		m_generated = false;
+		data = d;
+		drawType = d.drawType;
+		drawCount = d.indices.size();
+		generated = false;
 	}
 
 	void Mesh::generate() const
 	{
-		if(m_generated)
+		if(generated)
 			return;
 
-		if(!m_vbo)
-			glGenBuffers(1, &m_vbo);
-		if(!m_ibo)
-			glGenBuffers(1, &m_ibo);
+		if(!vbo)
+			glGenBuffers(1, &vbo);
+		if(!ibo)
+			glGenBuffers(1, &ibo);
 
-		glBindBuffer(GL_ARRAY_BUFFER, m_vbo); // bind the buffer
-		glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * m_data.vertices.size(),
-						&m_data.vertices[0], GL_STATIC_DRAW);
+		glBindBuffer(GL_ARRAY_BUFFER, vbo); // bind the buffer
+		glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * data.vertices.size(),
+						&data.vertices[0], GL_STATIC_DRAW);
 
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ibo); // bind the buffer
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(u32) * m_data.indices.size(),
-						&m_data.indices[0], GL_STATIC_DRAW);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo); // bind the buffer
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(u32) * data.indices.size(),
+						&data.indices[0], GL_STATIC_DRAW);
 
 
 		glBindBuffer(GL_ARRAY_BUFFER, 0); // unbind the buffer
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0); // unbind the buffer
 
-		m_generated = true;
+		generated = true;
 	}
 
 	void Mesh::draw() const
 	{
-		if(!m_generated)
+		if(!generated)
 			generate();
 
-		// set attrib to data from m_data
+		// set attrib to data from data
 		glEnableVertexAttribArray((u32)AttribLocation::Position); // enables attribute array[0] a_position
 		glEnableVertexAttribArray((u32)AttribLocation::TexCoord); // enable attribute [1] a_texCoord
 		glEnableVertexAttribArray((u32)AttribLocation::Color); // enables attribute array[2] a_color
 		glEnableVertexAttribArray((u32)AttribLocation::Normal); // enables attribute array[3] a_normal
 
-		glBindBuffer(GL_ARRAY_BUFFER, m_vbo); // bind the buffer
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ibo); // bind the buffer
+		glBindBuffer(GL_ARRAY_BUFFER, vbo); // bind the buffer
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo); // bind the buffer
 
 		// pointer for attribute position (att position[], size of vertices x/y/z, int type, normalized?, stride, pointer)
 		glVertexAttribPointer((u32)AttribLocation::Position, 3, 				
@@ -116,7 +116,7 @@ namespace Dunjun
 
 		// get the draw info from ModelAsset asset
 		//glDrawArrays(asset->drawType, asset->drawStart, asset->drawCount); // (mode to draw in, first vertex, total vertices)
-		glDrawElements((GLenum)m_drawType, (s32)m_drawCount, GL_UNSIGNED_INT, nullptr);
+		glDrawElements((GLenum)drawType, (s32)drawCount, GL_UNSIGNED_INT, nullptr);
 
 		glBindBuffer(GL_ARRAY_BUFFER, 0); // unbind the buffer
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0); // unbind the buffer

@@ -7,6 +7,12 @@ namespace Dunjun
 {
 	struct Color // must come before render
 	{
+		u8 data[4];
+		struct
+		{
+			u8 r, g, b, a;
+		};
+
 		GLOBAL const u32 COLOR_DEPTH = 256;
 
 		Color(u8 r, u8 g, u8 b, u8 a = 0xFF)
@@ -24,12 +30,6 @@ namespace Dunjun
 			b = (rgba >> 8) & 0xFF;
 			a = (rgba >> 0) & 0xFF;
 		}
-
-		u8 data[4];
-		struct
-		{
-			u8 r, g, b, a;
-		};
 	};
 
 	namespace ColorLib

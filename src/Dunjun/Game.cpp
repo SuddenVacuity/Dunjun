@@ -493,8 +493,9 @@ namespace Dunjun
 				{
 					// dynamic window title
 					g_window.setTitle(stringFormat("Dunjun - %.3f ms - %d fps",
-												  1000.f / tc.getTickRate(), 
-												  (u32)tc.getTickRate()));
+												   1000.f / tc.getTickRate(), 
+												   (u32)tc.getTickRate()
+												  ).c_str());
 				}
 
 				if(g_running)

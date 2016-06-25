@@ -108,6 +108,55 @@ namespace Dunjun
 		std::memcpy(&to, &x, ((sizeof(T) < sizeof(U)) ? sizeof(T) : sizeof(U)));
 		return to;
 	}
+	/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	)				.
+	)					DEFER FUNCTIONS TO END OF SCOPE
+	)
+	)				.
+	)					.
+	)
+	)				.
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+
+	namespace Impl
+	{
+		template <typename Fn>
+		struct Defer
+		{
+			Defer(Fn&& fn)
+				: fn(std::forward<Fn>(fn))
+			{
+			}
+
+			~Defer() 
+			{ 
+				fn(); 
+			}
+
+			Fn fn;
+		};
+
+		template <typename Fn>
+		Defer<Fn> deferFn(Fn&& fn)
+		{
+			return Defer<Fn>(std::forward<Fn>(fn)); 
+		}
+
+	} // end Impl
+
+#define Defer_1(x, y) x##y
+#define Defer_2(x, y) Defer_1(x, y)
+#define Defer_3(x) Defer_2(c, __COUNTER__)
+#define defer(code) auto Defer_3(_defer_) = Impl::deferFn([&](){code;});
+
+/*/	Example for defer
+ *	FILE* f{open("test.txt", "r")}
+ *	if (f == nullptr)
+ *		return;
+ *	defer(fclose(f)); 
+/*/
+
+
 
 	// Cross-Platform version of sprintf that uses a local persist buffer
 	// If more than 1024 characters are needed, a std::stringstream may be needed
@@ -140,15 +189,26 @@ namespace Dunjun
 
 	// len() currently unused
 	template <typename T>
-	inline usize len(const T& t)
+	inline size_t len(const T& t)
 	{
 		return t.size();
 	}
-	template <typename T, usize N>
-	inline usize len(const T(&array)[N])
+	template <typename T, size_t N>
+	inline size_t len(const T(&array)[N])
 	{
 		return N;
+	}	
+	template <typename T>
+	inline bool empty(const T& t)
+	{
+		return t.empty();
 	}
+	template <typename T, size_t N>
+	inline bool empty(const T(&array)[N])
+	{
+		return false;
+	}
+
 
 	inline void throwRuntimeError(const std::string& str)
 	{

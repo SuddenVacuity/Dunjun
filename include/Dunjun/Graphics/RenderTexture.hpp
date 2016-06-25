@@ -5,7 +5,7 @@
 
 namespace Dunjun
 {
-	class RenderTexture
+	struct RenderTexture
 	{
 	public:
 		enum TextureType
@@ -16,7 +16,16 @@ namespace Dunjun
 			Light = 4 | Color,
 		};
 
-		RenderTexture();
+		Texture colorTexture{};
+		Texture depthTexture{};
+
+		u32 width = 0;
+		u32 height = 0;
+
+		TextureType type = TextureType::Color;
+		u32 fbo = 0;
+
+		RenderTexture() = default;
 		virtual ~RenderTexture();
 
 		bool create(u32 w, u32 h,
@@ -28,30 +37,8 @@ namespace Dunjun
 		//void flush();
 
 		GLOBAL void bind(const RenderTexture* rt);
-		//GLOBAL void unbind(const RenderTexture* rt);
 
-		//void bindTexture(TextureType t, GLuint position) const;
 
-		//ReadOnly<u32, RenderTexture> width;
-		//ReadOnly<u32, RenderTexture> height;
-		u32 getWidth() const;
-		u32 getHeight() const;
-
-		//ReadOnly<TextureType, RenderTexture> type;
-		TextureType getType() const;
-
-		//ReadOnly<GLuint, RenderTexture> fbo; //frame buffer object
-		u32 getNativeHandle() const;
-
-		Texture colorTexture;
-		Texture depthTexture;
-	private:
-		u32 m_width;
-		u32 m_height;
-
-		TextureType m_type;
-
-		u32 m_fbo;
 	};	
 
 

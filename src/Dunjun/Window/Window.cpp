@@ -101,14 +101,7 @@ namespace Dunjun
 
 		u32 windowFlags = generateFlags(style);
 
-		assert(windowFlags && "Window::create windowFlass is nullptr");
-
-		m_impl = SDL_CreateWindow(title.c_str(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-								  (int)mode.width, (int)mode.height, windowFlags);
-
-		assert(m_impl && "Window::create m_impl is nullptr");
-
-		m_glContext = SDL_GL_CreateContext(m_impl);
+		assert(windowFlags && "Window::create windowFlags is nullptr");
 
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, context.majorVersion);
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, context.minorVersion);
@@ -119,11 +112,13 @@ namespace Dunjun
 		SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, true);
 		//SDL_GL_SetAttribute(SDL_GL_FRAMEBUFFER_SRGB_CAPABLE, true);
 
-		init();
-	}
+		m_impl = SDL_CreateWindow(title.c_str(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
+			(int)mode.width, (int)mode.height, windowFlags);
 
-	void Window::init()
-	{
+		assert(m_impl && "Window::create failed: m_impl is nullptr");
+
+		m_glContext = SDL_GL_CreateContext(m_impl);
+
 		setVisible(true);
 		setFramerateLimit(0);
 
@@ -183,14 +178,14 @@ namespace Dunjun
 		return *this;
 	}
 
-	const std::string& Window::getTitle() const
+	const char* Window::getTitle() const
 	{
 		return SDL_GetWindowTitle(m_impl);
 	}
 
-	Window& Window::setTitle(std::string& title)
+	Window& Window::setTitle(const char* title)
 	{
-		SDL_SetWindowTitle(m_impl, title.c_str());
+		SDL_SetWindowTitle(m_impl, title);
 
 		return *this;
 	}

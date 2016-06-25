@@ -22,17 +22,20 @@ namespace Dunjun
 	class Image // create an image class
 	{
 	public:
+		ImageFormat format = ImageFormat::None;
+		u32 width = 0;
+		u32 height = 0;
+		u8* pixels = nullptr;
 
-		Image(); // declair Image function
-		Image(u32 width, u32 height, ImageFormat format, const u8* pixels = nullptr); // and declair its variables
+		Image() = default; // declair Image function
 		Image(const Image& other); // the image function will be for half the image this part is the other half
-		Image& operator=(const Image& other);
 		~Image(); // 
+
+		Image& operator=(const Image& other);
 
 		bool loadFromFile(const std::string& filename); // get the name of the file to be loaded
 		bool loadFromImage(u32 width, u32 height, ImageFormat format, const u8* pixels); // load info from memory
 
-		const u8* getPixels() const;
 		u8* getPixel(u32 column, u32 row) const; // make function and vairables to get a pixel from a specific spot
 		void setPixel(u32 column, u32 row, const u32* pixel); // make function to set a pixel to a specific spot
 
@@ -43,23 +46,6 @@ namespace Dunjun
 //									uInt32 srcCol, uInt32 srcRow,
 //									uInt32 destCol, uInt32 destRow,
 //									uInt32 width, uInt32 height);
-
-		// declair variables that will be used in cpp files
-		//ReadOnly<ImageFormat, Image> format; // image format
-		//ReadOnly<u32, Image> width; // texture width
-		//ReadOnly<u32, Image> height; // texture height
-		//ReadOnly<u8*, Image> pixels; // 8 bit pixel array
-
-		ImageFormat getFormat() const;
-
-		u32 getWidth() const;
-		u32 getHeight() const;
-
-	private:
-		ImageFormat m_format = ImageFormat::None;
-		u32 m_width = 0;
-		u32 m_height = 0;
-		u8* m_pixels = nullptr;
 	};
 }
 

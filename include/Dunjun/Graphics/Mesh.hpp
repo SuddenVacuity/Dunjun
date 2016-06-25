@@ -27,7 +27,7 @@ namespace Dunjun
 		// Quads = GL_QUADS,
 	};
 
-	class Mesh
+	struct Mesh
 	{
 	public:
 		struct Data
@@ -61,6 +61,15 @@ namespace Dunjun
 			void generateNormals();
 		};
 
+		Data data;
+
+		mutable b32 generated = false;
+
+		mutable u32 vbo = 0;
+		mutable u32 ibo = 0;
+		DrawType drawType = DrawType::Triangles;
+		s32 drawCount = 0;
+
 		Mesh();
 		Mesh(const Data& data);
 
@@ -73,29 +82,15 @@ namespace Dunjun
 
 		void generate() const;
 
-	private:
-		friend class SceneRenderer;
+		void draw() const;
 
 		inline void destroy() const
 		{
-			if (m_vbo)
-				glDeleteBuffers(1, &m_vbo);
-			if (m_ibo)
-				glDeleteBuffers(1, &m_ibo);
+			if (vbo)
+				glDeleteBuffers(1, &vbo);
+			if (ibo)
+				glDeleteBuffers(1, &ibo);
 		}
-
-		void draw() const;
-
-		Data m_data;
-
-		mutable b32 m_generated = false;
-
-		mutable u32 m_vbo = 0;
-		mutable u32 m_ibo = 0;
-		DrawType m_drawType = DrawType::Triangles;
-		s32 m_drawCount = 0;
-
-
 	};
 } // end Dunjun
 

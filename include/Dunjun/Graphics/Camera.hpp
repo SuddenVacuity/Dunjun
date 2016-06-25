@@ -15,7 +15,18 @@ namespace Dunjun
 
 	struct Camera
 	{
-		Camera();
+		Transform transform = Transform();
+
+		Radian fieldOfView = Degree(50.0f);
+		f32 orthoScale = 4.0f;
+		f32 nearPlane = 0.01f;
+		f32 farPlane = 256.0f;
+		Vector2 viewportSize = {0, 0};
+		f32 viewportAspectRatio = 4.0f / 3.0f;
+		ProjectionType projectionType = ProjectionType::Perspective;
+
+
+		Camera() = default;
 		Camera(const Camera& other) = default;
 		//const Camera& operator=(const Camera& other) = default;
 
@@ -36,19 +47,6 @@ namespace Dunjun
 		Matrix4 getMatrix() const;
 		Matrix4 getProjection() const;
 		Matrix4 getView() const;
-
-		Transform transform;
-		Radian fieldOfView;
-		f32 orthoScale;
-		f32 nearPlane;
-		f32 farPlane;
-
-		Vector2 viewportSize;
-		f32 viewportAspectRatio;
-
-		ProjectionType projectionType;
-
-
 	};
 } // end Dunjun
 

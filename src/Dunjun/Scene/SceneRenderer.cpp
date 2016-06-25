@@ -117,7 +117,7 @@ namespace Dunjun
 
 		GBuffer::bind(&m_gBuffer);
 		{
-			glViewport(0, 0, m_gBuffer.getWidth(), m_gBuffer.getHeight());
+			glViewport(0, 0, m_gBuffer.width, m_gBuffer.height);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 			shaders.use();
@@ -152,17 +152,17 @@ namespace Dunjun
 
 	SceneRenderer& SceneRenderer::deferredLightPass()
 	{
-		m_lightingTexture.create(m_gBuffer.getWidth(), m_gBuffer.getHeight(), RenderTexture::Light);
+		m_lightingBuffer.create(m_gBuffer.width, m_gBuffer.height, RenderTexture::Light);
 
-		Texture::bind(&m_gBuffer.getTexture(GBuffer::Diffuse),  0);
-		Texture::bind(&m_gBuffer.getTexture(GBuffer::Specular), 1);
-		Texture::bind(&m_gBuffer.getTexture(GBuffer::Normal),   2);
-		Texture::bind(&m_gBuffer.getTexture(GBuffer::Depth),    3);
+		Texture::bind(&m_gBuffer.textures[GBuffer::Diffuse],  0);
+		Texture::bind(&m_gBuffer.textures[GBuffer::Specular], 1);
+		Texture::bind(&m_gBuffer.textures[GBuffer::Normal],   2);
+		Texture::bind(&m_gBuffer.textures[GBuffer::Depth],    3);
 
-		RenderTexture::bind(&m_lightingTexture);
+		RenderTexture::bind(&m_lightingBuffer);
 		{
 			glClearColor(0, 0, 0, 0);
-			glViewport(0, 0, m_lightingTexture.getWidth(), m_lightingTexture.getHeight());
+			glViewport(0, 0, m_lightingBuffer.width, m_lightingBuffer.height);
 			glClear(GL_COLOR_BUFFER_BIT);
 
 			glDepthMask(false);
@@ -185,15 +185,15 @@ namespace Dunjun
 
 	SceneRenderer& SceneRenderer::deferredFinalPass()
 	{
-		m_finalTexture.create(m_gBuffer.getWidth(), m_gBuffer.getHeight(), RenderTexture::Color);
+		m_finalTexture.create(m_gBuffer.width, m_gBuffer.height, RenderTexture::Color);
 
-		Texture::bind(&m_gBuffer.getTexture(GBuffer::Diffuse), 0);
-		Texture::bind(&m_lightingTexture.colorTexture, 1);
+		Texture::bind(&m_gBuffer.textures[GBuffer::Diffuse], 0);
+		Texture::bind(&m_lightingBuffer.colorTexture, 1);
 
 		RenderTexture::bind(&m_finalTexture);
 		{
 			glClearColor(1, 0, 1, 1);
-			glViewport(0, 0, m_finalTexture.getWidth(), m_finalTexture.getHeight());
+			glViewport(0, 0, m_finalTexture.width, m_finalTexture.height);
 			glClear(GL_COLOR_BUFFER_BIT);
 
 			auto& shaders = g_shaderHolder.get("deferredFinalPass");

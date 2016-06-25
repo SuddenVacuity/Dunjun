@@ -47,13 +47,13 @@ namespace Dunjun
 
 			if (!shaders->attachShaderFromFile(Dunjun::ShaderType::Vertex, vertexFilename)) // check if the file loaded
 			{
-				std::cerr << shaders->getErrorLog() << std::endl;
+				std::cerr << shaders->errorLog << std::endl;
 				return false;
 			}
 
 			if (!shaders->attachShaderFromFile(Dunjun::ShaderType::Fragment, fragmentFilename)) // check if the file loaded
 			{
-				std::cerr << shaders->getErrorLog() << std::endl;
+				std::cerr << shaders->errorLog << std::endl;
 				return false;
 			}
 
@@ -67,7 +67,7 @@ namespace Dunjun
 
 			if (!shaders->link())
 			{
-				std::cerr << (const std::string&)shaders->getErrorLog() << std::endl;
+				std::cerr << (const std::string&)shaders->errorLog << std::endl;
 				return false;
 			}
 

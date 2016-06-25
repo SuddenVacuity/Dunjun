@@ -138,8 +138,8 @@ namespace Dunjun
 		Vector2 getSize() const;
 		Window& setSize(const Vector2& size);
 
-		const std::string& getTitle() const;
-		Window& setTitle(std::string& title);
+		const char* getTitle() const;
+		Window& setTitle(const char* title);
 		Window& setVisible(bool visible);
 		Window& setVerticalSyncEnabled(bool enabled);
 		Window& setFramerateLimit(u32 limit);
@@ -159,7 +159,6 @@ namespace Dunjun
 		Vector2 currentSize = {0, 0};
 		f32 currentAspectRatio = 0.0f;
 	private:
-		void init();
 
 		SDL_Window* m_impl;
 		SDL_GLContext m_glContext;

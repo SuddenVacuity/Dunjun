@@ -14,7 +14,10 @@ namespace Dunjun
 
 		Vertex() = default;
 
-		Vertex(const Vector3& position, const Vector2& texCoord, const Color& color, const Vector3& normal = { 0, 0, 0 })
+		Vertex(const Vector3& position, 
+			   const Vector2& texCoord, 
+			   const Color& color, 
+			   const Vector3& normal = { 0, 0, 0 })
 			: position(position)
 			, texCoord(texCoord)
 			, color(color)

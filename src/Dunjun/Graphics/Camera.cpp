@@ -3,17 +3,6 @@
 
 namespace Dunjun
 {
-	Camera::Camera()
-		: transform()
-		, fieldOfView(Degree(50))
-		, orthoScale(4.0f)
-		, nearPlane(0.01f)
-		, farPlane(256.0f)
-		, viewportAspectRatio(4.0f / 3.0f)
-		, projectionType(ProjectionType::Perspective)
-	{
-	}
-
 	// Functions
 	// TODO: FIX: changing lookAt position does not act as expected
 	void Camera::lookAt(const Vector3& position, const Vector3& up)
@@ -58,7 +47,9 @@ namespace Dunjun
 	{
 		return transform.orientation * Vector3(0, -1, 0);
 	}
-
+	
+	//
+	// helper functions
 	Matrix4 Camera::getMatrix() const
 	{
 		return getProjection() * getView();

@@ -115,7 +115,7 @@ namespace Dunjun
 		World& m_world;
 		GBuffer m_gBuffer;
 
-		RenderTexture m_lightingTexture;
+		RenderTexture m_lightingBuffer;
 		RenderTexture m_finalTexture;
 
 		inline bool isCurrentShaders(const ShaderProgram* shaders);

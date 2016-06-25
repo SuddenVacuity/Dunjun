@@ -23,21 +23,21 @@ namespace Dunjun
 		}
 	}
 
-	Texture::Texture() // Initialize texture
-		: m_handle(0)
-		, m_width(0)
-		, m_height(0)
-	{
-	}
 	Texture::Texture(const Image& image,
 		TextureFilter minMagFilter,
 		TextureWrapMode wrapMode)
-		: m_handle(0)
-		, m_width((s32)image.getWidth())
-		, m_height((s32)image.getHeight())
+		: handle(0)
+		, width((s32)image.width)
+		, height((s32)image.height)
 	{
 		if (!loadFromImage(image, minMagFilter, wrapMode))
 			throwRuntimeError("Could not create texture from image.");
+	}
+
+	Texture::~Texture()
+	{
+		if (handle)
+			glDeleteTextures(1, &handle);
 	}
 
 	bool Texture::loadFromFile(const std::string& filename,
@@ -56,17 +56,17 @@ namespace Dunjun
 		TextureFilter minMagFilter,
 		TextureWrapMode wrapMode)
 	{
-		if ((const ImageFormat&)image.getFormat() == ImageFormat::None )
+		if ((const ImageFormat&)image.format == ImageFormat::None )
 			return false;
 
-		m_width = image.getWidth();
-		m_height = image.getHeight();
+		width = image.width;
+		height = image.height;
 
-		if(!m_handle)
-			glGenTextures(1, &m_handle);
+		if(!handle)
+			glGenTextures(1, &handle);
 
 		//glGenTextures(1, &m_object);
-		glBindTexture(GL_TEXTURE_2D, m_handle);
+		glBindTexture(GL_TEXTURE_2D, handle);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, static_cast<s32>(wrapMode)); // set the s axis (x) to repeat
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, static_cast<s32>(wrapMode)); // set the t axis (y) to repeat
 																	  //glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL REPEAT); // set the r axis (z) to repeat
@@ -87,21 +87,15 @@ namespace Dunjun
 
 	//	glTexImage2D(GL_TEXTURE_2D, 0, format, (GLsizei)m_width, (GLsizei)m_height, 0, image.getFormat(), GL_UNSIGNED_INT, image.getPixelPtr());
 		glTexImage2D(GL_TEXTURE_2D, 0, 
-					 getInternalFormat(image.getFormat(), true), 
-					 m_width, m_height, 0, 
-					 getInternalFormat(image.getFormat(), false), 
-					 GL_UNSIGNED_BYTE, image.getPixels());
+					 getInternalFormat(image.format, true), 
+					 width, height, 0, 
+					 getInternalFormat(image.format, false), 
+					 GL_UNSIGNED_BYTE, image.pixels);
 
 		glBindTexture(GL_TEXTURE_2D, 0);
 		
 		return true;
 
-	}
-
-	Texture::~Texture()
-	{
-		if(m_handle)
-			glDeleteTextures(1, &m_handle);
 	}
 
 	void Texture::bind(const Texture* tex, u32 position)
@@ -117,7 +111,7 @@ namespace Dunjun
 
 		glEnable(GL_TEXTURE_2D);
 
-		glBindTexture(GL_TEXTURE_2D, (tex && tex->m_handle ? tex->m_handle : 0));
+		glBindTexture(GL_TEXTURE_2D, (tex && tex->handle ? tex->handle : 0));
 
 		glDisable(GL_TEXTURE_2D);
 	}
@@ -140,19 +134,4 @@ namespace Dunjun
 	//	glDisable(GL_TEXTURE_2D);
 	//
 	//}
-
-		s32 Texture::getWidth() const
-		{
-			return m_width;
-		}
-
-		s32 Texture::getHeight() const
-		{
-			return m_height;
-		}
-
-		GLuint Texture::getNativeHandle() const
-		{
-			return m_handle;
-		}
 } // End Namespace Dunjun
