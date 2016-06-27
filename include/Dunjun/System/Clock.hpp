@@ -8,26 +8,25 @@
 
 namespace Dunjun
 {
-	class Clock
+	struct Clock
 	{
 	public:
+		Time startTime = Time::now();
+
 		inline Time getElapsedTime() const
 		{
-			return Time::now() - m_startTime;
+			return Time::now() - startTime;
 		}
 
 		inline Time restart()
 		{
 			//Time now = Input::getTime();
 			Time now = Time::now();
-			Time elapsed = now - m_startTime;
-			m_startTime = now;
+			Time elapsed = now - startTime;
+			startTime = now;
 
 			return elapsed;
 		}
-
-	private:
-		Time m_startTime = Time::now();
 	};
 }
 

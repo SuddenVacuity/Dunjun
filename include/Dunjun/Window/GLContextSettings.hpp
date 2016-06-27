@@ -7,8 +7,6 @@ namespace Dunjun
 {
 	struct GLContextSettings
 	{
-		explicit GLContextSettings() = default;
-
 		u32 depthBits = 0;
 		u32 stencilBits = 0;
 		u32 antialiasingLevel = 0;
@@ -16,6 +14,8 @@ namespace Dunjun
 
 		u32 majorVersion = 2;
 		u32 minorVersion = 1;
+
+		explicit GLContextSettings() = default;
 	};
 
 } // end Dunjun

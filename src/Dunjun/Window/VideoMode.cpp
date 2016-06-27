@@ -8,7 +8,7 @@ namespace Dunjun
 	VideoMode::VideoMode()
 		: width(0)
 		, height(0)
-		, bitsPerPixel(0)
+		, bitsPerPixel(24)
 	{
 	}
 

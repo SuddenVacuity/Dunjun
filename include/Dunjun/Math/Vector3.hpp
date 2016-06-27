@@ -7,14 +7,36 @@ namespace Dunjun
 {
 	struct Vector3
 	{
+		//f32 x = 0;
+		//f32 y = 0;
+		//f32 z = 0;
+
+		union // call info as v.x = 1;
+		{
+			f32 data[3];
+			struct
+			{
+				f32 x, y, z;
+			};
+			struct
+			{
+				f32 r, g, b;
+			};
+			struct
+			{
+				f32 s, t, p;
+			};
+		};
+		
 		Vector3();
 		explicit Vector3(f32 xyz);
 		Vector3(f32 x, f32 y, f32 z);
 		Vector3(f32 xyz[3]);
-
+		
 		explicit Vector3(const Vector2& other, f32 z);
-
+		
 		Vector3(const Vector3& other) = default; // copy constructor
+
 		//
 		// operators
 		f32& operator[](size_t index) { return data[index]; }
@@ -38,22 +60,6 @@ namespace Dunjun
 		Vector3& operator*=(f32 scaler);
 		Vector3& operator/=(f32 scaler);
 
-		union // call info as v.x = 1;
-		{
-			f32 data[3];
-			struct
-			{
-				f32 x, y, z;
-			};
-			struct
-			{
-				f32 r, g, b;
-			};
-			struct
-			{
-				f32 s, t, p;
-			};
-		};
 	}; // end Vector3
 	//
 	// Functions outside Vector3 struct

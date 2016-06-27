@@ -5,9 +5,12 @@
 
 namespace Dunjun
 {
-	class MeshRenderer : public NodeComponent
+	struct MeshRenderer : NodeComponent
 	{
 	public:
+		const Mesh* mesh;
+		const Material* material;
+
 		explicit MeshRenderer(const Mesh& mesh, Material* material)
 			: mesh(&mesh)
 			, material(material)
@@ -45,10 +48,6 @@ namespace Dunjun
 			//
 			//Texture::bind(nullptr, 0);
 		}
-
-		const Mesh* mesh;
-		const Material* material;
-
 	};
 
 } // end Dunjun

@@ -22,14 +22,6 @@ namespace Dunjun
 
 	GLOBAL World g_world;
 
-	GLOBAL bool toggleCulling = true;
-
-	INTERNAL std::string consoleText = "";
-	INTERNAL std::string consoleBuffer = "";
-	INTERNAL bool acceptInput = true;
-	INTERNAL bool checkForCommand = false;
-	INTERNAL bool useConsole = false;
-
 	namespace Game
 	{
 		/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -242,36 +234,36 @@ namespace Dunjun
 				case Event::KeyPressed:// && acceptInput == true
 				{
 					// console
-					if (useConsole == true)
+					if (g_world.useConsole == true)
 					{
 						// exit console
 						if (Input::isKeyPressed(Input::Key::Tab))
 						{
-							useConsole = false;
+							g_world.useConsole = false;
 						}
 
 						// check for a command
 						if (Input::isKeyPressed(Input::Key::Return))
 						{
-							checkForCommand = true;
+							g_world.checkForCommand = true;
 						}
 
 						// Erase letters
 						if (Input::isKeyPressed(Input::Key::Backspace))
-							if (consoleText.size() > 0)
-								consoleText.erase(consoleText.size() - 1);
+							if (g_world.consoleText.size() > 0)
+								g_world.consoleText.erase(g_world.consoleText.size() - 1);
 
 						if (Input::isKeyPressed(Input::Key::Delete))
 						{
-							consoleText.clear();
-							consoleBuffer.clear();
+							g_world.consoleText.clear();
+							g_world.consoleBuffer.clear();
 						}
 
 						// TODO: press up or down to cycle previous commands
 						if (Input::isKeyPressed(Input::Key::Up))
-							consoleText.append(" ");
+							g_world.consoleText.append(" ");
 						if (Input::isKeyPressed(Input::Key::Down))
-							consoleText.append(" ");
+							g_world.consoleText.append(" ");
 
 						// add letters
 						for (int i = 0; i < 26; i++)
@@ -284,8 +276,8 @@ namespace Dunjun
 								s = i + 97; // lower case letters
 
 							if (Input::isKeyPressed(Input::Key(i)))
-								if ((consoleBuffer.find(s) == consoleBuffer.npos)) // only add if letter is not already in buffer
-									consoleBuffer.append(s);
+								if ((g_world.consoleBuffer.find(s) == g_world.consoleBuffer.npos)) // only add if letter is not already in buffer
+									g_world.consoleBuffer.append(s);
 						}
 
 						if (1)
@@ -293,19 +285,19 @@ namespace Dunjun
 							// TODO: make this only happen when a key is released and while no keys are pressed
 							// SDL UP/DOWN events don't seem to work for this
 							// buffer is added twice when this happens here
-							consoleText.append(consoleBuffer);
-							consoleBuffer.clear();
+							g_world.consoleText.append(g_world.consoleBuffer);
+							g_world.consoleBuffer.clear();
 						}
 
 						std::cout << "\n\nType in a command and press enter. [HELP] [QUIT]" << std::endl;
-						std::cout << ">> [" << consoleText << "." << consoleBuffer << "]" << std::endl;
+						std::cout << ">> [" << g_world.consoleText << "." << g_world.consoleBuffer << "]" << std::endl;
 
 					}
 					// normal input
 					else
 					{
 						if (Input::isKeyPressed(Input::Key::Tab))
-							useConsole = true;
+							g_world.useConsole = true;
 					}
 					break;
 				}
@@ -462,8 +454,7 @@ namespace Dunjun
 			Time prevTime = Time::now();
 
 			std::cout << "\n\n\n\n" << std::endl;
-			std::cout << "Type in a command and press enter. [HELP] [QUIT]" << std::endl;
-			std::cout << ">> []" << std::endl;
+			std::cout << "Press Tab to open the Console." << std::endl;
 
 			while (g_running) // create a loop that works until the window closes
 			{
@@ -486,16 +477,15 @@ namespace Dunjun
 					accumulator -= TIME_STEP;
 					handleRealtimeInput(); // input handler
 					update(TIME_STEP);
-
 				}
 
-				if (tc.update(milliseconds(500)) && (g_running == true))
+				if (tc.update(milliseconds(500)) && 
+				   (g_running == true))
 				{
 					// dynamic window title
 					g_window.setTitle(stringFormat("Dunjun - %.3f ms - %d fps",
-												   1000.f / tc.getTickRate(), 
-												   (u32)tc.getTickRate()
-												  ).c_str());
+												   1000.f / tc.tickRate, 
+												   (u32)tc.tickRate).c_str());
 				}
 
 				if(g_running)
@@ -509,7 +499,7 @@ namespace Dunjun
 				//	Time::sleep(framelimitTime);
 				//frameClock.restart();
 
-			}
+			} // end while(g_running)
 		}
 
 		void cleanUp()

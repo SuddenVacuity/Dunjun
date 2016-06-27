@@ -9,15 +9,38 @@ namespace Dunjun
 {
 	struct Vector4
 	{
+		//f32 x = 0;
+		//f32 y = 0;
+		//f32 z = 0;
+		//f32 w = 0;
+
+		union // call info as v.x = 1;
+		{
+			f32 data[4];
+			struct
+			{
+				f32 x, y, z, w;
+			};
+			struct
+			{
+				f32 r, g, b, a;
+			};
+			struct
+			{
+				f32 s, t, p, q;
+			};
+		};
+		
 		Vector4();
 		explicit Vector4(f32 xyzw);
 		Vector4(f32 x, f32 y, f32 z, f32 w);
 		Vector4(f32 xyzw[4]);
-
+		
 		explicit Vector4(const Vector2& other, f32 z, f32 w);
 		explicit Vector4(const Vector3& other, f32 w);
-
+		
 		Vector4(const Vector4& other) = default; // copy constructor
+
 		//
 		// operators
 		inline f32& operator[](size_t index) { return data[index]; }
@@ -41,22 +64,6 @@ namespace Dunjun
 		Vector4& operator*=(f32 scaler);
 		Vector4& operator/=(f32 scaler);
 
-		union // call info as v.x = 1;
-		{
-			f32 data[4];
-			struct
-			{
-				f32 x, y, z, w;
-			};
-			struct
-			{
-				f32 r, g, b, a;
-			};
-			struct
-			{
-				f32 s, t, p, q;
-			};
-		};
 	}; // end Vector4
 	//
 	// Functions outside Vector4 struct

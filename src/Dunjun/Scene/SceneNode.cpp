@@ -18,7 +18,7 @@ namespace Dunjun
 	// TODO idCount-- when destrucitng
 	SceneNode::SceneNode()
 		: id(getUniqueSceneNodeId())
-		, m_componentArray()
+		, componentArray()
 	{
 		name = stringFormat("node_%llu", id);
 	}
@@ -26,8 +26,8 @@ namespace Dunjun
 	SceneNode& SceneNode::attachChild(u_ptr&& child)
 	{
 		// get the 
-		child->m_parent = this;
-		m_children.emplace_back(std::move(child));
+		child->parent = this;
+		children.emplace_back(std::move(child));
 
 		return *this;
 	}
@@ -35,8 +35,8 @@ namespace Dunjun
 	SceneNode::u_ptr SceneNode::detachChild(const SceneNode& node)
 	{
 		// check through all children to find if the one to detach exists
-		auto found = std::find_if(std::begin(m_children), 
-								  std::end(m_children), 
+		auto found = std::find_if(std::begin(children), 
+								  std::end(children), 
 		// lambda function: [](){}
 		// leave square brackets blank to bring in no variables
 		// [&] or [&variable] bring in all varibles by reference or single variable by reference respectively
@@ -48,12 +48,12 @@ namespace Dunjun
 		);
 
 		// if child is found before the end of m_children allow it to be moved and return the pointer to it
-		if(found != std::end(m_children))
+		if(found != std::end(children))
 		{
 			u_ptr result = std::move(*found);
 
-			result->m_parent = nullptr; // remove parent pointer form result
-			m_children.erase(found); // remove child pointer from m_children
+			result->parent = nullptr; // remove parent pointer form result
+			children.erase(found); // remove child pointer from m_children
 
 			return result;
 		}
@@ -64,7 +64,7 @@ namespace Dunjun
 	// TODO: return the id of all with the same name
 	SceneNode* SceneNode::findChildByName(const std::string& name) const
 	{
-		for(const u_ptr& child : m_children)
+		for(const u_ptr& child : children)
 		{
 			if(child->name == name)
 				return child.get();
@@ -80,7 +80,7 @@ namespace Dunjun
 
 	SceneNode* SceneNode::findChildById(size_t id) const
 	{
-		for (const u_ptr& child : m_children)
+		for (const u_ptr& child : children)
 		{
 			if (child->id == id)
 				return child.get();
@@ -99,7 +99,7 @@ namespace Dunjun
 		Transform result;
 
 		// go through all parents applying their transforms
-		for(const SceneNode* node = this; node != nullptr; node = node->getParent())
+		for(const SceneNode* node = this; node != nullptr; node = node->parent)
 			result *= node->transform;
 
 		return result;
@@ -111,7 +111,7 @@ namespace Dunjun
 		initChildren();
 
 		// check node components
-		for(auto& component : m_components)
+		for(auto& component : components)
 		{
 			component->init();
 		}
@@ -122,7 +122,7 @@ namespace Dunjun
 		updateCurrent(dt);
 		updateChildren(dt);
 
-		for (auto& component : m_components)
+		for (auto& component : components)
 		{
 			component->update(dt);
 		}
@@ -133,13 +133,13 @@ namespace Dunjun
 		handleEventCurrent(event);
 		handleEventChildren(event);
 
-		for(auto& component : m_components)
+		for(auto& component : components)
 			component->handleEvent(event);
 	}
 
 	void SceneNode::draw(SceneRenderer& renderer, Transform t) const
 	{
-		if(!visible)
+		if(!enabled)
 			return;
 
 		t *= this->transform;
@@ -147,7 +147,7 @@ namespace Dunjun
 		drawCurrent(renderer, t);
 		drawChildren(renderer, t);
 
-		for (auto& component : m_components)
+		for (auto& component : components)
 			component->draw(renderer, t);
 	}
 
@@ -189,7 +189,7 @@ namespace Dunjun
 
 	void SceneNode::initChildren()
 	{
-		for(u_ptr& child : m_children)
+		for(u_ptr& child : children)
 			child->init();
 	}
 
@@ -200,7 +200,7 @@ namespace Dunjun
 
 	void SceneNode::updateChildren(Time dt)
 	{
-		for (u_ptr& child : m_children)
+		for (u_ptr& child : children)
 			child->update(dt);
 	}
 
@@ -211,7 +211,7 @@ namespace Dunjun
 
 	void SceneNode::handleEventChildren(const Event& event)
 	{
-		for(u_ptr& child : m_children)
+		for(u_ptr& child : children)
 			child->handleEvent(event);
 	}
 
@@ -222,7 +222,7 @@ namespace Dunjun
 
 	void SceneNode::drawChildren(SceneRenderer& renderer, Transform t) const
 	{
-		for (const u_ptr& child : m_children)
+		for (const u_ptr& child : children)
 			child->draw(renderer, t);
 	}
 

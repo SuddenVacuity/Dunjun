@@ -37,6 +37,20 @@ namespace Dunjun
 		using ComponentBitset = std::bitset<MaxComponents>;
 		using ComponentArray = std::array<NodeComponent*, MaxComponents>;
 
+		using ID = u64;
+		const ID id;
+		std::string name;
+		Transform transform = Transform();
+		//ReadOnly<SceneNode*, SceneNode> parent;
+		bool enabled = true;
+
+		SceneNode* parent = nullptr;
+		std::deque<u_ptr> children{};
+
+		std::deque<NodeComponent::u_ptr> components{};
+		ComponentArray componentArray{};
+		ComponentBitset componentBitset{};
+
 		explicit SceneNode();
 
 		virtual ~SceneNode() {}
@@ -53,18 +67,6 @@ namespace Dunjun
 		void init();
 		void update(Time dt);
 		void handleEvent(const Event& event);
-
-		const SceneNode* getParent() const
-		{
-			return m_parent;
-		}
-
-		using ID = u64;
-		const ID id;
-		std::string name;
-		Transform transform = Transform();
-		//ReadOnly<SceneNode*, SceneNode> parent;
-		bool visible = true;
 
 		/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 		)				.
@@ -85,28 +87,28 @@ namespace Dunjun
 			//NodeComponent::u_ptr c = make_unique<ComponentType>(args...);
 			//c->parent = this;
 			//ComponentType* rawPtr = c.get();
-			//m_components.push_back(std::move(c));
+			//components.push_back(std::move(c));
 
 			static_assert(std::is_base_of<NodeComponent, ComponentType>::value, "Component must inherit from NodeComponent.");
 			assert(!hasComponent<ComponentType>() && "SceneNode::addComponent component of that type already exists.");
 
 			ComponentType* component = new ComponentType(std::forward<Args>(args)...);
-			component->m_parent = this;
+			component->parent = this;
 
-			m_components.emplace_back(std::unique_ptr<NodeComponent>(component));
+			components.emplace_back(std::unique_ptr<NodeComponent>(component));
 
 			// mark this type of component as added
-			m_componentArray[getComponentTypeId<ComponentType>()] = component;
-			m_componentBitset[getComponentTypeId<ComponentType>()] = true;
+			componentArray[getComponentTypeId<ComponentType>()] = component;
+			componentBitset[getComponentTypeId<ComponentType>()] = true;
 
 			return *component;
 		}
 		
 		//inline void removeAllComponents()
 		//{
-		//	for(auto& group : m_groupedComponents)
+		//	for(auto& group : groupedComponents)
 		//		group.second.clear();
-		//	m_groupedComponents.clear();
+		//	groupedComponents.clear();
 		//}
 		//
 		//template <class ComponentType>
@@ -115,15 +117,15 @@ namespace Dunjun
 		//	if(!std::is_base_of<NodeComponent, ComponentType>::value)
 		//		return nullptr;
 		//
-		//	if(m_groupedComponents.size() == 0)
+		//	if(groupedComponents.size() == 0)
 		//		return nullptr;
 		//
 		//	const std::type_index id(typeid(ComponentType));
 		//
-		//	for(auto& group : m_groupedComponents)
+		//	for(auto& group : groupedComponents)
 		//	{
 		//		if(group.first == id)
-		//			return &m_groupedComponents[id];
+		//			return &groupedComponents[id];
 		//	}
 		//
 		//	return nullptr;
@@ -133,7 +135,7 @@ namespace Dunjun
 		bool hasComponent() const
 		{
 			static_assert(std::is_base_of<NodeComponent, ComponentType>::value, "Component must inherit from NodeComponent.");
-			return m_componentBitset[getComponentTypeId<ComponentType>()];
+			return componentBitset[getComponentTypeId<ComponentType>()];
 		}
 
 		template <class ComponentType>
@@ -149,7 +151,7 @@ namespace Dunjun
 			static_assert(std::is_base_of<NodeComponent, ComponentType>::value, "Component must inherit from NodeComponent.");
 			assert(hasComponent<ComponentType>() && "SceneNode::getComponent component not in this node.");
 
-			auto ptr = m_componentArray[getComponentTypeId<ComponentType>()];
+			auto ptr = componentArray[getComponentTypeId<ComponentType>()];
 
 			return *reinterpret_cast<ComponentType*>(ptr);
 		}
@@ -179,17 +181,6 @@ namespace Dunjun
 
 		virtual void drawCurrent(SceneRenderer& renderer, Transform t) const;
 		void drawChildren(SceneRenderer& renderer, Transform t) const;
-
-		SceneNode* m_parent = nullptr;
-
-		std::deque<u_ptr> m_children{};
-		// A GroupedComponentMap groups components of the same type together by type_index(...).hash_code()
-		//GroupedComponentMap m_groupedComponents;
-
-		std::deque<NodeComponent::u_ptr> m_components{};
-		ComponentArray m_componentArray{};
-		ComponentBitset m_componentBitset{};
-
 	}; // end SceneNode
 } // end Dunjun
 

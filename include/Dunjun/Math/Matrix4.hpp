@@ -5,9 +5,11 @@
 
 namespace Dunjun
 {
-	class Matrix4
+	struct Matrix4
 	{
 	public:
+		Vector4 data[4];
+
 		Matrix4(); // Identity
 
 		explicit Matrix4(f32 x); // x * Identity
@@ -36,9 +38,7 @@ namespace Dunjun
 		Matrix4& operator+=(const Matrix4& other);
 		Matrix4& operator-=(const Matrix4& other);
 		Matrix4& operator*=(const Matrix4& other);
-
-		Vector4 data[4];
-	};
+	}; // end Matrix4
 
 	inline Matrix4 operator*(f32 scaler, const Matrix4& m) // scaler for the other side
 	{
@@ -48,7 +48,6 @@ namespace Dunjun
 		//return mat;
 		return m * scaler;
 	}
-
 
 	// use in transpose matrix
 	Matrix4 transpose(const Matrix4& m);

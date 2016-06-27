@@ -115,6 +115,15 @@ namespace Dunjun
 		//
 		//}; // end anon struct
 
+		SDL_Window* handle;
+		SDL_GLContext glContext;
+		Clock clock;
+		Time frameTimeLimit;
+
+		Vector2 currentPosition = { 0, 0 };
+		Vector2 currentSize = { 0, 0 };
+		f32 currentAspectRatio = 0.0f;
+
 		Window();
 
 		explicit Window(const std::string& title, 
@@ -150,21 +159,6 @@ namespace Dunjun
 		bool waitEvent(Event& event);
 
 		void makeGLContextCurrent() const;
-
-		inline SDL_Window* getSDLHandle() const
-		{
-			return m_impl;
-		}
-
-		Vector2 currentSize = {0, 0};
-		f32 currentAspectRatio = 0.0f;
-	private:
-
-		SDL_Window* m_impl;
-		SDL_GLContext m_glContext;
-		Clock m_clock;
-		Time m_frameTimeLimit;
-
 	};
 
 } // end Dunjun

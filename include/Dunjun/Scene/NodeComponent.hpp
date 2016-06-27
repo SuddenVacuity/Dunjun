@@ -6,9 +6,11 @@
 namespace Dunjun
 {
 	class SceneNode;
-	class NodeComponent : private NonCopyable
+	struct NodeComponent : private NonCopyable
 	{
 	public:
+		SceneNode* parent = nullptr;
+
 		using u_ptr = std::unique_ptr<NodeComponent>;
 
 		//NodeComponent() = default;
@@ -20,21 +22,7 @@ namespace Dunjun
 		virtual void handleEvent(const Event& event) {}
 
 		virtual void draw(SceneRenderer& renderer, Transform t) const {}
-
-		SceneNode* getParent() const
-		{
-			return m_parent;
-		}
-
-	private:
-		friend class SceneNode;
-
-		SceneNode* m_parent = nullptr;
 	};
-
-
-
-
 
 } // end Dunjun
 

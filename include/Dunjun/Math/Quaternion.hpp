@@ -7,6 +7,21 @@ namespace Dunjun
 {
 	struct Quaternion
 	{
+		//f32 x = 0;
+		//f32 y = 0;
+		//f32 z = 0;
+		//f32 w = 1;
+
+		union
+		{
+			f32 data[4];
+			struct
+			{
+				f32 x, y, z, w;
+			};
+			f32 xyz[3];
+		};
+		
 		Quaternion();
 		Quaternion(const Quaternion& q) = default;
 		Quaternion(f32 x, f32 y, f32 z, f32 w);
@@ -30,17 +45,6 @@ namespace Dunjun
 
 		f32 scaler() const;
 		f32& scaler();
-
-
-		union
-		{
-			f32 data[4];
-			struct
-			{
-				f32 x, y, z, w;
-			};
-			f32 xyz[3];
-		};
 	};
 //
 // functions outside of Quaternion struct

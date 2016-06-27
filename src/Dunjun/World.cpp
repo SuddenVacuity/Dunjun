@@ -4,9 +4,9 @@
 namespace Dunjun
 {
 	World::World()
-		: m_context(Context())
-		, m_renderer(*this)
+		: context(Context())
 	{
+		renderer.world = this;
 	}
 
 	World::~World()
@@ -23,43 +23,44 @@ namespace Dunjun
 	)				.
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-	void World::init(Context context)
+	void World::init(Context c)
 	{
-		m_context = context;
+		context = c;
 
 		{ // player scene node
-			SceneNode::u_ptr player = make_unique<SceneNode>();
+			SceneNode::u_ptr PLAYER = make_unique<SceneNode>();
 		
-			player->transform.position = { 2.5f, 1.0f, 2.5f };
-			player->transform.scale = { 2.0f, 2.0f, 2.0f };
-			player->name = "player";
+			PLAYER->transform.position = { 2.5f, 1.0f, 2.5f };
+			PLAYER->transform.scale = { 2.0f, 2.0f, 2.0f };
+			PLAYER->name = "player";
 		
-			player->addComponent<MeshRenderer>(m_context.meshHolder->get("player"),
-											   &m_context.materialHolder->get("dunjunText"));
+			PLAYER->addComponent<MeshRenderer>(context.meshHolder->get("player"),
+											   &context.materialHolder->get("dunjunText"));
 
 			//player->addComponent<FaceCamera>(m_mainCamera);
 		
-			m_player = player.get();
+			player = PLAYER.get();
 		
-			m_sceneGraph.attachChild(std::move(player));
+			sceneGraph.attachChild(std::move(PLAYER));
 		}
 
 		{ // level generation
-			auto level = make_unique<Level>();
+			auto LEVEL = make_unique<Level>();
+			
+			LEVEL->material = &context.materialHolder->get("terrain");
+			LEVEL->name = "level";
 
-			level->material = &m_context.materialHolder->get("terrain");
-			level->name = "level";
+			LEVEL->generate();
 
-			level->generate();
+			level = LEVEL.get();
 
-			m_level = level.get();
-
-			m_sceneGraph.attachChild(std::move(level));
+			sceneGraph.attachChild(std::move(LEVEL));
 		}
 
 		// add ambient light
 		{
-			m_ambientLight.setIntensities(ColorLib::Blue, 0.002f);
+			ambientLight.colorIntensity = calculateLightIntensities(ColorLib::Blue, 0.002f);
+			ambientLight.brightness = calculateLightBrightness(ambientLight.colorIntensity);
 		}
 
 
@@ -67,66 +68,77 @@ namespace Dunjun
 		{
 			PointLight light;
 
-			light.setIntensities(ColorLib::White, 20.0f);
-			light.position = { 0.0f, -300.0f, 0.0f };
-			m_pointLights.emplace_back(light);
+			light.position		 = { 0.0f, 19.5f, 0.0f };
+			light.colorIntensity = calculateLightIntensities(ColorLib::White, 10.0f);
+			light.brightness	 = calculateLightBrightness(light.colorIntensity);
+			light.range			 = calculateLightRange(light.intensity, light.color, light.attenuation);
+			pointLights.emplace_back(light);
 
-			light.setIntensities(ColorLib::Red, 5.0f);
-			light.position = { 3.0f, 0.5f, 3.0f };
-			m_pointLights.emplace_back(light);
+			light.position		 = { 3.0f, 0.5f, 3.0f };
+			light.colorIntensity = calculateLightIntensities(ColorLib::Red, 5.0f);
+			light.brightness	 = calculateLightBrightness(light.colorIntensity);
+			light.range			 = calculateLightRange(light.intensity, light.color, light.attenuation);
+			pointLights.emplace_back(light);
 
-			light.setIntensities(ColorLib::Blue, 5.0f);
-			light.position = { 2.5f, 0.5f, 2.0f };
-			m_pointLights.emplace_back(light);
+			light.position		 = { 2.5f, 0.5f, 2.0f };
+			light.colorIntensity = calculateLightIntensities(ColorLib::Blue, 5.0f);
+			light.brightness	 = calculateLightBrightness(light.colorIntensity);
+			light.range			 = calculateLightRange(light.intensity, light.color, light.attenuation);
+			pointLights.emplace_back(light);
 
-			light.setIntensities(ColorLib::Green, 5.0f);
-			light.position = { 2.0f, 0.5f, 3.0f };
-			m_pointLights.emplace_back(light);
+			light.position		 = { 2.0f, 0.5f, 3.0f };
+			light.colorIntensity = calculateLightIntensities(ColorLib::Green, 5.0f);
+			light.brightness	 = calculateLightBrightness(light.colorIntensity);
+			light.range			 = calculateLightRange(light.intensity, light.color, light.attenuation);
+			pointLights.emplace_back(light);
 		}
 
 		// add directional lights
 		{
 			DirectionalLight light;
 
-			light.setIntensities(ColorLib::Orange, 0.02f);
-			light.direction = Vector3(-0.8, -1.0, -0.2);
-			m_directionalLights.emplace_back(light);
+			light.direction		 = Vector3(-0.8, -1.0, -0.2);
+			light.colorIntensity = calculateLightIntensities(ColorLib::Orange, 0.02f);
+			light.brightness	 = calculateLightBrightness(light.colorIntensity);
+			directionalLights.emplace_back(light);
 		}
 
 		// add spot lights
 		{
 			SpotLight light;
 
-			light.position = { 2.5f, 2.0f, 2.5f };
-			light.setIntensities(ColorLib::White, 50.0f);
-			m_spotLights.emplace_back(light);
+			light.position		 = { 2.5f, 2.0f, 2.5f };
+			light.colorIntensity = calculateLightIntensities(ColorLib::White, 50.0f);
+			light.brightness	 = calculateLightBrightness(light.colorIntensity);
+			light.range			 = calculateLightRange(light.intensity, light.color, light.attenuation);
+			spotLights.emplace_back(light);
 		}
 
 		{
 			//Initialize camera
 			// aspect ratio
-			m_playerCamera.viewportSize = m_context.window->getSize();
-			m_playerCamera.viewportAspectRatio = m_context.window->getSize().x / m_context.window->getSize().y;
+			playerCamera.viewportSize = context.window->getSize();
+			playerCamera.viewportAspectRatio = context.window->getSize().x / context.window->getSize().y;
 			//m_playerCamera.viewportSize = {854, 480};
 			//m_playerCamera.viewportAspectRatio = 854 / 480;
 
-			m_playerCamera.transform.position = m_player->transform.position + Vector3(8 * 3, 8 * 2, 8 * 3);
+			playerCamera.transform.position = player->transform.position + Vector3(8 * 3, 8 * 2, 8 * 3);
 			//g_cameraPlayer.transform.orientation = angleAxis(Degree(45), {0, 1, 0}) * angleAxis(Degree(-30), {1, 0, 0});
-			m_playerCamera.lookAt(m_player->transform.position);
+			playerCamera.lookAt(player->transform.position);
 
-			m_playerCamera.projectionType = ProjectionType::Orthographic;
-			m_playerCamera.fieldOfView = Degree(50.0f); // for perspective view
-			m_playerCamera.orthoScale = 15.0f; // for perspective view
+			playerCamera.projectionType = ProjectionType::Orthographic;
+			playerCamera.fieldOfView = Degree(50.0f); // for perspective view
+			playerCamera.orthoScale = 15.0f; // for perspective view
 
 
 											   // initialize world camera
-			m_mainCamera = m_playerCamera;
-			m_mainCamera.projectionType = ProjectionType::Perspective;
-			m_mainCamera.lookAt({0, 0, 0});//m_player->transform.position);
+			mainCamera = playerCamera;
+			mainCamera.projectionType = ProjectionType::Perspective;
+			mainCamera.lookAt({0, 0, 0});//m_player->transform.position);
 
-			m_currentCamera = &m_mainCamera;
+			currentCamera = &mainCamera;
 
-			m_player->transform.orientation = -m_currentCamera->transform.orientation;
+			player->transform.orientation = -currentCamera->transform.orientation;
 
 			// temp variables used in lerp()
 			//const Matrix4 op = g_cameraPlayer.getProjection();
@@ -143,7 +155,7 @@ namespace Dunjun
 
 		}
 
-		m_sceneGraph.init();
+		sceneGraph.init();
 	} // end init()
 
 	/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -158,188 +170,255 @@ namespace Dunjun
 
 	void World::update(Time dt)
 	{
-		m_sceneGraph.update(dt);
+		sceneGraph.update(dt);
+
+		//// console
+		//if (useConsole == true)
+		//{
+		//	// exit console
+		//	if (Input::isKeyPressed(Input::Key::Tab))
+		//	{
+		//		useConsole = false;
+		//	}
+		//
+		//	// check for a command
+		//	if (Input::isKeyPressed(Input::Key::Return))
+		//	{
+		//		checkForCommand = true;
+		//	}
+		//
+		//	// Erase letters
+		//	if (Input::isKeyPressed(Input::Key::Backspace))
+		//		if (consoleText.size() > 0)
+		//			consoleText.erase(consoleText.size() - 1);
+		//
+		//	if (Input::isKeyPressed(Input::Key::Delete))
+		//	{
+		//		consoleText.clear();
+		//		consoleBuffer.clear();
+		//	}
+		//
+		//	// TODO: press up or down to cycle previous commands
+		//	if (Input::isKeyPressed(Input::Key::Up))
+		//		consoleText.append(" ");
+		//	if (Input::isKeyPressed(Input::Key::Down))
+		//		consoleText.append(" ");
+		//
+		//	// add letters
+		//	for (int i = 0; i < 26; i++)
+		//	{
+		//		std::string s = ""; // can't initialize as i or cast in .append()
+		//
+		//		//if (event.key.capsLock == true || event.key.shift == true)
+		//		//	s = i + 65; // capital letters
+		//		//else
+		//			s = i + 97; // lower case letters
+		//
+		//		if (Input::isKeyPressed(Input::Key(i)))
+		//			if ((consoleBuffer.find(s) == consoleBuffer.npos)) // only add if letter is not already in buffer
+		//				consoleBuffer.append(s);
+		//	}
+		//
+		//	if (1)
+		//	{
+		//		// TODO: make this only happen when a key is released and while no keys are pressed
+		//		// SDL UP/DOWN events don't seem to work for this
+		//		// buffer is added twice when this happens here
+		//		consoleText.append(consoleBuffer);
+		//		consoleBuffer.clear();
+		//	}
+		//
+		//	std::cout << "\n\nType in a command and press enter. [HELP] [QUIT]" << std::endl;
+		//	std::cout << ">> [" << consoleText << "." << consoleBuffer << "]" << std::endl;
+		//
+		//}
+		//
+		// normal input
+		//else
+		//{
+		//	if (Input::isKeyPressed(Input::Key::Tab))
+		//		useConsole = true;
+		//}
+		
+		if (checkForCommand == true)
+		{
+			std::cout << "\n";
+			if (consoleText == "HELP")
+			{
+				std::cout << "\n" << std::endl;
+				std::cout << "Commands suck for now.\n--------------------" << std::endl;
+		
+				std::cout << "GamePad::Left Stick = Move camera" << std::endl;
+				std::cout << "GamePad::Right Stick = Turn camera" << std::endl;
+				std::cout << "GamePad::D-Pad Move = sprite" << std::endl;
+				std::cout << "GamePad::Shoulder Buttons = Move camera up/down" << std::endl;
+				std::cout << "GamePad::X = Test vibration" << std::endl;
+				//std::cout << "GamePad::B = Render Texture on sprite" << std::endl;
+				std::cout << "GamePad::A = Move Light to current Camera location" << std::endl;
+				std::cout << "\n";
+				std::cout << "Keyboard::ArrowKeys = Move sprite" << std::endl;
+				std::cout << "Keyboard::L/R Ctrl = Move sprite up/down" << std::endl;
+				std::cout << "\n";
+				std::cout << "[SYSTEM] = Shwo system information" << std::endl;
+				std::cout << "[REGEN] = Regenerate level with culling" << std::endl;
+				std::cout << "[REGENNC] = Regenerate level without culling" << std::endl;
+				std::cout << "[DIR] = Return views cardinal direction and vertical angle" << std::endl;
+				std::cout << "[ROOMS] = Return number of rooms currently rendering" << std::endl;
+				std::cout << "[HELP] = Show help" << std::endl;
+				std::cout << "[QUIT] = Close Program" << std::endl;
+				//std::cout << "Keyboard::T = Test multiply transforms" << std::endl;
+				//std::cout << "Keyboard::R = Reset sprite position, orientation and scale" << std::endl;
+				//std::cout << "Keyboard::L = Change to orthographic camera" << std::endl;
+				//std::cout << "Keyboard::K = Change to perspective camera" << std::endl;
+		
+		
+			}
+			else if (consoleText == "TODO")
+			{
+				std::cout << "stuff" << std::endl;
+			}
+			// room visibility test
+			else if (consoleText == "ROOMS")
+			{
+				std::cout << "Rendering " << level->roomsRendered << " Rooms" << std::endl;
+			}
+			// room visibility test
+			else if (consoleText == "CHAR")
+			{
+				for (int i = 0; i < 255; i++)
+				{
+					// skip the beep
+					if (i == 7)
+						continue;
+		
+					std::cout << "char# " << i << " - " << (char)i << std::endl;
+				}
+		
+			}
+			// room visibility test
+			else if (consoleText == "SYSTEM")
+			{
+				std::cout << "Using Grapics Card:\n-------------------" << std::endl;
+				std::cout << glGetString(GL_VENDOR) << std::endl;
+				std::cout << glGetString(GL_RENDERER) << std::endl;
+				std::cout << "Version: " << glGetString(GL_VERSION) << std::endl;
+		
+				std::cout << "\n\n";
+			}
+			// return direction
+			else if (consoleText == "DIR")
+			{
+				Vector3 f = currentCamera->forward();
+		
+				s32 angle = f.y * 90;
+		
+				std::string direction;
+		
+				if (f.x > 0) // right side
+				{
+					if (f.z > 0) // right-bottom quadrant
+					{
+						if (f.x > f.z)
+							direction = "East";
+						else
+							direction = "South";
+					}
+					else // right-top quadrant
+					{
+						if (f.x > -f.z)
+							direction = "East";
+						else
+							direction = "North";
+					}
+				}
+				else // left side
+				{
+					if (f.z > 0) // left-bottom quadrant
+					{
+						if (-f.x > f.z)
+							direction = "West";
+						else
+							direction = "South";
+					}
+					else // left-top quadrant
+					{
+						if (f.z > f.x)
+							direction = "West";
+						else
+							direction = "North";
+					}
+				}
+		
+				std::cout << "You are facing " << direction << " and looking " << angle << " degrees vertically." << std::endl;
+		
+			}
+			// cout test iterator
+			else if (consoleText == "ITERATOR")
+			{
+				std::cout << "Test Iterator 0: " << testIterator_5[0] << std::endl;
+				std::cout << "Test Iterator 1: " << testIterator_5[1] << std::endl;
+				std::cout << "Test Iterator 2: " << testIterator_5[2] << std::endl;
+				std::cout << "Test Iterator 3: " << testIterator_5[3] << std::endl;
+				std::cout << "Test Iterator 4: " << testIterator_5[4] << std::endl;
+			}
+			// regenerate world without culling
+			else if (consoleText == "REGENNC")
+			{
+				toggleCulling = false;
+		
+				SceneNode* level = sceneGraph.findChildByName("level");
+				sceneGraph.detachChild(*level);
+		
+				{ // test level generation
+					auto l = make_unique<Level>();
+		
+					l->material = &g_materialHolder.get("terrain");
+					l->name = "level";
+					l->generate();
+		
+					level = l.get();
+		
+					sceneGraph.attachChild(std::move(l));
+				}
+			}
+			// level regeneration
+			else if (consoleText == "REGEN")
+			{
+				toggleCulling = true;
+				SceneNode* level = sceneGraph.findChildByName("level");
+				sceneGraph.detachChild(*level);
+		
+				{ // test level generation
+					auto l = make_unique<Level>();
+		
+					l->material = &g_materialHolder.get("terrain");
+					l->name = "level";
+					l->generate();
+		
+					level = l.get();
+		
+					sceneGraph.attachChild(std::move(l));
+				}
+			}
+		
+			else if (consoleText == "QUIT")
+			{
+				context.window->close();
+				//g_running = false;
+			}
+			else
+			{
+				std::cout << "Invalid command." << std::endl;
+			}
+			consoleText.clear();
+			checkForCommand = false;
+		}
+
 
 		f32 camVel = 20.0f; // multiplier for camera speed
 		f32 playerVelX = 5.5f;
 		f32 playerVelY = 3.5f;
 		f32 playerVelZ = 5.5f;
-
-		//
-		//if (checkForCommand == true)
-		//{
-		//	std::cout << "\n";
-		//	if (consoleText == "HELP")
-		//	{
-		//		std::cout << "\n" << std::endl;
-		//		std::cout << "Commands suck for now.\n--------------------" << std::endl;
-		//
-		//		std::cout << "GamePad::Left Stick = Move camera" << std::endl;
-		//		std::cout << "GamePad::Right Stick = Turn camera" << std::endl;
-		//		std::cout << "GamePad::D-Pad Move = sprite" << std::endl;
-		//		std::cout << "GamePad::Shoulder Buttons = Move camera up/down" << std::endl;
-		//		std::cout << "GamePad::X = Test vibration" << std::endl;
-		//		//std::cout << "GamePad::B = Render Texture on sprite" << std::endl;
-		//		std::cout << "GamePad::A = Move Light to current Camera location" << std::endl;
-		//		std::cout << "\n";
-		//		std::cout << "Keyboard::ArrowKeys = Move sprite" << std::endl;
-		//		std::cout << "Keyboard::L/R Ctrl = Move sprite up/down" << std::endl;
-		//		std::cout << "\n";
-		//		std::cout << "[SYSTEM] = Shwo system information" << std::endl;
-		//		std::cout << "[REGEN] = Regenerate level with culling" << std::endl;
-		//		std::cout << "[REGENNC] = Regenerate level without culling" << std::endl;
-		//		std::cout << "[DIR] = Return views cardinal direction and vertical angle" << std::endl;
-		//		std::cout << "[ROOMS] = Return number of rooms currently rendering" << std::endl;
-		//		std::cout << "[HELP] = Show help" << std::endl;
-		//		std::cout << "[QUIT] = Close Program" << std::endl;
-		//		//std::cout << "Keyboard::T = Test multiply transforms" << std::endl;
-		//		//std::cout << "Keyboard::R = Reset sprite position, orientation and scale" << std::endl;
-		//		//std::cout << "Keyboard::L = Change to orthographic camera" << std::endl;
-		//		//std::cout << "Keyboard::K = Change to perspective camera" << std::endl;
-		//
-		//
-		//	}
-		//	else if (consoleText == "TODO")
-		//	{
-		//		std::cout << "stuff" << std::endl;
-		//	}
-		//	// room visibility test
-		//	else if (consoleText == "ROOMS")
-		//	{
-		//		std::cout << "Rendering " << g_level->roomsRendered << " Rooms" << std::endl;
-		//	}
-		//	// room visibility test
-		//	else if (consoleText == "CHAR")
-		//	{
-		//		for (int i = 0; i < 255; i++)
-		//		{
-		//			// skip the beep
-		//			if (i == 7)
-		//				continue;
-		//
-		//			std::cout << "char# " << i << " - " << (char)i << std::endl;
-		//		}
-		//
-		//	}
-		//	// room visibility test
-		//	else if (consoleText == "SYSTEM")
-		//	{
-		//		std::cout << "Using Grapics Card:\n-------------------" << std::endl;
-		//		std::cout << glGetString(GL_VENDOR) << std::endl;
-		//		std::cout << glGetString(GL_RENDERER) << std::endl;
-		//		std::cout << "Version: " << glGetString(GL_VERSION) << std::endl;
-		//
-		//		std::cout << "\n\n";
-		//	}
-		//	// return direction
-		//	else if (consoleText == "DIR")
-		//	{
-		//		Vector3 f = g_cameraWorld.forward();
-		//
-		//		s32 angle = f.y * 90;
-		//
-		//		std::string direction;
-		//
-		//		if (f.x > 0) // right side
-		//		{
-		//			if (f.z > 0) // right-bottom quadrant
-		//			{
-		//				if (f.x > f.z)
-		//					direction = "East";
-		//				else
-		//					direction = "South";
-		//			}
-		//			else // right-top quadrant
-		//			{
-		//				if (f.x > -f.z)
-		//					direction = "East";
-		//				else
-		//					direction = "North";
-		//			}
-		//		}
-		//		else // left side
-		//		{
-		//			if (f.z > 0) // left-bottom quadrant
-		//			{
-		//				if (-f.x > f.z)
-		//					direction = "West";
-		//				else
-		//					direction = "South";
-		//			}
-		//			else // left-top quadrant
-		//			{
-		//				if (f.z > f.x)
-		//					direction = "West";
-		//				else
-		//					direction = "North";
-		//			}
-		//		}
-		//
-		//		std::cout << "You are facing " << direction << " and looking " << angle << " degrees vertically." << std::endl;
-		//
-		//	}
-		//	// cout test iterator
-		//	else if (consoleText == "ITERATOR")
-		//	{
-		//		std::cout << "Test Iterator 0: " << testIterator_5[0] << std::endl;
-		//		std::cout << "Test Iterator 1: " << testIterator_5[1] << std::endl;
-		//		std::cout << "Test Iterator 2: " << testIterator_5[2] << std::endl;
-		//		std::cout << "Test Iterator 3: " << testIterator_5[3] << std::endl;
-		//		std::cout << "Test Iterator 4: " << testIterator_5[4] << std::endl;
-		//	}
-		//	// regenerate world without culling
-		//	else if (consoleText == "REGENNC")
-		//	{
-		//		toggleCulling = false;
-		//
-		//		SceneNode* level = g_rootNode.findChildByName("level");
-		//		g_world.getSceneGraph().detachChild(*level);
-		//
-		//		{ // test level generation
-		//			auto level = make_unique<Level>();
-		//
-		//			level->material = &g_materialHolder.get("terrain");
-		//			level->name = "level";
-		//			level->generate();
-		//
-		//			g_level = level.get();
-		//
-		//			g_world.getSceneGraph().attachChild(std::move(level));
-		//		}
-		//	}
-		//	// level regeneration
-		//	else if (consoleText == "REGEN")
-		//	{
-		//		toggleCulling = true;
-		//		SceneNode* level = g_world.getSceneGraph().findChildByName("level");
-		//		g_world.getSceneGraph().detachChild(*level);
-		//
-		//		{ // test level generation
-		//			auto level = make_unique<Level>();
-		//
-		//			level->material = &g_materialHolder.get("terrain");
-		//			level->name = "level";
-		//			level->generate();
-		//
-		//			g_level = level.get();
-		//
-		//			g_world.getSceneGraph().attachChild(std::move(level));
-		//		}
-		//	}
-		//
-		//	else if (consoleText == "QUIT")
-		//	{
-		//		m_context.window->close();
-		//		g_running = false;
-		//	}
-		//	else
-		//	{
-		//		std::cout << "Invalid command." << std::endl;
-		//	}
-		//	consoleText.clear();
-		//	checkForCommand = false;
-		//}
-		//
 
 		Vector3 velocityDirection = { 0, 0, 0 };
 
@@ -361,7 +440,7 @@ namespace Dunjun
 			if (Math::abs(rts.y) < deadZone)
 				rts.y = 0;
 
-			m_currentCamera->offsetOrientation(lookSensitivityX * Radian(rts.x * dt.asSeconds()),
+			currentCamera->offsetOrientation(lookSensitivityX * Radian(rts.x * dt.asSeconds()),
 				lookSensitivityY * Radian(rts.y * dt.asSeconds()));
 
 			// gamepad camera translation
@@ -380,10 +459,10 @@ namespace Dunjun
 
 			Vector3 camVelocityDirection = { 0, 0, 0 };
 
-			Vector3 forward = m_currentCamera->forward();
+			Vector3 forward = currentCamera->forward();
 			forward = normalize(forward);
 
-			camVelocityDirection += lts.x * m_currentCamera->right();
+			camVelocityDirection += lts.x * currentCamera->right();
 			camVelocityDirection += lts.y * forward;
 
 			//Input::GamepadButtons buttons = Input::getGamepadButtons(Input::Gamepad_1);
@@ -396,33 +475,33 @@ namespace Dunjun
 			if (length(camVelocityDirection) > 1.0f)
 				camVelocityDirection = normalize(camVelocityDirection);
 
-			m_currentCamera->transform.position += camVel * camVelocityDirection * dt.asSeconds();
+			currentCamera->transform.position += camVel * camVelocityDirection * dt.asSeconds();
 
 			// gamepad player movement
 			if (Input::isGamepadButtonPressed(0, Input::GamepadButton::DpadUp))
 			{
-				Vector3 f = m_currentCamera->forward();
+				Vector3 f = currentCamera->forward();
 				f.y = 0;
 				f = normalize(f);
 				velocityDirection += f;
 			}
 			if (Input::isGamepadButtonPressed(0, Input::GamepadButton::DpadDown))
 			{
-				Vector3 b = m_currentCamera->backward();
+				Vector3 b = currentCamera->backward();
 				b.y = 0;
 				b = normalize(b);
 				velocityDirection += b;
 			}
 			if (Input::isGamepadButtonPressed(0, Input::GamepadButton::DpadLeft))
 			{
-				Vector3 l = m_currentCamera->left();
+				Vector3 l = currentCamera->left();
 				l.y = 0;
 				l = normalize(l);
 				velocityDirection += l;
 			}
 			if (Input::isGamepadButtonPressed(0, Input::GamepadButton::DpadRight))
 			{
-				Vector3 r = m_currentCamera->right();
+				Vector3 r = currentCamera->right();
 				r.y = 0;
 				r = normalize(r);
 				velocityDirection += r;
@@ -453,10 +532,10 @@ namespace Dunjun
 			
 			if (Input::isGamepadButtonPressed(0, Input::GamepadButton::A))
 			{
-				m_spotLights[0].position.x = m_currentCamera->transform.position.x;
-				m_spotLights[0].position.y = m_currentCamera->transform.position.y - 0.5f;
-				m_spotLights[0].position.z = m_currentCamera->transform.position.z;
-				m_spotLights[0].direction =  m_currentCamera->forward();
+				spotLights[0].position.x = currentCamera->transform.position.x;
+				spotLights[0].position.y = currentCamera->transform.position.y - 0.5f;
+				spotLights[0].position.z = currentCamera->transform.position.z;
+				spotLights[0].direction =  currentCamera->forward();
 			}
 
 		} // end Gamepad Input
@@ -477,28 +556,28 @@ namespace Dunjun
 
 		if (Input::isKeyPressed(Input::Key::Up))
 		{
-			Vector3 d = m_currentCamera->forward();
+			Vector3 d = currentCamera->forward();
 			d.y = 0;
 			d = normalize(d);
 			velocityDirection += d;
 		}
 		if (Input::isKeyPressed(Input::Key::Down))
 		{
-			Vector3 d = m_currentCamera->backward();
+			Vector3 d = currentCamera->backward();
 			d.y = 0;
 			d = normalize(d);
 			velocityDirection += d;
 		}
 		if (Input::isKeyPressed(Input::Key::Left))
 		{
-			Vector3 d = m_currentCamera->left();
+			Vector3 d = currentCamera->left();
 			d.y = 0;
 			d = normalize(d);
 			velocityDirection += d;
 		}
 		if (Input::isKeyPressed(Input::Key::Right))
 		{
-			Vector3 d = m_currentCamera->right();
+			Vector3 d = currentCamera->right();
 			d.y = 0;
 			d = normalize(d);
 			velocityDirection += d;
@@ -514,7 +593,7 @@ namespace Dunjun
 			velocityDirection = normalize(velocityDirection);
 
 			// update player position
-			m_player->transform.position += Vector3{ playerVelX, playerVelY, playerVelZ } * velocityDirection * dt.asSeconds();
+			player->transform.position += Vector3{ playerVelX, playerVelY, playerVelZ } * velocityDirection * dt.asSeconds();
 
 			//// delta between player and camera movement
 			//// this only works correctly if player and camera have 
@@ -553,20 +632,80 @@ namespace Dunjun
 			//}
 
 			// camera follow movement
-			m_playerCamera.transform.position.x = Math::lerp(m_playerCamera.transform.position.x, m_player->transform.position.x + 8.0f * 3.0f, 12.0f * dt.asSeconds());
-			m_playerCamera.transform.position.y = Math::lerp(m_playerCamera.transform.position.y, m_player->transform.position.y + 8.0f * 2.0f, 12.0f * dt.asSeconds());
-			m_playerCamera.transform.position.z = Math::lerp(m_playerCamera.transform.position.z, m_player->transform.position.z + 8.0f * 3.0f, 12.0f * dt.asSeconds());
+			playerCamera.transform.position.x = Math::lerp(playerCamera.transform.position.x, player->transform.position.x + 8.0f * 3.0f, 12.0f * dt.asSeconds());
+			playerCamera.transform.position.y = Math::lerp(playerCamera.transform.position.y, player->transform.position.y + 8.0f * 2.0f, 12.0f * dt.asSeconds());
+			playerCamera.transform.position.z = Math::lerp(playerCamera.transform.position.z, player->transform.position.z + 8.0f * 3.0f, 12.0f * dt.asSeconds());
 
-			m_playerCamera.lookAt({ m_player->transform.position });
+			playerCamera.lookAt({ player->transform.position });
 		}
 		// make player face the camera
-		m_player->transform.orientation = -m_currentCamera->transform.orientation;
+		player->transform.orientation = -currentCamera->transform.orientation;
+
+
+		// object culling
+		level->roomsRendered = 0;
+		const Vector3 viewPos = currentCamera->transform.position;
+		const Vector3 cameraOrientation = currentCamera->forward();
+		const f32 viewDistance = 50;
+		if (toggleCulling == true)
+			for (auto& room : level->rooms)
+			{
+				room->enabled = false;
+				Vector3 cullPoint = room->transform.position;
+
+				// check if cullPoint should add room size to itself
+				// decide based on the 3d (octo)-quadrant the camera is facing
+				if (cameraOrientation.x > 0) // +X
+				{
+					cullPoint.x += room->size.x;
+					if (cameraOrientation.y > 0) // +Y
+					{
+						cullPoint.y += room->size.y;
+						if (cameraOrientation.z > 0) // +Z
+							cullPoint.z += room->size.z;
+					}
+					else // stay -Y
+						if (cameraOrientation.z > 0) // +Z
+							cullPoint.z += room->size.z;
+				}
+				else // stay -X
+				{
+					if (cameraOrientation.y > 0) // +Y
+					{
+						cullPoint.y += room->size.y;
+						if (cameraOrientation.z > 0) // +Z
+							cullPoint.z += room->size.z;
+					}
+					else // stay -Y
+						if (cameraOrientation.z > 0) // +Z
+							cullPoint.z += room->size.z;
+				}
+
+				const Vector3 dp = cullPoint - viewPos;
+				const f32 dist = length(dp);
+
+				// distance culling
+				if (dist < viewDistance)
+				{
+					f32 cosTheta = dot(cameraOrientation, normalize(dp));
+					Radian theta = Math::acos(cosTheta);
+					// cheap cone culling
+					if (Math::abs(theta) <= currentCamera->fieldOfView || dist < 20)
+					{
+						level->roomsRendered++;
+						room->enabled = true;
+					}
+				}
+			}
+
+
+
 
 	} // end update()
 
 	void World::handleEvent(const Event& event)
 	{
-		m_sceneGraph.handleEvent(event);
+		sceneGraph.handleEvent(event);
 	}
 
 	/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -583,12 +722,12 @@ namespace Dunjun
 	void World::render()
 	{
 
-		Vector2 fbSize = m_context.window->getSize();
+		Vector2 fbSize = context.window->getSize();
 
 		// check whether to update aspectratio and size each cycle
-		if (m_context.window->currentSize != fbSize)
+		if (context.window->currentSize != fbSize)
 		{
-			m_renderer.setFrameBufferSize(fbSize);
+			renderer.setFrameBufferSize(fbSize);
 		}
 
 		//m_renderer.reset();
@@ -605,69 +744,69 @@ namespace Dunjun
 		//m_renderer.deferredFinalPass();
 
 		//m_renderer.setFrameBufferSize(fbSize);
-		m_renderer.render();
+		renderer.render();
 
 		glViewport(0, 0, fbSize.x, fbSize.y);
 		glClearColor(0.02f, 0.02f, 0.02f, 1.0f); // set the default color (R,G,B,A)
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		{
-			ShaderProgram& shaders = m_context.shaderHolder->get("texturePass");
+			ShaderProgram& shaders = context.shaderHolder->get("texturePass");
 
 			shaders.use();
 			shaders.setUniform("u_tex", 0);
 			shaders.setUniform("u_scale", Vector3(1.0f));
 
-			Texture::bind(&m_renderer.getFinalTexture(), 0);
+			Texture::bind(&renderer.finalTexture.colorTexture, 0);
 
-			m_renderer.draw(&m_context.meshHolder->get("quad"));
+			renderer.draw(&context.meshHolder->get("quad"));
 
 			shaders.stopUsing();
 		}
 
 
-		m_context.window->display(); // switches information between the front buffer and the back buffer
+		context.window->display(); // switches information between the front buffer and the back buffer
 	} // end render()
 
-	SceneNode& World::getSceneGraph()
-	{
-		return m_sceneGraph;
-	}
+	//SceneNode& World::getSceneGraph()
+	//{
+	//	return sceneGraph;
+	//}
+	//
+	//const SceneNode& World::getSceneGraph() const
+	//{
+	//	return sceneGraph;
+	//}
 
-	const SceneNode& World::getSceneGraph() const
-	{
-		return m_sceneGraph;
-	}
-
-	SceneNode* World::getPlayer()
-	{
-		return m_player;
-	}
-
-	const SceneNode* World::getPlayer() const
-	{
-		return m_player;
-	}
-
-	Level* World::getLevel()
-	{
-		return m_level;
-	}
-
-	const Level* World::getLevel() const
-	{
-		return m_level;
-	}
-
-	Camera& World::getCurrentCamera()
-	{
-		return *m_currentCamera;
-	}
-
-	const Camera& World::getCurrentCamera() const
-	{
-		return *m_currentCamera;
-	}
+	//SceneNode* World::getPlayer()
+	//{
+	//	return player;
+	//}
+	//
+	//const SceneNode* World::getPlayer() const
+	//{
+	//	return player;
+	//}
+	//
+	//Level* World::getLevel()
+	//{
+	//	return level;
+	//}
+	//
+	//const Level* World::getLevel() const
+	//{
+	//	return level;
+	//}
+	//
+	//Camera& World::getCurrentCamera()
+	//{
+	//	return *currentCamera;
+	//}
+	//
+	//const Camera& World::getCurrentCamera() const
+	//{
+	//	return *currentCamera;
+	//}
 
 } // end Dunjun
 

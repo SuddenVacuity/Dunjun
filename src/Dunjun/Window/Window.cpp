@@ -39,9 +39,9 @@ namespace Dunjun
 
 
 	Window::Window()
-		: m_impl(nullptr)
-		, m_glContext()
-		, m_frameTimeLimit(Time::Zero)
+		: handle(nullptr)
+		, glContext()
+		, frameTimeLimit(Time::Zero)
 	{
 	}
 
@@ -49,9 +49,9 @@ namespace Dunjun
 				   VideoMode mode,
 				   u32 style,
 				   const GLContextSettings& context)
-		: m_impl(nullptr)
-		, m_glContext()
-		, m_frameTimeLimit(Time::Zero)
+		: handle(nullptr)
+		, glContext()
+		, frameTimeLimit(Time::Zero)
 	{
 		create(title, mode, style, context);
 	}
@@ -112,12 +112,12 @@ namespace Dunjun
 		SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, true);
 		//SDL_GL_SetAttribute(SDL_GL_FRAMEBUFFER_SRGB_CAPABLE, true);
 
-		m_impl = SDL_CreateWindow(title.c_str(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
+		handle = SDL_CreateWindow(title.c_str(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
 			(int)mode.width, (int)mode.height, windowFlags);
 
-		assert(m_impl && "Window::create failed: m_impl is nullptr");
+		assert(handle && "Window::create failed: handle is nullptr");
 
-		m_glContext = SDL_GL_CreateContext(m_impl);
+		glContext = SDL_GL_CreateContext(handle);
 
 		setVisible(true);
 		setFramerateLimit(0);
@@ -128,8 +128,8 @@ namespace Dunjun
 
 	void Window::close()
 	{
-		SDL_DestroyWindow(m_impl);
-		m_impl = nullptr;
+		SDL_DestroyWindow(handle);
+		handle = nullptr;
 
 		if(this == fullscreenWindow)
 			fullscreenWindow = nullptr;
@@ -137,15 +137,15 @@ namespace Dunjun
 
 	bool Window::isOpen() const
 	{
-		return m_impl != nullptr;
+		return handle != nullptr;
 	}
 
 	Vector2 Window::getPosition() const
 	{
-		if(m_impl)
+		if(handle)
 		{
 			int x, y;
-			SDL_GetWindowPosition(m_impl, &x, &y);
+			SDL_GetWindowPosition(handle, &x, &y);
 
 			return Vector2(x, y);
 		}
@@ -155,7 +155,7 @@ namespace Dunjun
 
 	Window& Window::setPosition(const Vector2& position)
 	{
-		SDL_SetWindowPosition(m_impl, position.x, position.y);
+		SDL_SetWindowPosition(handle, position.x, position.y);
 
 		return *this;
 	}
@@ -163,29 +163,33 @@ namespace Dunjun
 	Vector2 Window::getSize() const
 	{
 		s32 width, height;
-		SDL_GetWindowSize(m_impl, &width, &height);
+		SDL_GetWindowSize(handle, &width, &height);
 
 		return Vector2(width, height);
 	}
 
 	Window& Window::setSize(const Vector2& size)
 	{
-		SDL_SetWindowSize(m_impl, size.x, size.y);
+		SDL_SetWindowSize(handle, size.x, size.y);
 
 		currentSize = size;
-		currentAspectRatio = size.x / size.y;
+
+		if(currentSize.y == 0)
+			currentSize.y = 1.0f;
+
+		currentAspectRatio = currentSize.x / currentSize.y;
 
 		return *this;
 	}
 
 	const char* Window::getTitle() const
 	{
-		return SDL_GetWindowTitle(m_impl);
+		return SDL_GetWindowTitle(handle);
 	}
 
 	Window& Window::setTitle(const char* title)
 	{
-		SDL_SetWindowTitle(m_impl, title);
+		SDL_SetWindowTitle(handle, title);
 
 		return *this;
 	}
@@ -193,9 +197,9 @@ namespace Dunjun
 	Window& Window::setVisible(bool visible)
 	{
 		if(visible)
-			SDL_ShowWindow(m_impl);
+			SDL_ShowWindow(handle);
 		else
-			SDL_HideWindow(m_impl);
+			SDL_HideWindow(handle);
 
 		return *this;
 	}
@@ -210,22 +214,22 @@ namespace Dunjun
 	Window& Window::setFramerateLimit(u32 limit)
 	{
 		if (limit > 0)
-			m_frameTimeLimit = seconds(1.0f / (f32)limit);
+			frameTimeLimit = seconds(1.0f / (f32)limit);
 		else
-			m_frameTimeLimit = Time::Zero;
+			frameTimeLimit = Time::Zero;
 
 		return *this;
 	}
 
 	void Window::display()
 	{
-		SDL_GL_SwapWindow(m_impl);
+		SDL_GL_SwapWindow(handle);
 
-		if (m_frameTimeLimit != Time::Zero &&
-			m_frameTimeLimit > m_clock.getElapsedTime())
+		if (frameTimeLimit != Time::Zero &&
+			frameTimeLimit > clock.getElapsedTime())
 		{
-			Time::sleep(m_frameTimeLimit - m_clock.getElapsedTime());
-			m_clock.restart();
+			Time::sleep(frameTimeLimit - clock.getElapsedTime());
+			clock.restart();
 		}
 	}
 
@@ -564,8 +568,8 @@ namespace Dunjun
 			else
 				event.gamepadAxis.value = static_cast<f32>(value) / 32768.0f;
 
-			if(Math::abs(event.gamepadAxis.value) > 0.2f)
-				std::cout << "Event - Gamepad " << (int)event.gamepadAxis.id << " Axis " << (int)e.caxis.axis << " Changed:  " << (f32)event.gamepadAxis.value << std::endl;
+			//if(Math::abs(event.gamepadAxis.value) > 0.2f)
+			//	std::cout << "Event - Gamepad " << (int)event.gamepadAxis.id << " Axis " << (int)e.caxis.axis << " Changed:  " << (f32)event.gamepadAxis.value << std::endl;
 			return;
 		}
 		} // end switch(e.type)

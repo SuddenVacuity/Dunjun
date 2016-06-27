@@ -5,10 +5,10 @@
 
 namespace Dunjun
 {
-	SceneRenderer::SceneRenderer(World& world)
-		: m_world(world)
-	{
-	}
+	//SceneRenderer::SceneRenderer(World& w)
+	//	: world(w)
+	//{
+	//}
 
 	SceneRenderer::~SceneRenderer()
 	{
@@ -16,20 +16,20 @@ namespace Dunjun
 
 	SceneRenderer& SceneRenderer::reset()
 	{
-		if (m_currentShaders)
-			m_currentShaders->stopUsing();
+		if (currentShaders)
+			currentShaders->stopUsing();
 
-		m_currentShaders = nullptr;
-		m_currentTexture = nullptr;
+		currentShaders = nullptr;
+		currentTexture = nullptr;
 		Texture::bind(nullptr, 0);
-		m_currentMaterial = nullptr; // commenting this out makes the top right corner of the window white
+		currentMaterial = nullptr; // commenting this out makes the top right corner of the window white
 
 		return *this;
 	}
 
 	SceneRenderer& SceneRenderer::clearAll()
 	{
-		m_modelInstances.clear();
+		modelInstances.clear();
 		//m_directionalLights.clear();
 		//m_pointLights.clear();
 		//m_spotLights.clear();
@@ -52,8 +52,14 @@ namespace Dunjun
 	
 	void SceneRenderer::addModelInstance(const MeshRenderer& meshRenderer, Transform t)
 	{
-		if(meshRenderer.getParent()->visible == true)
-			m_modelInstances.emplace_back(&meshRenderer, t);
+		if(meshRenderer.parent->enabled == true)
+		{
+			ModelInstance m;
+			m.asset = &meshRenderer;
+			m.transform = t;
+
+			modelInstances.emplace_back(m);
+		}
 	}
 
 	//void SceneRenderer::addDirectionalLight(const DirectionalLight* light)
@@ -73,7 +79,7 @@ namespace Dunjun
 
 	SceneRenderer& SceneRenderer::setFrameBufferSize(Vector2 size)
 	{
-		m_world.m_context.window->setSize(size);
+		world->context.window->setSize(size);
 
 		return *this;
 	}
@@ -82,12 +88,12 @@ namespace Dunjun
 	{
 		reset();
 		clearAll();
-		addSceneGraph(m_world.m_sceneGraph);
+		addSceneGraph(world->sceneGraph);
 
-		setCamera(*m_world.m_currentCamera);
+		camera = world->currentCamera;
 
-		m_gBuffer.create(m_world.m_context.window->currentSize.x, 
-						 m_world.m_context.window->currentSize.y);
+		gBuffer.create(world->context.window->currentSize.x,
+						 world->context.window->currentSize.y);
 
 		deferredGeometryPass();
 		deferredLightPass();
@@ -96,7 +102,7 @@ namespace Dunjun
 
 	SceneRenderer& SceneRenderer::deferredGeometryPass()
 	{
-		std::sort(std::begin(m_modelInstances), std::end(m_modelInstances),
+		std::sort(std::begin(modelInstances), std::end(modelInstances),
 			[](const ModelInstance& a, const ModelInstance& b) -> bool
 		{
 			const auto* A = a.asset->material;
@@ -115,17 +121,17 @@ namespace Dunjun
 
 		auto& shaders = g_shaderHolder.get("deferredGeometryPass");
 
-		GBuffer::bind(&m_gBuffer);
+		GBuffer::bind(&gBuffer);
 		{
-			glViewport(0, 0, m_gBuffer.width, m_gBuffer.height);
+			glViewport(0, 0, gBuffer.width, gBuffer.height);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 			shaders.use();
 
-			shaders.setUniform("u_camera", m_camera->getMatrix()); // shaderprogram.cpp
-			shaders.setUniform("u_cameraPosition", m_camera->transform.position); // shaderprogram.cpp
+			shaders.setUniform("u_camera", camera->getMatrix()); // shaderprogram.cpp
+			shaders.setUniform("u_cameraPosition", camera->transform.position); // shaderprogram.cpp
 
-			for (const auto& inst : m_modelInstances)
+			for (const auto& inst : modelInstances)
 			{
 				if (!inst.asset->mesh)
 					continue;
@@ -152,17 +158,17 @@ namespace Dunjun
 
 	SceneRenderer& SceneRenderer::deferredLightPass()
 	{
-		m_lightingBuffer.create(m_gBuffer.width, m_gBuffer.height, RenderTexture::Light);
+		lightingBuffer.create(gBuffer.width, gBuffer.height, RenderTexture::Light);
 
-		Texture::bind(&m_gBuffer.textures[GBuffer::Diffuse],  0);
-		Texture::bind(&m_gBuffer.textures[GBuffer::Specular], 1);
-		Texture::bind(&m_gBuffer.textures[GBuffer::Normal],   2);
-		Texture::bind(&m_gBuffer.textures[GBuffer::Depth],    3);
+		Texture::bind(&gBuffer.textures[GBuffer::Diffuse],  0);
+		Texture::bind(&gBuffer.textures[GBuffer::Specular], 1);
+		Texture::bind(&gBuffer.textures[GBuffer::Normal],   2);
+		Texture::bind(&gBuffer.textures[GBuffer::Depth],    3);
 
-		RenderTexture::bind(&m_lightingBuffer);
+		RenderTexture::bind(&lightingBuffer);
 		{
 			glClearColor(0, 0, 0, 0);
-			glViewport(0, 0, m_lightingBuffer.width, m_lightingBuffer.height);
+			glViewport(0, 0, lightingBuffer.width, lightingBuffer.height);
 			glClear(GL_COLOR_BUFFER_BIT);
 
 			glDepthMask(false);
@@ -185,15 +191,15 @@ namespace Dunjun
 
 	SceneRenderer& SceneRenderer::deferredFinalPass()
 	{
-		m_finalTexture.create(m_gBuffer.width, m_gBuffer.height, RenderTexture::Color);
+		finalTexture.create(gBuffer.width, gBuffer.height, RenderTexture::Color);
 
-		Texture::bind(&m_gBuffer.textures[GBuffer::Diffuse], 0);
-		Texture::bind(&m_lightingBuffer.colorTexture, 1);
+		Texture::bind(&gBuffer.textures[GBuffer::Diffuse], 0);
+		Texture::bind(&lightingBuffer.colorTexture, 1);
 
-		RenderTexture::bind(&m_finalTexture);
+		RenderTexture::bind(&finalTexture);
 		{
 			glClearColor(1, 0, 1, 1);
-			glViewport(0, 0, m_finalTexture.width, m_finalTexture.height);
+			glViewport(0, 0, finalTexture.width, finalTexture.height);
 			glClear(GL_COLOR_BUFFER_BIT);
 
 			auto& shaders = g_shaderHolder.get("deferredFinalPass");
@@ -218,7 +224,7 @@ namespace Dunjun
 
 		shaders.use();
 
-		shaders.setUniform("u_light.intensities", m_world.m_ambientLight.colorIntensity);
+		shaders.setUniform("u_light.intensities", world->ambientLight.colorIntensity);
 		
 		draw(&g_meshHolder.get("quad"));
 
@@ -234,7 +240,7 @@ namespace Dunjun
 		shaders.setUniform("u_specular", 1);
 		shaders.setUniform("u_normal", 2);
 
-		for (const DirectionalLight& light : m_world.m_directionalLights)
+		for (const DirectionalLight& light : world->directionalLights)
 		{
 			shaders.setUniform("u_light.base.intensities", light.colorIntensity); // shaderprogram.cpp
 
@@ -256,11 +262,11 @@ namespace Dunjun
 		shaders.setUniform("u_normal", 2);
 		shaders.setUniform("u_depth", 3);
 
-		shaders.setUniform("u_cameraInverse", inverse(m_camera->getMatrix()));
+		shaders.setUniform("u_cameraInverse", inverse(camera->getMatrix()));
 
-		for (const PointLight& light : m_world.m_pointLights)
+		for (const PointLight& light : world->pointLights)
 		{
-			light.calculateRange();
+			//light.range = calculateLightRange(light.intensity, light.color, light.attenuation);
 
 			shaders.setUniform("u_light.base.intensities", light.colorIntensity); // shaderprogram.cpp
 
@@ -288,11 +294,11 @@ namespace Dunjun
 		shaders.setUniform("u_normal", 2);
 		shaders.setUniform("u_depth", 3);
 
-		shaders.setUniform("u_cameraInverse", inverse(m_camera->getMatrix()));
+		shaders.setUniform("u_cameraInverse", inverse(camera->getMatrix()));
 
-		for (const SpotLight& light : m_world.m_spotLights)
+		for (const SpotLight& light : world->spotLights)
 		{
-			light.calculateRange();
+			//light.range = calculateLightRange(light.intensity, light.color, light.attenuation);
 
 			shaders.setUniform("u_light.coneAngle", static_cast<f32>(light.coneAngle)); // shaderprogram.cpp
 			shaders.setUniform("u_light.direction", light.direction); // shaderprogram.cpp
@@ -314,10 +320,10 @@ namespace Dunjun
 
 	bool SceneRenderer::isCurrentShaders(const ShaderProgram* shaders)
 	{
-		if(!m_currentShaders)
+		if(!currentShaders)
 			return false;
 
-		if(shaders == m_currentShaders)
+		if(shaders == currentShaders)
 		{
 			return true;
 		}
@@ -327,7 +333,7 @@ namespace Dunjun
 
 	bool SceneRenderer::isCurrentTexture(const Texture* texture)
 	{
-		if (texture == m_currentTexture)
+		if (texture == currentTexture)
 		{
 			return true;
 		}
@@ -338,13 +344,13 @@ namespace Dunjun
 	{
 		//if(shaders != m_currentShaders && m_currentShaders)
 		//	m_currentShaders->stopUsing();
-		if (shaders != m_currentShaders)
+		if (shaders != currentShaders)
 		{
-			if (m_currentShaders)
-				m_currentShaders->stopUsing();
+			if (currentShaders)
+				currentShaders->stopUsing();
 
-			m_currentShaders = shaders;
-			m_currentShaders->use();
+			currentShaders = shaders;
+			currentShaders->use();
 
 		}
 	}
@@ -353,17 +359,11 @@ namespace Dunjun
 	{
 		//assert(m_currentTexture);
 
-		if (texture != m_currentTexture || !m_currentTexture)
+		if (texture != currentTexture || !currentTexture)
 		{
-			m_currentTexture = texture;
-			Texture::bind(m_currentTexture, position);
+			currentTexture = texture;
+			Texture::bind(currentTexture, position);
 		}
 	}
 
-	SceneRenderer& SceneRenderer::setCamera(const Camera& camera)
-	{
-		m_camera = &camera;
-
-		return *this;
-	}
 } // end Dunjun

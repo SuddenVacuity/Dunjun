@@ -7,12 +7,33 @@ namespace Dunjun
 {
 	struct Vector2
 	{
+		//f32 x = 0;
+		//f32 y = 0;
+
+		union // call info as v.x = 1;
+		{
+			f32 data[2];
+			struct
+			{
+				f32 x, y;
+			};
+			struct
+			{
+				f32 r, g;
+			};
+			struct
+			{
+				f32 s, t;
+			};
+		};
+		
 		Vector2();
 		explicit Vector2(f32 xy);
 		Vector2(f32 x, f32 y);
 		Vector2(f32 xy[2]);
-
+		
 		Vector2(const Vector2& other) = default; // copy constructor
+
 		//
 		// operators
 		inline f32& operator[](size_t index) { return data[index]; }
@@ -36,23 +57,6 @@ namespace Dunjun
 		Vector2& operator*=(f32 scaler);
 		Vector2& operator/=(f32 scaler);
 
-		// =====================================================
-		union // call info as v.x = 1;
-		{
-			f32 data[2];
-			struct
-			{
-				f32 x, y;
-			};
-			struct
-			{
-				f32 r, g;
-			};
-			struct
-			{
-				f32 s, t;
-			};
-		};
 	}; // end Vector2
 	//
 	// Functions outside vector 2 struct

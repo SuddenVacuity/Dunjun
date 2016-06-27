@@ -284,7 +284,7 @@ namespace Dunjun
 
 		void setCursorPosition(const Vector2& pos, const Window& relativeTo)
 		{
-			SDL_WarpMouseInWindow(relativeTo.getSDLHandle(), pos.x, pos.y);
+			SDL_WarpMouseInWindow(relativeTo.handle, pos.x, pos.y);
 		}
 
 		bool isMouseButtonPressed(MouseButton button)

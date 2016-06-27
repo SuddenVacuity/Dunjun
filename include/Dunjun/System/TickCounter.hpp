@@ -5,30 +5,26 @@
 
 namespace Dunjun
 {
-	class TickCounter
+	struct TickCounter
 	{
 	public:
+		std::size_t tick = 0;
+		f64 tickRate = 0;
+		Clock clock = Clock();
+
 		bool update(Time frequency) // frequency is the time between tick rate updates
 		{
 			bool reset = false;
-			if (m_clock.getElapsedTime() >= frequency)
+			if (clock.getElapsedTime() >= frequency)
 			{
-				m_tickRate = m_tick * (1.0f / frequency.asSeconds());
-				m_tick = 0;
+				tickRate = tick * (1.0f / frequency.asSeconds());
+				tick = 0;
 				reset = true;
-				m_clock.restart();
+				clock.restart();
 			}
-			m_tick++;
+			tick++;
 			return reset;
 		}
-
-		inline f64 getTickRate() const { return m_tickRate; }
-
-	private:
-		std::size_t m_tick = 0;
-		f64 m_tickRate = 0;
-		Clock m_clock = Clock();
-
 	};
 }
 

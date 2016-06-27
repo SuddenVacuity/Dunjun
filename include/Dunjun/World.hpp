@@ -8,6 +8,31 @@ namespace Dunjun
 	class World : private NonCopyable
 	{
 	public:
+		Context context;
+
+		SceneNode sceneGraph;
+		SceneRenderer renderer;
+
+		Camera mainCamera;
+		Camera playerCamera;
+		Camera* currentCamera = nullptr;
+
+		SceneNode * player = nullptr;
+		Level* level = nullptr;
+
+		BaseLight ambientLight = BaseLight();
+		std::vector<DirectionalLight> directionalLights;
+		std::vector<PointLight> pointLights;
+		std::vector<SpotLight> spotLights;
+
+		bool toggleCulling = true;
+
+		std::string consoleText = "blank console text";
+		std::string consoleBuffer = "blank console buffer";
+		bool acceptInput = true;
+		bool checkForCommand = false;
+		bool useConsole = false;
+
 		World();
 		virtual ~World();
 
@@ -17,39 +42,17 @@ namespace Dunjun
 		void handleEvent(const Event& event);
 		void render();
 
-		SceneNode& getSceneGraph();
-		const SceneNode& getSceneGraph() const;
+		//SceneNode& getSceneGraph();
+		//const SceneNode& getSceneGraph() const;
 
-		SceneNode* getPlayer();
-		const SceneNode* getPlayer() const;
-
-		Level* getLevel();
-		const Level* getLevel() const;
-
-		Camera& getCurrentCamera();
-		const Camera& getCurrentCamera() const;
-
-	private:
-		friend class SceneRenderer;
-
-		Context m_context;
-
-		SceneNode m_sceneGraph;
-		SceneRenderer m_renderer;
-
-		Camera m_mainCamera;
-		Camera m_playerCamera;
-		Camera* m_currentCamera = nullptr;
-
-		SceneNode * m_player = nullptr;
-		Level* m_level = nullptr;
-
-		BaseLight m_ambientLight = BaseLight();
-		std::vector<DirectionalLight> m_directionalLights;
-		std::vector<PointLight> m_pointLights;
-		std::vector<SpotLight> m_spotLights;
-
-
+		//SceneNode* getPlayer();
+		//const SceneNode* getPlayer() const;
+		//
+		//Level* getLevel();
+		//const Level* getLevel() const;
+		//
+		//Camera& getCurrentCamera();
+		//const Camera& getCurrentCamera() const;
 
 	};
 
