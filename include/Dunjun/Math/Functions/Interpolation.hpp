@@ -33,10 +33,10 @@ namespace Math
 
 		if(cosTheta > 1.0f)
 		{
-			return Quaternion(lerp(x.x, y.x, t),
+			return Quaternion{lerp(x.x, y.x, t),
 							  lerp(x.y, y.y, t),
 							  lerp(x.z, y.z, t),
-							  lerp(x.w, y.w, t));
+							  lerp(x.w, y.w, t)};
 		}
 		else
 		{

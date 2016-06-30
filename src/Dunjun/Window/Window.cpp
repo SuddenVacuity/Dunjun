@@ -147,7 +147,8 @@ namespace Dunjun
 			int x, y;
 			SDL_GetWindowPosition(handle, &x, &y);
 
-			return Vector2(x, y);
+			return {static_cast<f32>(x), 
+					static_cast<f32>(y)};
 		}
 		
 		return {0, 0};
@@ -165,7 +166,8 @@ namespace Dunjun
 		s32 width, height;
 		SDL_GetWindowSize(handle, &width, &height);
 
-		return Vector2(width, height);
+		return {static_cast<f32>(width), 
+				static_cast<f32>(height)};
 	}
 
 	Window& Window::setSize(const Vector2& size)

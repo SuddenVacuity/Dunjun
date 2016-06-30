@@ -5,47 +5,34 @@
 
 namespace Dunjun
 {
-	struct Quaternion
+	union Quaternion
 	{
-		//f32 x = 0;
-		//f32 y = 0;
-		//f32 z = 0;
-		//f32 w = 1;
-
-		union
+		struct
 		{
-			f32 data[4];
-			struct
-			{
-				f32 x, y, z, w;
-			};
-			f32 xyz[3];
+			f32 x, y, z, w;
 		};
-		
-		Quaternion();
-		Quaternion(const Quaternion& q) = default;
-		Quaternion(f32 x, f32 y, f32 z, f32 w);
-		explicit Quaternion(const Vector3& v, f32 s);
-
-		inline const f32 operator[](size_t index) const { return data[index]; }
-		inline f32& operator[](size_t index) { return data[index]; }
-
-		Quaternion operator-() const;
-		Quaternion operator+(const Quaternion& b) const;
-		Quaternion operator-(const Quaternion& b) const;
-		Quaternion operator*(const Quaternion& b) const;
-		Quaternion operator*(f32 s) const;
-		Quaternion operator/(f32 s) const;
-
-		bool operator==(const Quaternion& b) const;
-		bool operator!= (const Quaternion& b) const;
-
-		const Vector3 vector() const;
-		Vector3& vector();
-
-		f32 scaler() const;
-		f32& scaler();
+		f32 data[4];
 	};
+
+
+	//inline const f32 operator[](const Quaternion& a, size_t index) { return data[index]; }
+	//inline f32& operator[](const Quaternion& a, size_t index) { return data[index]; }
+
+	Quaternion operator-(const Quaternion& a);
+	Quaternion operator+(const Quaternion& a, const Quaternion& b);
+	Quaternion operator-(const Quaternion& a, const Quaternion& b);
+	Quaternion operator*(const Quaternion& a, const Quaternion& b);
+	Quaternion operator*(const Quaternion& a, f32 s);
+	Quaternion operator/(const Quaternion& a, f32 s);
+
+	bool operator==(const Quaternion& a, const Quaternion& b);
+	bool operator!=(const Quaternion& a, const Quaternion& b);
+
+	//const Vector3 vector(const Quaternion& a);
+	//Vector3& vector(Quaternion& a);
+	//
+	//f32 scaler(const Quaternion& a);
+	//f32& scaler(Quaternion& a);
 //
 // functions outside of Quaternion struct
 Quaternion operator*(f32 s, const Quaternion& q);
@@ -68,7 +55,7 @@ inline std::ostream& operator<<(std::ostream& os, const Quaternion& q)
 	os << "Quaternion(";
 	for(size_t i = 0; i < 4; i++)
 	{
-		os << q[i];
+		os << q.data[i];
 		if (i < 3)
 			os << ", ";
 	}

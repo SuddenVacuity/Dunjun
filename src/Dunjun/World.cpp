@@ -47,7 +47,7 @@ namespace Dunjun
 		{ // level generation
 			auto LEVEL = make_unique<Level>();
 			
-			LEVEL->material = &context.materialHolder->get("terrain");
+			LEVEL->material = &context.materialHolder->get("default");
 			LEVEL->name = "level";
 
 			LEVEL->generate();
@@ -59,8 +59,10 @@ namespace Dunjun
 
 		// add ambient light
 		{
-			ambientLight.colorIntensity = calculateLightIntensities(ColorLib::Blue, 0.002f);
-			ambientLight.brightness = calculateLightBrightness(ambientLight.colorIntensity);
+			ambientLight.color			= ColorLib::Blue;
+			ambientLight.intensity		= 0.002f;
+			ambientLight.colorIntensity = calculateLightIntensities(ambientLight.color, ambientLight.intensity);
+			ambientLight.brightness		= ColorLib::calculateBrightness(ambientLight.colorIntensity);
 		}
 
 
@@ -69,26 +71,34 @@ namespace Dunjun
 			PointLight light;
 
 			light.position		 = { 0.0f, 19.5f, 0.0f };
-			light.colorIntensity = calculateLightIntensities(ColorLib::White, 10.0f);
-			light.brightness	 = calculateLightBrightness(light.colorIntensity);
+			light.color			 = ColorLib::White;
+			light.intensity		 = 10.0f;
+			light.colorIntensity = calculateLightIntensities(light.color, light.intensity);
+			light.brightness	 = ColorLib::calculateBrightness(light.colorIntensity);
 			light.range			 = calculateLightRange(light.intensity, light.color, light.attenuation);
 			pointLights.emplace_back(light);
 
-			light.position		 = { 3.0f, 0.5f, 3.0f };
-			light.colorIntensity = calculateLightIntensities(ColorLib::Red, 5.0f);
-			light.brightness	 = calculateLightBrightness(light.colorIntensity);
+			light.position		 = { 0.0f, 0.5f, 10.0f };
+			light.color			 = ColorLib::Red;
+			light.intensity		 = 1.0f;
+			light.colorIntensity = calculateLightIntensities(light.color, light.intensity);
+			light.brightness	 = ColorLib::calculateBrightness(light.colorIntensity);
 			light.range			 = calculateLightRange(light.intensity, light.color, light.attenuation);
 			pointLights.emplace_back(light);
 
-			light.position		 = { 2.5f, 0.5f, 2.0f };
-			light.colorIntensity = calculateLightIntensities(ColorLib::Blue, 5.0f);
-			light.brightness	 = calculateLightBrightness(light.colorIntensity);
+			light.position		 = { 10.0f, 0.5f, 0.0f };
+			light.color			 = ColorLib::Blue;
+			light.intensity		 = 1.0f;
+			light.colorIntensity = calculateLightIntensities(light.color, light.intensity);
+			light.brightness	 = ColorLib::calculateBrightness(light.colorIntensity);
 			light.range			 = calculateLightRange(light.intensity, light.color, light.attenuation);
 			pointLights.emplace_back(light);
 
-			light.position		 = { 2.0f, 0.5f, 3.0f };
-			light.colorIntensity = calculateLightIntensities(ColorLib::Green, 5.0f);
-			light.brightness	 = calculateLightBrightness(light.colorIntensity);
+			light.position		 = { 5.0f, 0.5f, 5.0f };
+			light.color			 = ColorLib::Green;
+			light.intensity		 = 1.0f;
+			light.colorIntensity = calculateLightIntensities(light.color, light.intensity);
+			light.brightness	 = ColorLib::calculateBrightness(light.colorIntensity);
 			light.range			 = calculateLightRange(light.intensity, light.color, light.attenuation);
 			pointLights.emplace_back(light);
 		}
@@ -97,9 +107,11 @@ namespace Dunjun
 		{
 			DirectionalLight light;
 
-			light.direction		 = Vector3(-0.8, -1.0, -0.2);
-			light.colorIntensity = calculateLightIntensities(ColorLib::Orange, 0.02f);
-			light.brightness	 = calculateLightBrightness(light.colorIntensity);
+			light.direction		 = {-0.8f, -1.0f, -0.2f};
+			light.color			 = ColorLib::Orange;
+			light.intensity		 = 0.02f;
+			light.colorIntensity = calculateLightIntensities(light.color, light.intensity);
+			light.brightness	 = ColorLib::calculateBrightness(light.colorIntensity);
 			directionalLights.emplace_back(light);
 		}
 
@@ -108,8 +120,10 @@ namespace Dunjun
 			SpotLight light;
 
 			light.position		 = { 2.5f, 2.0f, 2.5f };
-			light.colorIntensity = calculateLightIntensities(ColorLib::White, 50.0f);
-			light.brightness	 = calculateLightBrightness(light.colorIntensity);
+			light.color			 = ColorLib::White;
+			light.intensity		 = 50.0f;
+			light.colorIntensity = calculateLightIntensities(light.color, light.intensity);
+			light.brightness	 = ColorLib::calculateBrightness(light.colorIntensity);
 			light.range			 = calculateLightRange(light.intensity, light.color, light.attenuation);
 			spotLights.emplace_back(light);
 		}
@@ -122,7 +136,7 @@ namespace Dunjun
 			//m_playerCamera.viewportSize = {854, 480};
 			//m_playerCamera.viewportAspectRatio = 854 / 480;
 
-			playerCamera.transform.position = player->transform.position + Vector3(8 * 3, 8 * 2, 8 * 3);
+			playerCamera.transform.position = player->transform.position + Vector3{8 * 3, 8 * 2, 8 * 3};
 			//g_cameraPlayer.transform.orientation = angleAxis(Degree(45), {0, 1, 0}) * angleAxis(Degree(-30), {1, 0, 0});
 			playerCamera.lookAt(player->transform.position);
 
@@ -172,74 +186,6 @@ namespace Dunjun
 	{
 		sceneGraph.update(dt);
 
-		//// console
-		//if (useConsole == true)
-		//{
-		//	// exit console
-		//	if (Input::isKeyPressed(Input::Key::Tab))
-		//	{
-		//		useConsole = false;
-		//	}
-		//
-		//	// check for a command
-		//	if (Input::isKeyPressed(Input::Key::Return))
-		//	{
-		//		checkForCommand = true;
-		//	}
-		//
-		//	// Erase letters
-		//	if (Input::isKeyPressed(Input::Key::Backspace))
-		//		if (consoleText.size() > 0)
-		//			consoleText.erase(consoleText.size() - 1);
-		//
-		//	if (Input::isKeyPressed(Input::Key::Delete))
-		//	{
-		//		consoleText.clear();
-		//		consoleBuffer.clear();
-		//	}
-		//
-		//	// TODO: press up or down to cycle previous commands
-		//	if (Input::isKeyPressed(Input::Key::Up))
-		//		consoleText.append(" ");
-		//	if (Input::isKeyPressed(Input::Key::Down))
-		//		consoleText.append(" ");
-		//
-		//	// add letters
-		//	for (int i = 0; i < 26; i++)
-		//	{
-		//		std::string s = ""; // can't initialize as i or cast in .append()
-		//
-		//		//if (event.key.capsLock == true || event.key.shift == true)
-		//		//	s = i + 65; // capital letters
-		//		//else
-		//			s = i + 97; // lower case letters
-		//
-		//		if (Input::isKeyPressed(Input::Key(i)))
-		//			if ((consoleBuffer.find(s) == consoleBuffer.npos)) // only add if letter is not already in buffer
-		//				consoleBuffer.append(s);
-		//	}
-		//
-		//	if (1)
-		//	{
-		//		// TODO: make this only happen when a key is released and while no keys are pressed
-		//		// SDL UP/DOWN events don't seem to work for this
-		//		// buffer is added twice when this happens here
-		//		consoleText.append(consoleBuffer);
-		//		consoleBuffer.clear();
-		//	}
-		//
-		//	std::cout << "\n\nType in a command and press enter. [HELP] [QUIT]" << std::endl;
-		//	std::cout << ">> [" << consoleText << "." << consoleBuffer << "]" << std::endl;
-		//
-		//}
-		//
-		// normal input
-		//else
-		//{
-		//	if (Input::isKeyPressed(Input::Key::Tab))
-		//		useConsole = true;
-		//}
-		
 		if (checkForCommand == true)
 		{
 			std::cout << "\n";
@@ -262,6 +208,10 @@ namespace Dunjun
 				std::cout << "[SYSTEM] = Shwo system information" << std::endl;
 				std::cout << "[REGEN] = Regenerate level with culling" << std::endl;
 				std::cout << "[REGENNC] = Regenerate level without culling" << std::endl;
+				std::cout << "[LTCHRED] = Test ColorLib::removeChannelRed on point lights" << std::endl;
+				std::cout << "[LTCHGRN] = Test ColorLib::removeChannelGreen on point lights" << std::endl;
+				std::cout << "[LTCHBLU] = Test ColorLib::removeChannelBlue on point lights" << std::endl;
+				std::cout << "[LTRESET] = Set light to default values" << std::endl;
 				std::cout << "[DIR] = Return views cardinal direction and vertical angle" << std::endl;
 				std::cout << "[ROOMS] = Return number of rooms currently rendering" << std::endl;
 				std::cout << "[HELP] = Show help" << std::endl;
@@ -361,6 +311,26 @@ namespace Dunjun
 				std::cout << "Test Iterator 3: " << testIterator_5[3] << std::endl;
 				std::cout << "Test Iterator 4: " << testIterator_5[4] << std::endl;
 			}
+			// level regeneration
+			else if (consoleText == "REGEN")
+			{
+				toggleCulling = true;
+				SceneNode* level = sceneGraph.findChildByName("level");
+				sceneGraph.detachChild(*level);
+
+				{ // test level generation
+					auto LEVEL = make_unique<Level>();
+
+					LEVEL->material = &context.materialHolder->get("dunjunText");
+					LEVEL->name = "level";
+
+					LEVEL->generate();
+
+					level = LEVEL.get();
+
+					sceneGraph.attachChild(std::move(LEVEL));
+				}
+			}
 			// regenerate world without culling
 			else if (consoleText == "REGENNC")
 			{
@@ -370,37 +340,93 @@ namespace Dunjun
 				sceneGraph.detachChild(*level);
 		
 				{ // test level generation
-					auto l = make_unique<Level>();
-		
-					l->material = &g_materialHolder.get("terrain");
-					l->name = "level";
-					l->generate();
-		
-					level = l.get();
-		
-					sceneGraph.attachChild(std::move(l));
+					auto LEVEL = make_unique<Level>();
+
+					LEVEL->material = &context.materialHolder->get("dunjunText");
+					LEVEL->name = "level";
+
+					LEVEL->generate();
+
+					level = LEVEL.get();
+
+					sceneGraph.attachChild(std::move(LEVEL));
 				}
 			}
-			// level regeneration
-			else if (consoleText == "REGEN")
+			// remove red from point lights
+			else if (consoleText == "LTCHRED")
 			{
-				toggleCulling = true;
-				SceneNode* level = sceneGraph.findChildByName("level");
-				sceneGraph.detachChild(*level);
-		
-				{ // test level generation
-					auto l = make_unique<Level>();
-		
-					l->material = &g_materialHolder.get("terrain");
-					l->name = "level";
-					l->generate();
-		
-					level = l.get();
-		
-					sceneGraph.attachChild(std::move(l));
+				for(PointLight& light : pointLights)
+				{
+					light.color = ColorLib::removeChannelRed(light.color);
+					light.colorIntensity = calculateLightIntensities(light.color, light.intensity);
 				}
 			}
-		
+			// remove green from point lights
+			else if (consoleText == "LTCHGRN")
+			{
+				for (PointLight& light : pointLights)
+				{
+					light.color = ColorLib::removeChannelGreen(light.color);
+					light.colorIntensity = calculateLightIntensities(light.color, light.intensity);
+				}
+			}
+			// remove blue from point lights
+			else if (consoleText == "LTCHBLU")
+			{
+				for (PointLight& light : pointLights)
+				{
+					light.color = ColorLib::removeChannelBlue(light.color);
+					light.colorIntensity = calculateLightIntensities(light.color, light.intensity);
+				}
+			}
+			// make point lights greyscale
+			else if (consoleText == "LTGREYS")
+			{
+				for (PointLight& light : pointLights)
+				{
+					light.color = ColorLib::greyScale(light.brightness);
+					light.colorIntensity = calculateLightIntensities(light.color, light.intensity);
+				}
+			}
+			// reset point lights to default
+			else if (consoleText == "LTRESET")
+			{
+				u32 n = 0;
+				for (PointLight& light : pointLights)
+				{
+					switch(n)
+					{
+					default: break;
+					case 0:
+					{
+						light.color = ColorLib::White;
+						light.colorIntensity = calculateLightIntensities(light.color, light.intensity);
+						break;
+					}
+					case 1:
+					{
+						light.color = ColorLib::Red;
+						light.colorIntensity = calculateLightIntensities(light.color, light.intensity);
+						break;
+					}
+					case 2:
+					{
+						light.color = ColorLib::Blue;
+						light.colorIntensity = calculateLightIntensities(light.color, light.intensity);
+						break;
+					}
+					case 3:
+					{
+						light.color = ColorLib::Green;
+						light.colorIntensity = calculateLightIntensities(light.color, light.intensity);
+						break;
+					}
+					}
+					n++;
+				}
+				
+			}
+
 			else if (consoleText == "QUIT")
 			{
 				context.window->close();
@@ -454,7 +480,7 @@ namespace Dunjun
 			if (Math::abs(lts.y) < deadZone)
 				lts.y = 0;
 
-			if (length(Vector2(lts.x, lts.y)) > 1.0f) // keep diagonals from being faster then straight x, y or z
+			if (length(Vector2{lts.x, lts.y}) > 1.0f) // keep diagonals from being faster then straight x, y or z
 				lts = normalize(lts);
 
 			Vector3 camVelocityDirection = { 0, 0, 0 };
@@ -468,9 +494,9 @@ namespace Dunjun
 			//Input::GamepadButtons buttons = Input::getGamepadButtons(Input::Gamepad_1);
 
 			if (Input::isGamepadButtonPressed(0, Input::GamepadButton::RightShoulder))
-				camVelocityDirection.y += 1;
+				camVelocityDirection.y += 1.0f;
 			if (Input::isGamepadButtonPressed(0, Input::GamepadButton::LeftShoulder))
-				camVelocityDirection.y -= 1;
+				camVelocityDirection.y -= 1.0f;
 
 			if (length(camVelocityDirection) > 1.0f)
 				camVelocityDirection = normalize(camVelocityDirection);
@@ -755,7 +781,7 @@ namespace Dunjun
 
 			shaders.use();
 			shaders.setUniform("u_tex", 0);
-			shaders.setUniform("u_scale", Vector3(1.0f));
+			shaders.setUniform("u_scale", Vector3{1, 1, 1});
 
 			Texture::bind(&renderer.finalTexture.colorTexture, 0);
 
@@ -775,7 +801,7 @@ namespace Dunjun
 	//
 	//const SceneNode& World::getSceneGraph() const
 	//{
-	//	return sceneGraph;
+	//	return sceneGrap;h
 	//}
 
 	//SceneNode* World::getPlayer()

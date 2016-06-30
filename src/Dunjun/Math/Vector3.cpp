@@ -3,38 +3,6 @@
 
 namespace Dunjun
 {
-
-	Vector3::Vector3()
-		: x(0)
-		, y(0)
-		, z(0)
-	{
-	}
-	Vector3::Vector3(f32 xyz)
-		: x(xyz)
-		, y(xyz)
-		, z(xyz)
-	{
-	}
-	Vector3::Vector3(f32 x, f32 y, f32 z) // explicit means you must write Vector2 to get the info
-		: x(x)
-		, y(y)
-		, z(z)
-	{
-	}
-	Vector3::Vector3(f32 xyz[3])
-		: x(xyz[0])
-		, y(xyz[1])
-		, z(xyz[2])
-	{
-	}
-
-	Vector3::Vector3(const Vector2& other, f32 z) // to add z component to xy format
-		:Vector3(other.x, other.y, z)
-
-	{
-	}
-
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 )				.
 )					VECTOR 4 OPERATORS
@@ -45,95 +13,95 @@ namespace Dunjun
 )				.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-	bool Vector3::operator==(const Vector3& other) const // comparison
+	bool operator==(const Vector3& a, const Vector3& b) // comparison
 	{
 		for (size_t i = 0; i < 3; i++)
 		{
-			if (data[i] != other.data[i])
+			if (a.data[i] != b.data[i])
 				return false;
 		}
 		return true;
 	}
 
-	bool Vector3::operator!=(const Vector3& other) const
+	bool operator!=(const Vector3& a, const Vector3& b)
 	{
-		return !operator==(other);
+		return !operator==(a, b);
 	}
 
-	Vector3 Vector3::operator-() const { return{ -x, -y, -z }; }
+	Vector3 operator-(const Vector3& a) { return {-a.x, -a.y, -a.z}; }
 
-	Vector3 Vector3::operator+(const Vector3& other) const // addition
+	Vector3 operator+(const Vector3& a, const Vector3& b) // addition
 	{
-		return Vector3(x + other.x, y + other.y, z + other.z);
+		return {a.x + b.x, a.y + b.y, a.z + b.z};
 	}
 
-	Vector3 Vector3::operator-(const Vector3& other) const // subtraction
+	Vector3 operator-(const Vector3& a, const Vector3& b) // subtraction
 	{
-		return Vector3(x - other.x, y - other.y, z - other.z);
+		return {a.x - b.x, a.y - b.y, a.z - b.z};
 	}
 
-	Vector3 Vector3::operator*(f32 scaler) const // scaler
+	Vector3 operator*(const Vector3& a, f32 scaler) // scaler
 	{
-		return Vector3(scaler * x, scaler * y, scaler * z);
+		return {scaler * a.x, scaler * a.y, scaler * a.z};
 	}
 
 	// Hadamard Product
-	Vector3 Vector3::operator*(const Vector3& other) const
+	Vector3 operator*(const Vector3& a, const Vector3& b)
 	{
 		Vector3 result;
 		for (size_t i = 0; i < 3; i++)
-			result[i] = data[i] * other.data[i];
+			result.data[i] = a.data[i] * b.data[i];
 		return result;
 	}
 
-	Vector3 Vector3::operator/(const Vector3& other) const
+	Vector3 operator/(const Vector3& a, const Vector3& b)
 	{
 		Vector3 result;
 		for (size_t i = 0; i < 3; i++)
-			result[i] = data[i] / other.data[i];
+			result.data[i] = a.data[i] / b.data[i];
 		return result;
 	}
 
 
-	Vector3 Vector3::operator/(f32 scaler) const // division scaler
+	Vector3 operator/(const Vector3& a, f32 scaler) // division scaler
 	{
-		return Vector3(x / scaler, y / scaler, z / scaler);
+		return {a.x / scaler, a.y / scaler, a.z / scaler};
 	}
 
-	Vector3& Vector3::operator+=(const Vector3& other) // addition
+	Vector3& operator+=(Vector3& a, const Vector3& b) // addition
 	{
-		x += other.x;
-		y += other.y;
-		z += other.z;
+		a.x += b.x;
+		a.y += b.y;
+		a.z += b.z;
 
-		return *this;
+		return a;
 	}
 
-	Vector3& Vector3::operator-=(const Vector3& other) // subtraction
+	Vector3& operator-=(Vector3& a, const Vector3& b) // subtraction
 	{
-		x -= other.x;
-		y -= other.y;
-		z -= other.z;
+		a.x -= b.x;
+		a.y -= b.y;
+		a.z -= b.z;
 
-		return *this;
+		return a;
 	}
 
-	Vector3& Vector3::operator*=(f32 scaler) // scaler
+	Vector3& operator*=(Vector3& a, f32 scaler) // scaler
 	{
-		x *= scaler;
-		y *= scaler;
-		z *= scaler;
+		a.x *= scaler;
+		a.y *= scaler;
+		a.z *= scaler;
 
-		return *this;
+		return a;
 	}
 
-	Vector3& Vector3::operator/=(f32 scaler) // scaler
+	Vector3& operator/=(Vector3& a, f32 scaler) // scaler
 	{
-		x /= scaler;
-		y /= scaler;
-		z /= scaler;
+		a.x /= scaler;
+		a.y /= scaler;
+		a.z /= scaler;
 
-		return *this;
+		return a;
 	}
 
 	/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -153,9 +121,9 @@ namespace Dunjun
 	
 	Vector3 cross(const Vector3& a, const Vector3& b) // 
 	{
-		return Vector3(a.y * b.z - b.y * a.z,  // x
-			a.z * b.x - b.z * a.x,  // y
-			a.x * b.y - b.x * a.y); // z
+		return {a.y * b.z - b.y * a.z,  // x
+				a.z * b.x - b.z * a.x,  // y
+				a.x * b.y - b.x * a.y}; // z
 	}
 	
 	f32 lengthSquared(const Vector3& a)

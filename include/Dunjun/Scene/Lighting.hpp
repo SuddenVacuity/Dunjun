@@ -16,8 +16,8 @@ namespace Dunjun
 	{
 		Color color = ColorLib::White;
 		f32 intensity = 1.0f; // color intensity = max(color component) * brightness
-		f32 brightness = 1.0f; // perceived brightness
-		Vector3 colorIntensity = Vector3(1, 1, 1);
+		u8 brightness = 255; // perceived brightness
+		Vector3 colorIntensity = {1, 1, 1};
 	};
 
 	struct DirectionalLight : BaseLight
@@ -37,18 +37,9 @@ namespace Dunjun
 	{
 		//intensity = strength;
 
-		Vector3 c(color.r, color.g, color.b);
+		Vector3 c = {color.r, color.g, color.b};
 
 		return (c / (Color::COLOR_DEPTH - 1)) * strength;
-	}
-
-	inline f32 calculateLightBrightness(const Vector3& color, const Vector3& weight = Vector3(0.241f, 0.691f, 0.068f))
-	{
-		f32 r = (color.r * color.r) * weight.r;
-		f32 g = (color.g * color.g) * weight.g;
-		f32 b = (color.b * color.b) * weight.b;
-
-		return Math::sqrt(r + b + g);
 	}
 
 	inline f32 calculateLightRange(f32 intensity, Color color, Attenuation attenuation)

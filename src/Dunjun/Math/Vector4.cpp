@@ -3,46 +3,6 @@
 
 namespace Dunjun
 {
-	Vector4::Vector4()
-		: x(0)
-		, y(0)
-		, z(0)
-		, w(0)
-	{
-	}
-	Vector4::Vector4(f32 xyzw)
-		: x(xyzw)
-		, y(xyzw)
-		, z(xyzw)
-		, w(xyzw)
-	{
-	}
-	Vector4::Vector4(f32 x, f32 y, f32 z, f32 w) // explicit means you must write Vector2 to get the info
-		: x(x)
-		, y(y)
-		, z(z)
-		, w(w)
-	{
-	}
-	Vector4::Vector4(f32 xyzw[4])
-		: x(xyzw[0])
-		, y(xyzw[1])
-		, z(xyzw[2])
-		, w(xyzw[3])
-	{
-	}
-
-	Vector4::Vector4(const Vector2& other, f32 z, f32 w) // to add zw component to xy format
-		:Vector4(other.x, other.y, z, w)
-
-	{
-	}
-
-	Vector4::Vector4(const Vector3& other, f32 w) // to add w component to xyz format
-		:Vector4(other.x, other.y, other.z, w)
-	{
-	}
-
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 )				.
 )					VECTOR 4 OPERATORS
@@ -53,98 +13,98 @@ namespace Dunjun
 )				.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-	bool Vector4::operator==(const Vector4& other) const // comparison
+	bool operator==(const Vector4& a, const Vector4& b) // comparison
 	{
 		for (size_t i = 0; i < 4; i++)
 		{
-			if (data[i] != other.data[i])
+			if (a.data[i] != b.data[i])
 				return false;
 		}
 		return true;
 	}
 
-	bool Vector4::operator!=(const Vector4& other) const
+	bool operator!=(const Vector4& a, const Vector4& b)
 	{
-		return !operator==(other);
+		return !operator==(a, b);
 	}
 
-	Vector4 Vector4::operator-() const { return{ -x, -y, -z, w }; }
+	Vector4 operator-(const Vector4& a) { return{ -a.x, -a.y, -a.z, a.w }; }
 
-	Vector4 Vector4::operator+(const Vector4& other) const // addition
+	Vector4 operator+(const Vector4& a, const Vector4& b) // addition
 	{
-		return Vector4(x + other.x, y + other.y, z + other.z, w + other.w);
+		return {a.x + b.x, a.y + b.y, a.z + b.z, a.w + b.w};
 	}
 
-	Vector4 Vector4::operator-(const Vector4& other) const // subtraction
+	Vector4 operator-(const Vector4& a, const Vector4& b) // subtraction
 	{
-		return Vector4(x - other.x, y - other.y, z - other.z, w - other.w);
+		return {a.x - b.x, a.y - b.y, a.z - b.z, a.w - b.w};
 	}
 
-	Vector4 Vector4::operator*(f32 scaler) const // scaler
+	Vector4 operator*(const Vector4& a, f32 scaler) // scaler
 	{
-		return Vector4(scaler * x, scaler * y, scaler * z, scaler * w);
+		return {scaler * a.x, scaler * a.y, scaler * a.z, scaler * a.w};
 	}
 
 	// Hadamard Product
-	Vector4 Vector4::operator*(const Vector4& other) const
+	Vector4 operator*(const Vector4& a, const Vector4& b)
 	{
 		Vector4 result;
 		for (size_t i = 0; i < 4; i++)
-			result[i] = data[i] * other.data[i];
+			result.data[i] = a.data[i] * b.data[i];
 		return result;
 	}
 
-	Vector4 Vector4::operator/(const Vector4& other) const
+	Vector4 operator/(const Vector4& a, const Vector4& b)
 	{
 		Vector4 result;
 		for (size_t i = 0; i < 4; i++)
-			result[i] = data[i] / other.data[i];
+			result.data[i] = a.data[i] / b.data[i];
 		return result;
 	}
 
-	Vector4 Vector4::operator/(f32 scaler) const // division scaler
+	Vector4 operator/(const Vector4& a, f32 scaler) // division scaler
 	{
-		return Vector4(x / scaler, y / scaler, z / scaler, w / scaler);
+		return {a.x / scaler, a.y / scaler, a.z / scaler, a.w / scaler};
 	}
 
-	Vector4& Vector4::operator+=(const Vector4& other) // addition
+	Vector4& operator+=(Vector4& a, const Vector4& b) // addition
 	{
-		x += other.x;
-		y += other.y;
-		z += other.z;
-		w += other.w;
+		a.x += b.x;
+		a.y += b.y;
+		a.z += b.z;
+		a.w += b.w;
 
-		return *this;
+		return a;
 	}
 
-	Vector4& Vector4::operator-=(const Vector4& other) // subtraction
+	Vector4& operator-=(Vector4& a, const Vector4& b) // subtraction
 	{
-		x -= other.x;
-		y -= other.y;
-		z -= other.z;
-		w -= other.w;
+		a.x -= b.x;
+		a.y -= b.y;
+		a.z -= b.z;
+		a.w -= b.w;
 
-		return *this;
+		return a;
 	}
 
-	Vector4& Vector4::operator*=(f32 scaler) // scaler
+	Vector4& operator*=(Vector4& a, f32 scaler) // scaler
 	{
-		x *= scaler;
-		y *= scaler;
-		z *= scaler;
-		w *= scaler;
+		a.x *= scaler;
+		a.y *= scaler;
+		a.z *= scaler;
+		a.w *= scaler;
 
-		return *this;
+		return a;
 	}
 
-	Vector4& Vector4::operator/=(f32 scaler) // scaler
+	Vector4& operator/=(Vector4& a, f32 scaler) // scaler
 	{
-		x /= scaler;
-		y /= scaler;
-		z /= scaler;
-		w /= scaler;
+		a.x /= scaler;
+		a.y /= scaler;
+		a.z /= scaler;
+		a.w /= scaler;
 
-		return *this;
+		return a;
 	}
 
 	/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

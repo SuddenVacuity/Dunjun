@@ -36,6 +36,45 @@ namespace Dunjun
 	{
 		namespace
 		{
+		// returns u8 0-255 value
+		//
+		// Vector3 should be float value 0-1
+		// Color should be ColorLib::Color
+			u8 calculateBrightness(const Vector3& colorIntesities, const Vector3& weight = {0.241f, 0.691f, 0.068f})
+		{
+			//f32 r = ((colorIntesities.r * colorIntesities.r) * (Color::COLOR_DEPTH - 1)) * weight.r;
+			//f32 g = ((colorIntesities.g * colorIntesities.g) * (Color::COLOR_DEPTH - 1)) * weight.g;
+			//f32 b = ((colorIntesities.b * colorIntesities.b) * (Color::COLOR_DEPTH - 1)) * weight.b;
+
+			//f32 r = colorIntesities.r * (Color::COLOR_DEPTH - 1);
+			//f32 g = colorIntesities.g * (Color::COLOR_DEPTH - 1);
+			//f32 b = colorIntesities.b * (Color::COLOR_DEPTH - 1);
+
+
+			//r = r * r * weight.r;
+			//g = g * g * weight.g;
+			//b = b * b * weight.b;
+			
+			// if all are 0 return 0
+			if(colorIntesities.r == 0 && colorIntesities.g == 0 && colorIntesities.b == 0)
+				return 0;
+
+			return Math::sqrt((((colorIntesities.r * Color::COLOR_DEPTH) * (colorIntesities.r * Color::COLOR_DEPTH)) * weight.r) +
+							  (((colorIntesities.g * Color::COLOR_DEPTH) * (colorIntesities.g * Color::COLOR_DEPTH)) * weight.g) +
+							  (((colorIntesities.b * Color::COLOR_DEPTH) * (colorIntesities.b * Color::COLOR_DEPTH)) * weight.b)) - 1;
+		}
+
+		// returns 0-255 value
+			u8 calculateBrightness(const Color& color, const Vector3& weight = {0.241f, 0.691f, 0.068f})
+		{
+			f32 r = (color.r * color.r) * weight.r;
+			f32 g = (color.g * color.g) * weight.g;
+			f32 b = (color.b * color.b) * weight.b;
+
+			return Math::sqrt(((color.r * color.r) * weight.r) +
+							  ((color.g * color.g) * weight.g) +
+							  ((color.b * color.b) * weight.b));
+		}
 		// Mix two colors evenly.
 		Color mix(Color c1, Color c2)
 		{
@@ -59,6 +98,122 @@ namespace Dunjun
 					static_cast<u8>((ratio * c1.g + r2 * c2.g) / 2),
 					static_cast<u8>((ratio * c1.b + r2 * c2.b) / 2),
 					static_cast<u8>((ratio * c1.a + r2 * c2.a) / 2) };
+		}
+
+		Color removeChannelRed(const Color& color)
+		{
+			Color c = color;
+
+			// TODO: make it possible to divide removed color unevenly between other colors
+			c.g += c.r / 2;
+			c.b += c.r / 2;
+
+			c.r = 0;
+
+			u8 biggest = c.r;
+
+			if (c.g > c.r)
+				biggest = c.g;
+			if (c.b > c.g)
+				biggest = c.b;
+
+			if (c.r != 0)
+				c.r = (biggest / c.r) * Color::COLOR_DEPTH - 1;
+
+			if (c.g != 0)
+				c.g = (biggest / c.g) * Color::COLOR_DEPTH - 1;
+
+			if (c.b != 0)
+				c.b = (biggest / c.b) * Color::COLOR_DEPTH - 1;
+
+			return Color(static_cast<u8>(c.r),
+						 static_cast<u8>(c.g),
+						 static_cast<u8>(c.b));
+		}
+
+		Color removeChannelGreen(const Color& color)
+		{
+			Color c = color;
+
+			// TODO: make it possible to divide removed color unevenly between other colors
+			c.r += c.g / 2;
+			c.b += c.g / 2;
+
+			c.g = 0;
+
+			u8 biggest = c.r;
+
+			if (c.g > c.r)
+				biggest = c.g;
+			if (c.b > c.g)
+				biggest = c.b;
+
+			if (c.r != 0)
+				c.r = (biggest / c.r) * Color::COLOR_DEPTH - 1;
+
+			if (c.g != 0)
+				c.g = (biggest / c.g) * Color::COLOR_DEPTH - 1;
+
+			if (c.b != 0)
+				c.b = (biggest / c.b) * Color::COLOR_DEPTH - 1;
+
+			return Color(static_cast<u8>(c.r),
+						 static_cast<u8>(c.g),
+						 static_cast<u8>(c.b));
+		}
+
+		Color removeChannelBlue(const Color& color)
+		{
+			Color c = color;
+
+			// TODO: make it possible to divide removed color unevenly between other colors
+			c.r += c.b / 2;
+			c.g += c.b / 2;
+
+			c.b = 0;
+
+			u8 biggest = c.r;
+
+			if (c.g > c.r)
+				biggest = c.g;
+			if (c.b > c.g)
+				biggest = c.b;
+
+			if (c.r != 0)
+				c.r = (biggest / c.r) * Color::COLOR_DEPTH - 1;
+
+			if (c.g != 0)
+				c.g = (biggest / c.g) * Color::COLOR_DEPTH - 1;
+
+			if (c.b != 0)
+				c.b = (biggest / c.b) * Color::COLOR_DEPTH - 1;
+
+			return Color(static_cast<u8>(c.r),
+						 static_cast<u8>(c.g),
+						 static_cast<u8>(c.b));
+		}
+
+		Color greyScale(const f32& brightness)
+		{
+			Color c = Color(0xFF, 0xFF, 0xFF);
+
+			c.r = brightness;
+			c.g = brightness;
+			c.b = brightness;
+				    
+			return c;
+		}
+
+		Color greyScale(const Color& color)
+		{
+			f32 brightness = calculateBrightness(color);
+			Color c = Color(0xFF, 0xFF, 0xFF);
+
+			c.r = brightness;
+			c.g = brightness;
+			c.b = brightness;
+
+			return c;
 		}
 
 	const Color White(0xFFFFFFFF);

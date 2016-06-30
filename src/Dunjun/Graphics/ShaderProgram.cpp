@@ -338,7 +338,7 @@ namespace Dunjun
 			s32 loc = getUniformLocation(name);
 			if (loc == -1)
 				return;
-			glUniform2fv(loc, 1, &v[0]);
+			glUniform2fv(loc, 1, &v.data[0]);
 
 		}
 		void ShaderProgram::setUniform(const std::string& name, const Vector3& v) const
@@ -347,7 +347,7 @@ namespace Dunjun
 			s32 loc = getUniformLocation(name);
 			if (loc == -1)
 				return;
-			glUniform3fv(loc, 1, &v[0]);
+			glUniform3fv(loc, 1, &v.data[0]);
 		}
 		void ShaderProgram::setUniform(const std::string& name, const Vector4& v) const
 		{
@@ -355,7 +355,7 @@ namespace Dunjun
 			s32 loc = getUniformLocation(name);
 			if (loc == -1)
 				return;
-			glUniform4fv(loc, 1, &v[0]);
+			glUniform4fv(loc, 1, &v.data[0]);
 		}
 		void ShaderProgram::setUniform(const std::string& name, const Matrix4& m) const
 		{
@@ -363,7 +363,7 @@ namespace Dunjun
 			s32 loc = getUniformLocation(name);
 			if (loc == -1)
 				return;
-			glUniformMatrix4fv(loc, 1, GL_FALSE, &m[0][0]);
+			glUniformMatrix4fv(loc, 1, GL_FALSE, &m.data[0].data[0]);
 		}
 
 

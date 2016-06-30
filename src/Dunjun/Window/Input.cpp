@@ -262,8 +262,8 @@ namespace Dunjun
 
 			SDL_GetMouseState(&x, &y);
 
-			return Vector2(static_cast<f32>(x),
-						   static_cast<f32>(y));
+			return {static_cast<f32>(x),
+					static_cast<f32>(y)};
 		}
 
 		Vector2 getCursorPosition(const Window& relativeTo)
@@ -272,9 +272,10 @@ namespace Dunjun
 
 			SDL_GetGlobalMouseState(&x, &y);
 
-			auto pos = relativeTo.getPosition();
+			Vector2 pos = relativeTo.getPosition();
 
-			return Vector2(static_cast<f32>(x), static_cast<f32>(y)) - pos;
+			return {static_cast<f32>(x) - pos.x, 
+					static_cast<f32>(y) - pos.y};
 		}
 
 		void setCursorPosition(const Vector2& pos)

@@ -7,38 +7,40 @@ namespace Dunjun
 {
 	struct Matrix4
 	{
-	public:
-		Vector4 data[4];
+		union
+		{
+			struct
+			{
+				Vector4 x, y, z, w;
+			};
+			Vector4 data[4];
+		};
 
-		Matrix4(); // Identity
+		// Matrix4 all values 0's with diagonal 1's
+		GLOBAL const Matrix4 Identity;
 
-		explicit Matrix4(f32 x); // x * Identity
+		// Matrix4 all values 0
+		GLOBAL const Matrix4 Identity0;
 
-		explicit Matrix4(const Vector4& v0, 
-						 const Vector4& v1, 
-						 const Vector4& v2, 
-						 const Vector4& v3);
-		
-		Matrix4(const Matrix4& other) = default;
-
-		Vector4& operator[](size_t index);
-		const Vector4& operator[](size_t index) const;
-
-		bool operator==(const Matrix4& m2) const;
-		bool operator!=(const Matrix4& m2) const;
-
-		// Addition
-		Matrix4 operator+(const Matrix4& other) const;
-		Matrix4 operator-(const Matrix4& other) const;
-		Matrix4 operator*(const Matrix4& m2) const;
-		Vector4 operator*(const Vector4& v) const;
-		Matrix4 operator*(f32 scaler) const;
-		Matrix4 operator/(f32 scaler) const;
-
-		Matrix4& operator+=(const Matrix4& other);
-		Matrix4& operator-=(const Matrix4& other);
-		Matrix4& operator*=(const Matrix4& other);
 	}; // end Matrix4
+
+	//Vector4& operator[](size_t index);
+	//const Vector4& operator[](size_t index);
+
+	bool operator==(const Matrix4& a, const Matrix4& b);
+	bool operator!=(const Matrix4& a, const Matrix4& b);
+
+	// Addition
+	Matrix4 operator+(const Matrix4& a, const Matrix4& b);
+	Matrix4 operator-(const Matrix4& a, const Matrix4& b);
+	Matrix4 operator*(const Matrix4& a, const Matrix4& b);
+	Vector4 operator*(const Matrix4& a, const Vector4& v);
+	Matrix4 operator*(const Matrix4& a, f32 scaler);
+	Matrix4 operator/(const Matrix4& a, f32 scaler);
+
+	Matrix4& operator+=(Matrix4& a, const Matrix4& b);
+	Matrix4& operator-=(Matrix4& a, const Matrix4& b);
+	Matrix4& operator*=(Matrix4& a, const Matrix4& b);
 
 	inline Matrix4 operator*(f32 scaler, const Matrix4& m) // scaler for the other side
 	{
@@ -59,7 +61,7 @@ namespace Dunjun
 	{
 		os << "Matrix4(";
 		for(size_t i = 0; i < 4; i++)
-			os << "\n\t" << m[i];
+			os << "\n\t" << m.data[i];
 		os << "\n)";
 		
 		return os;

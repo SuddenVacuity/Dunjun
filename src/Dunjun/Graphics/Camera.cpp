@@ -23,29 +23,29 @@ namespace Dunjun
 	// must be normalized
 	Vector3 Camera::forward() const
 	{
-		return transform.orientation * Vector3(0, 0, -1);
+		return transform.orientation * Vector3{0, 0, -1};
 	}
 	Vector3 Camera::backward() const
 	{
-		return transform.orientation * Vector3(0, 0, 1);
+		return transform.orientation * Vector3{0, 0, 1};
 	}
 
 	Vector3 Camera::right() const
 	{
-		return transform.orientation * Vector3(1, 0, 0);
+		return transform.orientation * Vector3{1, 0, 0};
 	}
 	Vector3 Camera::left() const
 	{
-		return transform.orientation * Vector3(-1, 0, 0);
+		return transform.orientation * Vector3{-1, 0, 0};
 	}
 
 	Vector3 Camera::up() const
 	{
-		return transform.orientation * Vector3(0, 1, 0);
+		return transform.orientation * Vector3{ 0, 1, 0};
 	}
 	Vector3 Camera::down() const
 	{
-		return transform.orientation * Vector3(0, -1, 0);
+		return transform.orientation * Vector3{0, -1, 0};
 	}
 	
 	//
@@ -57,7 +57,7 @@ namespace Dunjun
 
 	Matrix4 Camera::getProjection() const
 	{
-		Matrix4 proj;
+		Matrix4 proj = Matrix4::Identity;
 
 		if (projectionType == ProjectionType::Perspective)
 		{
@@ -84,10 +84,13 @@ namespace Dunjun
 
 	Matrix4 Camera::getView() const
 	{
-		Matrix4 view;
+		Matrix4 view = Matrix4::Identity;
 
-		view =	Math::scale(Vector3(1) / transform.scale) * 
-				quaternionToMatrix4(conjugate(transform.orientation)) * Math::translate(-transform.position);
+		view = Math::scale(Vector3{1, 1, 1} / transform.scale);
+
+		view = view * quaternionToMatrix4(conjugate(transform.orientation));
+
+		view = view * Math::translate(-transform.position);
 
 		return view;
 	}

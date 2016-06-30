@@ -27,8 +27,8 @@ namespace Dunjun
 
 		bool toggleCulling = true;
 
-		std::string consoleText = "blank console text";
-		std::string consoleBuffer = "blank console buffer";
+		std::string consoleText = "";
+		std::string consoleBuffer = "";
 		bool acceptInput = true;
 		bool checkForCommand = false;
 		bool useConsole = false;

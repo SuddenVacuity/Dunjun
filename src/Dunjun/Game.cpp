@@ -88,7 +88,7 @@ namespace Dunjun
 		INTERNAL void loadMaterials()
 		{
 			// load textures
-			g_textureHolder.insertFromFile("default", "dunjunText.jpg");
+			g_textureHolder.insertFromFile("default", "default.jpg");
 			g_textureHolder.insertFromFile("dunjunText", "dunjunText.jpg");
 			g_textureHolder.insertFromFile("stone", "stone.png");
 			g_textureHolder.insertFromFile("terrain", "terrain.png", TextureFilter::Nearest);
@@ -244,9 +244,10 @@ namespace Dunjun
 
 						// check for a command
 						if (Input::isKeyPressed(Input::Key::Return))
-						{
 							g_world.checkForCommand = true;
-						}
+
+						if (Input::isKeyPressed(Input::Key::Space))
+							g_world.consoleBuffer.append(" ");
 
 						// Erase letters
 						if (Input::isKeyPressed(Input::Key::Backspace))

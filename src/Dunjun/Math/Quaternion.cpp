@@ -3,71 +3,45 @@
 
 namespace Dunjun
 {
-	Quaternion::Quaternion()
-		: x(0)
-		, y(0)
-		, z(0)
-		, w(1)
+	Quaternion operator-(const Quaternion& a)
 	{
-	}
+		Quaternion c = a;
 
-	Quaternion::Quaternion(f32 x, f32 y, f32 z, f32 w)
-		: x(x)
-		, y(y)
-		, z(z)
-		, w(w)
-	{
-	}
-
-
-	Quaternion::Quaternion(const Vector3& v, f32 s)
-		: x(v.x)
-		, y(v.y)
-		, z(v.z)
-		, w(s)
-	{
-	}
-
-	Quaternion Quaternion::operator-() const
-	{
-		Quaternion c;
-
-		c.w = -w;
-		c.x = -x;
-		c.y = -y;
-		c.z = -z;
+		c.w = -a.w;
+		c.x = -a.x;
+		c.y = -a.y;
+		c.z = -a.z;
 
 		return c;
 	}
 
-	Quaternion Quaternion::operator+(const Quaternion& b) const
+	Quaternion operator+(const Quaternion& a, const Quaternion& b)
 	{
-		Quaternion c;
+		Quaternion c = a;
 
-		c.w = w + b.w;
-		c.x = x + b.x;
-		c.y = y + b.y;
-		c.z = z + b.z;
+		c.w = a.w + b.w;
+		c.x = a.x + b.x;
+		c.y = a.y + b.y;
+		c.z = a.z + b.z;
 
 		return c;
 	}
 
-	Quaternion Quaternion::operator-(const Quaternion& b) const
+	Quaternion operator-(const Quaternion& a, const Quaternion& b)
 	{
-		Quaternion c;
+		Quaternion c = a;
 
-		c.w = w - b.w;
-		c.x = x - b.x;
-		c.y = y - b.y;
-		c.z = z - b.z;
+		c.w = a.w - b.w;
+		c.x = a.x - b.x;
+		c.y = a.y - b.y;
+		c.z = a.z - b.z;
 
 		return c;
 	}
 
-	Quaternion Quaternion::operator*(const Quaternion& b) const
+	Quaternion operator*(const Quaternion& a, const Quaternion& b)
 	{
-		const Quaternion& a = *this;
-		Quaternion c;
+		Quaternion c = a;
 
 		c.x = a.w * b.x + a.x * b.w + a.y * b.z - a.z * b.y;
 		c.y = a.w * b.y - a.x * b.z + a.y * b.w + a.z * b.x;
@@ -77,9 +51,9 @@ namespace Dunjun
 		return c;
 	}
 
-	Quaternion Quaternion::operator*(f32 s) const
+	Quaternion operator*(const Quaternion& a, f32 s)
 	{
-		Quaternion c = *this;
+		Quaternion c = a;
 
 		c.x *= s;
 		c.y *= s;
@@ -89,9 +63,9 @@ namespace Dunjun
 		return c;
 	}
 
-	Quaternion Quaternion::operator/(f32 s) const
+	Quaternion operator/(const Quaternion& a, f32 s)
 	{
-		Quaternion c = *this;
+		Quaternion c = a;
 
 		c.x /= s;
 		c.y /= s;
@@ -101,26 +75,26 @@ namespace Dunjun
 		return c;
 	}
 
-	bool Quaternion::operator==(const Quaternion& b) const
+	bool operator==(const Quaternion& a, const Quaternion& b)
 	{
 		for (size_t i = 0; i < 4; i++)
 		{
-			if (data[i] != b.data[i])
+			if (a.data[i] != b.data[i])
 				return false;
 		}
 		return true;
 	}
 
-	bool Quaternion::operator!= (const Quaternion& b) const
+	bool operator!= (const Quaternion& a, const Quaternion& b)
 	{
-		return !operator==(b);
+		return !operator==(a, b);
 	}
 
-	const Vector3 Quaternion::vector() const { return reinterpret_cast<const Vector3&>(data); }
-	Vector3& Quaternion::vector() { return reinterpret_cast<Vector3&>(data); }
-
-	f32 Quaternion::scaler() const { return w; }
-	f32& Quaternion::scaler() { return w; }
+	//const Vector3 vector(const Quaternion& a) { return reinterpret_cast<const Vector3&>(a.data); }
+	//Vector3& vector(Quaternion& a) { return reinterpret_cast<Vector3&>(a.data); }
+	//
+	//const f32 scaler(const Quaternion& a) { return a.w; }
+	//f32& scaler(Quaternion& a) { return a.w; }
 
 	f32 lengthSquared(const Quaternion& q)
 	{
@@ -149,17 +123,19 @@ namespace Dunjun
 
 	f32 dot(const Quaternion& a, const Quaternion& b)
 	{
-		return dot(a.vector(), b.vector()) + a.w * b.w;
+		return dot(Vector3{a.x, a.y, a.z}, 
+				   Vector3{b.x, b.y, b.z}) +
+				   a.w * b.w;
 	}
 
 	Quaternion cross(const Quaternion& a, const Quaternion& b)
 	{
-		return Quaternion(
+		return Quaternion{
 			a.w * b.x + a.x * b.w + a.y * b.z - a.z * b.y,
 			a.w * b.y + a.y * b.w + a.z * b.x - a.x * b.z,
 			a.w * b.z + a.z * b.w + a.x * b.y - a.y * b.x,
 			a.w * b.w - a.x * b.x - a.y * b.y - a.z * b.z
-			);
+		};
 
 	}
 
@@ -170,7 +146,7 @@ namespace Dunjun
 
 	Quaternion conjugate(const Quaternion& q)
 	{
-		Quaternion c(-q.x, -q.y, -q.z, q.w);
+		Quaternion c{-q.x, -q.y, -q.z, q.w};
 		return c;
 	}
 
@@ -183,8 +159,8 @@ namespace Dunjun
 	Vector3 operator*(const Quaternion& q, const Vector3& v)
 	{
 		// return q * quaternion(v, 0) * conjugate(q) // More expensive
-		Vector3 t = 2.0f * cross(q.vector(), v);
-		return (v + q.w * t + cross(q.vector(), t));
+		Vector3 t = 2.0f * cross(Vector3{q.x, q.y, q.z}, v);
+		return (v + q.w * t + cross(Vector3{q.x, q.y, q.z}, t));
 	}
 
 	/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -206,22 +182,27 @@ namespace Dunjun
 	{
 		f32 s2 = 1.0f - q.w * q.w; // 1 - sqrt(cos(theta)) = sqrt(sin(theta))
 		if (s2 <-0)
-			return Vector3(0, 0, 1);
+			return {0, 0, 1};
 
 		f32 invs2 = 1.0f / Math::sqrt(s2);
 
-		return q.vector() * invs2;
+		return Vector3{q.x, q.y, q.z} * invs2;
 	}
 
 	Quaternion angleAxis(const Radian& angle, const Vector3& axis)
 	{
 		Quaternion q;
 
-		const Vector3 a = normalize(axis);
+		Vector3 a = normalize(axis);
 
 		const f32 s = Math::sin(0.5f * angle);
 
-		q.vector() = a * s;
+		a *= s;
+
+		q.x = a.x;
+		q.y = a.y;
+		q.z = a.z;
+
 		q.w = Math::cos(0.5f * angle);
 
 		return q;
@@ -229,19 +210,21 @@ namespace Dunjun
 
 	Radian roll(const Quaternion& q)
 	{
-		return Radian(Math::atan2(2.0f * q[0] * q[1] + q[2] * q[3],
-			q[0] * q[0] + q[3] * q[3] - q[1] * q[1] - q[2] * q[2]));
+		return Radian(Math::atan2(2.0f * q.data[0] * q.data[1] + q.data[2] * q.data[3],
+										 q.data[0] * q.data[0] + q.data[3] * q.data[3] -
+										 q.data[1] * q.data[1] - q.data[2] * q.data[2]));
 	}
 
 	Radian pitch(const Quaternion& q)
 	{
-		return Radian(Math::atan2(2.0f * q[1] * q[2] + q[3] * q[0],
-			q[3] * q[3] - q[0] * q[0] - q[1] * q[1] + q[2] * q[2]));
+		return Radian(Math::atan2(2.0f * q.data[1] * q.data[2] + q.data[3] * q.data[0],
+										 q.data[3] * q.data[3] - q.data[0] * q.data[0] -
+										 q.data[1] * q.data[1] + q.data[2] * q.data[2]));
 	}
 
 	Radian yaw(const Quaternion& q)
 	{
-		return Radian(Math::asin(-2.0f * (q[0] * q[2] - q[3] * q[1])));
+		return Radian(Math::asin(-2.0f * (q.data[0] * q.data[2] - q.data[3] * q.data[1])));
 	}
 
 	EulerAngles quaternionToEulerAngles(const Quaternion& q)
@@ -261,7 +244,8 @@ namespace Dunjun
 
 	Matrix4 quaternionToMatrix4(const Quaternion& q)
 	{
-		Matrix4 mat(1);
+		Matrix4 mat = Matrix4::Identity;
+
 		Quaternion a = normalize(q);
 
 		const f32 xx = a.x * a.x;
@@ -274,17 +258,17 @@ namespace Dunjun
 		const f32 wy = a.w * a.y;
 		const f32 wz = a.w * a.z;
 
-		mat[0][0] = 1.0f - 2.0f * (yy + zz);
-		mat[0][1] = 2.0f * (xy + wz);
-		mat[0][2] = 2.0f * (xz - wy);
+		mat.data[0].data[0] = 1.0f - 2.0f * (yy + zz);
+		mat.data[0].data[1] = 2.0f * (xy + wz);
+		mat.data[0].data[2] = 2.0f * (xz - wy);
 
-		mat[1][0] = 2.0f * (xy - wz);
-		mat[1][1] = 1.0f - 2.0f * (xx + zz);
-		mat[1][2] = 2.0f * (yz + wx);
+		mat.data[1].data[0] = 2.0f * (xy - wz);
+		mat.data[1].data[1] = 1.0f - 2.0f * (xx + zz);
+		mat.data[1].data[2] = 2.0f * (yz + wx);
 
-		mat[2][0] = 2.0f * (xz + wy);
-		mat[2][1] = 2.0f * (yz - wx);
-		mat[2][2] = 1.0f - 2.0f * (xx + yy);
+		mat.data[2].data[0] = 2.0f * (xz + wy);
+		mat.data[2].data[1] = 2.0f * (yz - wx);
+		mat.data[2].data[2] = 1.0f - 2.0f * (xx + yy);
 
 		return mat;
 	}
@@ -292,10 +276,10 @@ namespace Dunjun
 	// NOTE: assumes matrix is only a rotational matrix and has no skew applied (scale)
 	Quaternion matrix4ToQuaternion(const Matrix4& m)
 	{
-		f32 fourXSquaredMinus1 = m[0][0] - m[1][1] - m[2][2];
-		f32 fourYSquaredMinus1 = m[1][1] - m[0][0] - m[2][2];
-		f32 fourZSquaredMinus1 = m[2][2] - m[0][0] - m[1][1];
-		f32 fourWSquaredMinus1 = m[0][0] + m[1][1] + m[2][2];
+		f32 fourXSquaredMinus1 = m.data[0].data[0] - m.data[1].data[1] - m.data[2].data[2];
+		f32 fourYSquaredMinus1 = m.data[1].data[1] - m.data[0].data[0] - m.data[2].data[2];
+		f32 fourZSquaredMinus1 = m.data[2].data[2] - m.data[0].data[0] - m.data[1].data[1];
+		f32 fourWSquaredMinus1 = m.data[0].data[0] + m.data[1].data[1] + m.data[2].data[2];
 
 		int biggestIndex = 0;
 		f32 fourBiggestSquaredMinus1 = fourWSquaredMinus1;
@@ -328,33 +312,33 @@ namespace Dunjun
 		case 0:
 		{
 			q.w = biggestVal;
-			q.x = (m[1][2] - m[2][1]) * mult;
-			q.y = (m[2][0] - m[0][2]) * mult;
-			q.z = (m[0][1] - m[1][0]) * mult;
+			q.x = (m.data[1].data[2] - m.data[2].data[1]) * mult;
+			q.y = (m.data[2].data[0] - m.data[0].data[2]) * mult;
+			q.z = (m.data[0].data[1] - m.data[1].data[0]) * mult;
 		}
 		break;
 		case 1:
 		{
-			q.w = (m[1][2] - m[2][1]) * mult;
+			q.w = (m.data[1].data[2] - m.data[2].data[1]) * mult;
 			q.x = biggestVal;
-			q.y = (m[0][1] + m[1][0]) * mult;
-			q.z = (m[2][0] + m[0][2]) * mult;
+			q.y = (m.data[0].data[1] + m.data[1].data[0]) * mult;
+			q.z = (m.data[2].data[0] + m.data[0].data[2]) * mult;
 
 		}
 		break;
 		case 2:
 		{
-			q.w = (m[2][0] - m[0][2]) * mult;
-			q.x = (m[0][1] + m[1][0]) * mult;
+			q.w = (m.data[2].data[0] - m.data[0].data[2]) * mult;
+			q.x = (m.data[0].data[1] + m.data[1].data[0]) * mult;
 			q.y = biggestVal;
-			q.z = (m[1][2] + m[2][1]) * mult;
+			q.z = (m.data[1].data[2] + m.data[2].data[1]) * mult;
 		}
 		break;
 		case 3:
 		{
-			q.w = (m[0][1] - m[1][0]) * mult;
-			q.x = (m[2][0] + m[0][2]) * mult;
-			q.y = (m[1][2] + m[2][1]) * mult;
+			q.w = (m.data[0].data[1] - m.data[1].data[0]) * mult;
+			q.x = (m.data[2].data[0] + m.data[0].data[2]) * mult;
+			q.y = (m.data[1].data[2] + m.data[2].data[1]) * mult;
 			q.z = biggestVal;
 		}
 		break;

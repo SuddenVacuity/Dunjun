@@ -3,27 +3,6 @@
 
 namespace Dunjun
 {
-	Vector2::Vector2()
-			: x(0)
-			, y(0)
-		{
-		}
-	Vector2::Vector2(f32 xy)
-			: x(xy)
-			, y(xy)
-		{
-		}
-	Vector2::Vector2(f32 x, f32 y)
-			: x(x)
-			, y(y)
-		{
-		}
-	Vector2::Vector2(f32 xy[2])
-			: x(xy[0])
-			, y(xy[1])
-		{
-		}
-
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 )				.
 )					VECTOR 2 OPERATORS
@@ -34,93 +13,97 @@ namespace Dunjun
 )				.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-		bool Vector2::Vector2::operator==(const Vector2& other) const // comparison
+		bool operator==(const Vector2& a, const Vector2& b) // comparison
 		{
 			for (size_t i = 0; i < 2; i++)
 			{
-				if (data[i] != other.data[i])
+				if (a.data[i] != b.data[i])
 					return false;
 			}
 			return true;
 		}
 
-		bool Vector2::operator!=(const Vector2& other) const
+		bool operator!=(const Vector2& a, const Vector2& b)
 		{
-			return !operator==(other);
+			return !operator==(a, b);
 		}
 
-		Vector2 Vector2::operator-() const
+		Vector2 operator-(const Vector2& a)
 		{
-			return Vector2(-x, -y);
+			return {-a.x, -a.y};
 		}
 
-		Vector2 Vector2::operator+(const Vector2& other) const // addition
+		Vector2 operator+(const Vector2& a, const Vector2& b) // addition
 		{
-			return Vector2(x + other.x, y + other.y);
+			return {a.x + b.x, a.y + b.y};
 		}
 
-		Vector2 Vector2::operator-(const Vector2& other) const // subtraction
+		Vector2 operator-(const Vector2& a, const Vector2& b) // subtraction
 		{
-			return Vector2(x - other.x, y - other.y);
+			return {a.x - b.x, a.y - b.y};
 		}
 
-		Vector2 Vector2::operator*(f32 scaler) const // scaler
+		Vector2 operator*(const Vector2& a, f32 scaler) // scaler
 		{
-			return Vector2(scaler * x, scaler * y);
+			return {scaler * a.x, scaler * a.y};
 		}
 
 		// Hadamard Product
-		Vector2 Vector2::operator*(const Vector2& other) const
+		Vector2 operator*(const Vector2& a, const Vector2& b)
 		{
 			Vector2 result;
 			for (size_t i = 0; i < 2; i++)
-				result[i] = data[i] * other.data[i];
+				result.data[i] = a.data[i] * b.data[i];
 			return result;
 		}
 
-		Vector2 Vector2::operator/(const Vector2& other) const
+		Vector2 operator/(const Vector2& a, const Vector2& b)
 		{
 			Vector2 result;
 			for (size_t i = 0; i < 2; i++)
-				result[i] = data[i] / other.data[i];
+				result.data[i] = a.data[i] / b.data[i];
 			return result;
 		}
 
-		Vector2 Vector2::operator/(f32 scaler) const // division scaler
+		Vector2 operator/(const Vector2& a, f32 scaler) // division scaler
 		{
-			return Vector2(x / scaler, y / scaler);
+			return {a.x / scaler, a.y / scaler};
 		}
 
-		Vector2& Vector2::operator+=(const Vector2& other) // addition
+		Vector2& operator+=(Vector2& a, const Vector2& b) // addition
 		{
-			x += other.x;
-			y += other.y;
+			a.x += b.x;
+			a.y += b.y;
 
-			return *this;
+			//return *this;
+			return a;
 		}
 
-		Vector2& Vector2::operator-=(const Vector2& other) // subtraction
+		Vector2& operator-=(Vector2& a, const Vector2& b) // subtraction
 		{
-			x -= other.x;
-			y -= other.y;
+			a.x -= b.x;
+			a.y -= b.y;
 
-			return *this;
+			//return *this;
+			return a;
 		}
 
-		Vector2& Vector2::operator*=(f32 scaler) // scaler
+		Vector2& operator*=(Vector2& a, f32 scaler) // scaler
 		{
-			x *= scaler;
-			y *= scaler;
-
-			return *this;
+			a.x *= scaler;
+			a.y *= scaler;
+			
+			//return *this;
+			return a;
 		}
 
-		Vector2& Vector2::operator/=(f32 scaler) // scaler
+		Vector2& operator/=(Vector2& a, f32 scaler) // scaler
 		{
-			x /= scaler;
-			y /= scaler;
-
-			return *this;
+			a.x /= scaler;
+			a.y /= scaler;
+			    
+			//return *this;
+			return a;
 		}
 
 	/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

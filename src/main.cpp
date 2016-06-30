@@ -29,10 +29,15 @@ main.cpp
 
 int main(int argc, char** argv)
 {
+	std::cout << "Vector2 POD - " << std::is_pod<Dunjun::Vector2>() << std::endl;
+	std::cout << "Vector3 POD - " << std::is_pod<Dunjun::Vector3>() << std::endl;
+	std::cout << "Vector4 POD - " << std::is_pod<Dunjun::Vector4>() << std::endl;
+	std::cout << "Matrix4 POD - " << std::is_pod<Dunjun::Matrix4>() << std::endl;
+	std::cout << "Quaternion POD - " << std::is_pod<Dunjun::Quaternion>() << std::endl;
+
+
 	Dunjun::Game::init();
-
 	Dunjun::Game::run();
-
 	Dunjun::Game::cleanUp();
 
 	return 0;
