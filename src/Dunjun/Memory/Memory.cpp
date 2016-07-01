@@ -24,7 +24,7 @@ namespace Dunjun
 		Allocator::SizeType* s = (Allocator::SizeType*)data;
 
 		// loop until s is 0
-		while (*(s - 1) != Header::PadValue)
+		while (*(s - 1) == Header::PadValue)
 			s--;
 
 		return (Header*)s - 1;
@@ -59,6 +59,7 @@ namespace Dunjun
 			Header* h = header(ptr);
 				
 			m_totalAllocated  -= h->size;
+
 			free(h);
 		}
 

@@ -391,6 +391,21 @@ namespace Dunjun
 		{
 			Memory::init();
 
+			// test custom array allocator
+			{
+				Array<f32> f = defaultAllocator();
+				reserve(f, 3);
+				f[0] = 1.0f;
+				f[1] = 2.0f;
+				f[2] = 3.0f;
+
+
+				std::cout << f[0] << f[1] << f[2];
+
+
+
+			} // end test custom array allocator
+
 			if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_GAMECONTROLLER | 
 						SDL_INIT_HAPTIC | SDL_INIT_JOYSTICK) != 0)
 			{

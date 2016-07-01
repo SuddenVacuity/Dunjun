@@ -11,6 +11,10 @@
 #define INTERNAL static
 #define LOCAL_PERSIST static
 
+#ifdef _MSC_VER
+#define alignof(x) __alignof(x)
+#endif
+
 namespace Dunjun
 {
 	using s8  = signed char;

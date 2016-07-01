@@ -1,7 +1,7 @@
 #ifndef DUNJUN_MEMORY_ALLOCATOR_HPP
 #define DUNJUN_MEMORY_ALLOCATOR_HPP
 
-#include <Dunjun/System/Types.hpp>
+#include <Dunjun/Common.hpp>
 
 #include <new>
 #include <utility>

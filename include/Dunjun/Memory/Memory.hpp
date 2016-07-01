@@ -15,7 +15,7 @@ namespace Dunjun
 
 		inline void* alignForward(void* ptr, Allocator::SizeType align)
 		{
-			uintptr p((uintptr)ptr);
+			uintptr p = (uintptr)ptr;
 			const Allocator::SizeType modulo = p % align;
 			if(modulo)
 				p += (uintptr)(align - modulo);
