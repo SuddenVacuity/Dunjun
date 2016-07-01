@@ -1,7 +1,7 @@
 #ifndef DUNJUN_COMMON_HPP // ifndef checks if this macro has been defined
 #define DUNJUN_COMMON_HPP // if not then define it
 
-#include <Dunjun/System/Types.hpp>
+#include <Dunjun/Memory/Memory.hpp>
 
 // undef these for internal math library
 #ifdef min
@@ -41,10 +41,6 @@
 //#include <typeinfo> // SceneNode.hpp
 #include <unordered_map> // ResourceHolder.hpp
 #include <vector>
-
-#define GLOBAL static // set all these types to refer to static
-#define INTERNAL static
-#define LOCAL_PERSIST static
 
 //namespace
 //{

@@ -7,6 +7,10 @@
 #include <cstring>	// added for s16/f16 type structs at end of file
 #include <memory>	// added for s16/f16 type structs at end of file
 
+#define GLOBAL static // set all these types to refer to static
+#define INTERNAL static
+#define LOCAL_PERSIST static
+
 namespace Dunjun
 {
 	using s8  = signed char;
@@ -29,6 +33,10 @@ namespace Dunjun
 
 	using b8 = bool;
 	using b32 = s32; // define this as 32 bit for it to be dword alignde
+
+	using usize = std::size_t;
+	using uintptr = uintptr_t;
+	using intptr = intptr_t;
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 )				.

@@ -216,7 +216,6 @@ namespace Dunjun
 				{
 					// TODO: fix inconsistant delay/ignore for this event
 					g_running = false;
-					g_window.close();
 					break;
 				}
 				case Event::Resized:
@@ -339,7 +338,6 @@ namespace Dunjun
 				Input::isKeyPressed(Input::Key::Escape)) // checks if the escape key is pressed in window
 			{
 				g_running = false;
-				g_window.close();
 			}
 
 			if (Input::isKeyPressed(Input::Key::F11)) // press F11 to toggle between default and fullscreen
@@ -391,6 +389,7 @@ namespace Dunjun
 
 		void init()
 		{
+			Memory::init();
 
 			if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_GAMECONTROLLER | 
 						SDL_INIT_HAPTIC | SDL_INIT_JOYSTICK) != 0)
@@ -506,6 +505,11 @@ namespace Dunjun
 		void cleanUp()
 		{
 			Input::cleanup();
+			g_window.close();
+			SDL_Quit();
+			Memory::shutdown();
+
+			std::exit(EXIT_SUCCESS);
 		}
 
 	} // end Game
