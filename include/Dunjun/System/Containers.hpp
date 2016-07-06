@@ -5,7 +5,8 @@
 
 namespace Dunjun
 {
-
+	// Dynamic array for POD types
+	// does not construct items
 	template <typename T>
 	struct Array
 	{
@@ -14,61 +15,23 @@ namespace Dunjun
 		Allocator::SizeType m_capacity;
 		T* m_data;
 
-		//template <typename T>
-		Array(Allocator& a)
-			: m_allocator(&a)
-			, m_length(0)
-			, m_capacity(0)
-			, m_data(nullptr)
-		{
-		}
+		Array(Allocator& a);
+		~Array();
 
-		//template <typename T>
-		~Array()
-		{
-			m_allocator->deallocate(m_data);
-		}
+		Array(const Array& other);
 
-		//template <typename T>
-		Array(const Array& other)
-			: m_allocator(other.m_allocator)
-			, m_length(0)
-			, m_capacity(0)
-			, m_data(nullptr)
-		{
-			const Allocator::SizeType num = other.m_length;
-			setCapacity(*this, num);
-			std::memcpy(data, other.data, num * sizeof(T));
-			m_length = num;
-		}
+		Array& operator=(const Array& other);
 
-		//template <typename T>
-		Array& operator=(const Array& other)
-		{
-			const Allocator::SizeType num = other.length;
-			resize(*this, num);
-			std::memcpy(data, other.data, num * sizrof(T));
-			return *this;
-		}
-
-		//template <typename T>
-		inline T& operator[](Allocator::SizeType index)
-		{
-			return m_data[index];
-		}
-		//template <typename T>
-		inline const T& operator[](Allocator::SizeType index) const
-		{
-			return m_data[index];
-		}
+		inline T& operator[](Allocator::SizeType index);
+		inline const T& operator[](Allocator::SizeType index) const;
 	}; // end Array
 
 	template <typename T>
 	struct Queue
 	{
 		Array<T> m_data;
-		Allocator::SizeType length;
-		Allocator::SizeType offset;
+		Allocator::SizeType m_length;
+		Allocator::SizeType m_offset;
 
 		Queue(Allocator& a);
 

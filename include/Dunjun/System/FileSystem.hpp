@@ -2,6 +2,7 @@
 #define DUNJUN_SYSTEM_FILESYSTEM_HPP
 
 #include <Dunjun/System/Array.hpp>
+#include <Dunjun/System/Queue.hpp>
 
 namespace Dunjun
 {
