@@ -3,6 +3,7 @@
 
 #include <Dunjun/System/Array.hpp>
 #include <Dunjun/System/Queue.hpp>
+#include <Dunjun/System/HashMap.hpp>
 
 namespace Dunjun
 {

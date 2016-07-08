@@ -13,10 +13,10 @@ namespace Dunjun
 		void init();
 		void shutdown();
 
-		inline void* alignForward(void* ptr, Allocator::SizeType align)
+		inline void* alignForward(void* ptr, size_t align)
 		{
 			uintptr p = (uintptr)ptr;
-			const Allocator::SizeType modulo = p % align;
+			const size_t modulo = p % align;
 			if(modulo)
 				p += (uintptr)(align - modulo);
 

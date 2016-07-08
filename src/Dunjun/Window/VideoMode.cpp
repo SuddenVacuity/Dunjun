@@ -34,7 +34,7 @@ namespace Dunjun
 
 		if(modes.empty())
 		{
-			int i, displayModeCount;
+			s32 displayModeCount;
 			SDL_DisplayMode dm;
 
 			displayModeCount = SDL_GetNumDisplayModes(0);

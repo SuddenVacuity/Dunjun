@@ -6,14 +6,14 @@ namespace Dunjun
 
 	struct Header
 	{
-		GLOBAL const Allocator::SizeType PadValue = Allocator::MaxSize;
-		Allocator::SizeType size;
+		GLOBAL const size_t PadValue = Allocator::MaxSize;
+		size_t size;
 	};
 
-	INTERNAL inline void fill(Header* header, void* data, Allocator::SizeType size)
+	INTERNAL inline void fill(Header* header, void* data, size_t size)
 	{
 		header->size = size;
-		Allocator::SizeType* ptr = (Allocator::SizeType*)(header + 1);
+		size_t* ptr = (size_t*)(header + 1);
 
 		while(ptr < data)
 			*ptr++ = Header::PadValue;
@@ -21,7 +21,7 @@ namespace Dunjun
 
 	INTERNAL inline Header* header(void* data)
 	{
-		Allocator::SizeType* s = (Allocator::SizeType*)data;
+		size_t* s = (size_t*)data;
 
 		// loop until s is 0
 		while (*(s - 1) == Header::PadValue)
@@ -39,9 +39,9 @@ namespace Dunjun
 
 		~HeapAllocator() {}
 
-		virtual void* allocate(SizeType size, SizeType align = DefaultAlign)
+		virtual void* allocate(size_t size, size_t align = DefaultAlign)
 		{
-			const SizeType total = size + align + sizeof(Header); // total memory
+			const size_t total = size + align + sizeof(Header); // total memory
 			Header* header = (Header*)malloc(total);//  malloc total memroy
 			void* ptr = header + 1; // get a pointer to the next point in memory
 			ptr = Memory::alignForward(ptr, align); // make new pointer aligned with memory
@@ -63,13 +63,13 @@ namespace Dunjun
 			free(h);
 		}
 
-		virtual SizeType allocatedSize(void* ptr)
+		virtual size_t allocatedSize(void* ptr)
 		{
 			return  header(ptr)->size;
 		}
 
 	private:
-		SizeType m_totalAllocated;
+		size_t m_totalAllocated;
 
 	}; // end HeapAllocator
 

@@ -11,8 +11,8 @@ namespace Dunjun
 	struct Array
 	{
 		Allocator* m_allocator;
-		Allocator::SizeType m_length;
-		Allocator::SizeType m_capacity;
+		size_t m_capacity;
+		size_t m_length;
 		T* m_data;
 
 		Array(Allocator& a);
@@ -22,22 +22,58 @@ namespace Dunjun
 
 		Array& operator=(const Array& other);
 
-		inline T& operator[](Allocator::SizeType index);
-		inline const T& operator[](Allocator::SizeType index) const;
+		inline T& operator[](size_t index);
+		inline const T& operator[](size_t index) const;
 	}; // end Array
+
+/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+)				.
+)					QUEUE
+)
+)				 Ring buffer for POD types  
+)				 does not construct items	
+)
+)				.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
 	template <typename T>
 	struct Queue
 	{
 		Array<T> m_data;
-		Allocator::SizeType m_length;
-		Allocator::SizeType m_offset;
+		size_t m_capacity;
+		size_t m_offset;
 
 		Queue(Allocator& a);
 
-		T& operator[](Allocator::SizeType index);
-		const T& operator[](Allocator::SizeType index) const;
+		T& operator[](size_t index);
+		const T& operator[](size_t index) const;
 	}; // end Queue
+
+/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+)				.
+)					HASH MAP
+)
+)				.
+)					.
+)
+)				.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+
+	template <typename T>
+	struct HashMap
+	{
+		struct Entry
+		{
+			u64 key;
+			size_t next;
+			T value;
+		};
+
+		Array<size_t> hashes;
+		Array<Entry> data;
+
+		HashMap(Allocator& a);
+	};
 
 } // end Dunjun
 

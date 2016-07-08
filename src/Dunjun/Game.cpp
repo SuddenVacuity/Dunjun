@@ -393,6 +393,7 @@ namespace Dunjun
 
 			// test custom array allocator
 			{
+				std::cout << "testing Array\n";
 				Array<f32> f = defaultAllocator();
 				reserve(f, 3);
 				f[0] = 1.0f;
@@ -403,8 +404,11 @@ namespace Dunjun
 
 			} // end test custom array allocator
 
+			std::cout << "\n\n\n";
+
 			// test custom queue allocator
 			{
+				std::cout << "testing Queue\n";
 				Allocator& a = defaultAllocator();
 				Queue<int> q = a;
 
@@ -439,6 +443,41 @@ namespace Dunjun
 							 q[3] << " " << q[4] << " " << q[5] << " " << std::endl;
 
 			} // end test custom queue allocator
+
+			std::cout << "\n\n\n";
+
+			// test HashMap
+			{
+				std::cout << "testing HashMap\n";
+				Allocator& a = defaultAllocator();
+
+				HashMap<int> h = a;
+
+				std::cout << "has(h, 0) :: " << has(h, 0) << "\n";
+
+				std::cout << "set(1337, 7331)\n";
+
+				set(h, 1337, 7331);
+
+				std::cout << "has(h, 1337, 7331) :: " << has(h, 1337) << "\n";
+				std::cout << "get(h, 1337, 7331) :: " << get(h, 1337, 0) << "\n";
+
+				std::cout << "\nset(h, i, 2 * i)\n";
+				for (int i = 0; i < 100; i++)
+				{
+					set(h, i, 2 * i);
+				}
+				std::cout << "get(h, i, 2 * i)\n";
+				for (int i = 0; i < 100; i++)
+				{
+					std::cout << get(h, i, -1) << " ";
+				}
+
+
+
+			} // end test HashMap
+
+			std::cout << "\n\n\n";
 
 			if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_GAMECONTROLLER | 
 						SDL_INIT_HAPTIC | SDL_INIT_JOYSTICK) != 0)

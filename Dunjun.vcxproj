@@ -161,7 +161,6 @@
     </ProjectReference>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\Dunjun\System\Array.cpp" />
     <ClCompile Include="src\Dunjun\Common.cpp" />
     <ClCompile Include="src\Dunjun\Memory\Memory.cpp" />
     <ClCompile Include="src\Dunjun\System\FileSystem.cpp" />
@@ -208,6 +207,7 @@
     <ClInclude Include="include\Dunjun\Common.hpp" />
     <ClInclude Include="include\Dunjun\System\Config.hpp" />
     <ClInclude Include="include\Dunjun\System\Containers.hpp" />
+    <ClInclude Include="include\Dunjun\System\HashMap.hpp" />
     <ClInclude Include="include\Dunjun\System\Queue.hpp" />
     <ClInclude Include="include\Dunjun\Window\GLContextSettings.hpp" />
     <ClInclude Include="include\Dunjun\Window\Event.hpp" />
