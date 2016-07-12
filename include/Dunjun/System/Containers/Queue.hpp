@@ -5,19 +5,28 @@
 
 namespace Dunjun
 {
-	// Appends an item to the end of the queue and changes queue length to match
-	// expands the queue if needed
+	// Returns the number of elements in the queue
+	template <typename T>
+	size_t len(const Queue<T>& q);
+	// Returns number of spaces remaining in queue
+	template <typename T>
+	size_t space(const Queue<T>& q);
+
+	// adds item behind current offset
+	// added item is last in queue
 	template <typename T>
 	size_t pushBack(Queue<T>& q, const T& item);
-	// Removes the last item in the queue
+	// moves offset forward by one
+	// TODO: make this affect data
 	template <typename T>
 	void popBack(Queue<T>& q);
 
-	// Appends an item to the front of the queue and changes queue length to match
-	// expands the queue if needed
+	// adds item in front of current offset
+	// added item first in queue
 	template <typename T>
 	size_t pushFront(Queue<T>& q, const T& item);
-	// Removes the first item in the queue
+	// moves offset back by one
+	// TODO: make this affect data
 	template <typename T>
 	void popFront(Queue<T>& q);
 
@@ -30,14 +39,7 @@ namespace Dunjun
 	template <typename T>
 	void pop(Queue<T>& q, size_t count);
 
-	// Returns the number of elements in the queue
-	template <typename T>
-	size_t len(const Queue<T>& q);
-	// Returns number of spaces remaining in queue
-	template <typename T>
-	size_t space(const Queue<T>& q);
-
-	// Iterator :: Returns a pointer to where the queue begins
+	// Iterator :: Returns a pointer to where to insert data
 	template <typename T>
 	inline T* begin(Queue<T>& q);
 	template <typename T>
@@ -93,15 +95,26 @@ namespace Dunjun
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
 	template <typename T>
+	inline size_t len(const Queue<T>& q)
+	{
+		return q.m_capacity;
+	}
+
+	template <typename T>
+	size_t space(const Queue<T>& q)
+	{
+		return len(q.m_data) - q.m_capacity;
+	}
+
+	/////////////////////////////////////////
+
+	template <typename T>
 	size_t pushBack(Queue<T>& q, const T& item)
 	{
-		if(space(q) == 0)
+		if (space(q) == 0)
 			grow(q);
 
-		q[q.m_capacity] = item;
-
-		q.m_capacity++;
-		//q.m_offset++;
+		q[q.m_capacity++] = item;
 
 		return q.m_capacity;
 	}
@@ -109,10 +122,9 @@ namespace Dunjun
 	template <typename T>
 	void popBack(Queue<T>& q)
 	{
-		assert(q.m_capacity > 0 && "Queue<T> Queue must be greater than 0");
+		assert(q.m_capacity > 0);
 
 		q.m_capacity--;
-		//q.m_offset--;
 	}
 
 	////////////////////////////////////
@@ -134,7 +146,7 @@ namespace Dunjun
 	template <typename T>
 	void popFront(Queue<T>& q)
 	{
-		assert(q.m_capacity > 0 && "Queue<T> Queue must be greater than 0");
+		assert(q.m_capacity > 0);
 
 		q.m_offset = (q.m_offset + 1) % len(q.m_data);
 		q.m_capacity--;
@@ -144,28 +156,21 @@ namespace Dunjun
 	template <typename T>
 	size_t push(Queue<T>& q, const T* items, size_t count)
 	{
-	
 		if(space(q) < count)
 			grow(q, q.m_capacity + count);
 
 		const size_t length = len(q.m_data);
-
-		// find current offset
 		const size_t insert = (q.m_offset + q.m_capacity) % length;
 
-		// count of items used to find end of data to be added
 		size_t toInsert = count;
 
-		//if (insert + toInsert + 1 > length)
-		if (insert + toInsert > length)
+		if(insert + toInsert > length)
 			toInsert = length - insert;
 
 		std::memcpy(begin(q.m_data) + insert, items, toInsert * sizeof(T));
 
-		q.m_capacity += toInsert;
-
-		// wrap around to beginning
 		items += toInsert;
+
 		toInsert = count - toInsert;
 
 		std::memcpy(begin(q.m_data), items, toInsert * sizeof(T));
@@ -173,8 +178,6 @@ namespace Dunjun
 		q.m_capacity += count;
 
 		return q.m_capacity;
-		// TODO: Fix Queue
-		//get 1 4 9 1 2 3 //expect 4 5 6 7 8 9
 	}
 	template <typename T>
 	void pop(Queue<T>& q, size_t count)
@@ -185,47 +188,39 @@ namespace Dunjun
 		q.m_capacity -= count;
 	}
 
-	template <typename T>
-	inline size_t len(const Queue<T>& q)
-	{
-		return q.m_capacity;
-	}
-
-	template <typename T>
-	size_t space(const Queue<T>& q)
-	{
-		return len(q.m_data) - q.m_capacity;
-	}
-
 	////////////////////////////////////
 	template <typename T>
 	inline T* begin(Queue<T>& q)
 	{
-		return begin(q.m_data) + q.m_capacity;
+		return begin(q.m_data) + q.m_offset;
 	}
 
 	template <typename T>
 	inline const T* begin(const Queue<T>& q)
 	{
-		return begin(q.m_data) + q.m_capacity;
+		return begin(q.m_data) + q.m_offset;
 	}
 
 	template <typename T>
 	T* end(Queue<T>& q)
 	{
-		const size_t end = q.m_offset + q.m_capacity;
+		const size_t endPos = (q.m_offset + q.m_capacity) % len(q.m_data);
 
-		return !(end < len(q.m_data)) ? end(q.m_data)
-									  : begin(q.m_data) + end;
+		//return !(endPos < len(q.m_data)) ? end(q.m_data)
+		//								   : begin(q.m_data) + endPos;
+		return !(endPos < len(q.m_data)) ? end(q.m_data)
+										 : begin(q.m_data) + endPos;
 	}
 
 	template <typename T>
 	const T* end(const Queue<T>& q)
 	{
-		const size_t end = q.m_offset + q.m_capacity;
+		const size_t endPos = q.m_offset + q.m_capacity % len(q.m_data);
 
-		return !(end < len(q.m_data)) ? end(q.m_data)
-									  : begin(q.m_data) + end;
+		//return !(endPos < len(q.m_data)) ? end(q.m_data)
+		//								   : begin(q.m_data) + endPos;
+		return !(endPos < len(q.m_data)) ? end(q.m_data)
+										 : begin(q.m_data) + endPos;
 	}
 
 
@@ -278,6 +273,7 @@ namespace Dunjun
 	{
 		const size_t oldLength = len(q.m_data);
 
+		//q.m_capacity = capacity;
 		resize(q.m_data, capacity);
 
 		if(oldLength < q.m_offset + q.m_capacity)
@@ -299,6 +295,7 @@ namespace Dunjun
 		setCapacity(q, q.m_capacity + count);
 	}
 
+	// TODO: remove this - ring buffer should only grow by explicit amounts
 	template <typename T>
 	void grow(Queue<T>& q, size_t minCapacity)
 	{
@@ -330,6 +327,20 @@ namespace Dunjun
 	{
 	}
 
+// cancel offset overloaded operators for testing
+#if 0
+	template <typename T>
+	T& Queue<T>::operator[](size_t index)
+	{
+		return m_data[index % len(m_data)];
+	}
+
+	template <typename T>
+	const T& Queue<T>::operator[](size_t index) const
+	{
+		return m_data[index % len(m_data)];
+	}
+#else
 	template <typename T>
 	T& Queue<T>::operator[](size_t index)
 	{
@@ -341,6 +352,7 @@ namespace Dunjun
 	{
 		return m_data[(m_offset + index) % len(m_data)];
 	}
+#endif
 } // end Dunjun
 
 #endif

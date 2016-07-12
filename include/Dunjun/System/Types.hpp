@@ -12,7 +12,11 @@
 #define LOCAL_PERSIST static
 
 #ifdef _MSC_VER
-#define alignof(x) __alignof(x)
+	#define _ALLOW_KEYWORD_MACROS
+#endif
+
+#if !defined(alignof)
+	#define alignof(x) __alignof(x)
 #endif
 
 namespace Dunjun
@@ -82,10 +86,7 @@ namespace Dunjun
 		class f16
 		 {
 		public:
-			f16()
-				 : m_value{ 0 }
-				{
-				}
+			f16() = default;
 			
 				f16(f32 f)
 				 : m_value{ f32Tof16(f) }

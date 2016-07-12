@@ -20,6 +20,7 @@ namespace Dunjun
 		virtual void* allocate(size_t size, size_t align = DefaultAlign) = 0;
 		virtual void deallocate(void* ptr) = 0;
 		virtual size_t allocatedSize(void* ptr) = 0;
+		virtual size_t totalAllocated() = 0;
 
 		template <typename T, typename... Args>
 		T* makeNew(Args&&... args)

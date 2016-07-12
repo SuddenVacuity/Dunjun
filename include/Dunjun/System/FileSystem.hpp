@@ -1,9 +1,11 @@
 #ifndef DUNJUN_SYSTEM_FILESYSTEM_HPP
 #define DUNJUN_SYSTEM_FILESYSTEM_HPP
 
-#include <Dunjun/System/Array.hpp>
-#include <Dunjun/System/Queue.hpp>
-#include <Dunjun/System/HashMap.hpp>
+#include <Dunjun/System/Containers/Array.hpp>
+#include <Dunjun/System/Containers/Queue.hpp>
+
+//#include <Dunjun/System/MurmurHash.hpp>
+#include <Dunjun/System/Containers/HashMap.hpp>
 
 namespace Dunjun
 {

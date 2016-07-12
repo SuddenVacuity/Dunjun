@@ -28,33 +28,33 @@ namespace Dunjun
 		context = c;
 
 		{ // player scene node
-			SceneNode::u_ptr PLAYER = make_unique<SceneNode>();
+			SceneNode::u_ptr player = make_unique<SceneNode>();
 		
-			PLAYER->transform.position = { 2.5f, 1.0f, 2.5f };
-			PLAYER->transform.scale = { 2.0f, 2.0f, 2.0f };
-			PLAYER->name = "player";
+			player->transform.position = { 2.5f, 1.0f, 2.5f };
+			player->transform.scale = { 2.0f, 2.0f, 2.0f };
+			player->name = "player";
 		
-			PLAYER->addComponent<MeshRenderer>(context.meshHolder->get("player"),
+			player->addComponent<MeshRenderer>(context.meshHolder->get("player"),
 											   &context.materialHolder->get("dunjunText"));
 
 			//player->addComponent<FaceCamera>(m_mainCamera);
 		
-			player = PLAYER.get();
+			this->player = player.get();
 		
-			sceneGraph.attachChild(std::move(PLAYER));
+			sceneGraph.attachChild(std::move(player));
 		}
 
 		{ // level generation
-			auto LEVEL = make_unique<Level>();
+			auto level = make_unique<Level>();
 			
-			LEVEL->material = &context.materialHolder->get("default");
-			LEVEL->name = "level";
+			level->material = &context.materialHolder->get("default");
+			level->name = "level";
 
-			LEVEL->generate();
+			level->generate();
 
-			level = LEVEL.get();
+			this->level = level.get();
 
-			sceneGraph.attachChild(std::move(LEVEL));
+			sceneGraph.attachChild(std::move(level));
 		}
 
 		// add ambient light
@@ -211,6 +211,7 @@ namespace Dunjun
 				std::cout << "[LTCHRED] = Test ColorLib::removeChannelRed on point lights" << std::endl;
 				std::cout << "[LTCHGRN] = Test ColorLib::removeChannelGreen on point lights" << std::endl;
 				std::cout << "[LTCHBLU] = Test ColorLib::removeChannelBlue on point lights" << std::endl;
+				std::cout << "[LTGREYS] = Test ColorLib::greyScale on point lights" << std::endl;
 				std::cout << "[LTRESET] = Set light to default values" << std::endl;
 				std::cout << "[DIR] = Return views cardinal direction and vertical angle" << std::endl;
 				std::cout << "[ROOMS] = Return number of rooms currently rendering" << std::endl;
@@ -319,16 +320,16 @@ namespace Dunjun
 				sceneGraph.detachChild(*level);
 
 				{ // test level generation
-					auto LEVEL = make_unique<Level>();
+					auto level = make_unique<Level>();
 
-					LEVEL->material = &context.materialHolder->get("dunjunText");
-					LEVEL->name = "level";
+					level->material = &context.materialHolder->get("dunjunText");
+					level->name = "level";
 
-					LEVEL->generate();
+					level->generate();
 
-					level = LEVEL.get();
+					this->level = level.get();
 
-					sceneGraph.attachChild(std::move(LEVEL));
+					sceneGraph.attachChild(std::move(level));
 				}
 			}
 			// regenerate world without culling
@@ -340,16 +341,16 @@ namespace Dunjun
 				sceneGraph.detachChild(*level);
 		
 				{ // test level generation
-					auto LEVEL = make_unique<Level>();
+					auto level = make_unique<Level>();
 
-					LEVEL->material = &context.materialHolder->get("dunjunText");
-					LEVEL->name = "level";
+					level->material = &context.materialHolder->get("dunjunText");
+					level->name = "level";
 
-					LEVEL->generate();
+					level->generate();
 
-					level = LEVEL.get();
+					this->level = level.get();
 
-					sceneGraph.attachChild(std::move(LEVEL));
+					sceneGraph.attachChild(std::move(level));
 				}
 			}
 			// remove red from point lights
@@ -726,7 +727,7 @@ namespace Dunjun
 
 
 
-
+		std::cout << "";
 	} // end update()
 
 	void World::handleEvent(const Event& event)

@@ -59,28 +59,28 @@ namespace Dunjun
 			std::cout << "Loading shader " << shaderCounter++;
 			g_shaderHolder.insertFromFile("default", "default_vert.glsl", 
 													 "default_frag.glsl");
-			std::cout << " > " << shaderCounter++;
+			std::cout << " " << shaderCounter++;
 			g_shaderHolder.insertFromFile("texturePass", "texPass_vert.glsl", 
 														 "texPass_frag.glsl");
-			std::cout << " > " << shaderCounter++;
+			std::cout << " " << shaderCounter++;
 			g_shaderHolder.insertFromFile("deferredGeometryPass", "deferredGeometryPass_vert.glsl", 
 																  "deferredGeometryPass_frag.glsl");
-			std::cout << " > " << shaderCounter++;
+			std::cout << " " << shaderCounter++;
 			g_shaderHolder.insertFromFile("deferredDirectionalLight", "deferredLightPass_vert.glsl",
 																	  "deferredDirectionalLightPass_frag.glsl");
-			std::cout << " > " << shaderCounter++;
+			std::cout << " " << shaderCounter++;
 			g_shaderHolder.insertFromFile("deferredAmbientLight", "deferredLightPass_vert.glsl", 
 																  "deferredAmbientLightPass_frag.glsl");
-			std::cout << " > " << shaderCounter++;
+			std::cout << " " << shaderCounter++;
 			g_shaderHolder.insertFromFile("deferredPointLight", "deferredLightPass_vert.glsl",
 																"deferredPointLightPass_frag.glsl");
-			std::cout << " > " << shaderCounter++;
+			std::cout << " " << shaderCounter++;
 			g_shaderHolder.insertFromFile("deferredSpotLight", "deferredLightPass_vert.glsl",
 															   "deferredSpotLightPass_frag.glsl");
 
 
 
-			std::cout << " > " << shaderCounter++ << std::endl;
+			std::cout << " " << shaderCounter++ << std::endl;
 			g_shaderHolder.insertFromFile("deferredFinalPass", "deferredLightPass_vert.glsl",
 															   "deferredFinalPass_frag.glsl");
 		}
@@ -265,7 +265,12 @@ namespace Dunjun
 						if (Input::isKeyPressed(Input::Key::Down))
 							g_world.consoleText.append(" ");
 
-						// add letters
+						//////////////////////////////////
+						//								//
+						//		   ADD LETTERS			//
+						//								//
+						//////////////////////////////////
+
 						for (int i = 0; i < 26; i++)
 						{
 							std::string s = ""; // can't initialize as i or cast in .append()
@@ -390,92 +395,6 @@ namespace Dunjun
 		void init()
 		{
 			Memory::init();
-
-			// test custom array allocator
-			{
-				std::cout << "testing Array\n";
-				Array<f32> f = defaultAllocator();
-				reserve(f, 3);
-				f[0] = 1.0f;
-				f[1] = 2.0f;
-				f[2] = 3.0f;
-
-				std::cout << f[0] << f[1] << f[2] << "\n";
-
-			} // end test custom array allocator
-
-			std::cout << "\n\n\n";
-
-			// test custom queue allocator
-			{
-				std::cout << "testing Queue\n";
-				Allocator& a = defaultAllocator();
-				Queue<int> q = a;
-
-				reserve(q, 6);
-
-				std::cout << "\nq - initial reserved values\n";
-				std::cout << q[0] << " " << q[1] << " " << q[2] << " " <<
-							 q[3] << " " << q[4] << " " << q[5] << " " << "\n";
-
-				pushBack(q, 4);
-				std::cout << "\nq - pushBack(q, 4) values\n";
-				std::cout << q[0] << " " << q[1] << " " << q[2] << " " <<
-							 q[3] << " " << q[4] << " " << q[5] << " " << "\n";
-
-				pushBack(q, 9);
-				std::cout << "\nq - pushBack(q, 9) values\n";
-				std::cout << q[0] << " " << q[1] << " " << q[2] << " " <<
-							 q[3] << " " << q[4] << " " << q[5] << " " << "\n";
-
-				pushFront(q, 1);
-
-				std::cout << "\nq - pushFront(q, 1) values\n";
-				std::cout << q[0] << " " << q[1] << " " << q[2] << " " <<
-							 q[3] << " " << q[4] << " " << q[5] << " " << "\n";
-
-				int items[] = {1, 2, 3, 4, 5, 6, 7, 8, 9};
-
-				push(q, items, 9);
-
-				std::cout << "\nq - push(q, items, 9) values\n";
-				std::cout << q[0] << " " << q[1] << " " << q[2] << " " <<
-							 q[3] << " " << q[4] << " " << q[5] << " " << std::endl;
-
-			} // end test custom queue allocator
-
-			std::cout << "\n\n\n";
-
-			// test HashMap
-			{
-				std::cout << "testing HashMap\n";
-				Allocator& a = defaultAllocator();
-
-				HashMap<int> h = a;
-
-				std::cout << "has(h, 0) :: " << has(h, 0) << "\n";
-
-				std::cout << "set(1337, 7331)\n";
-
-				set(h, 1337, 7331);
-
-				std::cout << "has(h, 1337, 7331) :: " << has(h, 1337) << "\n";
-				std::cout << "get(h, 1337, 7331) :: " << get(h, 1337, 0) << "\n";
-
-				std::cout << "\nset(h, i, 2 * i)\n";
-				for (int i = 0; i < 100; i++)
-				{
-					set(h, i, 2 * i);
-				}
-				std::cout << "get(h, i, 2 * i)\n";
-				for (int i = 0; i < 100; i++)
-				{
-					std::cout << get(h, i, -1) << " ";
-				}
-
-
-
-			} // end test HashMap
 
 			std::cout << "\n\n\n";
 

@@ -162,11 +162,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\Dunjun\Common.cpp" />
+    <ClCompile Include="src\Dunjun\debug\UnitTest.cpp" />
     <ClCompile Include="src\Dunjun\Memory\Memory.cpp" />
     <ClCompile Include="src\Dunjun\System\FileSystem.cpp" />
     <ClCompile Include="src\Dunjun\Game.cpp" />
     <ClCompile Include="src\Dunjun\Graphics\GBuffer.cpp" />
     <ClCompile Include="src\Dunjun\Graphics\Image.cpp" />
+    <ClCompile Include="src\Dunjun\System\MurmurHash.cpp" />
     <ClCompile Include="src\Dunjun\Window\Input.cpp" />
     <ClCompile Include="src\Dunjun\Level.cpp" />
     <ClCompile Include="src\Dunjun\Level\Room.cpp" />
@@ -198,17 +200,19 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Dunjun\Context.hpp" />
+    <ClInclude Include="include\Dunjun\debug\Preprocessor.hpp" />
     <ClInclude Include="include\Dunjun\Graphics\Camera.hpp" />
     <ClInclude Include="include\Dunjun\Memory\Allocator.hpp" />
     <ClInclude Include="include\Dunjun\Memory\Memory.hpp" />
-    <ClInclude Include="include\Dunjun\System\Array.hpp" />
+    <ClInclude Include="include\Dunjun\System\Containers\Array.hpp" />
     <ClInclude Include="include\Dunjun\System\Clock.hpp" />
     <ClInclude Include="include\Dunjun\Graphics\Color.hpp" />
     <ClInclude Include="include\Dunjun\Common.hpp" />
     <ClInclude Include="include\Dunjun\System\Config.hpp" />
     <ClInclude Include="include\Dunjun\System\Containers.hpp" />
-    <ClInclude Include="include\Dunjun\System\HashMap.hpp" />
-    <ClInclude Include="include\Dunjun\System\Queue.hpp" />
+    <ClInclude Include="include\Dunjun\System\Containers\HashMap.hpp" />
+    <ClInclude Include="include\Dunjun\System\Containers\Queue.hpp" />
+    <ClInclude Include="include\Dunjun\System\Containers\RingBuffer.hpp" />
     <ClInclude Include="include\Dunjun\Window\GLContextSettings.hpp" />
     <ClInclude Include="include\Dunjun\Window\Event.hpp" />
     <ClInclude Include="include\Dunjun\System\FileSystem.hpp" />
@@ -258,6 +262,7 @@
     <ClInclude Include="include\Dunjun\Window\VideoMode.hpp" />
     <ClInclude Include="include\Dunjun\Window\Window.hpp" />
     <ClInclude Include="include\Dunjun\World.hpp" />
+    <ClInclude Include="include\Dunjun\System\MurmurHash.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="data\shaders\deferredFinalPass_frag.glsl" />

@@ -5,6 +5,13 @@
 
 namespace Dunjun
 {
+	// Returns the number of elements in the array
+	template <typename T>
+	size_t len(const Array<T>& a);
+	// Returns the max number of elements the array can hold
+	template <typename T>
+	size_t capacity(const Array<T>& a);
+
 	// Appends an item to the array and changes array length to match
 	// expands the array if needed
 	template <typename T>
@@ -16,13 +23,6 @@ namespace Dunjun
 	// expands the array if needed
 	template <typename T>
 	size_t push(Array<T>& a, const T* items, size_t count);
-
-	// Returns the number of elements in the array
-	template <typename T>
-	size_t len(const Array<T>& a);
-	// Returns the max number of elements the array can hold
-	template <typename T>
-	size_t capacity(const Array<T>& a);
 
 	// Iterator :: Returns a pointer to where the array begins
 	template <typename T>
@@ -81,6 +81,18 @@ namespace Dunjun
 	)				.
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
+	template <typename T>
+	inline size_t len(const Array<T>& a)
+	{
+		return a.m_length;
+	}
+	template <typename T>
+	inline size_t capacity(const Array<T>& a)
+	{
+		return a.m_capacity;
+	}
+
+	//////////////////////////////////
 
 	template <typename T>
 	inline size_t pushBack(Array<T>& a, const T& item)
@@ -88,9 +100,7 @@ namespace Dunjun
 		if(a.m_length == a.m_capacity)
 			grow(a);
 
-		a.m_data[a.m_length] = item;
-
-		a.m_length++;
+		a.m_data[a.m_length++] = item;
 
 		return a.m_length;
 	}
@@ -105,25 +115,13 @@ namespace Dunjun
 	template <typename T>
 	inline size_t push(Array<T>& a, const T* items, size_t count)
 	{
-		if(!(a.m_capacity > a.m_length + count))
+		if(a.m_capacity <= a.m_length + count)
 			grow(a, a.m_length + count);
 
 		std::memcpy(&a.m_data[a.m_length], items, count * sizeof(T));
 		a.m_length += count;
 
 		return a.m_length;
-	}
-
-	/////////////////////////////////
-	template <typename T>
-	inline size_t len(const Array<T>& a)
-	{
-		return a.m_length;
-	}
-	template <typename T>
-	inline size_t capacity(const Array<T>& a)
-	{
-		return a.m_capacity;
 	}
 
 	/////////////////////////////////
@@ -140,12 +138,12 @@ namespace Dunjun
 	template <typename T>
 	inline T* end(Array<T>& a)
 	{
-		return a.m_data + a.length;
+		return a.m_data + a.m_length;
 	}
 	template <typename T>
 	inline const T* end(const Array<T>& a)
 	{
-		return a.m_data + a.length;
+		return a.m_data + a.m_length;
 	}
 
 	/////////////////////////////////
@@ -248,8 +246,8 @@ namespace Dunjun
 	template <typename T>
 	inline Array<T>::Array(Allocator& a)
 		: m_allocator(&a)
-		, m_capacity(0)
 		, m_length(0)
+		, m_capacity(0)
 		, m_data(nullptr)
 	{
 	}
@@ -257,14 +255,15 @@ namespace Dunjun
 	template <typename T>
 	inline Array<T>::~Array()
 	{
+
 		m_allocator->deallocate(m_data);
 	}
 
 	template <typename T>
 	Array<T>::Array(const Array& other)
 		: m_allocator(other.m_allocator)
-		, m_capacity(0)
 		, m_length(0)
+		, m_capacity(0)
 		, m_data(nullptr)
 	{
 		const size_t num = other.m_length;
@@ -274,12 +273,12 @@ namespace Dunjun
 	}
 
 	template <typename T>
-	Array<T>& Array<T>::operator=(const Array& other)
+	inline Array<T>& Array<T>::operator=(const Array& other)
 	{
 		const size_t num = other.m_length;
 		resize(*this, num);
 		std::memcpy(m_data, other.m_data, num * sizeof(T));
-		m_length = num;
+		//m_length = num;
 		return *this;
 	}
 

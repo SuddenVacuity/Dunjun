@@ -43,32 +43,6 @@
 #include <unordered_map> // ResourceHolder.hpp
 #include <vector>
 
-//namespace
-//{
-//	template <typenameF>
-//	struct Defer
-//	{
-//		Defer(F f)
-//			:f(f)
-//		{
-//		}
-//
-//		~Defer() { f(); }
-//
-//		F f;
-//	};
-//
-//	template <typename F>
-//	inline Defer<F> makeDefer(F f)
-//	{
-//		return Defer<F>(f);
-//	}
-//} // end anon namespace
-//
-//#define STRING_JOIN2(arg1, arg2) DO_STRING_JOIN(arg1, arg2)
-//#define DO_STRING_JOIN2(arg1, arg2) arg1 ## arg2
-//#define DEFER(code) auto STRING_JOIN2(defer_, __LINE__) = makeDefer([=](){code;});
-
 namespace Dunjun
 {
 	namespace
@@ -143,7 +117,7 @@ namespace Dunjun
 
 #define Defer_1(x, y) x##y
 #define Defer_2(x, y) Defer_1(x, y)
-#define Defer_3(x) Defer_2(c, __COUNTER__)
+#define Defer_3(x) Defer_2(x, __COUNTER__)
 #define defer(code) auto Defer_3(_defer_) = Impl::deferFn([&](){code;});
 
 /*/	Example for defer

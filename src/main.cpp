@@ -24,8 +24,12 @@ main.cpp
 
 */
 
+#include <Dunjun/debug/Preprocessor.hpp>
 
 #include <Dunjun/Game.hpp>
+
+
+#ifndef DEBUG_ALT_MAIN
 
 int main(int argc, char** argv)
 {
@@ -42,6 +46,8 @@ int main(int argc, char** argv)
 
 	return 0;
 }
+
+#endif // #ifndef DUNJUN_ALT_MAIN
 
 //#include <Dunjun/Input.hpp>
 //#include <Dunjun/Event.hpp>

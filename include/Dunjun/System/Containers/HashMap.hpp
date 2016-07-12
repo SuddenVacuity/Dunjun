@@ -2,7 +2,7 @@
 #define DUNJUN_SYSTEM_HASHMAP_HPP
 
 #include <Dunjun/System/Containers.hpp>
-#include <Dunjun/System/Array.hpp>
+#include <Dunjun/System/Containers/Array.hpp>
 
 namespace Dunjun
 {
@@ -11,8 +11,8 @@ namespace Dunjun
 	bool has(const HashMap<T> u, u64 key);
 
 	// returns stored value for the key
-	template <typename T>
-	const T& get(const HashMap<T>& h, u64 key);
+	//template <typename T>
+	//const T& get(const HashMap<T>& h, u64 key);
 	// returns stored value for the key - return a default value if key does not exist
 	template <typename T>
 	const T& get(const HashMap<T>& h, u64 key, const T& defaultValue);
@@ -145,13 +145,12 @@ namespace Dunjun
 			else
 				h.data[fr.dataPrev].next = h.data[fr.dataIndex].next;
 
-			if(fr.dataIndex == len(h.data) - 1)
-			{
-				popBack(h.data);
-				return;
-			}
+			popBack(h.data);
 
-			h.data[fr.dataIndex] = h.data[len(h.data) - 1];
+			if(fr.dataIndex == len(h.data))
+				return;
+
+			h.data[fr.dataIndex] = h.data[len(h.data)];
 
 			FindResult last = find(h, h.data[fr.dataIndex].key);
 
@@ -301,7 +300,7 @@ namespace Dunjun
 		template <typename T>
 		bool full(HashMap<T>& h)
 		{
-			LOCAL_PERSIST const f32 maximumLoadCoefficient = 0.75f;
+			const f32 maximumLoadCoefficient = 0.75f;
 			return len(h.data) >= maximumLoadCoefficient * len(h.hashes);
 		}
 
@@ -319,22 +318,22 @@ namespace Dunjun
 
 
 	template <typename T>
-	bool has(const HashMap<T> h, u64 key)
+	inline bool has(const HashMap<T> h, u64 key)
 	{
 		return Impl::findOrFail(h, key) != Impl::EndOfList;
 	}
 
-	template <typename T>
-	const T& get(const HashMap<T>& h, u64 key)
-	{
-		const size_t index = Impl::findOrFail(h, key);
-		assert(index != Impl::EndOfList && "HashMap::get() index does not exist and no default value was specified");
+	//template <typename T>
+	//const T& get(const HashMap<T>& h, u64 key)
+	//{
+	//	const size_t index = Impl::findOrFail(h, key);
+	//	assert(index != Impl::EndOfList && "HashMap::get() index does not exist and no default value was specified");
+	//
+	//	return h.data[index].value;
+	//}
 
-		return h.data[index].value;
-	}
-
 	template <typename T>
-	const T& get(const HashMap<T>& h, u64 key, const T& defaultValue)
+	inline const T& get(const HashMap<T>& h, u64 key, const T& defaultValue)
 	{
 		const size_t index = Impl::findOrFail(h, key);
 
@@ -345,7 +344,7 @@ namespace Dunjun
 	}
 
 	template <typename T>
-	void set(HashMap<T>& h, u64 key, const T& value)
+	inline void set(HashMap<T>& h, u64 key, const T& value)
 	{
 		if(len(h.hashes) == 0)
 			Impl::grow(h);
@@ -360,31 +359,31 @@ namespace Dunjun
 	}
 
 	template <typename T>
-	void remove(HashMap<T>& h, u64 key)
+	inline void remove(HashMap<T>& h, u64 key)
 	{
 		Impl::findAndErase(h, key);
 	}
 
 	template <typename T>
-	void reserve(HashMap<T>& h, size_t capacity)
+	inline void reserve(HashMap<T>& h, size_t capacity)
 	{
 		Impl::rehash(h, capacity);
 	}
 
 	template <typename T>
-	void clear(HashMap<T>& h)
+	inline void clear(HashMap<T>& h)
 	{
 		clear(h.hashes);
 		clear(h.data);
 	}
 
 	template <typename T>
-	const typename HashMap<T>::Entry* begin(const HashMap<T>& h)
+	inline const typename HashMap<T>::Entry* begin(const HashMap<T>& h)
 	{
 		return begin(h.data);
 	}
 	template <typename T>
-	const typename HashMap<T>::Entry* end(const HashMap<T>& h)
+	inline const typename HashMap<T>::Entry* end(const HashMap<T>& h)
 	{
 		return end(h.data);
 	}
@@ -402,27 +401,27 @@ namespace Dunjun
 	namespace MultiHash
 	{
 		template <typename T>
-		void get(const HashMap<T>& h, u64 key, Array<T>& items)
+		inline void get(const HashMap<T>& h, u64 key, Array<T>& items)
 		{
-			const typename HashMap<T>::Entry* e = Impl::findFirst(h, key);
+			auto e = MultiHash::findFirst(h, key);
 
 			while (e)
 			{
 				pushBack(items, e->value);
-				e = Impl::findNext(h, e);
+				e = MultiHash::findNext(h, e);
 			}
 		}
 
 		template <typename T>
-		size_t count(const HashMap<T>& h, u64 key)
+		inline size_t count(const HashMap<T>& h, u64 key)
 		{
 			size_t c = 0;
-			auto e = Impl::findFirst(h, key);
+			auto e = MultiHash::findFirst(h, key);
 
 			while (e)
 			{
 				c++;
-				e = Impl::findNext(h, e);
+				e = MultiHash::findNext(h, e);
 			}
 
 			return c;
@@ -433,19 +432,19 @@ namespace Dunjun
 		{
 			const Impl::FindResult fr = Impl::find(h, e);
 
-			if (fr.dataIndex != EndofList)
+			if (fr.dataIndex != Impl::EndOfList)
 				Impl::erase(h, fr);
 		}
 
 		template <typename T>
-		void removeAll(HashMap<T>& h, u64 key)
+		inline void removeAll(HashMap<T>& h, u64 key)
 		{
 			while (has(h, key))
 				remove(h, key);
 		}
 
 		template <typename T>
-		void insert(HashMap<T>& h, u64 key, const T& value)
+		inline void insert(HashMap<T>& h, u64 key, const T& value)
 		{
 			if (len(h.hashes) == 0)
 				Impl::grow(h);
@@ -459,7 +458,7 @@ namespace Dunjun
 		}
 
 		template <typename T>
-		const typename HashMap<T>::Entry* findFirst(const HashMap<T>& h, u64 key)
+		inline const typename HashMap<T>::Entry* findFirst(const HashMap<T>& h, u64 key)
 		{
 			const size_t index = Impl::findOrFail(h, key);
 			if (index == Impl::EndOfList)
@@ -469,7 +468,7 @@ namespace Dunjun
 		}
 
 		template <typename T>
-		const typename HashMap<T>::Entry* findNext(const HashMap<T>& h, const typename HashMap<T>::Entry* e)
+		inline const typename HashMap<T>::Entry* findNext(const HashMap<T>& h, const typename HashMap<T>::Entry* e)
 		{
 			if (!e)
 				return nullptr;
