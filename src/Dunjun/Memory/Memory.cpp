@@ -9,7 +9,7 @@ namespace Dunjun
 	struct Header
 	{
 		size_t size;
-		GLOBAL const size_t PadValue = Allocator::MaxSize;
+		GLOBAL const size_t PadValue = Allocator::SizeNotTracked;
 	};
 
 	INTERNAL inline void fill(Header* header, void* data, size_t size)

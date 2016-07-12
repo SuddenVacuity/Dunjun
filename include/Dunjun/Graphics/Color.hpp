@@ -40,21 +40,8 @@ namespace Dunjun
 		//
 		// Vector3 should be float value 0-1
 		// Color should be ColorLib::Color
-			u8 calculateBrightness(const Vector3& colorIntesities, const Vector3& weight = {0.241f, 0.691f, 0.068f})
+		u8 calculateBrightness(const Vector3& colorIntesities, const Vector3& weight = {0.241f, 0.691f, 0.068f})
 		{
-			//f32 r = ((colorIntesities.r * colorIntesities.r) * (Color::COLOR_DEPTH - 1)) * weight.r;
-			//f32 g = ((colorIntesities.g * colorIntesities.g) * (Color::COLOR_DEPTH - 1)) * weight.g;
-			//f32 b = ((colorIntesities.b * colorIntesities.b) * (Color::COLOR_DEPTH - 1)) * weight.b;
-
-			//f32 r = colorIntesities.r * (Color::COLOR_DEPTH - 1);
-			//f32 g = colorIntesities.g * (Color::COLOR_DEPTH - 1);
-			//f32 b = colorIntesities.b * (Color::COLOR_DEPTH - 1);
-
-
-			//r = r * r * weight.r;
-			//g = g * g * weight.g;
-			//b = b * b * weight.b;
-			
 			// if all are 0 return 0
 			if(colorIntesities.r == 0 && colorIntesities.g == 0 && colorIntesities.b == 0)
 				return 0;
@@ -65,11 +52,10 @@ namespace Dunjun
 		}
 
 		// returns 0-255 value
-			u8 calculateBrightness(const Color& color, const Vector3& weight = {0.241f, 0.691f, 0.068f})
+		u8 calculateBrightness(const Color& color, const Vector3& weight = {0.241f, 0.691f, 0.068f})
 		{
-			f32 r = (color.r * color.r) * weight.r;
-			f32 g = (color.g * color.g) * weight.g;
-			f32 b = (color.b * color.b) * weight.b;
+			if(color.r == 0 && color.g == 0 && color.b == 0)
+				return 0.0f;
 
 			return Math::sqrt(((color.r * color.r) * weight.r) +
 							  ((color.g * color.g) * weight.g) +
@@ -118,13 +104,13 @@ namespace Dunjun
 				biggest = c.b;
 
 			if (c.r != 0)
-				c.r = (biggest / c.r) * Color::COLOR_DEPTH - 1;
-
-			if (c.g != 0)
-				c.g = (biggest / c.g) * Color::COLOR_DEPTH - 1;
-
-			if (c.b != 0)
-				c.b = (biggest / c.b) * Color::COLOR_DEPTH - 1;
+				c.r = (biggest / c.r) * (Color::COLOR_DEPTH - (biggest + 1));
+														
+			if (c.g != 0)								
+				c.g = (biggest / c.g) * (Color::COLOR_DEPTH - (biggest + 1));
+													
+			if (c.b != 0)							
+				c.b = (biggest / c.b) * (Color::COLOR_DEPTH - (biggest + 1));
 
 			return Color(static_cast<u8>(c.r),
 						 static_cast<u8>(c.g),
@@ -149,13 +135,13 @@ namespace Dunjun
 				biggest = c.b;
 
 			if (c.r != 0)
-				c.r = (biggest / c.r) * Color::COLOR_DEPTH - 1;
+				c.r = (biggest / c.r) * (Color::COLOR_DEPTH - (biggest + 1));
 
 			if (c.g != 0)
-				c.g = (biggest / c.g) * Color::COLOR_DEPTH - 1;
+				c.g = (biggest / c.g) * (Color::COLOR_DEPTH - (biggest + 1));
 
 			if (c.b != 0)
-				c.b = (biggest / c.b) * Color::COLOR_DEPTH - 1;
+				c.b = (biggest / c.b) * (Color::COLOR_DEPTH - (biggest + 1));
 
 			return Color(static_cast<u8>(c.r),
 						 static_cast<u8>(c.g),
@@ -180,13 +166,13 @@ namespace Dunjun
 				biggest = c.b;
 
 			if (c.r != 0)
-				c.r = (biggest / c.r) * Color::COLOR_DEPTH - 1;
+				c.r = (biggest / c.r) * (Color::COLOR_DEPTH - (biggest + 1));
 
 			if (c.g != 0)
-				c.g = (biggest / c.g) * Color::COLOR_DEPTH - 1;
+				c.g = (biggest / c.g) * (Color::COLOR_DEPTH - (biggest + 1));
 
 			if (c.b != 0)
-				c.b = (biggest / c.b) * Color::COLOR_DEPTH - 1;
+				c.b = (biggest / c.b) * (Color::COLOR_DEPTH - (biggest + 1));
 
 			return Color(static_cast<u8>(c.r),
 						 static_cast<u8>(c.g),

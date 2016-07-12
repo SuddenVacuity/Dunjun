@@ -12,7 +12,7 @@ namespace Dunjun
 	{
 	public:
 		GLOBAL const size_t DefaultAlign = 4;
-		GLOBAL const size_t MaxSize = size_t(-1);
+		GLOBAL const size_t SizeNotTracked = size_t(-1);
 
 		Allocator() {}
 		virtual ~Allocator() {}

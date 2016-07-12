@@ -204,7 +204,6 @@
     <ClInclude Include="include\Dunjun\Graphics\Camera.hpp" />
     <ClInclude Include="include\Dunjun\Memory\Allocator.hpp" />
     <ClInclude Include="include\Dunjun\Memory\Memory.hpp" />
-    <ClInclude Include="include\Dunjun\Memory\TempAllocator.hpp" />
     <ClInclude Include="include\Dunjun\System\Containers\Array.hpp" />
     <ClInclude Include="include\Dunjun\System\Clock.hpp" />
     <ClInclude Include="include\Dunjun\Graphics\Color.hpp" />
