@@ -25,9 +25,10 @@ namespace Dunjun
 
 		u32 fbo;
 
-		virtual ~GBuffer();
+		//virtual ~GBuffer();
 
 		bool create(u32 w, u32 h);
+		void destroy();
 
 		GLOBAL void bind(const GBuffer* b);
 	};

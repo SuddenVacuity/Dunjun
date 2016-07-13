@@ -132,7 +132,7 @@ namespace Dunjun
 			e.next = EndOfList;
 
 			size_t eIndex = len(h.data);
-			pushBack(h.data, e);
+			append(h.data, e);
 
 			return eIndex;
 		}
@@ -407,7 +407,7 @@ namespace Dunjun
 
 			while (e)
 			{
-				pushBack(items, e->value);
+				append(items, e->value);
 				e = MultiHash::findNext(h, e);
 			}
 		}

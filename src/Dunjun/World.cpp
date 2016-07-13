@@ -4,7 +4,9 @@
 namespace Dunjun
 {
 	World::World()
-		: context(Context())
+		: pointLights(defaultAllocator())
+		, directionalLights(defaultAllocator())
+		, spotLights(defaultAllocator())
 	{
 		renderer.world = this;
 	}
@@ -34,7 +36,7 @@ namespace Dunjun
 			player->transform.scale = { 2.0f, 2.0f, 2.0f };
 			player->name = "player";
 		
-			player->addComponent<MeshRenderer>(context.meshHolder->get("player"),
+			player->addComponent<MeshRenderer>(&context.meshHolder->get("player"),
 											   &context.materialHolder->get("dunjunText"));
 
 			//player->addComponent<FaceCamera>(m_mainCamera);
@@ -76,7 +78,7 @@ namespace Dunjun
 			light.colorIntensity = calculateLightIntensities(light.color, light.intensity);
 			light.brightness	 = ColorLib::calculateBrightness(light.colorIntensity);
 			light.range			 = calculateLightRange(light.intensity, light.color, light.attenuation);
-			pointLights.emplace_back(light);
+			append(pointLights, light);
 
 			light.position		 = { 0.0f, 0.5f, 10.0f };
 			light.color			 = ColorLib::Red;
@@ -84,7 +86,7 @@ namespace Dunjun
 			light.colorIntensity = calculateLightIntensities(light.color, light.intensity);
 			light.brightness	 = ColorLib::calculateBrightness(light.colorIntensity);
 			light.range			 = calculateLightRange(light.intensity, light.color, light.attenuation);
-			pointLights.emplace_back(light);
+			append(pointLights, light);
 
 			light.position		 = { 10.0f, 0.5f, 0.0f };
 			light.color			 = ColorLib::Blue;
@@ -92,7 +94,7 @@ namespace Dunjun
 			light.colorIntensity = calculateLightIntensities(light.color, light.intensity);
 			light.brightness	 = ColorLib::calculateBrightness(light.colorIntensity);
 			light.range			 = calculateLightRange(light.intensity, light.color, light.attenuation);
-			pointLights.emplace_back(light);
+			append(pointLights, light);
 
 			light.position		 = { 5.0f, 0.5f, 5.0f };
 			light.color			 = ColorLib::Green;
@@ -100,7 +102,7 @@ namespace Dunjun
 			light.colorIntensity = calculateLightIntensities(light.color, light.intensity);
 			light.brightness	 = ColorLib::calculateBrightness(light.colorIntensity);
 			light.range			 = calculateLightRange(light.intensity, light.color, light.attenuation);
-			pointLights.emplace_back(light);
+			append(pointLights, light);
 		}
 
 		// add directional lights
@@ -109,10 +111,10 @@ namespace Dunjun
 
 			light.direction		 = {-0.8f, -1.0f, -0.2f};
 			light.color			 = ColorLib::Orange;
-			light.intensity		 = 0.02f;
+			light.intensity		 = 0.12f;
 			light.colorIntensity = calculateLightIntensities(light.color, light.intensity);
 			light.brightness	 = ColorLib::calculateBrightness(light.colorIntensity);
-			directionalLights.emplace_back(light);
+			append(directionalLights, light);
 		}
 
 		// add spot lights
@@ -125,7 +127,7 @@ namespace Dunjun
 			light.colorIntensity = calculateLightIntensities(light.color, light.intensity);
 			light.brightness	 = ColorLib::calculateBrightness(light.colorIntensity);
 			light.range			 = calculateLightRange(light.intensity, light.color, light.attenuation);
-			spotLights.emplace_back(light);
+			append(spotLights, light);
 		}
 
 		{

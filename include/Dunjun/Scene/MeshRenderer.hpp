@@ -9,10 +9,10 @@ namespace Dunjun
 	{
 	public:
 		const Mesh* mesh;
-		const Material* material;
+		Material* material;
 
-		explicit MeshRenderer(const Mesh& mesh, Material* material)
-			: mesh(&mesh)
+		explicit MeshRenderer(const Mesh* mesh, Material* material)
+			: mesh(mesh)
 			, material(material)
 		{
 		}

@@ -32,31 +32,21 @@ namespace Dunjun
 	public:
 		struct Data
 		{
-			DrawType drawType = DrawType::Triangles;
+			DrawType drawType;
 
 			//std::vector<Vertex> vertices;
-			VertexArray vertices;
-			std::vector<u32> indices;
+			Array<Vertex> vertices;
+			Array<u32> indices;
+
+			Data();
+			Data(const Data& other) = default;
+			~Data() = default;
 
 			// push a single triangle from indices
-			Data& addFace(u32 a, u32 b, u32 c)
-			{
-				indices.emplace_back(a);
-				indices.emplace_back(b);
-				indices.emplace_back(c);
-
-				return *this;
-			}
+			Data& addFace(u32 a, u32 b, u32 c);
 
 			// push a single triangle from indices into an existing mesh
-			Data& addFace(u32 offset, u32 a, u32 b, u32 c)
-			{
-				indices.emplace_back(offset + a);
-				indices.emplace_back(offset + b);
-				indices.emplace_back(offset + c);
-
-				return *this;
-			}
+			Data& addFace(u32 offset, u32 a, u32 b, u32 c);
 
 			void generateNormals();
 		};
@@ -92,6 +82,10 @@ namespace Dunjun
 				glDeleteBuffers(1, &ibo);
 		}
 	};
+
+
+
+
 } // end Dunjun
 
 #endif

@@ -39,7 +39,7 @@ namespace Dunjun
 
 		Vector3 c = {color.r, color.g, color.b};
 
-		return (c / (Color::COLOR_DEPTH - 1)) * strength;
+		return (c / (COLOR_DEPTH - 1)) * strength;
 	}
 
 	inline f32 calculateLightRange(f32 intensity, Color color, Attenuation attenuation)

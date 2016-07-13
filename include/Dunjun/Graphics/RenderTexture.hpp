@@ -16,8 +16,8 @@ namespace Dunjun
 			Light = 4 | Color,
 		};
 
-		Texture colorTexture{};
-		Texture depthTexture{};
+		Texture colorTexture = {};
+		Texture depthTexture = {};
 
 		u32 width = 0;
 		u32 height = 0;

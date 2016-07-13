@@ -5,13 +5,14 @@
 
 namespace Dunjun
 {
-	//SceneRenderer::SceneRenderer(World& w)
-	//	: world(w)
-	//{
-	//}
+	SceneRenderer::SceneRenderer()
+		: modelInstances(defaultAllocator())
+	{
+	}
 
 	SceneRenderer::~SceneRenderer()
 	{
+		gBuffer.destroy();
 	}
 
 	SceneRenderer& SceneRenderer::reset()
@@ -29,7 +30,7 @@ namespace Dunjun
 
 	SceneRenderer& SceneRenderer::clearAll()
 	{
-		modelInstances.clear();
+		clear(modelInstances);
 		//m_directionalLights.clear();
 		//m_pointLights.clear();
 		//m_spotLights.clear();
@@ -58,7 +59,7 @@ namespace Dunjun
 			m.asset = &meshRenderer;
 			m.transform = t;
 
-			modelInstances.emplace_back(m);
+			append(modelInstances, m);
 		}
 	}
 
@@ -102,7 +103,7 @@ namespace Dunjun
 
 	SceneRenderer& SceneRenderer::deferredGeometryPass()
 	{
-		std::sort(std::begin(modelInstances), std::end(modelInstances),
+		std::sort(begin(modelInstances), end(modelInstances),
 			[](const ModelInstance& a, const ModelInstance& b) -> bool
 		{
 			const auto* A = a.asset->material;

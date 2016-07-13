@@ -5,7 +5,7 @@
 
 namespace Dunjun
 {
-	class World : private NonCopyable
+	class World
 	{
 	public:
 		Context context;
@@ -21,9 +21,9 @@ namespace Dunjun
 		Level* level = nullptr;
 
 		BaseLight ambientLight = BaseLight();
-		std::vector<DirectionalLight> directionalLights;
-		std::vector<PointLight> pointLights;
-		std::vector<SpotLight> spotLights;
+		Array<DirectionalLight> directionalLights;
+		Array<PointLight> pointLights;
+		Array<SpotLight> spotLights;
 
 		bool toggleCulling = true;
 
@@ -41,6 +41,10 @@ namespace Dunjun
 		void update(Time dt);
 		void handleEvent(const Event& event);
 		void render();
+
+	private:
+		World(const World&) = delete;
+		World& operator=(const World&) = delete;
 
 		//SceneNode& getSceneGraph();
 		//const SceneNode& getSceneGraph() const;

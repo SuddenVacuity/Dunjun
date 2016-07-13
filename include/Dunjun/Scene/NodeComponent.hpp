@@ -6,7 +6,7 @@
 namespace Dunjun
 {
 	class SceneNode;
-	struct NodeComponent : private NonCopyable
+	struct NodeComponent
 	{
 	public:
 		SceneNode* parent = nullptr;
@@ -15,6 +15,7 @@ namespace Dunjun
 
 		//NodeComponent() = default;
 
+		NodeComponent() = default;
 		virtual ~NodeComponent() {}
 
 		virtual void init() {}
@@ -22,6 +23,10 @@ namespace Dunjun
 		virtual void handleEvent(const Event& event) {}
 
 		virtual void draw(SceneRenderer& renderer, Transform t) const {}
+
+	private:
+		NodeComponent(const NodeComponent&) = delete;
+		NodeComponent& operator=(const NodeComponent&) = delete;
 	};
 
 } // end Dunjun

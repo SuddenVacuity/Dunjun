@@ -14,7 +14,7 @@ namespace Dunjun
 
 		void* allocate(size_t size, size_t align = DefaultAlign);
 		void deallocate(void* /*ptr*/) {}
-		size_t allocatedSize(void* /*ptr*/) { return SizeNotTracked; }
+		size_t allocatedSize(const void* /*ptr*/) { return SizeNotTracked; }
 		size_t totalAllocated() { return SizeNotTracked; }
 
 

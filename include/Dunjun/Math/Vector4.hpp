@@ -7,21 +7,39 @@
 
 namespace Dunjun
 {
-	union Vector4// call info as v.x = 1;
+	struct Vector4
 	{
-		struct
+		union // call info as v.x = 1;
 		{
-			f32 x, y, z, w;
+			struct
+			{
+				f32 x, y, z, w;
+			};
+			struct
+			{
+				f32 r, g, b, a;
+			};
+			f32 data[4];
+	
+			struct
+			{
+				Vector2 xy;
+				Vector2 zw;
+			};
+	
+			struct
+			{
+				Vector2 rg;
+				Vector2 ba;
+			};
+	
+			Vector3 xyz;
+			Vector3 rgb;
 		};
-		struct
-		{
-			f32 r, g, b, a;
-		};
-		struct
-		{
-			f32 s, t, p, q;
-		};
-		f32 data[4];
+		GLOBAL const Vector4 Zero;
+
+		inline f32& operator[](usize index) { return data[index]; }
+		inline const f32& operator[](usize index) const { return data[index]; }
 	};
 
 	//inline f32& operator[](size_t index) { return data[index]; }

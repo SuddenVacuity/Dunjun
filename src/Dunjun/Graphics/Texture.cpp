@@ -23,50 +23,43 @@ namespace Dunjun
 		}
 	}
 
-	Texture::Texture(const Image& image,
-		TextureFilter minMagFilter,
-		TextureWrapMode wrapMode)
-		: handle(0)
-		, width((s32)image.width)
-		, height((s32)image.height)
+
+	void destroyTexture(Texture& texture)
 	{
-		if (!loadFromImage(image, minMagFilter, wrapMode))
-			throwRuntimeError("Could not create texture from image.");
+		if (texture.handle)
+			glDeleteTextures(1, &texture.handle);
 	}
 
-	Texture::~Texture()
-	{
-		if (handle)
-			glDeleteTextures(1, &handle);
-	}
-
-	bool Texture::loadFromFile(const std::string& filename,
+	Texture loadTextureFromFile(const char* filename,
 		TextureFilter minMagFilter,
 		TextureWrapMode wrapMode)
 	{
-		Image image;
-		if (!image.loadFromFile(filename))
-			return false;
-		image.flipVertically(); // because textures load upside-down
+		Image image = loadImageFromFile(filename);
+		defer(destroyImage(image));
 
-		return loadFromImage(image, minMagFilter, wrapMode);
+		//if (!loadTextureFromFile(filename).handle)
+		//	return false;
+		flipVertically(image); // because textures load upside-down
+
+		return loadTextureFromImage(image, minMagFilter, wrapMode);
 	}
 
-	bool Texture::loadFromImage(const Image& image,
+	Texture loadTextureFromImage(const Image& image,
 		TextureFilter minMagFilter,
 		TextureWrapMode wrapMode)
 	{
-		if ((const ImageFormat&)image.format == ImageFormat::None )
-			return false;
+		if (image.format == ImageFormat::None )
+			return Texture{};
 
-		width = image.width;
-		height = image.height;
+		Texture result = {0, image.width, image.height};
 
-		if(!handle)
-			glGenTextures(1, &handle);
+		//if(!result.handle)
+		glGenTextures(1, &result.handle);
 
 		//glGenTextures(1, &m_object);
-		glBindTexture(GL_TEXTURE_2D, handle);
+		glBindTexture(GL_TEXTURE_2D, result.handle);
+		defer(glBindTexture(GL_TEXTURE_2D, 0));
+
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, static_cast<s32>(wrapMode)); // set the s axis (x) to repeat
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, static_cast<s32>(wrapMode)); // set the t axis (y) to repeat
 																	  //glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL REPEAT); // set the r axis (z) to repeat
@@ -88,13 +81,12 @@ namespace Dunjun
 	//	glTexImage2D(GL_TEXTURE_2D, 0, format, (GLsizei)m_width, (GLsizei)m_height, 0, image.getFormat(), GL_UNSIGNED_INT, image.getPixelPtr());
 		glTexImage2D(GL_TEXTURE_2D, 0, 
 					 getInternalFormat(image.format, true), 
-					 width, height, 0, 
+					 result.width, result.height, 0,
 					 getInternalFormat(image.format, false), 
 					 GL_UNSIGNED_BYTE, image.pixels);
 
-		glBindTexture(GL_TEXTURE_2D, 0);
 		
-		return true;
+		return result;
 
 	}
 

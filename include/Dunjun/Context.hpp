@@ -9,19 +9,19 @@ namespace Dunjun
 	{
 		Window* window = nullptr;
 
-		TextureHolder* textureHolder = nullptr;
+		//TextureHolder* textureHolder = nullptr;
 		ShaderHolder* shaderHolder = nullptr;
 		MeshHolder* meshHolder = nullptr;
 		MaterialHolder* materialHolder = nullptr;
 		Context() {}
 
 		Context(Window& window,
-						 TextureHolder& textureHolder,
+						 //TextureHolder& textureHolder,
 						 ShaderHolder& shaderHolder,
 						 MeshHolder& meshHolder,
 						 MaterialHolder& materialHolder)
 			: window(&window)
-			, textureHolder(&textureHolder)
+			//, textureHolder(&textureHolder)
 			, shaderHolder(&shaderHolder)
 			, meshHolder(&meshHolder)
 			, materialHolder(&materialHolder)

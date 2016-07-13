@@ -19,34 +19,31 @@ namespace Dunjun
 		RGB = 3,
 		RGBA = 4,
 	};
-	class Image // create an image class
+	struct Image // create an image class
 	{
 	public:
 		ImageFormat format = ImageFormat::None;
 		u32 width = 0;
 		u32 height = 0;
 		u8* pixels = nullptr;
+	};
 
-		Image() = default; // declair Image function
-		Image(const Image& other); // the image function will be for half the image this part is the other half
-		~Image(); // 
+	Image loadImageFromFile(const std::string& filename); // get the name of the file to be loaded
+	Image loadImageFromMemory(u32 width, u32 height, ImageFormat format, const u8* pixels); // load info from memory
 
-		Image& operator=(const Image& other);
+	void destroyImage(Image& image);
 
-		bool loadFromFile(const std::string& filename); // get the name of the file to be loaded
-		bool loadFromImage(u32 width, u32 height, ImageFormat format, const u8* pixels); // load info from memory
+	u8* getPixel(u32 column, u32 row); // make function and vairables to get a pixel from a specific spot
+	void setPixel(u32 column, u32 row, const u32* pixel); // make function to set a pixel to a specific spot
 
-		u8* getPixel(u32 column, u32 row) const; // make function and vairables to get a pixel from a specific spot
-		void setPixel(u32 column, u32 row, const u32* pixel); // make function to set a pixel to a specific spot
-
-		void flipVertically(); // declair flip function
+	void flipVertically(Image& image); // declair flip function
 //		void rotate90CCW();
 
 //		void copyRectangleFromImage(const Image& src, 
 //									uInt32 srcCol, uInt32 srcRow,
 //									uInt32 destCol, uInt32 destRow,
 //									uInt32 width, uInt32 height);
-	};
+
 }
 
 

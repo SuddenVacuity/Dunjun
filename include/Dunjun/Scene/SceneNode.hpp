@@ -26,7 +26,7 @@ namespace Dunjun
 		return typeId;
 	}
 
-	class SceneNode : private NonCopyable
+	class SceneNode
 	{
 	public:
 		using u_ptr = std::unique_ptr<SceneNode>; // quick typedef for unique pointers
@@ -80,7 +80,7 @@ namespace Dunjun
 
 		//SceneNode* addComponent(NodeComponent::u_ptr component);
 
-		template <class ComponentType, class ... Args>
+		template <typename ComponentType, typename ... Args>
 		ComponentType& addComponent(Args&& ... args)
 		{
 			////return addComponent(make_unique<Derived>(args...));
@@ -181,6 +181,10 @@ namespace Dunjun
 
 		virtual void drawCurrent(SceneRenderer& renderer, Transform t) const;
 		void drawChildren(SceneRenderer& renderer, Transform t) const;
+
+	private:
+		SceneNode(const SceneNode&) = delete;
+		SceneNode& operator=(const SceneNode&)= delete;
 	}; // end SceneNode
 } // end Dunjun
 

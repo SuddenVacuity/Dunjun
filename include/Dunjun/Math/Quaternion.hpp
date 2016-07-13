@@ -5,13 +5,18 @@
 
 namespace Dunjun
 {
-	union Quaternion
+	struct Quaternion
 	{
-		struct
+		union 
 		{
-			f32 x, y, z, w;
+			struct
+			{
+				f32 x, y, z, w;
+			};
+			Vector3 xyz;
+			f32 data[4];
 		};
-		f32 data[4];
+		GLOBAL const Quaternion Identity;
 	};
 
 

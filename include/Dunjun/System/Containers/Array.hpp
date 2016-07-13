@@ -12,10 +12,17 @@ namespace Dunjun
 	template <typename T>
 	size_t capacity(const Array<T>& a);
 
+	// Appends an item to the array and returns the number of items in the array
+	template <typename T>
+	size_t append(Array<T>& a, const T& item);
+	// Append items to the array and returns the number of items in the array
+	template <typename T>
+	size_t append(Array<T>& a, const T* items, size_t count);
+
 	// Appends an item to the array and changes array length to match
 	// expands the array if needed
-	template <typename T>
-	size_t pushBack(Array<T>& a, const T& item);
+	//template <typename T>
+	//size_t pushBack(Array<T>& a, const T& item);
 	// Removes the last item in the array
 	template <typename T>
 	void popBack(const Array<T>& a);
@@ -95,15 +102,38 @@ namespace Dunjun
 	//////////////////////////////////
 
 	template <typename T>
-	inline size_t pushBack(Array<T>& a, const T& item)
+	size_t append(Array<T>& a, const T& item)
 	{
-		if(a.m_length == a.m_capacity)
+		if (a.m_length + 1 > a.m_capacity)
 			grow(a);
 
 		a.m_data[a.m_length++] = item;
 
 		return a.m_length;
 	}
+
+	template <typename T>
+	size_t append(Array<T>& a, const T* items, size_t count)
+	{
+		if (a.m_capacity <= a.m_length + count)
+			grow(a, a.m_length + count);
+
+		memcpy(&a.m_data[a.m_length] ,items, count * sizeof(T));
+		a.m_length += count;
+
+		return a.m_length;
+	}
+
+	//template <typename T>
+	//inline size_t pushBack(Array<T>& a, const T& item)
+	//{
+	//	if(a.m_length == a.m_capacity)
+	//		grow(a);
+	//
+	//	a.m_data[a.m_length++] = item;
+	//
+	//	return a.m_length;
+	//}
 	template <typename T>
 	inline void popBack(Array<T>& a)
 	{
@@ -206,6 +236,7 @@ namespace Dunjun
 		if(capacity > 0)
 		{
 			data = (T*)a.m_allocator->allocate(capacity * sizeof(T), alignof(T));
+
 			std::memcpy(data, a.m_data, a.m_length * sizeof(T));
 		}
 

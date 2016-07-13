@@ -24,31 +24,25 @@ namespace Dunjun
 		MirroedRepeat = GL_MIRRORED_REPEAT,
 	};
 
-	struct Texture : public NonCopyable // create texture class
+	struct Texture // create texture class
 	{
 	public:
-		s32 width = 0;
-		s32 height = 0;
-		u32 handle = 0;
-
-		Texture() = default;
-		Texture(const Image& image,
-			TextureFilter minMagFilter = TextureFilter::Linear,
-			TextureWrapMode wrapMode = TextureWrapMode::ClampToEdge);
-
-		virtual ~Texture();
-
-		bool loadFromFile(const std::string& filename,
-			TextureFilter minMagFilter = TextureFilter::Linear,
-			TextureWrapMode wrapMode = TextureWrapMode::ClampToEdge);
-
-		bool loadFromImage(const Image& image,
-			TextureFilter minMagFilter = TextureFilter::Linear,
-			TextureWrapMode wrapMode = TextureWrapMode::ClampToEdge);
-
+		u32 handle;
+		s32 width;
+		s32 height;
 
 		GLOBAL void bind(const Texture* tex, u32 position);
 	};
+
+	void destroyTexture(Texture& texture);
+
+	Texture loadTextureFromFile(const char* filename,
+								TextureFilter minMagFilter = TextureFilter::Linear,
+								TextureWrapMode wrapMode = TextureWrapMode::ClampToEdge);
+
+	Texture loadTextureFromImage(const Image& image,
+								 TextureFilter minMagFilter = TextureFilter::Linear,
+								 TextureWrapMode wrapMode = TextureWrapMode::ClampToEdge);
 }
 
 

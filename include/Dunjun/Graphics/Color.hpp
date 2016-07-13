@@ -5,31 +5,32 @@
 
 namespace Dunjun
 {
+	GLOBAL const u32 COLOR_DEPTH = 256;
+
 	struct Color // must come before render
 	{
-		u8 data[4];
-		struct
-		{
+		//u8 data[4];
+		//struct
+		//{
 			u8 r, g, b, a;
-		};
-
-		GLOBAL const u32 COLOR_DEPTH = 256;
-
-		Color(u8 r, u8 g, u8 b, u8 a = 0xFF)
-			: r(r)
-			, g(g)
-			, b(b)
-			, a(a)
-		{
-		}
-
-		explicit Color(u32 rgba)
-		{
-			r = (rgba >> 24) & 0xFF;
-			g = (rgba >> 16) & 0xFF;
-			b = (rgba >> 8) & 0xFF;
-			a = (rgba >> 0) & 0xFF;
-		}
+		//};
+		//
+		//
+		//Color(u8 r, u8 g, u8 b, u8 a = 0xFF)
+		//	: r(r)
+		//	, g(g)
+		//	, b(b)
+		//	, a(a)
+		//{
+		//}
+		//
+		//explicit Color(u32 rgba)
+		//{
+		//	r = (rgba >> 24) & 0xFF;
+		//	g = (rgba >> 16) & 0xFF;
+		//	b = (rgba >> 8) & 0xFF;
+		//	a = (rgba >> 0) & 0xFF;
+		//}
 	};
 
 	namespace ColorLib
@@ -46,9 +47,9 @@ namespace Dunjun
 			if(colorIntesities.r == 0 && colorIntesities.g == 0 && colorIntesities.b == 0)
 				return 0;
 
-			return Math::sqrt((((colorIntesities.r * Color::COLOR_DEPTH) * (colorIntesities.r * Color::COLOR_DEPTH)) * weight.r) +
-							  (((colorIntesities.g * Color::COLOR_DEPTH) * (colorIntesities.g * Color::COLOR_DEPTH)) * weight.g) +
-							  (((colorIntesities.b * Color::COLOR_DEPTH) * (colorIntesities.b * Color::COLOR_DEPTH)) * weight.b)) - 1;
+			return Math::sqrt((((colorIntesities.r * COLOR_DEPTH) * (colorIntesities.r * COLOR_DEPTH)) * weight.r) +
+							  (((colorIntesities.g * COLOR_DEPTH) * (colorIntesities.g * COLOR_DEPTH)) * weight.g) +
+							  (((colorIntesities.b * COLOR_DEPTH) * (colorIntesities.b * COLOR_DEPTH)) * weight.b)) - 1;
 		}
 
 		// returns 0-255 value
@@ -104,17 +105,17 @@ namespace Dunjun
 				biggest = c.b;
 
 			if (c.r != 0)
-				c.r = (biggest / c.r) * (Color::COLOR_DEPTH - (biggest + 1));
-														
-			if (c.g != 0)								
-				c.g = (biggest / c.g) * (Color::COLOR_DEPTH - (biggest + 1));
-													
-			if (c.b != 0)							
-				c.b = (biggest / c.b) * (Color::COLOR_DEPTH - (biggest + 1));
+				c.r = (biggest / c.r) * (COLOR_DEPTH - 1);
+													 
+			if (c.g != 0)							 
+				c.g = (biggest / c.g) * (COLOR_DEPTH - 1);
+													 
+			if (c.b != 0)							 
+				c.b = (biggest / c.b) * (COLOR_DEPTH - 1);
 
-			return Color(static_cast<u8>(c.r),
-						 static_cast<u8>(c.g),
-						 static_cast<u8>(c.b));
+			return {static_cast<u8>(c.r),
+					static_cast<u8>(c.g),
+					static_cast<u8>(c.b)};
 		}
 
 		Color removeChannelGreen(const Color& color)
@@ -135,17 +136,17 @@ namespace Dunjun
 				biggest = c.b;
 
 			if (c.r != 0)
-				c.r = (biggest / c.r) * (Color::COLOR_DEPTH - (biggest + 1));
+				c.r = (biggest / c.r) * (COLOR_DEPTH - 1);
 
 			if (c.g != 0)
-				c.g = (biggest / c.g) * (Color::COLOR_DEPTH - (biggest + 1));
+				c.g = (biggest / c.g) * (COLOR_DEPTH - 1);
 
 			if (c.b != 0)
-				c.b = (biggest / c.b) * (Color::COLOR_DEPTH - (biggest + 1));
+				c.b = (biggest / c.b) * (COLOR_DEPTH - 1);
 
-			return Color(static_cast<u8>(c.r),
-						 static_cast<u8>(c.g),
-						 static_cast<u8>(c.b));
+			return {static_cast<u8>(c.r),
+					static_cast<u8>(c.g),
+					static_cast<u8>(c.b)};
 		}
 
 		Color removeChannelBlue(const Color& color)
@@ -166,22 +167,22 @@ namespace Dunjun
 				biggest = c.b;
 
 			if (c.r != 0)
-				c.r = (biggest / c.r) * (Color::COLOR_DEPTH - (biggest + 1));
+				c.r = (biggest / c.r) * (COLOR_DEPTH - 1);
 
 			if (c.g != 0)
-				c.g = (biggest / c.g) * (Color::COLOR_DEPTH - (biggest + 1));
+				c.g = (biggest / c.g) * (COLOR_DEPTH - 1);
 
 			if (c.b != 0)
-				c.b = (biggest / c.b) * (Color::COLOR_DEPTH - (biggest + 1));
+				c.b = (biggest / c.b) * (COLOR_DEPTH - 1);
 
-			return Color(static_cast<u8>(c.r),
-						 static_cast<u8>(c.g),
-						 static_cast<u8>(c.b));
+			return {static_cast<u8>(c.r),
+					static_cast<u8>(c.g),
+					static_cast<u8>(c.b)};
 		}
 
 		Color greyScale(const f32& brightness)
 		{
-			Color c = Color(0xFF, 0xFF, 0xFF);
+			Color c = Color{0xFF, 0xFF, 0xFF, 0xFF};
 
 			c.r = brightness;
 			c.g = brightness;
@@ -193,7 +194,7 @@ namespace Dunjun
 		Color greyScale(const Color& color)
 		{
 			f32 brightness = calculateBrightness(color);
-			Color c = Color(0xFF, 0xFF, 0xFF);
+			Color c = Color{0xFF, 0xFF, 0xFF, 0xFF};
 
 			c.r = brightness;
 			c.g = brightness;
@@ -202,17 +203,17 @@ namespace Dunjun
 			return c;
 		}
 
-	const Color White(0xFFFFFFFF);
-	const Color Grey (0x7F7F7FFF);
-	const Color Black(0x000000FF);
+	const Color White{0xFF, 0xFF, 0xFF, 0xFF};
+	const Color Grey {0x7F, 0x7F, 0x7F, 0xFF};
+	const Color Black{0x00, 0x00, 0x00, 0xFF};
 
-	const Color Red   (0xFF0000FF);
-	const Color Green (0x00FF00FF);
-	const Color Blue  (0x0000FFFF);
+	const Color Red   {0xFF, 0x00, 0x00, 0xFF};
+	const Color Green {0x00, 0xFF, 0x00, 0xFF};
+	const Color Blue  {0x00, 0x00, 0xFF, 0xFF};
 
-	const Color Yellow  (0xFFFF00FF);
-	const Color Magenta (0xFF00FFFF);
-	const Color Cyan	(0x00FFFFFF);
+	const Color Yellow  {0xFF, 0xFF, 0x00, 0xFF};
+	const Color Magenta {0xFF, 0x00, 0xFF, 0xFF};
+	const Color Cyan	{0x00, 0xFF, 0xFF, 0xFF};
 
 	const Color Orange = mix(Red, Yellow);	   // 0xFF7F00 FF
 	const Color Rose   = mix(Red, Magenta);	   // 0xFF007F FF

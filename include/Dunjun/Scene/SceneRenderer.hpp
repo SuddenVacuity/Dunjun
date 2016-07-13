@@ -10,7 +10,7 @@ namespace Dunjun
 	//class Drawable;
 	struct MeshRenderer;
 
-	struct SceneRenderer : private NonCopyable
+	class SceneRenderer
 	{
 	public:
 
@@ -40,11 +40,10 @@ namespace Dunjun
 		const ShaderProgram* currentShaders = nullptr;
 		const Material* currentMaterial = nullptr;
 
-		std::deque<ModelInstance> modelInstances{};
+		Array<ModelInstance> modelInstances;
 
-		//SceneRenderer(World& world);
-
-		virtual ~SceneRenderer();
+		SceneRenderer();
+		~SceneRenderer();
 
 		// clear all pointers
 		SceneRenderer& reset();

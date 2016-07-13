@@ -44,6 +44,7 @@ namespace Dunjun
 		size_t m_offset;
 	
 		Queue(Allocator& a);
+		~Queue() = default;
 	
 		T& operator[](size_t index);
 		const T& operator[](size_t index) const;
@@ -96,6 +97,7 @@ namespace Dunjun
 		Array<Entry> data;
 
 		HashMap(Allocator& a);
+		~HashMap() = default;
 	};
 
 } // end Dunjun

@@ -3,7 +3,7 @@
 
 namespace Dunjun
 {
-	GBuffer::~GBuffer()
+	void GBuffer::destroy()
 	{
 		if(fbo)
 			glDeleteFramebuffersEXT(1, &fbo);

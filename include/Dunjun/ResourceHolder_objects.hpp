@@ -5,35 +5,35 @@
 
 namespace Dunjun
 {
-	class TextureHolder : public ResourceHolder<Texture, std::string>
-	{
-	public:
-		bool insertFromFile(IdentifierType id, const std::string& filename,
-			TextureFilter minMagFilter = TextureFilter::Linear,
-			TextureWrapMode wrapMode = TextureWrapMode::ClampToEdge)
-		{
-			std::unique_ptr<Texture> tex = make_unique<Texture>();
-			bool t = tex->loadFromFile(BaseDirectories::Texture + filename, minMagFilter, wrapMode);
-
-			if(t == true)
-				insert(id, std::move(tex));
-
-			return t;
-		}
-
-		bool insertFromImage(IdentifierType id, const Image& image,
-			TextureFilter minMagFilter = TextureFilter::Linear,
-			TextureWrapMode wrapMode = TextureWrapMode::ClampToEdge)
-		{
-			std::unique_ptr<Texture> tex = make_unique<Texture>();
-			bool t = tex->loadFromImage(image, minMagFilter, wrapMode);
-
-			if (t == true)
-				insert(id, std::move(tex));
-
-			return t;
-		}
-	};
+	//class TextureHolder : public ResourceHolder<Texture, std::string>
+	//{
+	//public:
+	//	bool insertFromFile(IdentifierType id, const std::string& filename,
+	//		TextureFilter minMagFilter = TextureFilter::Linear,
+	//		TextureWrapMode wrapMode = TextureWrapMode::ClampToEdge)
+	//	{
+	//		std::unique_ptr<Texture> tex = make_unique<Texture>();
+	//		bool t = tex->loadFromFile(BaseDirectories::Texture + filename, minMagFilter, wrapMode);
+	//
+	//		if(t == true)
+	//			insert(id, std::move(tex));
+	//
+	//		return t;
+	//	}
+	//
+	//	bool insertFromImage(IdentifierType id, const Image& image,
+	//		TextureFilter minMagFilter = TextureFilter::Linear,
+	//		TextureWrapMode wrapMode = TextureWrapMode::ClampToEdge)
+	//	{
+	//		std::unique_ptr<Texture> tex = make_unique<Texture>();
+	//		bool t = tex->loadFromImage(image, minMagFilter, wrapMode);
+	//
+	//		if (t == true)
+	//			insert(id, std::move(tex));
+	//
+	//		return t;
+	//	}
+	//};
 
 	class ShaderHolder : public ResourceHolder<ShaderProgram, std::string>
 	{
@@ -82,7 +82,7 @@ namespace Dunjun
 	using MaterialHolder = ResourceHolder<Material, std::string>;
 
 
-	extern TextureHolder g_textureHolder;
+	//extern TextureHolder g_textureHolder;
 	extern ShaderHolder g_shaderHolder;
 	extern MeshHolder g_meshHolder;
 	extern MaterialHolder g_materialHolder;
