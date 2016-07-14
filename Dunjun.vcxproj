@@ -162,7 +162,9 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\Dunjun\Common.cpp" />
+    <ClCompile Include="src\Dunjun\debug\EntityTest.cpp" />
     <ClCompile Include="src\Dunjun\debug\UnitTest.cpp" />
+    <ClCompile Include="src\Dunjun\Entity.cpp" />
     <ClCompile Include="src\Dunjun\Memory\Memory.cpp" />
     <ClCompile Include="src\Dunjun\System\FileSystem.cpp" />
     <ClCompile Include="src\Dunjun\Game.cpp" />
@@ -201,6 +203,7 @@
   <ItemGroup>
     <ClInclude Include="include\Dunjun\Context.hpp" />
     <ClInclude Include="include\Dunjun\debug\Preprocessor.hpp" />
+    <ClInclude Include="include\Dunjun\Entity.hpp" />
     <ClInclude Include="include\Dunjun\Graphics\Camera.hpp" />
     <ClInclude Include="include\Dunjun\Memory\Allocator.hpp" />
     <ClInclude Include="include\Dunjun\Memory\Memory.hpp" />

@@ -7,10 +7,10 @@ namespace Dunjun
 {
 	struct Vertex // must come before render
 	{
-		Vector3 position = {0, 0, 0};
-		Vector2 texCoord = {0, 0};
+		Vector3 position = Vector3::Zero;
+		Vector2 texCoord = Vector2::Zero;
 		Color color = ColorLib::White;
-		Vector3 normal = {0, 0, 0};
+		Vector3 normal = Vector3::Zero;
 
 		Vertex() = default;
 

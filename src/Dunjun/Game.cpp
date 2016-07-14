@@ -1,6 +1,7 @@
 
 
 #include <Dunjun/Game.hpp>
+#include <Dunjun/Entity.hpp>
 
 
 namespace Dunjun
