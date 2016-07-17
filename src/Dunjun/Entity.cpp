@@ -1,9 +1,12 @@
 
 #include <Dunjun/Entity.hpp>
+#include <Dunjun/SceneGraph.hpp>
+#include <Dunjun/Memory/Memory.hpp>
 
 namespace Dunjun
 {
-	void EntityWorld::init()
+	EntityWorld::EntityWorld()
+		: sceneGraph(defaultAllocator())
 	{
 		for(EntityId& id : components)
 			id = ComponentMask::ComponentNone;

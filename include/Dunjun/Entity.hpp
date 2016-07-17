@@ -2,23 +2,24 @@
 #define DUNJUN_ENTITY_HPP
 
 #include <Dunjun/Math.hpp>
+#include <Dunjun/SceneGraph.hpp>
 
 namespace Dunjun
 {
-	using EntityId = u32;
+	struct SceneGraph;
 
-	enum ComponentMask
+	enum ComponentMask : u32
 	{
 		ComponentNone			= 0x00000000,
-		ComponentPosition		= 0x00000001,
-		ComponentName			= 0x00000010,
+	//	ComponentPosition		= 0x00000001,
+		ComponentName			= 0x00000001,
 
 	};
 
-	struct PositionComponent
-	{
-		Vector3 position;
-	};
+	//struct PositionComponent
+	//{
+	//	Vector3 position;
+	//};
 
 	struct NameComponent
 	{
@@ -34,11 +35,14 @@ namespace Dunjun
 	public:
 		//GLOBAL const size_t MaxEntities;
 		u32 components[MaxEntities];
-
-		PositionComponent positions[MaxEntities];
 		NameComponent names[MaxEntities];
+		//PositionComponent positions[MaxEntities];
 
-		void init();
+		SceneGraph sceneGraph;
+
+		EntityWorld();
+		~EntityWorld() = default;
+		//void init();
 
 		EntityId createEntity();
 

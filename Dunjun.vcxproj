@@ -166,6 +166,7 @@
     <ClCompile Include="src\Dunjun\debug\UnitTest.cpp" />
     <ClCompile Include="src\Dunjun\Entity.cpp" />
     <ClCompile Include="src\Dunjun\Memory\Memory.cpp" />
+    <ClCompile Include="src\Dunjun\SceneGraph.cpp" />
     <ClCompile Include="src\Dunjun\System\FileSystem.cpp" />
     <ClCompile Include="src\Dunjun\Game.cpp" />
     <ClCompile Include="src\Dunjun\Graphics\GBuffer.cpp" />
@@ -267,6 +268,7 @@
     <ClInclude Include="include\Dunjun\Window\Window.hpp" />
     <ClInclude Include="include\Dunjun\World.hpp" />
     <ClInclude Include="include\Dunjun\System\MurmurHash.hpp" />
+    <ClInclude Include="include\Dunjun\SceneGraph.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="data\shaders\deferredFinalPass_frag.glsl" />

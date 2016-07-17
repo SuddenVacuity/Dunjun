@@ -3,6 +3,8 @@
 
 namespace Dunjun
 {
+	const Transform Transform::Identity = Transform{Vector3::Zero, Quaternion::Identity, Vector3{1, 1, 1}};
+
 	// World Transform  = Parent * Local
 	Transform operator*(const Transform& ps, const Transform& ls)
 	{

@@ -2,6 +2,7 @@
 
 #include <Dunjun/Game.hpp>
 #include <Dunjun/Entity.hpp>
+#include <Dunjun/SceneGraph.hpp>
 
 
 namespace Dunjun

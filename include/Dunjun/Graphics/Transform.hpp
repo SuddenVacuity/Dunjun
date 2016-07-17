@@ -7,9 +7,11 @@ namespace Dunjun
 {
 	struct Transform
 	{
-		Vector3 position = Vector3::Zero;
-		Quaternion orientation = Quaternion::Identity;
-		Vector3 scale = {1, 1, 1};
+		Vector3 position;
+		Quaternion orientation;
+		Vector3 scale;
+
+		GLOBAL const Transform Identity;
 	};
 
 	// World Transform

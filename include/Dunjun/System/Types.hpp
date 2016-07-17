@@ -28,6 +28,8 @@ namespace Dunjun
 	using s32 = signed int;
 	using u32 = unsigned int;
 
+	using EntityId = u32;
+
 #if defined(_MSC_VER)
 	using s64 = signed __int64;
 	using u64 = unsigned __int64;
