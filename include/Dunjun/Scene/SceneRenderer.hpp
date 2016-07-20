@@ -1,8 +1,8 @@
-#ifndef DUNJUN_RENDERER_HPP
-#define DUNJUN_RENDERER_HPP
+
 
 #include <Dunjun/Context.hpp>
-
+#ifdef DUNJUN_RENDERER_HPP
+#define DUNJUN_RENDERER_HPP
 namespace Dunjun
 {
 	class World;

@@ -166,6 +166,7 @@
     <ClCompile Include="src\Dunjun\debug\UnitTest.cpp" />
     <ClCompile Include="src\Dunjun\Entity.cpp" />
     <ClCompile Include="src\Dunjun\Memory\Memory.cpp" />
+    <ClCompile Include="src\Dunjun\RenderSystem.cpp" />
     <ClCompile Include="src\Dunjun\SceneGraph.cpp" />
     <ClCompile Include="src\Dunjun\System\FileSystem.cpp" />
     <ClCompile Include="src\Dunjun\Game.cpp" />
@@ -173,8 +174,6 @@
     <ClCompile Include="src\Dunjun\Graphics\Image.cpp" />
     <ClCompile Include="src\Dunjun\System\MurmurHash.cpp" />
     <ClCompile Include="src\Dunjun\Window\Input.cpp" />
-    <ClCompile Include="src\Dunjun\Level.cpp" />
-    <ClCompile Include="src\Dunjun\Level\Room.cpp" />
     <ClCompile Include="src\Dunjun\Graphics\Mesh.cpp" />
     <ClCompile Include="src\Dunjun\System\OpenGL_SDL.cpp" />
     <ClCompile Include="src\Dunjun\Math\Functions\MathLib.cpp" />
@@ -190,15 +189,11 @@
     <ClCompile Include="src\Dunjun\Math\Vector4.cpp" />
     <ClCompile Include="src\Dunjun\Graphics\RenderTexture.cpp" />
     <ClCompile Include="src\Dunjun\ResourceHolders.cpp" />
-    <ClCompile Include="src\Dunjun\Scene\FaceCamera.cpp" />
-    <ClCompile Include="src\Dunjun\Scene\SceneNode.cpp" />
-    <ClCompile Include="src\Dunjun\Scene\SceneRenderer.cpp" />
     <ClCompile Include="src\Dunjun\Graphics\ShaderProgram.cpp" />
     <ClCompile Include="src\Dunjun\Graphics\Texture.cpp" />
     <ClCompile Include="src\Dunjun\System\Time.cpp" />
     <ClCompile Include="src\Dunjun\Window\VideoMode.cpp" />
     <ClCompile Include="src\Dunjun\Window\Window.cpp" />
-    <ClCompile Include="src\Dunjun\World.cpp" />
     <ClCompile Include="src\main.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -209,6 +204,8 @@
     <ClInclude Include="include\Dunjun\Memory\Allocator.hpp" />
     <ClInclude Include="include\Dunjun\Memory\Memory.hpp" />
     <ClInclude Include="include\Dunjun\Memory\TempAllocator.hpp" />
+    <ClInclude Include="include\Dunjun\RenderComponent.hpp" />
+    <ClInclude Include="include\Dunjun\RenderSystem.hpp" />
     <ClInclude Include="include\Dunjun\System\Containers\Array.hpp" />
     <ClInclude Include="include\Dunjun\System\Clock.hpp" />
     <ClInclude Include="include\Dunjun\Graphics\Color.hpp" />
@@ -251,12 +248,6 @@
     <ClInclude Include="include\Dunjun\ResourceHolder.hpp" />
     <ClInclude Include="include\Dunjun\ResourceHolder_objects.hpp" />
     <ClInclude Include="include\Dunjun\Scene.hpp" />
-    <ClInclude Include="include\Dunjun\Scene\FaceCamera.hpp" />
-    <ClInclude Include="include\Dunjun\Scene\Lighting.hpp" />
-    <ClInclude Include="include\Dunjun\Scene\MeshRenderer.hpp" />
-    <ClInclude Include="include\Dunjun\Scene\NodeComponent.hpp" />
-    <ClInclude Include="include\Dunjun\Scene\SceneNode.hpp" />
-    <ClInclude Include="include\Dunjun\Scene\SceneRenderer.hpp" />
     <ClInclude Include="include\Dunjun\Graphics\ShaderProgram.hpp" />
     <ClInclude Include="include\Dunjun\Graphics\Texture.hpp" />
     <ClInclude Include="include\Dunjun\System\TickCounter.hpp" />
@@ -266,7 +257,6 @@
     <ClInclude Include="include\Dunjun\Graphics\Vertex.hpp" />
     <ClInclude Include="include\Dunjun\Window\VideoMode.hpp" />
     <ClInclude Include="include\Dunjun\Window\Window.hpp" />
-    <ClInclude Include="include\Dunjun\World.hpp" />
     <ClInclude Include="include\Dunjun\System\MurmurHash.hpp" />
     <ClInclude Include="include\Dunjun\SceneGraph.hpp" />
   </ItemGroup>

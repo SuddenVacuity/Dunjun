@@ -3,6 +3,7 @@
 #include <Dunjun/Game.hpp>
 #include <Dunjun/Entity.hpp>
 #include <Dunjun/SceneGraph.hpp>
+#include <Dunjun/RenderSystem.hpp>
 
 
 namespace Dunjun
@@ -22,13 +23,15 @@ namespace Dunjun
 		GLOBAL bool g_running = true;
 	} // end anon namespace
 
-	GLOBAL World* g_world;
+	GLOBAL EntityWorld* g_world;
 
 	// textures
 	GLOBAL Texture g_defaultTexture;
 	GLOBAL Texture g_dunjunTextTexture;
 	GLOBAL Texture g_stoneTexture;
 	GLOBAL Texture g_terrainTexture;
+
+	GLOBAL Material g_dunjunTextMaterial;
 
 	namespace Game
 	{
@@ -44,8 +47,8 @@ namespace Dunjun
 
 		void glInit()
 		{
-			glEnable(GL_CULL_FACE);
-			glCullFace(GL_BACK);
+			//glEnable(GL_CULL_FACE);
+			//glCullFace(GL_BACK);
 			glEnable(GL_DEPTH_TEST);
 			glDepthFunc(GL_LESS);
 		}
@@ -101,71 +104,40 @@ namespace Dunjun
 			g_stoneTexture = loadTextureFromFile("data/textures/stone.png");
 			g_terrainTexture = loadTextureFromFile("data/textures/terrain.png", TextureFilter::Nearest);
 
-			// load materials
-			{
-				auto mat = make_unique<Material>();
-				mat->shaders = &g_shaderHolder.get("deferredGeometryPass");
-				mat->diffuseMap = &g_defaultTexture;
-				g_materialHolder.insert("default", std::move(mat));
-			}
-			{
-				auto mat = make_unique<Material>();
-				mat->shaders = &g_shaderHolder.get("deferredGeometryPass");
-				mat->diffuseMap = &g_dunjunTextTexture;
-				mat->specularExponent = 100000.0f;
-				g_materialHolder.insert("dunjunText", std::move(mat));
-			}
-			{
-				auto mat = make_unique<Material>();
-				mat->shaders = &g_shaderHolder.get("deferredGeometryPass");
-				mat->diffuseMap = &g_stoneTexture;
-				g_materialHolder.insert("stone", std::move(mat));
-			}
-			{
-				auto mat = make_unique<Material>();
-				mat->shaders = &g_shaderHolder.get("deferredGeometryPass");
-				mat->diffuseMap = &g_terrainTexture;
-				g_materialHolder.insert("terrain", std::move(mat));
-			}
+			//// load materials
+			//{
+			//	auto mat = make_unique<Material>();
+			//	mat->shaders = &g_shaderHolder.get("deferredGeometryPass");
+			//	mat->diffuseMap = &g_defaultTexture;
+			//	g_materialHolder.insert("default", std::move(mat));
+			//}
+			//{
+			//	auto mat = make_unique<Material>();
+			//	mat->shaders = &g_shaderHolder.get("deferredGeometryPass");
+			//	mat->diffuseMap = &g_dunjunTextTexture;
+			//	mat->specularExponent = 100000.0f;
+			//	g_materialHolder.insert("dunjunText", std::move(mat));
+			//}
+			//{
+			//	auto mat = make_unique<Material>();
+			//	mat->shaders = &g_shaderHolder.get("deferredGeometryPass");
+			//	mat->diffuseMap = &g_stoneTexture;
+			//	g_materialHolder.insert("stone", std::move(mat));
+			//}
+			//{
+			//	auto mat = make_unique<Material>();
+			//	mat->shaders = &g_shaderHolder.get("deferredGeometryPass");
+			//	mat->diffuseMap = &g_terrainTexture;
+			//	g_materialHolder.insert("terrain", std::move(mat));
+			//}
+
+			g_dunjunTextMaterial = Material{};
+			g_dunjunTextMaterial.diffuseMap = &g_dunjunTextTexture;
 		}
 
 		// sprite vertex info, vbo and ibo
 		INTERNAL void loadSpriteAsset()
 		{
-			{
-				// Here is where you add vertice information
-				//
-				Vertex vertices[] = { // define vertexes for a triangle
-					//  x	    y	  z		  s	    t	       r	 g	   b	 a		normals				// for triangle strips organize vertexes in a backwards Z
-					{ { +0.5f,  0.5f, 0.0f },{ 1.0f, 1.0f },{ 0xFF,0xFF,0xFF,0xFF }, { 0, 0, 0 } },	// 0 vertex         1 ---- 0        
-					{ { -0.5f,  0.5f, 0.0f },{ 0.0f, 1.0f },{ 0xFF,0xFF,0xFF,0xFF }, { 0, 0, 0 } },	// 1 vertex           \             
-					{ { +0.5f, -0.5f, 0.0f },{ 1.0f, 0.0f },{ 0xFF,0xFF,0xFF,0xFF }, { 0, 0, 0 } },	// 2 vertex              \           
-					{ { -0.5f, -0.5f, 0.0f },{ 0.0f, 0.0f },{ 0xFF,0xFF,0xFF,0xFF }, { 0, 0, 0 } },	// 3 vertex         3 -----2       
-				};
-
-				u32 indices[] = { 0, 1, 2, 1, 3, 2 }; // vertex draw order for GL_TRIANGLES
-
-				// get number of entries
-				u32 numVertices = sizeof(vertices) / sizeof(vertices[0]);
-				u32 numIndices = sizeof(indices) / sizeof(indices[0]);
-
-				Mesh::Data meshData = {};
-
-				reserve(meshData.vertices, numVertices);
-				reserve(meshData.indices, numIndices);
-
-				// add the data
-				for(u32 i = 0; i < numVertices; i++)
-					append(meshData.vertices, vertices[i]);
-
-				for(u32 i = 0; i <  numIndices; i++)
-					append(meshData.indices, indices[i]);
-
-				meshData.generateNormals();
-
-				g_meshHolder.insert("player", make_unique<Mesh>(meshData));
-				//g_meshes["sprite"] = new Mesh(meshData);
-			}
 
 			{
 				// Here is where you add vertice information
@@ -180,11 +152,12 @@ namespace Dunjun
 
 				u32 indices[] = { 0, 1, 2, 1, 3, 2 }; // vertex draw order for GL_TRIANGLES
 
-				// get number of entries
+													  // get number of entries
 				u32 numVertices = sizeof(vertices) / sizeof(vertices[0]);
 				u32 numIndices = sizeof(indices) / sizeof(indices[0]);
 
-				Mesh::Data meshData = {};
+				MeshData meshData = { defaultAllocator() };
+				meshData.drawType = DrawType::Triangles;
 
 				reserve(meshData.vertices, numVertices);
 				reserve(meshData.indices, numIndices);
@@ -198,7 +171,43 @@ namespace Dunjun
 
 				meshData.generateNormals();
 
-				g_meshHolder.insert("quad", make_unique<Mesh>(meshData));
+				g_meshHolder.insert("quad", std::unique_ptr<Mesh>(new Mesh(generateMesh(meshData))));
+			}
+			{
+				// Here is where you add vertice information
+				//
+				Vertex vertices[] = { // define vertexes for a triangle
+					//  x	    y	  z		  s	    t	       r	 g	   b	 a		normals				// for triangle strips organize vertexes in a backwards Z
+					{ { +0.5f,  0.5f, 0.0f },{ 1.0f, 1.0f },{ 0xFF,0xFF,0xFF,0xFF }, { 0, 0, 0 } },	// 0 vertex         1 ---- 0        
+					{ { -0.5f,  0.5f, 0.0f },{ 0.0f, 1.0f },{ 0xFF,0xFF,0xFF,0xFF }, { 0, 0, 0 } },	// 1 vertex           \             
+					{ { +0.5f, -0.5f, 0.0f },{ 1.0f, 0.0f },{ 0xFF,0xFF,0xFF,0xFF }, { 0, 0, 0 } },	// 2 vertex              \           
+					{ { -0.5f, -0.5f, 0.0f },{ 0.0f, 0.0f },{ 0xFF,0xFF,0xFF,0xFF }, { 0, 0, 0 } },	// 3 vertex         3 -----2       
+				};
+			
+				u32 indices[] = { 0, 1, 2, 1, 3, 2 }; // vertex draw order for GL_TRIANGLES
+			
+				// get number of entries
+				u32 numVertices = sizeof(vertices) / sizeof(vertices[0]);
+				u32 numIndices = sizeof(indices) / sizeof(indices[0]);
+
+				MeshData meshData = { defaultAllocator() };
+				meshData.drawType = DrawType::Triangles;
+			
+				reserve(meshData.vertices, numVertices);
+				reserve(meshData.indices, numIndices);
+			
+				// add the data
+				for(u32 i = 0; i < numVertices; i++)
+					append(meshData.vertices, vertices[i]);
+			
+				for(u32 i = 0; i <  numIndices; i++)
+					append(meshData.indices, indices[i]);
+			
+				meshData.generateNormals();
+			
+				g_meshHolder.insert("sprite", std::unique_ptr<Mesh>(new Mesh(generateMesh(meshData))));
+				//g_meshes["sprite"] = new Mesh(meshData);
+
 			}
 		}
 
@@ -222,7 +231,6 @@ namespace Dunjun
 				default: break;
 				case Event::Closed:
 				{
-					// TODO: fix inconsistant delay/ignore for this event
 					g_running = false;
 					break;
 				}
@@ -240,79 +248,84 @@ namespace Dunjun
 
 				case Event::KeyPressed:// && acceptInput == true
 				{
-					// console
-					if (g_world->useConsole == true)
+					if (Input::isKeyPressed(Input::Key::Escape))
 					{
-						// exit console
-						if (Input::isKeyPressed(Input::Key::Tab))
-						{
-							g_world->useConsole = false;
-						}
-
-						// check for a command
-						if (Input::isKeyPressed(Input::Key::Return))
-							g_world->checkForCommand = true;
-
-						if (Input::isKeyPressed(Input::Key::Space))
-							g_world->consoleBuffer.append(" ");
-
-						// Erase letters
-						if (Input::isKeyPressed(Input::Key::Backspace))
-							if (g_world->consoleText.size() > 0)
-								g_world->consoleText.erase(g_world->consoleText.size() - 1);
-
-						if (Input::isKeyPressed(Input::Key::Delete))
-						{
-							g_world->consoleText.clear();
-							g_world->consoleBuffer.clear();
-						}
-
-						// TODO: press up or down to cycle previous commands
-						if (Input::isKeyPressed(Input::Key::Up))
-							g_world->consoleText.append(" ");
-						if (Input::isKeyPressed(Input::Key::Down))
-							g_world->consoleText.append(" ");
-
-						//////////////////////////////////
-						//								//
-						//		   ADD LETTERS			//
-						//								//
-						//////////////////////////////////
-
-						for (int i = 0; i < 26; i++)
-						{
-							std::string s = ""; // can't initialize as i or cast in .append()
-
-							if (event.key.capsLock == true || event.key.shift == true)
-								s = i + 65; // capital letters
-							else
-								s = i + 97; // lower case letters
-
-							if (Input::isKeyPressed(Input::Key(i)))
-								if ((g_world->consoleBuffer.find(s) == g_world->consoleBuffer.npos)) // only add if letter is not already in buffer
-									g_world->consoleBuffer.append(s);
-						}
-
-						if (1)
-						{
-							// TODO: make this only happen when a key is released and while no keys are pressed
-							// SDL UP/DOWN events don't seem to work for this
-							// buffer is added twice when this happens here
-							g_world->consoleText.append(g_world->consoleBuffer);
-							g_world->consoleBuffer.clear();
-						}
-
-						std::cout << "\n\nType in a command and press enter. [HELP] [QUIT]" << std::endl;
-						std::cout << ">> [" << g_world->consoleText << "." << g_world->consoleBuffer << "]" << std::endl;
-
+						g_running = false;
+						break;
 					}
-					// normal input
-					else
-					{
-						if (Input::isKeyPressed(Input::Key::Tab))
-							g_world->useConsole = true;
-					}
-					break;
+				//	// console
+				//	if (g_world->useConsole == true)
+				//	{
+				//		// exit console
+				//		if (Input::isKeyPressed(Input::Key::Tab))
+				//		{
+				//			g_world->useConsole = false;
+				//		}
+				//
+				//		// check for a command
+				//		if (Input::isKeyPressed(Input::Key::Return))
+				//			g_world->checkForCommand = true;
+				//
+				//		if (Input::isKeyPressed(Input::Key::Space))
+				//			g_world->consoleBuffer.append(" ");
+				//
+				//		// Erase letters
+				//		if (Input::isKeyPressed(Input::Key::Backspace))
+				//			if (g_world->consoleText.size() > 0)
+				//				g_world->consoleText.erase(g_world->consoleText.size() - 1);
+				//
+				//		if (Input::isKeyPressed(Input::Key::Delete))
+				//		{
+				//			g_world->consoleText.clear();
+				//			g_world->consoleBuffer.clear();
+				//		}
+				//
+				//		// TODO: press up or down to cycle previous commands
+				//		if (Input::isKeyPressed(Input::Key::Up))
+				//			g_world->consoleText.append(" ");
+				//		if (Input::isKeyPressed(Input::Key::Down))
+				//			g_world->consoleText.append(" ");
+				//
+				//		//////////////////////////////////
+				//		//								//
+				//		//		   ADD LETTERS			//
+				//		//								//
+				//		//////////////////////////////////
+				//
+				//		for (int i = 0; i < 26; i++)
+				//		{
+				//			std::string s = ""; // can't initialize as i or cast in .append()
+				//
+				//			if (event.key.capsLock == true || event.key.shift == true)
+				//				s = i + 65; // capital letters
+				//			else
+				//				s = i + 97; // lower case letters
+				//
+				//			if (Input::isKeyPressed(Input::Key(i)))
+				//				if ((g_world->consoleBuffer.find(s) == g_world->consoleBuffer.npos)) // only add if letter is not already in buffer
+				//					g_world->consoleBuffer.append(s);
+				//		}
+				//
+				//		if (1)
+				//		{
+				//			// TODO: make this only happen when a key is released and while no keys are pressed
+				//			// SDL UP/DOWN events don't seem to work for this
+				//			// buffer is added twice when this happens here
+				//			g_world->consoleText.append(g_world->consoleBuffer);
+				//			g_world->consoleBuffer.clear();
+				//		}
+				//
+				//		std::cout << "\n\nType in a command and press enter. [HELP] [QUIT]" << std::endl;
+				//		std::cout << ">> [" << g_world->consoleText << "." << g_world->consoleBuffer << "]" << std::endl;
+				//
+				//	}
+				//	// normal input
+				//	else
+				//	{
+				//		if (Input::isKeyPressed(Input::Key::Tab))
+				//			g_world->useConsole = true;
+				//	}
+				//	break;
 				}
 
 				/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -358,6 +371,52 @@ namespace Dunjun
 				// TODO: Fullscreen
 				glInit();
 			}
+
+			if(Input::isKeyPressed(Input::Key::D))
+			{
+				Vector3 f = g_world->camera.forward();
+
+				s32 angle = f.y * 90;
+
+				std::string direction;
+
+				if (f.x > 0) // right side
+				{
+					if (f.z > 0) // right-bottom quadrant
+					{
+						if (f.x > f.z)
+							direction = "East";
+						else
+							direction = "South";
+					}
+					else // right-top quadrant
+					{
+						if (f.x > -f.z)
+							direction = "East";
+						else
+							direction = "North";
+					}
+				}
+				else // left side
+				{
+					if (f.z > 0) // left-bottom quadrant
+					{
+						if (-f.x > f.z)
+							direction = "West";
+						else
+							direction = "South";
+					}
+					else // left-top quadrant
+					{
+						if (f.z > f.x)
+							direction = "West";
+						else
+							direction = "North";
+					}
+				}
+
+				std::cout << "You are facing " << direction << " and looking " << angle << " degrees vertically." << std::endl;
+			}
 		}
 
 		/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -373,6 +432,21 @@ namespace Dunjun
 		INTERNAL void update(Time dt)
 		{
 			g_world->update(dt);
+
+			SceneGraph& sg = g_world->sceneGraph;
+			auto node = sg.getNodeId(g_world->player);
+			Transform pos = sg.getGlobalTransform(node);
+			f32 wt = 1.0f * Time::now().asSeconds();
+			f32 a = 1.0f;
+			pos.position.x = a * Math::cos(Radian(wt));
+			pos.position.z = a * Math::sin(Radian(wt));
+			pos.orientation = conjugate(Math::lookAt<Quaternion>(pos.position, Vector3::Zero, Vector3{0, 1, 0}));
+
+			sg.setGlobalTransform(node, pos);
+
+			//std::cout << sg.getGlobalTransform(node).position << "\n";
+			//std::cout << sg.getGlobalTransform(node).orientation << "\n";
+			//std::cout << sg.getGlobalTransform(node).scale << "\n";
 		}
 
 		/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -399,6 +473,43 @@ namespace Dunjun
 		)
 		)				.
 		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+
+		INTERNAL void initWorld()
+		{
+			SceneGraph& sg = g_world->sceneGraph;
+			RenderSystem& rs = g_world->renderSystem;
+			sg.allocate(16);
+			rs.allocate(16);
+
+			EntityId crate = g_world->createEntity();
+			EntityId player = g_world->player = g_world->createEntity();
+
+			g_world->components[crate] = ComponentName;
+			g_world->components[player] = ComponentName | ComponentRender;
+
+			g_world->names[crate] = NameComponent{"crate"};
+			g_world->names[player] = NameComponent{"Bob"};
+
+			auto playerNode = sg.create(player, Transform::Identity);
+			auto crateNode = sg.create(crate, Transform::Identity);
+
+			sg.link(crateNode, playerNode);
+
+			(void)rs.create(playerNode, {g_meshHolder.get("sprite"), g_dunjunTextMaterial });
+
+			{
+				DirectionalLight light;
+
+				light.direction = { -0.0f, -1.0f, -0.2f };
+				light.color = ColorLib::Orange;
+				light.intensity = 1.0f;
+				light.colorIntensity = calculateLightIntensities(light.color, light.intensity);
+				light.brightness = ColorLib::calculateBrightness(light.colorIntensity);
+				append(rs.directionalLights, light);
+			}
+
+		}
+
 
 		void init()
 		{
@@ -433,14 +544,17 @@ namespace Dunjun
 			loadMaterials();
 			loadSpriteAsset();
 
-			g_world = defaultAllocator().makeNew<World>();
+			g_world = defaultAllocator().makeNew<EntityWorld>();
+			initWorld();
+
+			//g_world = defaultAllocator().makeNew<World>();
 
 			// pass context to world
-			g_world->init(Context{ g_window,
-								 // g_textureHolder,
-								  g_shaderHolder,
-								  g_meshHolder,
-								  g_materialHolder });
+			//g_world->init(Context{ g_window,
+			//					 // g_textureHolder,
+			//					  g_shaderHolder,
+			//					  g_meshHolder,
+			//					  g_materialHolder });
 		}
 
 		/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -505,8 +619,8 @@ namespace Dunjun
 												   (u32)tc.tickRate).c_str());
 				}
 
-				if(g_running)
-					render();
+				render();
+				g_window.display();
 
 
 				// framerate limiter
@@ -521,8 +635,8 @@ namespace Dunjun
 
 		void cleanUp()
 		{
-			defaultAllocator().makeDelete<World>(g_world);
-
+			//defaultAllocator().makeDelete<World>(g_world);
+			defaultAllocator().makeDelete(g_world);
 			Input::cleanup();
 			g_window.close();
 			SDL_Quit();

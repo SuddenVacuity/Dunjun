@@ -1,8 +1,8 @@
-#ifndef DUNJUN_SCENE_MESH_RENDERER_HPP
-#define DUNJUN_SCENE_MESH_RENDERER_HPP
+
 
 #include <Dunjun/Scene/SceneNode.hpp>
-
+#ifdef DUNJUN_SCENE_MESH_RENDERER_HPP
+#define DUNJUN_SCENE_MESH_RENDERER_HPP
 namespace Dunjun
 {
 	struct MeshRenderer : NodeComponent

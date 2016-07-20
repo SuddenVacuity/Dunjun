@@ -33,7 +33,7 @@ namespace Dunjun
 
 		*/
 
-		Dunjun::ShaderProgram* shaders = nullptr;
+		//Dunjun::ShaderProgram* shaders = nullptr;
 		//Dunjun::Texture* texture;
 
 		Dunjun::Texture* diffuseMap = nullptr;

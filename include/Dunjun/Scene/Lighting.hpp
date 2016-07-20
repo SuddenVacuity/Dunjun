@@ -29,14 +29,12 @@ namespace Dunjun
 	struct PointLight : BaseLight
 	{
 		Vector3 position = {0, 0, 0};
-		Attenuation attenuation;
+		Attenuation attenuation = {};
 		mutable f32 range = 16.0f;
 	};
 
 	inline Vector3 calculateLightIntensities(Color color, f32 strength)
 	{
-		//intensity = strength;
-
 		Vector3 c = {color.r, color.g, color.b};
 
 		return (c / (COLOR_DEPTH - 1)) * strength;

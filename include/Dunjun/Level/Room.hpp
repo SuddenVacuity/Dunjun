@@ -1,9 +1,8 @@
-#ifndef DUNJUN_lEVEL_ROOM_HPP
-#define DUNJUN_lEVEL_ROOM_HPP
 
 
-#include <Dunjun/Scene.hpp>
-
+#include <Dunjun/Context.hpp>
+#ifdef DUNJUN_LEVEL_ROOM_HPP
+#define DUNJUN_LEVEL_ROOM_HPP
 
 namespace Dunjun
 {

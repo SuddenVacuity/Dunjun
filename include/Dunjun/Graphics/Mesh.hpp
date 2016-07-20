@@ -27,63 +27,46 @@ namespace Dunjun
 		// Quads = GL_QUADS,
 	};
 
+	struct MeshData
+	{
+		DrawType drawType;
+
+		//std::vector<Vertex> vertices;
+		Array<Vertex> vertices;
+		Array<u32> indices;
+
+		MeshData(Allocator& a);
+		MeshData(const MeshData& other) = default;
+		~MeshData() = default;
+
+		// push a single triangle from indices
+		MeshData& addFace(u32 a, u32 b, u32 c);
+
+		// push a single triangle from indices into an existing mesh
+		MeshData& addFace(u32 offset, u32 a, u32 b, u32 c);
+
+		void generateNormals();
+	};
+
 	struct Mesh
 	{
 	public:
-		struct Data
-		{
-			DrawType drawType;
+		u32 vbo;
+		u32 ibo;
 
-			//std::vector<Vertex> vertices;
-			Array<Vertex> vertices;
-			Array<u32> indices;
-
-			Data();
-			Data(const Data& other) = default;
-			~Data() = default;
-
-			// push a single triangle from indices
-			Data& addFace(u32 a, u32 b, u32 c);
-
-			// push a single triangle from indices into an existing mesh
-			Data& addFace(u32 offset, u32 a, u32 b, u32 c);
-
-			void generateNormals();
-		};
-
-		Data data;
-
-		mutable b32 generated = false;
-
-		mutable u32 vbo = 0;
-		mutable u32 ibo = 0;
-		DrawType drawType = DrawType::Triangles;
-		s32 drawCount = 0;
-
-		Mesh();
-		Mesh(const Data& data);
-
-		virtual ~Mesh()
-		{
-			destroy();
-		}
-
-		void addData(const Data& data);
-
-		void generate() const;
-
-		void draw() const;
-
-		inline void destroy() const
-		{
-			if (vbo)
-				glDeleteBuffers(1, &vbo);
-			if (ibo)
-				glDeleteBuffers(1, &ibo);
-		}
+		DrawType drawType;
+		s32 drawCount;
 	};
 
+	Mesh generateMesh(const MeshData& data);
 
+	void drawMesh(const Mesh& mesh);
+
+	inline void destroyMesh(Mesh& mesh)
+	{
+			glDeleteBuffers(1, &mesh.vbo);
+			glDeleteBuffers(1, &mesh.ibo);
+	}
 
 
 } // end Dunjun

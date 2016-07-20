@@ -1,8 +1,8 @@
-#ifndef DUNJUN_LEVEL_HPP
-#define DUNJUN_LEVEL_HPP
+
 
 #include <Dunjun/Level/Room.hpp>
-
+#ifdef DUNJUN_LEVEL_HPP
+#define DUNJUN_LEVEL_HPP
 namespace Dunjun
 {
 	class Level : public SceneNode

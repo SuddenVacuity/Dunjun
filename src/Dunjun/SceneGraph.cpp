@@ -37,8 +37,8 @@ namespace Dunjun
 		// assign pointers to buffer data accunting for extra capacity
 		newData.entityId	= (EntityId*)(newData.buffer);
 		newData.local		= (Transform*)(newData.entityId	+ capacity);
-		newData.world		= (Transform*)(newData.local	+ capacity);
-		newData.parent		= (NodeId*)(newData.world		+ capacity);
+		newData.global		= (Transform*)(newData.local	+ capacity);
+		newData.parent		= (NodeId*)(newData.global + capacity);
 		newData.firstChild  = (NodeId*)(newData.parent		+ capacity);
 		newData.prevSibling = (NodeId*)(newData.firstChild	+ capacity);
 		newData.nextSibling = (NodeId*)(newData.prevSibling + capacity);
@@ -46,7 +46,7 @@ namespace Dunjun
 		// copy data from old location to new location
 		memcpy(newData.entityId,	data.entityId,	  data.length * sizeof(EntityId));
 		memcpy(newData.local,		data.local,		  data.length * sizeof(Transform));
-		memcpy(newData.world,		data.world,		  data.length * sizeof(Transform));
+		memcpy(newData.global,		data.global,	  data.length * sizeof(Transform));
 		memcpy(newData.parent,		data.parent,	  data.length * sizeof(NodeId));
 		memcpy(newData.firstChild,	data.firstChild,  data.length * sizeof(NodeId));
 		memcpy(newData.prevSibling, data.prevSibling, data.length * sizeof(NodeId));
@@ -69,7 +69,7 @@ namespace Dunjun
 		// assing data to next open position
 		data.entityId[last] = id;
 		data.local[last] = t;
-		data.world[last] = t;
+		data.global[last] = t;
 
 		data.parent[last] = EmptyNode;
 		data.firstChild[last] = EmptyNode;
@@ -92,7 +92,7 @@ namespace Dunjun
 
 		data.entityId[id]	 = data.entityId[last];
 		data.local[id]		 = data.local[last];
-		data.world[id]		 = data.world[last];
+		data.global[id]		 = data.global[last];
 		data.parent[id]		 = data.parent[last];
 		data.firstChild[id]	 = data.firstChild[last];
 		data.prevSibling[id] = data.prevSibling[last];
@@ -150,8 +150,8 @@ namespace Dunjun
 			data.prevSibling[child] = prev;
 		}
 
-		const Transform parentTransform = data.world[parent];
-		const Transform childTransform = data.world[child];
+		const Transform parentTransform = data.global[parent];
+		const Transform childTransform = data.global[child];
 
 		const Transform localTransform = parentTransform / childTransform;
 
@@ -183,12 +183,12 @@ namespace Dunjun
 
 	void SceneGraph::transformChild(NodeId id, const Transform& t)
 	{
-		data.world[id] = data.local[id] * t;
+		data.global[id] = data.local[id] * t;
 		NodeId child = data.firstChild[id];
 
 		while(isValid(child))
 		{
-			transformChild(child, data.world[id]);
+			transformChild(child, data.global[id]);
 			child = data.nextSibling[child];
 		}
 	}
@@ -199,20 +199,20 @@ namespace Dunjun
 		Transform parentTransform = Transform::Identity;
 
 		if (isValid(parent))
-			parentTransform = data.world[parent];
+			parentTransform = data.global[parent];
 
 		transformChild(id, parentTransform);
 	}
 
-	void SceneGraph::updateWorld(NodeId id)
+	void SceneGraph::updateGlobal(NodeId id)
 	{
 		NodeId parent = data.parent[id];
 		Transform parentTransform = Transform::Identity;
 
 		if (isValid(parent))
-			parentTransform = data.world[parent];
+			parentTransform = data.global[parent];
 
-		data.local[id] = data.world[id] / parentTransform;
+		data.local[id] = data.global[id] / parentTransform;
 
 		transformChild(id, parentTransform);
 	}
@@ -223,9 +223,9 @@ namespace Dunjun
 		return data.local[id];
 	}
 
-	Transform SceneGraph::getWorldTransform(NodeId id) const
+	Transform SceneGraph::getGlobalTransform(NodeId id) const
 	{
-		return data.world[id];
+		return data.global[id];
 	}
 
 
@@ -235,10 +235,10 @@ namespace Dunjun
 		updateLocal(id);
 	}
 
-	void SceneGraph::setWorldTransform(NodeId id, const Transform& t)
+	void SceneGraph::setGlobalTransform(NodeId id, const Transform& t)
 	{
-		data.world[id] = t;
-		updateWorld(id);
+		data.global[id] = t;
+		updateGlobal(id);
 	}
 
 } // end Dunjun

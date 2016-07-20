@@ -1,7 +1,7 @@
-#ifndef DUNJUN_SCENE_FACE_CAMERA_HPP
-#define DUNJUN_SCENE_FACE_CAMERA_HPP
 
 #include <Dunjun/Scene/MeshRenderer.hpp>
+#ifdef DUNJUN_SCENE_FACE_CAMERA_HPP
+#define DUNJUN_SCENE_FACE_CAMERA_HPP
 
 namespace Dunjun
 {

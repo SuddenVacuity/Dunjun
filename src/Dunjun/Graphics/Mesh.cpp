@@ -12,17 +12,17 @@ namespace Dunjun
 	)
 	)				.
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
-	Mesh::Data::Data()
+	MeshData::MeshData(Allocator& a)
 		: drawType(DrawType::Triangles)
-		, vertices(defaultAllocator())
-		, indices(defaultAllocator())
+		, vertices(a)
+		, indices(a)
 	{
 	}
 
 
 
 	// push a single triangle from indices
-	Mesh::Data& Mesh::Data::addFace(u32 a, u32 b, u32 c)
+	MeshData& MeshData::addFace(u32 a, u32 b, u32 c)
 	{
 		append(indices, a);
 		append(indices, b);
@@ -32,7 +32,7 @@ namespace Dunjun
 	}
 
 	// push a single triangle from indices into an existing mesh
-	Mesh::Data& Mesh::Data::addFace(u32 offset, u32 a, u32 b, u32 c)
+	MeshData& MeshData::addFace(u32 offset, u32 a, u32 b, u32 c)
 	{
 		append(indices, offset + a);
 		append(indices, offset + b);
@@ -41,7 +41,7 @@ namespace Dunjun
 		return *this;
 	}
 
-	void Mesh::Data::generateNormals()
+	void MeshData::generateNormals()
 	{
 		u32 li = (u32)len(indices);
 		for (u32 i = 0; i < li; i += 3)
@@ -76,68 +76,39 @@ namespace Dunjun
 	)				.
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-	Mesh::Mesh()
-		: data()
-		, generated(false)
-		, vbo(0)
-		, ibo(0)
-		, drawType(DrawType::Triangles)
-		, drawCount(0)
+
+	Mesh generateMesh(const MeshData& data)
 	{
-	}
+		//if(generated)
+		//	return;
+		Mesh mesh;
+		mesh.drawType = data.drawType;
+		mesh.drawCount = (s32)len(data.indices);
 
-	Mesh::Mesh(const Data& data)
-		: data(data)
-		, generated(false)
-		, vbo(0)
-		, ibo(0)
-		, drawType(data.drawType)
-		, drawCount((s32)len(data.indices))
-	{
-		generate();
-	}
+		//if(!vbo)
+			glGenBuffers(1, &mesh.vbo);
+		//if(!ibo)
+			glGenBuffers(1, &mesh.ibo);
 
-	void Mesh::addData(const Data& d)
-	{
-
-		data = d;
-
-		drawType = d.drawType;
-
-		drawCount = (u32)len(data.indices);
-
-		generated = false;
-	}
-
-	void Mesh::generate() const
-	{
-		if(generated)
-			return;
-
-		if(!vbo)
-			glGenBuffers(1, &vbo);
-		if(!ibo)
-			glGenBuffers(1, &ibo);
-
-		glBindBuffer(GL_ARRAY_BUFFER, vbo); // bind the buffer
+		glBindBuffer(GL_ARRAY_BUFFER, mesh.vbo); // bind the buffer
 		defer(glBindBuffer(GL_ARRAY_BUFFER, 0)); // unbind the buffer
 		glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * len(data.indices),
 						&data.vertices[0], GL_STATIC_DRAW);
 
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo); // bind the buffer
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.ibo); // bind the buffer
 		defer(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0)); // unbind the buffer
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(u32) * len(data.indices),
 						&data.indices[0], GL_STATIC_DRAW);
 
 
 
-		generated = true;
+		return mesh;
 	}
 
-	void Mesh::draw() const
+	void drawMesh(const Mesh& mesh)
 	{
-		if(!generated)
-			generate();
+		//if(!generated)
+		//	generate();
 
 		// set attrib to data from data
 		glEnableVertexAttribArray((u32)AttribLocation::Position); // enables attribute array[0] a_position
@@ -150,8 +121,10 @@ namespace Dunjun
 		defer(glDisableVertexAttribArray((u32)AttribLocation::Color)); // disables attribute array[2] a_color
 		defer(glDisableVertexAttribArray((u32)AttribLocation::Normal)); // disables attribute array[3] a_normal
 
-		glBindBuffer(GL_ARRAY_BUFFER, vbo); // bind the buffer
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo); // bind the buffer
+		glBindBuffer(GL_ARRAY_BUFFER, mesh.vbo); // bind the buffer
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.ibo); // bind the buffer
+		defer(glBindBuffer(GL_ARRAY_BUFFER, 0)); // unbind the buffer
+		defer(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0)); // unbind the buffer
 
 		// pointer for attribute position (att position[], size of vertices x/y/z, int type, normalized?, stride, pointer)
 		glVertexAttribPointer((u32)AttribLocation::Position, 3, 				
@@ -175,10 +148,9 @@ namespace Dunjun
 
 		// get the draw info from ModelAsset asset
 		//glDrawArrays(asset->drawType, asset->drawStart, asset->drawCount); // (mode to draw in, first vertex, total vertices)
-		glDrawElements((GLenum)drawType, (s32)drawCount, GL_UNSIGNED_INT, nullptr);
+		glDrawElements((GLenum)mesh.drawType, mesh.drawCount, GL_UNSIGNED_INT, nullptr);
 
-		glBindBuffer(GL_ARRAY_BUFFER, 0); // unbind the buffer
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0); // unbind the buffer
+
 	}
 
 }

@@ -321,9 +321,6 @@ namespace Dunjun
 
 	bool SceneRenderer::isCurrentShaders(const ShaderProgram* shaders)
 	{
-		if(!currentShaders)
-			return false;
-
 		if(shaders == currentShaders)
 		{
 			return true;
@@ -360,7 +357,7 @@ namespace Dunjun
 	{
 		//assert(m_currentTexture);
 
-		if (texture != currentTexture || !currentTexture)
+		if (texture != currentTexture)
 		{
 			currentTexture = texture;
 			Texture::bind(currentTexture, position);

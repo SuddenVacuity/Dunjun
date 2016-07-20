@@ -4,7 +4,6 @@
 namespace Dunjun
 {
 	// Functions
-	// TODO: FIX: changing lookAt position does not act as expected
 	void Camera::lookAt(const Vector3& position, const Vector3& up)
 	{
 		transform.orientation = conjugate(Math::lookAt<Quaternion>(transform.position, position, up));

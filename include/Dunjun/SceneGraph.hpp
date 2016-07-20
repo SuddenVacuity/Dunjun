@@ -22,7 +22,7 @@ namespace Dunjun
 			// data contained in void* buffer
 			EntityId* entityId  = nullptr;
 			Transform* local	= nullptr;
-			Transform* world	= nullptr;
+			Transform* global	= nullptr;
 			NodeId* parent		= nullptr;
 			NodeId* firstChild  = nullptr;
 			NodeId* prevSibling = nullptr;
@@ -54,15 +54,15 @@ namespace Dunjun
 		void transformChild(NodeId child, const Transform& t);
 
 		void updateLocal(NodeId id);
-		void updateWorld(NodeId id);
+		void updateGlobal(NodeId id);
 
 		Transform getLocalTransform(NodeId id) const;
-		Transform getWorldTransform(NodeId id) const;
+		Transform getGlobalTransform(NodeId id) const;
 
 		// relative to current transform
 		void setLocalTransform(NodeId id, const Transform& t);
 		// absolute transform
-		void setWorldTransform(NodeId id, const Transform& t);
+		void setGlobalTransform(NodeId id, const Transform& t);
 
 
 	}; // end SceneGraph

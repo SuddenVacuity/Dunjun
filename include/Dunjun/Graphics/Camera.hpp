@@ -15,14 +15,13 @@ namespace Dunjun
 
 	struct Camera
 	{
-		Transform transform = Transform();
-
-		Radian fieldOfView = Degree(50.0f);
-		f32 orthoScale = 4.0f;
-		f32 nearPlane = 0.01f;
-		f32 farPlane = 256.0f;
-		Vector2 viewportSize = {0, 0};
-		f32 viewportAspectRatio = 4.0f / 3.0f;
+		Transform transform			  = Transform::Identity;
+		Radian fieldOfView			  = Degree(50.0f);
+		f32 orthoScale				  = 4.0f;
+		f32 nearPlane				  = 0.01f;
+		f32 farPlane				  = 256.0f;
+		//Vector2 viewportSize		  = {0, 0};
+		f32 viewportAspectRatio		  = 4.0f / 3.0f;
 		ProjectionType projectionType = ProjectionType::Perspective;
 
 

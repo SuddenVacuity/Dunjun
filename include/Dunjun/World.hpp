@@ -1,8 +1,8 @@
-#ifndef DUNJUN_WORLD_HPP
-#define DUNJUN_WORLD_HPP
+
 
 #include <Dunjun/Level.hpp>
-
+#ifdef DUNJUN_WORLD_HPP
+#define DUNJUN_WORLD_HPP
 namespace Dunjun
 {
 	class World

@@ -1,7 +1,7 @@
-#ifndef DUNJUN_SCENE_SCENENODE_HPP
-#define DUNJUN_SCENE_SCENENODE_HPP
 
 #include <Dunjun/Scene/NodeComponent.hpp>
+#ifdef DUNJUN_SCENE_SCENENODE_HPP
+#define DUNJUN_SCENE_SCENENODE_HPP
 
 namespace Dunjun
 {

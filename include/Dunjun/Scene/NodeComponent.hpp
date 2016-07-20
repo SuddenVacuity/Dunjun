@@ -1,8 +1,8 @@
-#ifndef DUNJUN_SCENE_NODE_COMPONENT_HPP
-#define DUNJUN_SCENE_NODE_COMPONENT_HPP
+
 
 #include <Dunjun/Scene/SceneRenderer.hpp>
-
+#ifdef DUNJUN_SCENE_NODE_COMPONENT_HPP
+#define DUNJUN_SCENE_NODE_COMPONENT_HPP
 namespace Dunjun
 {
 	class SceneNode;
