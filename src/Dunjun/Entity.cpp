@@ -13,22 +13,25 @@ namespace Dunjun
 		, components()
 		, camera()
 	{
-		//for(EntityId& id : components)
-		//	id = ComponentMask::ComponentNone;
+		for(u32 id = 0; id < MaxEntities; id++)
+			components[id] = ComponentMask::ComponentNone;
 
-		camera.transform.position = {0, 1, 3};
+		camera.transform.position = {0, 3, 9};
 		camera.lookAt({0, 0, 0});
 
 		camera.projectionType = ProjectionType::Perspective;
 	}
 
-	EntityId EntityWorld::createEntity()
+	EntityId EntityWorld::createEntity(u32 flags)
 	{
 		EntityId id;
 		for(id = 0; id < MaxEntities; id++)
 		{
 			if(components[id] == ComponentMask::ComponentNone)
+			{
+				components[id] = flags;
 				return id;
+			}
 
 		}
 
@@ -66,7 +69,7 @@ namespace Dunjun
 		renderSystem.render();
 
 		glViewport(0, 0, renderSystem.fbSize.x, renderSystem.fbSize.y);
-		glClearColor(1, 1, 1, 0);
+		glClearColor(0, 0, 0, 0);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		{
 			ShaderProgram& shaders = g_shaderHolder.get("texturePass");

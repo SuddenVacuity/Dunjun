@@ -14,9 +14,10 @@ namespace Dunjun
 	public:
 		using IdentifierType = Identifier;
 		using ResourceType = Resource;
+		using ResourceUPtr = std::unique_ptr<Resource>;
 
 
-		void insert(Identifier id, std::unique_ptr<Resource> resource)
+		void insert(Identifier id, ResourceUPtr resource)
 		{
 			auto inserted = m_resources.insert(std::make_pair(id, std::move(resource)));
 			assert(inserted.second && "ResourceHolder resource not inserted.");

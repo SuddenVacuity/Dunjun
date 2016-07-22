@@ -171,6 +171,7 @@ namespace Dunjun
 
 				meshData.generateNormals();
 
+				// TODO:FIXME: seemingly random access violations happenjl here
 				g_meshHolder.insert("quad", std::unique_ptr<Mesh>(new Mesh(generateMesh(meshData))));
 			}
 			{
@@ -434,15 +435,22 @@ namespace Dunjun
 			g_world->update(dt);
 
 			SceneGraph& sg = g_world->sceneGraph;
-			auto node = sg.getNodeId(g_world->player);
-			Transform pos = sg.getGlobalTransform(node);
-			f32 wt = 1.0f * Time::now().asSeconds();
-			f32 a = 1.0f;
-			pos.position.x = a * Math::cos(Radian(wt));
-			pos.position.z = a * Math::sin(Radian(wt));
-			pos.orientation = conjugate(Math::lookAt<Quaternion>(pos.position, Vector3::Zero, Vector3{0, 1, 0}));
+			SceneGraph::NodeId crateNode = sg.getNodeId(g_world->crate);
+			SceneGraph::NodeId playerNode = sg.getNodeId(g_world->player);
 
-			sg.setGlobalTransform(node, pos);
+			f32 wt = 1.0f * Time::now().asSeconds();
+			f32 a = 2.0f;
+			//pos.orientation = conjugate(Quaternion::Identity);
+
+			Transform pos = sg.getLocalTransform(crateNode);
+			pos.position.y = a * Math::sin(Radian(wt));
+			pos.orientation = angleAxis(Degree(50 * wt), { 1, 0, 0 });
+			pos.scale = Vector3{1.2f, 1.2f, 1.2f } + Vector3{0.4f, 0.4f, 0.4f } * Math::sin(Radian(wt));
+			sg.setLocalTransform(crateNode, pos);
+
+			Transform pos2 = sg.getLocalTransform(playerNode);
+			pos2.position.x = 2.0f * a * Math::cos(Radian(wt));
+			sg.setLocalTransform(playerNode, pos2);
 
 			//std::cout << sg.getGlobalTransform(node).position << "\n";
 			//std::cout << sg.getGlobalTransform(node).orientation << "\n";
@@ -481,21 +489,26 @@ namespace Dunjun
 			sg.allocate(16);
 			rs.allocate(16);
 
-			EntityId crate = g_world->createEntity();
-			EntityId player = g_world->player = g_world->createEntity();
-
-			g_world->components[crate] = ComponentName;
-			g_world->components[player] = ComponentName | ComponentRender;
+			EntityId crate = g_world->crate = g_world->createEntity(ComponentName | ComponentRender);
+			EntityId player = g_world->player = g_world->createEntity(ComponentName | ComponentRender);
 
 			g_world->names[crate] = NameComponent{"crate"};
 			g_world->names[player] = NameComponent{"Bob"};
 
+			Transform crateTransform = Transform::Identity;
+
+			//crateTransform.position = {3, 0, 0,};
+			crateTransform.orientation = angleAxis(-Degree(90), { 1, 0, 0 });
+			//crateTransform.scale = {2, 2, 2};
+
+
+			auto crateNode = sg.create(crate, crateTransform);
 			auto playerNode = sg.create(player, Transform::Identity);
-			auto crateNode = sg.create(crate, Transform::Identity);
 
 			sg.link(crateNode, playerNode);
 
-			(void)rs.create(playerNode, {g_meshHolder.get("sprite"), g_dunjunTextMaterial });
+			(void)rs.create(crate, { g_meshHolder.get("sprite"), g_dunjunTextMaterial });
+			(void)rs.create(player, { g_meshHolder.get("sprite"), g_dunjunTextMaterial });
 
 			{
 				DirectionalLight light;
@@ -506,6 +519,17 @@ namespace Dunjun
 				light.colorIntensity = calculateLightIntensities(light.color, light.intensity);
 				light.brightness = ColorLib::calculateBrightness(light.colorIntensity);
 				append(rs.directionalLights, light);
+			}
+			{
+				PointLight light;
+
+				light.color = ColorLib::Blue;
+				light.position = Vector3{0, 0, -10.5f};
+				light.intensity = 100.0f;
+				light.colorIntensity = calculateLightIntensities(light.color, light.intensity);
+				light.brightness = ColorLib::calculateBrightness(light.colorIntensity);
+				light.range = calculateLightRange(light.intensity, light.color, light.attenuation);
+				append(rs.pointLights, light);
 			}
 
 		}

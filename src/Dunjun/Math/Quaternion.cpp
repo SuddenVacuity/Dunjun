@@ -199,12 +199,7 @@ namespace Dunjun
 
 		const f32 s = Math::sin(0.5f * angle);
 
-		a *= s;
-
-		q.x = a.x;
-		q.y = a.y;
-		q.z = a.z;
-
+		q.xyz = a * s;
 		q.w = Math::cos(0.5f * angle);
 
 		return q;

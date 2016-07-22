@@ -79,7 +79,7 @@ namespace Dunjun
 
 	u8* getPixel(u32 column, u32 row)
 	{
-		Image result;
+		Image result = {};
 
 		if (column >= result.width || row >= result.height)
 			return nullptr; // end when image is done being read
@@ -87,7 +87,7 @@ namespace Dunjun
 	}
 	void setPixel(u32 column, u32 row, const u32* pixel)
 	{
-		Image result;
+		Image result {};
 
 		if (column >= result.width || row >= result.height)
 			return; // end when image is done being set

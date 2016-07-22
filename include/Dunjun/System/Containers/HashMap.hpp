@@ -163,55 +163,55 @@ namespace Dunjun
 		template <typename T>
 		FindResult find(const HashMap<T>& h, u64 key)
 		{
-			FindResult result;
+			FindResult fr;
 
-			result.hashIndex = EndOfList;
-			result.dataPrev = EndOfList;
-			result.dataIndex = EndOfList;
+			fr.hashIndex = EndOfList;
+			fr.dataPrev = EndOfList;
+			fr.dataIndex = EndOfList;
 
 			if (len(h.hashes) == 0)
-				return result;
+				return fr;
 
-			result.hashIndex = key % len(h.hashes);
-			result.dataIndex = h.hashes[result.hashIndex];
+			fr.hashIndex = key % len(h.hashes);
+			fr.dataIndex = h.hashes[fr.hashIndex];
 
-			while (result.dataIndex != EndOfList)
+			while (fr.dataIndex != EndOfList)
 			{
-				if (h.data[result.dataIndex].key == key)
-					return result;
+				if (h.data[fr.dataIndex].key == key)
+					return fr;
 
-				result.dataPrev = result.dataIndex;
-				result.dataIndex = h.data[result.dataIndex].next;
+				fr.dataPrev = fr.dataIndex;
+				fr.dataIndex = h.data[fr.dataIndex].next;
 			}
 
-			return result;
+			return fr;
 		}
 
 		template <typename T>
 		FindResult find(const HashMap<T>& h, const typename HashMap<T>::Entry* e)
 		{
-			FindResult result;
+			FindResult fr;
 
-			result.hashIndex = EndOfList;
-			result.dataPrev = EndOfList;
-			result.dataIndex = EndOfList;
+			fr.hashIndex = EndOfList;
+			fr.dataPrev = EndOfList;
+			fr.dataIndex = EndOfList;
 
 			if (len(h.hashes) == 0 || !e)
-				return result;
+				return fr;
 
-			result.hashIndex = e->key % len(h.hashes);
-			result.dataIndex = h.hashes[result.hashIndex];
+			fr.hashIndex = e->key % len(h.hashes);
+			fr.dataIndex = h.hashes[fr.hashIndex];
 
-			while (result.dataIndex != EndOfList)
+			while (fr.dataIndex != EndOfList)
 			{
-				if (&h.data[result.dataIndex] == e)
-					return result;
+				if (&h.data[fr.dataIndex] == e)
+					return fr;
 
-				result.dataPrev = result.dataIndex;
-				result.dataIndex = h.data[result.dataIndex].next;
+				fr.dataPrev = fr.dataIndex;
+				fr.dataIndex = h.data[fr.dataIndex].next;
 			}
 
-			return result;
+			return fr;
 		}
 
 		template <typename T>
@@ -249,16 +249,16 @@ namespace Dunjun
 		template <typename T>
 		size_t findOrMake(HashMap<T>& h, u64 key)
 		{
-			const FindResult result = find(h, key);
-			if(result.dataIndex != EndOfList)
-				return result.dataIndex;
+			const FindResult fr = find(h, key);
+			if(fr.dataIndex != EndOfList)
+				return fr.dataIndex;
 
 			 size_t index = addEntry(h, key);
 
-			 if(result.dataPrev == EndOfList)
-				 h.hashes[result.hashIndex] = index;
+			 if(fr.dataPrev == EndOfList)
+				 h.hashes[fr.hashIndex] = index;
 			 else
-				 h.data[result.dataPrev].next = index;
+				 h.data[fr.dataPrev].next = index;
 
 			return index;
 		}
@@ -282,7 +282,7 @@ namespace Dunjun
 				MultiHash::insert(newHash, e.key, e.value);
 			}
 
-			HashMap<T> empty(*h.hashes.m_allocator);
+			HashMap<T> empty = *h.hashes.m_allocator;
 
 			h.~HashMap<T>();
 
@@ -403,12 +403,12 @@ namespace Dunjun
 		template <typename T>
 		inline void get(const HashMap<T>& h, u64 key, Array<T>& items)
 		{
-			auto e = MultiHash::findFirst(h, key);
+			auto e = findFirst(h, key);
 
 			while (e)
 			{
 				append(items, e->value);
-				e = MultiHash::findNext(h, e);
+				e = findNext(h, e);
 			}
 		}
 
@@ -416,12 +416,12 @@ namespace Dunjun
 		inline size_t count(const HashMap<T>& h, u64 key)
 		{
 			size_t c = 0;
-			auto e = MultiHash::findFirst(h, key);
+			auto e = findFirst(h, key);
 
 			while (e)
 			{
 				c++;
-				e = MultiHash::findNext(h, e);
+				e = findNext(h, e);
 			}
 
 			return c;

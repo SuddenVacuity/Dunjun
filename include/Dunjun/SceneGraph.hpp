@@ -37,6 +37,9 @@ namespace Dunjun
 		SceneGraph(Allocator& a);
 		~SceneGraph();
 
+		SceneGraph(const SceneGraph&) = delete;
+		SceneGraph& operator=(const SceneGraph&) = delete;
+
 		void allocate(size_t capacity);
 
 		NodeId create(EntityId id, const Transform& t);
@@ -51,7 +54,7 @@ namespace Dunjun
 		void link(NodeId parent, NodeId child);
 		void unlink(NodeId child);
 
-		void transformChild(NodeId child, const Transform& t);
+		void transformChild(NodeId child, const Transform& parentTransform);
 
 		void updateLocal(NodeId id);
 		void updateGlobal(NodeId id);

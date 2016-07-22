@@ -92,7 +92,7 @@ namespace Dunjun
 
 		glBindBuffer(GL_ARRAY_BUFFER, mesh.vbo); // bind the buffer
 		defer(glBindBuffer(GL_ARRAY_BUFFER, 0)); // unbind the buffer
-		glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * len(data.indices),
+		glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * len(data.vertices),
 						&data.vertices[0], GL_STATIC_DRAW);
 
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.ibo); // bind the buffer

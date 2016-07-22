@@ -38,7 +38,7 @@ namespace Dunjun
 		newData.entityId	= (EntityId*)(newData.buffer);
 		newData.local		= (Transform*)(newData.entityId	+ capacity);
 		newData.global		= (Transform*)(newData.local	+ capacity);
-		newData.parent		= (NodeId*)(newData.global + capacity);
+		newData.parent		= (NodeId*)(newData.global		+ capacity);
 		newData.firstChild  = (NodeId*)(newData.parent		+ capacity);
 		newData.prevSibling = (NodeId*)(newData.firstChild	+ capacity);
 		newData.nextSibling = (NodeId*)(newData.prevSibling + capacity);
@@ -122,6 +122,7 @@ namespace Dunjun
 
 	void SceneGraph::link(NodeId parent, NodeId child)
 	{
+		// unlink any previous parent
 		unlink(child);
 
 		// check if node is empty
@@ -137,18 +138,25 @@ namespace Dunjun
 			NodeId prev = EmptyNode;
 			NodeId current = data.firstChild[parent];
 
+			// cycle though any existing children
 			while(isValid(current))
 			{
+				// and linked child to the end of the line
 				prev = current;
 				current = data.nextSibling[current];
 			}
 
+			// add new child to last childs pointer
 			data.nextSibling[prev] = child;
 
+			// set pointers for new child
 			data.firstChild[child] = EmptyNode;
 			data.nextSibling[child] = EmptyNode;
 			data.prevSibling[child] = prev;
 		}
+		//
+		// start update child transform to account for parent transform
+		//
 
 		const Transform parentTransform = data.global[parent];
 		const Transform childTransform = data.global[child];
@@ -159,8 +167,6 @@ namespace Dunjun
 		data.parent[child] = parent;
 
 		transformChild(child, parentTransform);
-
-
 	}
 
 	void SceneGraph::unlink(NodeId child)
@@ -181,9 +187,9 @@ namespace Dunjun
 		data.prevSibling[child] = EmptyNode;
 	}
 
-	void SceneGraph::transformChild(NodeId id, const Transform& t)
+	void SceneGraph::transformChild(NodeId id, const Transform& parentTransform)
 	{
-		data.global[id] = data.local[id] * t;
+		data.global[id] = parentTransform * data.local[id];
 		NodeId child = data.firstChild[id];
 
 		while(isValid(child))
@@ -231,13 +237,23 @@ namespace Dunjun
 
 	void SceneGraph::setLocalTransform(NodeId id, const Transform& t)
 	{
-		data.local[id] = t;
+		// TODO: find out why this is needed
+		// changing data.local anywhere else causes problems
+		Transform transform = t;
+		//transform.orientation = conjugate(Quaternion::Identity);
+
+		data.local[id] = transform;
 		updateLocal(id);
 	}
 
 	void SceneGraph::setGlobalTransform(NodeId id, const Transform& t)
 	{
-		data.global[id] = t;
+		// TODO: find out why this is needed
+		// scale is ending up with negative values
+		Transform transform = t;
+		//transform.orientation = conjugate(Quaternion::Identity);
+
+		data.global[id] = transform;
 		updateGlobal(id);
 	}
 

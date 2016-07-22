@@ -3,19 +3,17 @@
 
 namespace Dunjun
 {
-	const Transform Transform::Identity = Transform{Vector3::Zero, Quaternion::Identity, Vector3{1, 1, 1}};
+	const Transform Transform::Identity = Transform{Vector3::Zero, Quaternion::Identity, Vector3{1.0f, 1.0f, 1.0f}};
 
 	// World Transform  = Parent * Local
 	Transform operator*(const Transform& ps, const Transform& ls)
 	{
-		Transform ws;
+		Transform ws = Transform::Identity;
 		// correct order: scale >> rotate >> translate
 
-		ws.position = ps.position + ps.orientation * (ps.scale * ls.position); // <-- This is correct
-		//ws.position = ps.position + (ps.scale * ls.position); // removed orientation for easier testing
+		ws.position = ps.position + ps.scale * (ps.orientation * ls.position); // <-- This is correct
 		ws.orientation = ps.orientation * ls.orientation;
-		//ws.scale = ps.scale * (ps.orientation * ls.scale); // the orientation doesn't multiply with the scale correctly
-		ws.scale = ps.scale * ls.scale;
+		ws.scale = ps.scale * (conjugate(ps.orientation) * ls.scale);
 
 		return ws;
 	}
@@ -23,13 +21,13 @@ namespace Dunjun
 	// World Transform  = World / Parent
 	Transform operator/(const Transform& ws, const Transform& ps)
 	{
-		Transform ls;
+		Transform ls = Transform::Identity;
 
 		const Quaternion psConjugate = conjugate(ps.orientation);
 
 		ls.position = (psConjugate * (ws.position - ps.position)) / ps.scale;
 		ls.orientation = psConjugate * ws.orientation;
-		ls.scale = psConjugate * (ws.scale / ps.scale);
+		ls.scale = ls.orientation * (ws.scale / ps.scale);
 
 		return ls;
 	}
@@ -38,7 +36,7 @@ namespace Dunjun
 	{
 		const Quaternion invOrientation = conjugate(t.orientation);
 
-		Transform invTransform;
+		Transform invTransform = Transform::Identity;
 
 		invTransform.position = (invOrientation * -t.position) / t.scale;
 		invTransform.orientation = invOrientation;

@@ -46,13 +46,17 @@ namespace Dunjun
 		Camera camera;
 		RenderSystem renderSystem;
 
+		// temporary handles to track entities
 		EntityId player;
+		EntityId crate;
 
 		EntityWorld();
 		~EntityWorld() = default;
 		//void init();
+		EntityWorld(const EntityWorld&) = delete;
+		EntityWorld& operator=(const EntityWorld&) = delete;
 
-		EntityId createEntity();
+		EntityId createEntity(u32 flags);
 
 		bool isAlive(EntityId id) const;
 		void destroy(EntityId id);

@@ -66,10 +66,10 @@ namespace Dunjun
 	private:
 		const Texture* currentTexture;
 
-		void renderAmbientLight();
-		void renderDirectionalLights();
-		void renderPointLights();
-		void renderSpotLights();
+		inline void renderAmbientLight();
+		inline void renderDirectionalLights();
+		inline void renderPointLights();
+		inline void renderSpotLights();
 
 		inline bool isCurrentShaders(const ShaderProgram* shaders);
 		inline bool isCurrentTexture(const Texture* texture);

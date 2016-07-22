@@ -112,6 +112,11 @@ namespace Dunjun
 
 		//camera = world->currentCamera;
 
+		if (!camera)
+		{
+			std::cout << "RenderSystem:: No camera for rendersystem.\n";
+		}
+
 		gBuffer.create(fbSize.x, fbSize.y);
 
 		deferredGeometryPass();
@@ -139,11 +144,6 @@ namespace Dunjun
 		//	return false;
 		//});
 
-		if(!camera)
-		{
-			std::cout << "RenderSystem:: No camera for rendersystem.\n";
-		}
-
 		ShaderProgram& shaders = g_shaderHolder.get("deferredGeometryPass");
 
 		GBuffer::bind(&gBuffer);
@@ -161,9 +161,12 @@ namespace Dunjun
 			for(u32 i = 0; i < data.length; i++)
 			{
 				EntityId entityId = data.entityId[i];
+				SceneGraph::NodeId nodeId = sceneGraph.getNodeId(entityId);
+
+
 				const RenderComponent& component = data.component[i];
 				const Material& material = component.material;
-				const Transform& transform = sceneGraph.getGlobalTransform(sceneGraph.getNodeId(entityId));
+				const Transform& transform = sceneGraph.getGlobalTransform(nodeId);
 
 				shaders.setUniform("u_material.diffuseMap", (u32)0); // shaderprogram.cpp
 				shaders.setUniform("u_material.diffuseColor", material.diffuseColor); // shaderprogram.cpp
@@ -224,8 +227,8 @@ namespace Dunjun
 
 			renderAmbientLight();
 			renderDirectionalLights();
-			//renderPointLights();
-			//renderSpotLights();
+			renderPointLights();
+			renderSpotLights();
 
 		}
 	}
@@ -242,9 +245,6 @@ namespace Dunjun
 		shaders.setUniform("u_light.intensities", colorIntensity);
 
 		drawMesh(g_meshHolder.get("quad"));
-
-		shaders.stopUsing();
-
 	}
 
 	void RenderSystem::renderDirectionalLights()
@@ -352,7 +352,7 @@ namespace Dunjun
 		RenderTexture::bind(&finalTexture);
 		defer(RenderTexture::bind(nullptr));
 		{
-			glClearColor(0, 1, 0, 0);
+			glClearColor(0, 0, 0, 0);
 			glViewport(0, 0, finalTexture.width, finalTexture.height);
 			glClear(GL_COLOR_BUFFER_BIT);
 		

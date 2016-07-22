@@ -118,7 +118,7 @@ namespace Dunjun
 		if (a.m_capacity <= a.m_length + count)
 			grow(a, a.m_length + count);
 
-		memcpy(&a.m_data[a.m_length] ,items, count * sizeof(T));
+		memcpy(&a.m_data[a.m_length], items, count * sizeof(T));
 		a.m_length += count;
 
 		return a.m_length;

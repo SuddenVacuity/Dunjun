@@ -7,13 +7,15 @@ namespace Dunjun
 {
 	struct Vertex // must come before render
 	{
-		Vector3 position = Vector3::Zero;
-		Vector2 texCoord = Vector2::Zero;
-		Color color = ColorLib::White;
-		Vector3 normal = Vector3::Zero;
+		Vector3 position;
+		Vector2 texCoord;
+		Color color;
+		Vector3 normal;
+
+		GLOBAL const Vertex Identity;
 
 		Vertex() = default;
-
+		
 		Vertex(const Vector3& position, 
 			   const Vector2& texCoord, 
 			   const Color& color, 
@@ -25,7 +27,6 @@ namespace Dunjun
 		{
 		}
 	};
-
 	//class VertexArray
 	//{
 	//public:

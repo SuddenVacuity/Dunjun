@@ -165,6 +165,7 @@
     <ClCompile Include="src\Dunjun\debug\EntityTest.cpp" />
     <ClCompile Include="src\Dunjun\debug\UnitTest.cpp" />
     <ClCompile Include="src\Dunjun\Entity.cpp" />
+    <ClCompile Include="src\Dunjun\Graphics\Vertex.cpp" />
     <ClCompile Include="src\Dunjun\Memory\Memory.cpp" />
     <ClCompile Include="src\Dunjun\RenderSystem.cpp" />
     <ClCompile Include="src\Dunjun\SceneGraph.cpp" />

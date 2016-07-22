@@ -38,6 +38,24 @@ int main(int argc, char** argv)
 	std::cout << "Vector4 POD - " << std::is_pod<Dunjun::Vector4>() << std::endl;
 	std::cout << "Matrix4 POD - " << std::is_pod<Dunjun::Matrix4>() << std::endl;
 	std::cout << "Quaternion POD - " << std::is_pod<Dunjun::Quaternion>() << std::endl;
+	std::cout << "\n";
+	std::cout << "Vertex POD - "		<< std::is_pod<Dunjun::Vertex>() << std::endl;
+	std::cout << "Transform POD - "		<< std::is_pod<Dunjun::Transform>() << std::endl;
+	std::cout << "Camera POD - "		<< std::is_pod<Dunjun::Camera>() << std::endl;
+	std::cout << "Color POD - "			<< std::is_pod<Dunjun::Color>() << std::endl;
+	std::cout << "GBuffer POD - "		<< std::is_pod<Dunjun::GBuffer>() << std::endl;
+	std::cout << "Image POD - "			<< std::is_pod<Dunjun::Image>() << std::endl;
+	std::cout << "Material POD - "		<< std::is_pod<Dunjun::Material>() << std::endl;
+	std::cout << "Mesh POD - "			<< std::is_pod<Dunjun::Mesh>() << std::endl;
+	std::cout << "MeshData POD - "		<< std::is_pod<Dunjun::MeshData>() << std::endl;
+	std::cout << "ModelAsset POD - "	<< std::is_pod<Dunjun::ModelAsset>() << std::endl;
+	std::cout << "RenderTexture POD - " << std::is_pod<Dunjun::RenderTexture>() << std::endl;
+	std::cout << "ShaderProgram POD - " << std::is_pod<Dunjun::ShaderProgram>() << std::endl;
+	std::cout << "Texture POD - "		<< std::is_pod<Dunjun::Texture>() << std::endl;
+	//std::cout << "\n";
+	//std::cout << "GBuffer POD - " << std::is_pod<Dunjun::GBuffer>() << std::endl;
+	//std::cout << "GBuffer POD - " << std::is_pod<Dunjun::GBuffer>() << std::endl;
+	//std::cout << "GBuffer POD - " << std::is_pod<Dunjun::GBuffer>() << std::endl;
 
 
 	Dunjun::Game::init();
