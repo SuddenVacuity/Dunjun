@@ -11,7 +11,7 @@
 
 namespace Dunjun
 {
-	enum class ImageFormat // Format is the list of image types to check
+	enum class ImageFormat : u32// Format is the list of image types to check
 	{
 		None = 0,
 		Greyscale = 1, // image type then number of bytes per pixel
@@ -28,7 +28,7 @@ namespace Dunjun
 		u8* pixels;
 	};
 
-	Image loadImageFromFile(const std::string& filename); // get the name of the file to be loaded
+	Image loadImageFromFile(const String& filename); // get the name of the file to be loaded
 	Image loadImageFromMemory(u32 width, u32 height, ImageFormat format, const u8* pixels); // load info from memory
 
 	void destroyImage(Image& image);

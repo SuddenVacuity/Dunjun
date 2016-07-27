@@ -29,19 +29,7 @@ namespace Dunjun
 		Camera(const Camera& other) = default;
 		//const Camera& operator=(const Camera& other) = default;
 
-		void lookAt(const Vector3& position, const Vector3& up = {0, 1, 0});
-
-		// positive values go counterclock-wise
-		void offsetOrientation(const Radian& yaw, const Radian& pitch);
-
-		Vector3 forward() const;
-		Vector3 backward() const;
-
-		Vector3 right() const;
-		Vector3 left() const;
-
-		Vector3 up() const;
-		Vector3 down() const;
+		void cameraLookAt(const Vector3& position, const Vector3& up = { 0, 1, 0 });
 
 		Matrix4 getMatrix() const;
 		Matrix4 getProjection() const;

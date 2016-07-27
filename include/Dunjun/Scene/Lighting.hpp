@@ -1,7 +1,7 @@
 #ifndef DUNJUN_SCENE_LIGHTING_HPP 
 #define DUNJUN_SCENE_LIGHTING_HPP 
 
-#include <Dunjun/Graphics/ModelAsset.hpp>
+#include <Dunjun/RenderComponent.hpp>
 
 namespace Dunjun
 {
@@ -30,7 +30,7 @@ namespace Dunjun
 	{
 		Vector3 position = {0, 0, 0};
 		Attenuation attenuation = {};
-		mutable f32 range = 16.0f;
+		f32 range = 16.0f;
 	};
 
 	inline Vector3 calculateLightIntensities(Color color, f32 strength)
@@ -42,7 +42,7 @@ namespace Dunjun
 
 	inline f32 calculateLightRange(f32 intensity, Color color, Attenuation attenuation)
 	{
-		f32 i = intensity * (f32)std::max(color.r, std::max(color.g, color.b));
+		f32 i = intensity * (f32)Math::max(color.r, Math::max(color.g, color.b));
 
 		f32 r = -attenuation.linear +
 				Math::sqrt(attenuation.linear * attenuation.linear -

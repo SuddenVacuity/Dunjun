@@ -7,6 +7,11 @@ namespace Dunjun
 {
 	struct Material
 	{
+		enum class MaterialType : u32
+		{
+			Default,
+		};
+
 		/*
 			shaders
 			
@@ -32,9 +37,7 @@ namespace Dunjun
 				color
 
 		*/
-
-		//Dunjun::ShaderProgram* shaders = nullptr;
-		//Dunjun::Texture* texture;
+		MaterialType type = MaterialType::Default;
 
 		Dunjun::Texture* diffuseMap = nullptr;
 		Color diffuseColor = ColorLib::White;

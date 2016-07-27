@@ -1,8 +1,7 @@
 #ifndef DUNJUN_SYSTEM_HASHMAP_HPP
 #define DUNJUN_SYSTEM_HASHMAP_HPP
 
-#include <Dunjun/System/Containers.hpp>
-#include <Dunjun/System/Containers/Array.hpp>
+#include <Dunjun/System/Containers/Queue.hpp>
 
 namespace Dunjun
 {
@@ -74,7 +73,7 @@ namespace Dunjun
 
 
 
-	} // end MultiHashMap
+	} // end MultiHash
 
 
 	/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -487,7 +486,7 @@ namespace Dunjun
 		}
 
 
-	} // end MultiHashMap
+	} // end MultiHash
 
 	/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	)				.

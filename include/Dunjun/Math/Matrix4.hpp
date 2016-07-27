@@ -19,9 +19,6 @@ namespace Dunjun
 		// Matrix4 all values 0's with diagonal 1's
 		GLOBAL const Matrix4 Identity;
 
-		// Matrix4 all values 0
-		GLOBAL const Matrix4 Identity0;
-
 		inline Vector4& operator[](size_t index) { return data[index]; }
 		inline const Vector4& operator[](size_t index) const { return data[index]; }
 

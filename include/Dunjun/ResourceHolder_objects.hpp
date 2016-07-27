@@ -1,7 +1,7 @@
 #ifndef DUNJUN_RESOURCE_HOLDER_OBJECTS_HPP
 #define DUNJUN_RESOURCE_HOLDER_OBJECTS_HPP
 
-#include <Dunjun/Scene/Lighting.hpp>
+#include <Dunjun/ResourceHolder.hpp>
 
 namespace Dunjun
 {
@@ -13,7 +13,7 @@ namespace Dunjun
 	//		TextureWrapMode wrapMode = TextureWrapMode::ClampToEdge)
 	//	{
 	//		std::unique_ptr<Texture> tex = make_unique<Texture>();
-	//		bool t = tex->loadFromFile(BaseDirectories::Texture + filename, minMagFilter, wrapMode);
+	//		bool t = tex->loadFromFile(BaseDirectories::Textures + filename, minMagFilter, wrapMode);
 	//
 	//		if(t == true)
 	//			insert(id, std::move(tex));
@@ -39,8 +39,8 @@ namespace Dunjun
 	{
 	public:
 		bool insertFromFile(const std::string& id, 
-			const std::string& vertexFilename,
-			const std::string& fragmentFilename,
+			const char* vertexFilename,
+			const char* fragmentFilename,
 			bool bindDefaultAttribLocation = true)
 		{
 			std::unique_ptr<ShaderProgram> shaders = make_unique<ShaderProgram>();
@@ -59,10 +59,10 @@ namespace Dunjun
 
 			if(bindDefaultAttribLocation)
 			{
-				shaders->bindAttribLocation((u32)AttribLocation::Position, "a_position"); // bind the position of 1st attribute in shaders
-				shaders->bindAttribLocation((u32)AttribLocation::TexCoord, "a_texCoord"); // bind the position of 3rd attribute in shaders
-				shaders->bindAttribLocation((u32)AttribLocation::Color, "a_color"); // bind the position of 2nd attribute in shaders
-				shaders->bindAttribLocation((u32)AttribLocation::Normal, "a_normal"); // bind the position of 2nd attribute in shaders
+				shaders->bindAttribLocation((s32)AttribLocation::Position, "a_position"); // bind the position of 1st attribute in shaders
+				shaders->bindAttribLocation((s32)AttribLocation::TexCoord, "a_texCoord"); // bind the position of 3rd attribute in shaders
+				shaders->bindAttribLocation((s32)AttribLocation::Color, "a_color"); // bind the position of 2nd attribute in shaders
+				shaders->bindAttribLocation((s32)AttribLocation::Normal, "a_normal"); // bind the position of 2nd attribute in shaders
 			}
 
 			if (!shaders->link())

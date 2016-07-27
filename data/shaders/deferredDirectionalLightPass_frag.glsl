@@ -1,6 +1,6 @@
 #version 120
 
-#include <_head_light.glsl>
+#include _head_light.glsl
 
 uniform sampler2D u_specular;
 uniform sampler2D u_normal;

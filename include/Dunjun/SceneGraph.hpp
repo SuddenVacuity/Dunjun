@@ -1,7 +1,7 @@
 #ifndef DUNJUN_SCENEGRAPH_HPP
 #define DUNJUN_SCENEGRAPH_HPP
 
-#include <Dunjun/Graphics/Transform.hpp>
+#include <Dunjun/Scene/Lighting.hpp>
 
 
 namespace Dunjun
@@ -42,8 +42,8 @@ namespace Dunjun
 
 		void allocate(size_t capacity);
 
-		NodeId create(EntityId id, const Transform& t);
-		void destroy(NodeId id);
+		NodeId addNode(EntityId id, const Transform& t);
+		void removeNode(NodeId id);
 
 		NodeId getNodeId(EntityId id) const;
 
@@ -51,8 +51,8 @@ namespace Dunjun
 
 		u32 nodeCount() const;
 
-		void link(NodeId parent, NodeId child);
-		void unlink(NodeId child);
+		void linkNodes(NodeId parent, NodeId child);
+		void unlinkNode(NodeId child);
 
 		void transformChild(NodeId child, const Transform& parentTransform);
 

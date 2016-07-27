@@ -2,13 +2,13 @@
 #ifndef DUNJUN_RESOURCE_HOLDER_HPP
 #define DUNJUN_RESOURCE_HOLDER_HPP
 
-#include <Dunjun/System/FileSystem.hpp>
+#include <Dunjun/Graphics/Material.hpp>
 
 //#include <unordered_map>
 
 namespace Dunjun
 {
-	template <class Resource, class Identifier>
+	template <typename Resource, typename Identifier>
 	class ResourceHolder
 	{
 	public:
@@ -27,7 +27,7 @@ namespace Dunjun
 		{
 			auto found = std::find_if(std::begin(m_resources),
 									  std::end(m_resources),
-								 	  [&resource](std::unique_ptr<Resource>& res)
+								 	  [&resource](ResourceUPtr& res)
 			{
 				return res.get();
 			});
@@ -64,7 +64,7 @@ namespace Dunjun
 		{
 			auto found = m_resources.find(id);
 
-			if(found != m_resources.end();)
+			if(found != m_resources.end())
 				return true;
 
 			return false;
@@ -86,8 +86,8 @@ namespace Dunjun
 			return *found->second;
 		}
 
-	private:
-		std::unordered_map<Identifier, std::unique_ptr<Resource>> m_resources;
+	protected:
+		std::unordered_map<Identifier, ResourceUPtr> m_resources;
 
 	};
 } // end Dunjun

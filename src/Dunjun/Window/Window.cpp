@@ -39,19 +39,19 @@ namespace Dunjun
 
 
 	Window::Window()
-		: handle(nullptr)
-		, glContext()
-		, frameTimeLimit(Time::Zero)
+		: m_handle(nullptr)
+		, m_glContext()
+		, m_frameTimeLimit(Time::Zero)
 	{
 	}
 
-	Window::Window(const std::string& title,
+	Window::Window(const String& title,
 				   VideoMode mode,
 				   u32 style,
 				   const GLContextSettings& context)
-		: handle(nullptr)
-		, glContext()
-		, frameTimeLimit(Time::Zero)
+		: m_handle(nullptr)
+		, m_glContext()
+		, m_frameTimeLimit(Time::Zero)
 	{
 		create(title, mode, style, context);
 	}
@@ -62,7 +62,7 @@ namespace Dunjun
 		close();
 	}
 
-	void Window::create(const std::string& title,
+	void Window::create(const String& title,
 						VideoMode mode,
 						u32 style,
 						const GLContextSettings& context)
@@ -112,24 +112,27 @@ namespace Dunjun
 		SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, true);
 		//SDL_GL_SetAttribute(SDL_GL_FRAMEBUFFER_SRGB_CAPABLE, true);
 
-		handle = SDL_CreateWindow(title.c_str(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
+		m_handle = SDL_CreateWindow(cString(title), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
 			(int)mode.width, (int)mode.height, windowFlags);
 
-		assert(handle && "Window::create failed: handle is nullptr");
+		assert(m_handle && "Window::create failed: handle is nullptr");
 
-		glContext = SDL_GL_CreateContext(handle);
+		m_glContext = SDL_GL_CreateContext(m_handle);
 
 		setVisible(true);
 		setFramerateLimit(0);
 
-		currentSize = getSize();
-		currentAspectRatio = currentSize.x / currentSize.y;
+		Vector2 size = getSize();
+
+		currentSize[0] = size.x;
+		currentSize[1] = size.y;
+		currentAspectRatio = currentSize[0] / currentSize[1];
 	}
 
 	void Window::close()
 	{
-		SDL_DestroyWindow(handle);
-		handle = nullptr;
+		SDL_DestroyWindow(m_handle);
+		m_handle = nullptr;
 
 		if(this == fullscreenWindow)
 			fullscreenWindow = nullptr;
@@ -137,15 +140,15 @@ namespace Dunjun
 
 	bool Window::isOpen() const
 	{
-		return handle != nullptr;
+		return m_handle != nullptr;
 	}
 
 	Vector2 Window::getPosition() const
 	{
-		if(handle)
+		if(m_handle)
 		{
 			int x, y;
-			SDL_GetWindowPosition(handle, &x, &y);
+			SDL_GetWindowPosition(m_handle, &x, &y);
 
 			return {static_cast<f32>(x), 
 					static_cast<f32>(y)};
@@ -156,7 +159,7 @@ namespace Dunjun
 
 	Window& Window::setPosition(const Vector2& position)
 	{
-		SDL_SetWindowPosition(handle, position.x, position.y);
+		SDL_SetWindowPosition(m_handle, position.x, position.y);
 
 		return *this;
 	}
@@ -164,7 +167,7 @@ namespace Dunjun
 	Vector2 Window::getSize() const
 	{
 		s32 width, height;
-		SDL_GetWindowSize(handle, &width, &height);
+		SDL_GetWindowSize(m_handle, &width, &height);
 
 		return {static_cast<f32>(width), 
 				static_cast<f32>(height)};
@@ -172,26 +175,27 @@ namespace Dunjun
 
 	Window& Window::setSize(const Vector2& size)
 	{
-		SDL_SetWindowSize(handle, size.x, size.y);
+		SDL_SetWindowSize(m_handle, size.x, size.y);
 
-		currentSize = size;
+		currentSize[0] = size.x;
+		currentSize[1] = size.y;
 
-		if(currentSize.y == 0)
-			currentSize.y = 1.0f;
+		if(currentSize[1] == 0)
+			currentSize[1] = 1.0f;
 
-		currentAspectRatio = currentSize.x / currentSize.y;
+		currentAspectRatio = currentSize[0] / currentSize[1];
 
 		return *this;
 	}
 
-	const char* Window::getTitle() const
+	String Window::getTitle() const
 	{
-		return SDL_GetWindowTitle(handle);
+		return SDL_GetWindowTitle(m_handle);
 	}
 
-	Window& Window::setTitle(const char* title)
+	Window& Window::setTitle(const String& title)
 	{
-		SDL_SetWindowTitle(handle, title);
+		SDL_SetWindowTitle(m_handle, cString(title));
 
 		return *this;
 	}
@@ -199,9 +203,9 @@ namespace Dunjun
 	Window& Window::setVisible(bool visible)
 	{
 		if(visible)
-			SDL_ShowWindow(handle);
+			SDL_ShowWindow(m_handle);
 		else
-			SDL_HideWindow(handle);
+			SDL_HideWindow(m_handle);
 
 		return *this;
 	}
@@ -216,22 +220,22 @@ namespace Dunjun
 	Window& Window::setFramerateLimit(u32 limit)
 	{
 		if (limit > 0)
-			frameTimeLimit = seconds(1.0f / (f32)limit);
+			m_frameTimeLimit = seconds(1.0f / (f32)limit);
 		else
-			frameTimeLimit = Time::Zero;
+			m_frameTimeLimit = Time::Zero;
 
 		return *this;
 	}
 
 	void Window::display()
 	{
-		SDL_GL_SwapWindow(handle);
+		SDL_GL_SwapWindow(m_handle);
 
-		if (frameTimeLimit != Time::Zero &&
-			frameTimeLimit > clock.getElapsedTime())
+		if (m_frameTimeLimit != Time::Zero &&
+			m_frameTimeLimit > m_clock.getElapsedTime())
 		{
-			Time::sleep(frameTimeLimit - clock.getElapsedTime());
-			clock.restart();
+			Time::sleep(m_frameTimeLimit - m_clock.getElapsedTime());
+			m_clock.restart();
 		}
 	}
 

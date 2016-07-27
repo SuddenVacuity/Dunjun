@@ -23,16 +23,9 @@ namespace Dunjun
 		}
 	}
 
-
-	void destroyTexture(Texture& texture)
-	{
-		if (texture.handle)
-			glDeleteTextures(1, &texture.handle);
-	}
-
-	Texture loadTextureFromFile(const char* filename,
-		TextureFilter minMagFilter,
-		TextureWrapMode wrapMode)
+	Texture loadTextureFromFile(const String& filename,
+								TextureFilter minMagFilter,
+								TextureWrapMode wrapMode)
 	{
 		Image image = loadImageFromFile(filename);
 		defer(destroyImage(image));
@@ -45,8 +38,8 @@ namespace Dunjun
 	}
 
 	Texture loadTextureFromImage(const Image& image,
-		TextureFilter minMagFilter,
-		TextureWrapMode wrapMode)
+								 TextureFilter minMagFilter,
+								 TextureWrapMode wrapMode)
 	{
 		if (image.format == ImageFormat::None )
 			return Texture{};
@@ -90,7 +83,13 @@ namespace Dunjun
 
 	}
 
-	void Texture::bind(const Texture* tex, u32 position)
+	void destroyTexture(Texture& texture)
+	{
+		if (texture.handle)
+			glDeleteTextures(1, &texture.handle);
+	}
+
+	void bindTexture(const Texture* tex, uSize_t position)
 	{
 		if (position > 31)
 		{

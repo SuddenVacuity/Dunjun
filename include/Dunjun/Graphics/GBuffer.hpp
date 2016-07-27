@@ -1,7 +1,7 @@
 #ifndef DUNJUN_GRAPHICS_GBUFFER_HPP
 #define DUNJUN_GRAPHICS_GBUFFER_HPP
 
-#include <Dunjun/Graphics/Texture.hpp>
+#include <Dunjun/Graphics/Mesh.hpp>
 
 namespace Dunjun
 {
@@ -20,18 +20,15 @@ namespace Dunjun
 
 		u32 width;
 		u32 height;
+		u32 fbo;
 
 		Texture textures[TextureType::Count];
 
-		u32 fbo;
-
-		//virtual ~GBuffer();
-
-		bool create(u32 w, u32 h);
-		void destroy();
-
-		GLOBAL void bind(const GBuffer* b);
 	};
+		bool createGBuffer(GBuffer& b, u32 w, u32 h);
+		void destroyGBuffer(GBuffer& b);
+
+		void bindGBuffer(const GBuffer* b);
 } // end Dunjun
 
 #endif

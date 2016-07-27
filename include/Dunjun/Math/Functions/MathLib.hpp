@@ -65,10 +65,23 @@ namespace Dunjun
 		Radian abs(const Radian& x);
 		Degree abs(const Degree& x);
 
+		template <typename T>
+		inline const T& min(const T& a, const T& b)
+		{
+			return (b < a) ? b : a;
+		}
+
+		template <typename T>
+		inline const T& max(const T& a, const T& b)
+		{
+			return (a < b) ? b : a;
+		}
+
+
 		template <class T>
 		T clamp(const T& x, const T& lower, const T& upper)
 		{
-			return std::max(lower, std::min(x, upper));
+			return Math::max(lower, Math::min(x, upper));
 		}
 
 		template <class T>
@@ -76,10 +89,6 @@ namespace Dunjun
 		{
 			return i == j ? T(1) : T(0);
 		}
-
-
-
-
 
 	} // end Math
 } // end Dunjun

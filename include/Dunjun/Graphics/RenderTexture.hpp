@@ -21,25 +21,23 @@ namespace Dunjun
 
 		u32 width = 0;
 		u32 height = 0;
-
-		TextureType type = TextureType::Color;
 		u32 fbo = 0;
 
-		RenderTexture() = default;
-		virtual ~RenderTexture();
+		TextureType type = TextureType::Color;
 
-		bool create(u32 w, u32 h,
-			TextureType t = ColorAndDepth,
-			TextureFilter minMagFilter = TextureFilter::Linear,
-			TextureWrapMode wrapMode = TextureWrapMode::ClampToEdge);
+	};
 
-		//void setActive(bool active = true);
-		//void flush();
+	bool createRenderTexture(RenderTexture& rt,
+							 u32 width, u32 height,
+							 RenderTexture::TextureType type = RenderTexture::ColorAndDepth,
+							 TextureFilter minMagFilter = TextureFilter::Linear,
+							 TextureWrapMode wrapMode = TextureWrapMode::ClampToEdge);
 
-		GLOBAL void bind(const RenderTexture* rt);
+	void destroyRenderTexture(RenderTexture& rt);
+
+	void bindRenderTexture(const RenderTexture* rt);
 
 
-	};	
 
 
 } // end Dunjun

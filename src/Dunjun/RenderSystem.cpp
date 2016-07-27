@@ -1,6 +1,5 @@
 
 #include <Dunjun/RenderSystem.hpp>
-#include <Dunjun/ResourceHolder_objects.hpp>
 
 namespace Dunjun
 {
@@ -19,8 +18,18 @@ namespace Dunjun
 		, pointLights(a)
 		, spotLights(a)
 		, camera(nullptr)
-		, currentTexture(nullptr)
+		, currentTexture()
 	{
+		allocate(16);
+	}
+
+	RenderSystem::~RenderSystem()
+	{
+		allocator.deallocate(data.buffer);
+
+		destroyGBuffer(gBuffer);
+		destroyRenderTexture(lightingBuffer);
+		destroyRenderTexture(finalTexture);
 	}
 
 	void RenderSystem::allocate(u32 capacity)
@@ -52,9 +61,9 @@ namespace Dunjun
 		data = newData;
 	}
 
-	ComponentId RenderSystem::create(EntityId id, const RenderComponent& component)
+	ComponentId RenderSystem::addComponent(EntityId id, const RenderComponent& component)
 	{
-		if (data.capacity == data.length)
+		if (data.capacity == data.length || data.capacity == 0)
 			allocate(2 * data.length + 1);
 
 		// get last position in data arrays
@@ -72,7 +81,7 @@ namespace Dunjun
 		return last;
 	}
 
-	void RenderSystem::destroy(ComponentId id)
+	void RenderSystem::removeComponent(ComponentId id)
 	{
 		const ComponentId last = data.length - 1;
 		const EntityId entity = data.entityId[id];
@@ -102,7 +111,9 @@ namespace Dunjun
 	void RenderSystem::resetAllPointers()
 	{
 		camera = nullptr;
-		currentTexture = nullptr;
+		//currentTexture = nullptr;
+		for(u32 i = 0; i < 32; i++) // 32 is the number of elements in currentTexture array
+			setTexture(nullptr, i);
 	}
 
 	void RenderSystem::render()
@@ -114,10 +125,11 @@ namespace Dunjun
 
 		if (!camera)
 		{
-			std::cout << "RenderSystem:: No camera for rendersystem.\n";
+			std::cerr << "RenderSystem:: No camera for rendersystem.\n";
+			return;
 		}
 
-		gBuffer.create(fbSize.x, fbSize.y);
+		createGBuffer(gBuffer, fbSize.x, fbSize.y);
 
 		deferredGeometryPass();
 		deferredLightPass();
@@ -146,8 +158,8 @@ namespace Dunjun
 
 		ShaderProgram& shaders = g_shaderHolder.get("deferredGeometryPass");
 
-		GBuffer::bind(&gBuffer);
-		defer(GBuffer::bind(nullptr));
+		bindGBuffer(&gBuffer);
+		defer(bindGBuffer(nullptr));
 		{
 			glViewport(0, 0, gBuffer.width, gBuffer.height);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -203,15 +215,15 @@ namespace Dunjun
 	
 	void RenderSystem::deferredLightPass()
 	{
-		lightingBuffer.create(gBuffer.width, gBuffer.height, RenderTexture::Light);
+		createRenderTexture(lightingBuffer, gBuffer.width, gBuffer.height, RenderTexture::Light);
 
-		Texture::bind(&gBuffer.textures[GBuffer::Diffuse], 0);
-		Texture::bind(&gBuffer.textures[GBuffer::Specular], 1);
-		Texture::bind(&gBuffer.textures[GBuffer::Normal], 2);
-		Texture::bind(&gBuffer.textures[GBuffer::Depth], 3);
+		bindTexture(&gBuffer.textures[GBuffer::Diffuse], 0);
+		bindTexture(&gBuffer.textures[GBuffer::Specular], 1);
+		bindTexture(&gBuffer.textures[GBuffer::Normal], 2);
+		bindTexture(&gBuffer.textures[GBuffer::Depth], 3);
 
-		RenderTexture::bind(&lightingBuffer);
-		defer(RenderTexture::bind(nullptr));
+		bindRenderTexture(&lightingBuffer);
+		defer(bindRenderTexture(nullptr));
 		{
 			glClearColor(0, 0, 0, 0);
 			glViewport(0, 0, lightingBuffer.width, lightingBuffer.height);
@@ -344,13 +356,13 @@ namespace Dunjun
 	void RenderSystem::deferredFinalPass()
 	{
 
-		finalTexture.create(gBuffer.width, gBuffer.height, RenderTexture::Color);
+		createRenderTexture(finalTexture, gBuffer.width, gBuffer.height, RenderTexture::Color);
 		
-		Texture::bind(&gBuffer.textures[GBuffer::Diffuse], 0);
-		Texture::bind(&lightingBuffer.colorTexture, 1);
+		bindTexture(&gBuffer.textures[GBuffer::Diffuse], 0);
+		bindTexture(&lightingBuffer.colorTexture, 1);
 		
-		RenderTexture::bind(&finalTexture);
-		defer(RenderTexture::bind(nullptr));
+		bindRenderTexture(&finalTexture);
+		defer(bindRenderTexture(nullptr));
 		{
 			glClearColor(0, 0, 0, 0);
 			glViewport(0, 0, finalTexture.width, finalTexture.height);
@@ -375,14 +387,14 @@ namespace Dunjun
 	//
 	//}
 
-	bool RenderSystem::isCurrentTexture(const Texture* texture)
-	{
-		if (texture == currentTexture)
-		{
-			return true;
-		}
-		return false;
-	}
+	//bool RenderSystem::isCurrentTexture(const Texture* texture)
+	//{
+	//	if (texture == currentTexture[position])
+	//	{
+	//		return true;
+	//	}
+	//	return false;
+	//}
 
 	//void RenderSystem::setShaders(const ShaderProgram* shaders)
 	//{
@@ -391,10 +403,10 @@ namespace Dunjun
 
 	bool RenderSystem::setTexture(const Texture* texture, u32 position)
 	{
-		if (texture != currentTexture)
+		if (texture != currentTexture[position])
 		{
-			currentTexture = texture;
-			Texture::bind(currentTexture, position);
+			currentTexture[position] = texture;
+			bindTexture(currentTexture[position], position);
 			return true;
 		}
 		return false;

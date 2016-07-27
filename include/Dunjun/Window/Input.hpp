@@ -9,7 +9,7 @@ namespace Dunjun
 {
 	namespace Input
 	{
-		enum class Key
+		enum class Key : s32
 		{
 			Unknown = -1,
 			A = 0,
@@ -120,7 +120,7 @@ namespace Dunjun
 			KeyCount,
 		};
 
-		enum MouseButton 
+		enum class MouseButton
 		{
 			MouseButton_1 = 1,
 			MouseButton_2 = 2,
@@ -165,7 +165,7 @@ namespace Dunjun
 			MaxCount
 		};
 
-		enum class GamepadAxis
+		enum class GamepadAxis : u32
 		{
 			Invalid = -1,
 
@@ -183,7 +183,7 @@ namespace Dunjun
 
 		using GamepadButtons = std::vector<b8>;
 
-		enum class CursorMode
+		enum class CursorMode : u32
 		{
 			Normal,
 			Hidden,
@@ -199,25 +199,16 @@ namespace Dunjun
 		)				.
 		)					INPUT MODES
 		)
-		)				.
-		)					.
-		)
-		)				.
 		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-		void setCursorMode(CursorMode mode);
-
-		void setStickyKeys(bool stickyKeys);
-		void setStickyMouseButtons(bool stickyButtons);
+		//void setCursorMode(CursorMode mode);
+		//void setStickyKeys(bool stickyKeys);
+		//void setStickyMouseButtons(bool stickyButtons);
 
 		/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 		)				.
 		)					KEYBOARD
 		)
-		)				.
-		)					.
-		)
-		)				.
 		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
 		bool isKeyPressed(Key key);
@@ -226,10 +217,6 @@ namespace Dunjun
 		)				.
 		)					MOUSE
 		)
-		)				.
-		)					.
-		)
-		)				.
 		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
 		Vector2 getCursorPosition();
@@ -246,22 +233,24 @@ namespace Dunjun
 		)				.
 		)					GAMEPAD
 		)
-		)				.
-		)					.
-		)
-		)				.
 		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
 		bool isGamepadPresent(u32 gamepadId);
 		b8 isGamepadButtonPressed(u32 gamepadId, GamepadButton button);
 		f32 getGamepadAxis(u32 gamepadId, GamepadAxis axis);
 
-		std::string getGamepadName(u32 gamepadId);
+		String getGamepadName(u32 gamepadId);
 		void setGamepadVibration(u32 gamepadId, f32 strength, Time duration = milliseconds(SDL_HAPTIC_INFINITY));
 
-		std::string getClipboardString();
-		void setClipboardString(const std::string& str);
+		/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+		)				.
+		)					CLIPBOARD
+		)
+		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
+		bool hasClipboardString();
+		String getClipboardString();
+		void setClipboardString(const String& str);
 
 	} // end Input
 } // end Dunjun

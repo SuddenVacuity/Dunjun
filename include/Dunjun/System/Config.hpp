@@ -5,6 +5,8 @@
 //		SYSTEM OS
 ///////////////////////
 
+#define DUNJUN_DEBUG_MODE
+
 #if defined(_WIN32) || defined(_WIN64)
 // windows
 	#define DUNJUN_SYSTEM_WINDOWS

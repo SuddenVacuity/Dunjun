@@ -1,10 +1,8 @@
 #ifndef DUNJUN_ENTITY_HPP
 #define DUNJUN_ENTITY_HPP
 
-#include <Dunjun/Math.hpp>
-#include <Dunjun/SceneGraph.hpp>
-#include <Dunjun/Window/Event.hpp>
-#include <Dunjun/RenderSystem.hpp>
+#include <Dunjun/Context.hpp>
+
 
 namespace Dunjun
 {
@@ -15,7 +13,8 @@ namespace Dunjun
 		ComponentNone			= 0x00000000,
 	//	ComponentPosition		= 0x00000001,
 		ComponentName			= 0x00000001,
-		ComponentRender			= 0x00000002,
+		ComponentTransform		= 0x00000002,
+		ComponentRender			= 0x00000004 | ComponentTransform,
 
 	};
 
@@ -26,44 +25,58 @@ namespace Dunjun
 
 	struct NameComponent
 	{
-		std::string name;
+		String name;
 	};
 
-
-//#define MaxEntities 1024
-
-
-	struct EntityWorld
+	struct EntitySystem
 	{
 	public:
 		GLOBAL const size_t MaxEntities = 1024;
-
 		u32 components[MaxEntities];
-		NameComponent names[MaxEntities];
-		//PositionComponent positions[MaxEntities];
+
+		EntitySystem() = default;
+
+		EntityId addEntity(u32 componentMask);
+		void removeEntity(u32 id);
+
+		bool isAlive(EntityId id) const;
+	}; // end EntitySystem
+
+	struct World
+	{
+	public:
+		EntitySystem entitySystem;
 
 		SceneGraph sceneGraph;
-		Camera camera;
 		RenderSystem renderSystem;
+
+		Camera camera;
+
+		NameComponent names[EntitySystem::MaxEntities];
+		//PositionComponent positions[MaxEntities];
 
 		// temporary handles to track entities
 		EntityId player;
 		EntityId crate;
 
-		EntityWorld();
-		~EntityWorld() = default;
+		World();
+		~World() = default;
 		//void init();
-		EntityWorld(const EntityWorld&) = delete;
-		EntityWorld& operator=(const EntityWorld&) = delete;
+		//World(const EntityWorld&) = delete;
+		//World& operator=(const EntityWorld&) = delete;
 
-		EntityId createEntity(u32 flags);
+		//EntityId addEntity(u32 flags);
+		//void removeEntity(EntityId id);
 
-		bool isAlive(EntityId id) const;
-		void destroy(EntityId id);
+		//bool isAlive(EntityId id) const;
 
 		void handleEvent(const Event& event);
 		void update(Time dt);
 		void render();
+
+	private:
+		World(const World&) = delete;
+		World& operator=(const World&) = delete;
 	};
 
 

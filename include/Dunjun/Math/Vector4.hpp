@@ -38,8 +38,8 @@ namespace Dunjun
 		};
 		GLOBAL const Vector4 Zero;
 
-		inline f32& operator[](usize index) { return data[index]; }
-		inline const f32& operator[](usize index) const { return data[index]; }
+		inline f32& operator[](uSize_t index) { return data[index]; }
+		inline const f32& operator[](uSize_t index) const { return data[index]; }
 	};
 
 	//inline f32& operator[](size_t index) { return data[index]; }

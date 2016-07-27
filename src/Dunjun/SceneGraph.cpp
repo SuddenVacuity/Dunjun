@@ -1,6 +1,5 @@
 
 #include <Dunjun/SceneGraph.hpp>
-#include <Dunjun/System/Containers/HashMap.hpp>
 
 namespace Dunjun
 {
@@ -10,7 +9,7 @@ namespace Dunjun
 		, data()
 		, map(allocator)
 	{
-
+		allocate(16);
 	}
 
 	SceneGraph::~SceneGraph()
@@ -58,9 +57,9 @@ namespace Dunjun
 		data = newData;
 	}
 
-	SceneGraph::NodeId SceneGraph::create(EntityId id, const Transform& t)
+	SceneGraph::NodeId SceneGraph::addNode(EntityId id, const Transform& t)
 	{
-		if(data.capacity == data.length)
+		if(data.capacity == data.length || data.capacity == 0)
 			allocate(2 * data.length + 1);
 
 		// get last position in data arrays
@@ -84,7 +83,7 @@ namespace Dunjun
 		return last;
 	}
 
-	void SceneGraph::destroy(NodeId id)
+	void SceneGraph::removeNode(NodeId id)
 	{
 		const NodeId last = data.length - 1;
 		const EntityId entity = data.entityId[id];
@@ -120,10 +119,10 @@ namespace Dunjun
 		return data.length;
 	}
 
-	void SceneGraph::link(NodeId parent, NodeId child)
+	void SceneGraph::linkNodes(NodeId parent, NodeId child)
 	{
 		// unlink any previous parent
-		unlink(child);
+		unlinkNode(child);
 
 		// check if node is empty
 		if(!isValid(data.firstChild[parent]))
@@ -169,7 +168,7 @@ namespace Dunjun
 		transformChild(child, parentTransform);
 	}
 
-	void SceneGraph::unlink(NodeId child)
+	void SceneGraph::unlinkNode(NodeId child)
 	{
 		if(!isValid(data.parent[child]))
 			return;
@@ -218,7 +217,7 @@ namespace Dunjun
 		if (isValid(parent))
 			parentTransform = data.global[parent];
 
-		data.local[id] = data.global[id] / parentTransform;
+		data.local[id] = parentTransform / data.global[id];
 
 		transformChild(id, parentTransform);
 	}

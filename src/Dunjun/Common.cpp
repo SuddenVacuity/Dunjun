@@ -12,9 +12,9 @@ namespace Dunjun
 	//	return filepath.substr(0, found);
 	//}
 
-	bool showSimpleMessageBox(MessageBoxType type,
-		const std::string& title,
-		const std::string& message)
+	bool showSimpleMessageBox(const String& message,
+							  const String& title,
+							  MessageBoxType type)
 	{
 		u32 flag = 0;
 
@@ -26,12 +26,18 @@ namespace Dunjun
 		case MessageBoxType::Information : flag = SDL_MESSAGEBOX_INFORMATION; break;
 		}
 
-		return SDL_ShowSimpleMessageBox(flag, title.c_str(), message.c_str(), nullptr) == 0;
-	}
+		bool result = SDL_ShowSimpleMessageBox(flag, cString(title), cString(message), nullptr) == 0;
 
-	namespace BaseDirectories
-	{
-		const std::string Shaders = "data/shaders/";
-		const std::string Texture = "data/textures/";
-	} // end BaseDirectories
+		if(type == MessageBoxType::Error)
+		{
+			#ifdef DUNJUN_DEBUG_MODE
+			char* createAccessViolation = 0;
+			*createAccessViolation = 0;
+			#endif
+
+			std::exit(EXIT_FAILURE);
+		}
+
+		return result;
+	}
 } // end Dunjun

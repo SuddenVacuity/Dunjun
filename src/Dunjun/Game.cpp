@@ -1,10 +1,6 @@
 
 
 #include <Dunjun/Game.hpp>
-#include <Dunjun/Entity.hpp>
-#include <Dunjun/SceneGraph.hpp>
-#include <Dunjun/RenderSystem.hpp>
-
 
 namespace Dunjun
 {
@@ -23,7 +19,7 @@ namespace Dunjun
 		GLOBAL bool g_running = true;
 	} // end anon namespace
 
-	GLOBAL EntityWorld* g_world;
+	GLOBAL World* g_world;
 
 	// textures
 	GLOBAL Texture g_defaultTexture;
@@ -32,6 +28,8 @@ namespace Dunjun
 	GLOBAL Texture g_terrainTexture;
 
 	GLOBAL Material g_dunjunTextMaterial;
+	GLOBAL Material g_stoneMaterial;
+	GLOBAL Material g_terrainMaterial;
 
 	namespace Game
 	{
@@ -104,41 +102,23 @@ namespace Dunjun
 			g_stoneTexture = loadTextureFromFile("data/textures/stone.png");
 			g_terrainTexture = loadTextureFromFile("data/textures/terrain.png", TextureFilter::Nearest);
 
-			//// load materials
-			//{
-			//	auto mat = make_unique<Material>();
-			//	mat->shaders = &g_shaderHolder.get("deferredGeometryPass");
-			//	mat->diffuseMap = &g_defaultTexture;
-			//	g_materialHolder.insert("default", std::move(mat));
-			//}
-			//{
-			//	auto mat = make_unique<Material>();
-			//	mat->shaders = &g_shaderHolder.get("deferredGeometryPass");
-			//	mat->diffuseMap = &g_dunjunTextTexture;
-			//	mat->specularExponent = 100000.0f;
-			//	g_materialHolder.insert("dunjunText", std::move(mat));
-			//}
-			//{
-			//	auto mat = make_unique<Material>();
-			//	mat->shaders = &g_shaderHolder.get("deferredGeometryPass");
-			//	mat->diffuseMap = &g_stoneTexture;
-			//	g_materialHolder.insert("stone", std::move(mat));
-			//}
-			//{
-			//	auto mat = make_unique<Material>();
-			//	mat->shaders = &g_shaderHolder.get("deferredGeometryPass");
-			//	mat->diffuseMap = &g_terrainTexture;
-			//	g_materialHolder.insert("terrain", std::move(mat));
-			//}
 
 			g_dunjunTextMaterial = Material{};
 			g_dunjunTextMaterial.diffuseMap = &g_dunjunTextTexture;
+
+			g_stoneMaterial = Material{};
+			g_stoneMaterial.diffuseMap = &g_stoneTexture;
+
+			g_terrainMaterial = Material{};
+			g_terrainMaterial.diffuseMap = &g_terrainTexture;
+
 		}
 
 		// sprite vertex info, vbo and ibo
 		INTERNAL void loadSpriteAsset()
 		{
 
+			// Quad
 			{
 				// Here is where you add vertice information
 				//
@@ -174,6 +154,8 @@ namespace Dunjun
 				// TODO:FIXME: seemingly random access violations happenjl here
 				g_meshHolder.insert("quad", std::unique_ptr<Mesh>(new Mesh(generateMesh(meshData))));
 			}
+
+			// Sprite
 			{
 				// Here is where you add vertice information
 				//
@@ -207,7 +189,42 @@ namespace Dunjun
 				meshData.generateNormals();
 			
 				g_meshHolder.insert("sprite", std::unique_ptr<Mesh>(new Mesh(generateMesh(meshData))));
-				//g_meshes["sprite"] = new Mesh(meshData);
+			}
+
+			// Walls
+			{
+				// Here is where you add vertice information
+				//
+				Vertex vertices[] = { // define vertexes for a triangle
+									  //  x	    y	  z		  s	    t	       r	 g	   b	 a		normals				// for triangle strips organize vertexes in a backwards Z
+					{ { +0.5f,  0.5f, 0.0f },{ 1.0f, 1.0f },{ 0xFF,0xFF,0xFF,0xFF },{ 0, 0, 0 } },	// 0 vertex         1 ---- 0        
+					{ { -0.5f,  0.5f, 0.0f },{ 0.0f, 1.0f },{ 0xFF,0xFF,0xFF,0xFF },{ 0, 0, 0 } },	// 1 vertex           \             
+					{ { +0.5f, -0.5f, 0.0f },{ 1.0f, 0.0f },{ 0xFF,0xFF,0xFF,0xFF },{ 0, 0, 0 } },	// 2 vertex              \           
+					{ { -0.5f, -0.5f, 0.0f },{ 0.0f, 0.0f },{ 0xFF,0xFF,0xFF,0xFF },{ 0, 0, 0 } },	// 3 vertex         3 -----2       
+				};
+
+				u32 indices[] = { 0, 1, 2, 1, 3, 2 }; // vertex draw order for GL_TRIANGLES
+
+													  // get number of entries
+				u32 numVertices = sizeof(vertices) / sizeof(vertices[0]);
+				u32 numIndices = sizeof(indices) / sizeof(indices[0]);
+
+				MeshData meshData = { defaultAllocator() };
+				meshData.drawType = DrawType::Triangles;
+
+				reserve(meshData.vertices, numVertices);
+				reserve(meshData.indices, numIndices);
+
+				// add the data
+				for (u32 i = 0; i < numVertices; i++)
+					append(meshData.vertices, vertices[i]);
+
+				for (u32 i = 0; i < numIndices; i++)
+					append(meshData.indices, indices[i]);
+
+				meshData.generateNormals();
+
+				g_meshHolder.insert("surface", std::unique_ptr<Mesh>(new Mesh(generateMesh(meshData))));
 
 			}
 		}
@@ -375,7 +392,7 @@ namespace Dunjun
 
 			if(Input::isKeyPressed(Input::Key::D))
 			{
-				Vector3 f = g_world->camera.forward();
+				Vector3 f = forwardVector(g_world->camera.transform.orientation);
 
 				s32 angle = f.y * 90;
 
@@ -444,17 +461,15 @@ namespace Dunjun
 
 			Transform pos = sg.getLocalTransform(crateNode);
 			pos.position.y = a * Math::sin(Radian(wt));
-			pos.orientation = angleAxis(Degree(50 * wt), { 1, 0, 0 });
-			pos.scale = Vector3{1.2f, 1.2f, 1.2f } + Vector3{0.4f, 0.4f, 0.4f } * Math::sin(Radian(wt));
+			//pos.orientation = angleAxis(Degree(50 * wt), { 1, 0, 0 });
+			//pos.scale = Vector3{1.2f, 1.2f, 1.2f } + Vector3{0.4f, 0.4f, 0.4f } * Math::sin(Radian(wt));
 			sg.setLocalTransform(crateNode, pos);
 
-			Transform pos2 = sg.getLocalTransform(playerNode);
-			pos2.position.x = 2.0f * a * Math::cos(Radian(wt));
+			Transform pos2 = sg.getGlobalTransform(playerNode);
+			pos2.position.x = 1.0f * a * Math::cos(Radian(wt));
 			sg.setLocalTransform(playerNode, pos2);
 
-			//std::cout << sg.getGlobalTransform(node).position << "\n";
-			//std::cout << sg.getGlobalTransform(node).orientation << "\n";
-			//std::cout << sg.getGlobalTransform(node).scale << "\n";
+			std::cout << "";
 		}
 
 		/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -469,6 +484,13 @@ namespace Dunjun
 
 		INTERNAL void render()
 		{
+			g_world->renderSystem.fbSize.x = g_window.getSize().x;
+			g_world->renderSystem.fbSize.y = g_window.getSize().y;
+
+			glViewport(0, 0, g_window.getSize().x, g_window.getSize().y);
+			glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
 			g_world->render();
 		}
 
@@ -484,32 +506,67 @@ namespace Dunjun
 
 		INTERNAL void initWorld()
 		{
+			EntitySystem& es = g_world->entitySystem;
 			SceneGraph& sg = g_world->sceneGraph;
 			RenderSystem& rs = g_world->renderSystem;
-			sg.allocate(16);
-			rs.allocate(16);
 
-			EntityId crate = g_world->crate = g_world->createEntity(ComponentName | ComponentRender);
-			EntityId player = g_world->player = g_world->createEntity(ComponentName | ComponentRender);
+			//sg.allocate(16);
+			//rs.allocate(16);
+
+			EntityId crate = g_world->crate = es.addEntity(ComponentName | ComponentRender);
+			EntityId player = g_world->player = es.addEntity(ComponentName | ComponentRender);
+
+			EntityId floor = es.addEntity(ComponentName | ComponentRender);
+			EntityId wall1 = es.addEntity(ComponentName | ComponentRender);
+			EntityId wall2 = es.addEntity(ComponentName | ComponentRender);
+			EntityId wall3 = es.addEntity(ComponentName | ComponentRender);
 
 			g_world->names[crate] = NameComponent{"crate"};
 			g_world->names[player] = NameComponent{"Bob"};
 
 			Transform crateTransform = Transform::Identity;
 
-			//crateTransform.position = {3, 0, 0,};
-			crateTransform.orientation = angleAxis(-Degree(90), { 1, 0, 0 });
-			//crateTransform.scale = {2, 2, 2};
+			crateTransform.position = {0, 0, 0,};
+			crateTransform.orientation = angleAxis(Degree(-90), { 1, 0, 0 });
+			crateTransform.scale = {1, 1, 1};
 
 
-			auto crateNode = sg.create(crate, crateTransform);
-			auto playerNode = sg.create(player, Transform::Identity);
+			auto crateNode = g_world->crate;
+			auto playerNode = g_world->player;
+			
+			sg.addNode(crate, crateTransform);
+			sg.addNode(player, Transform::Identity);
 
-			sg.link(crateNode, playerNode);
+			sg.linkNodes(crateNode, playerNode);
 
-			(void)rs.create(crate, { g_meshHolder.get("sprite"), g_dunjunTextMaterial });
-			(void)rs.create(player, { g_meshHolder.get("sprite"), g_dunjunTextMaterial });
+			{
+				Transform wallTransform = Transform::Identity;
+				wallTransform.position = {0, 0, -4};
+				wallTransform.scale = {8, 8, 8};
+				sg.addNode(wall1, wallTransform);
+			
+				wallTransform.position = { -4, 0, 0};
+				wallTransform.orientation = angleAxis(Degree(90), {0, 1, 0});
+				sg.addNode(wall2, wallTransform);
+			
+				wallTransform.position = {4, 0, 0};
+				wallTransform.orientation = angleAxis(Degree(-90), {0, 1, 0});
+				sg.addNode(wall3, wallTransform);
 
+				wallTransform.position = { 0, -4, 0 };
+				wallTransform.orientation = angleAxis(Degree(-90), { 1, 0, 0 });
+				sg.addNode(floor, wallTransform);
+			
+			
+			}
+			{
+				rs.addComponent(crate, { g_meshHolder.get("sprite"), g_dunjunTextMaterial });
+				rs.addComponent(player, { g_meshHolder.get("sprite"), g_dunjunTextMaterial });
+				rs.addComponent(floor, { g_meshHolder.get("surface"), g_stoneMaterial });
+				rs.addComponent(wall1, { g_meshHolder.get("surface"), g_stoneMaterial });
+				rs.addComponent(wall2, { g_meshHolder.get("surface"), g_stoneMaterial });
+				rs.addComponent(wall3, { g_meshHolder.get("surface"), g_stoneMaterial });
+			}
 			{
 				DirectionalLight light;
 
@@ -537,6 +594,7 @@ namespace Dunjun
 
 		void init()
 		{
+
 			Memory::init();
 
 			std::cout << "\n\n\n";
@@ -568,7 +626,7 @@ namespace Dunjun
 			loadMaterials();
 			loadSpriteAsset();
 
-			g_world = defaultAllocator().makeNew<EntityWorld>();
+			g_world = defaultAllocator().makeNew<World>();
 			initWorld();
 
 			//g_world = defaultAllocator().makeNew<World>();

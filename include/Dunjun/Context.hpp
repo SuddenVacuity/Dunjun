@@ -1,7 +1,7 @@
 #ifndef DUNJUN_CONTEXT_HPP
 #define DUNJUN_CONTEXT_HPP
 
-#include <Dunjun/ResourceHolder_objects.hpp>
+#include <Dunjun/RenderSystem.hpp>
 
 namespace Dunjun
 {

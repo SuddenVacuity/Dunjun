@@ -11,13 +11,6 @@ namespace Dunjun
 									   Vector4{0, 0, 1, 0},
 									   Vector4{0, 0, 0, 1}};
 
-	// Matrix4 all values 0
-	const Matrix4 Matrix4::Identity0 = {Vector4{0, 0, 0, 0},
-										Vector4{0, 0, 0, 0},
-										Vector4{0, 0, 0, 0},
-										Vector4{0, 0, 0, 0} };
-
-
 	bool operator==(const Matrix4& a, const Matrix4& b)
 			{
 				const Matrix4& m1 = a; // shorthand

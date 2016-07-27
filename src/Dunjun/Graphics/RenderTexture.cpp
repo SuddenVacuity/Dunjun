@@ -3,25 +3,35 @@
 
 namespace Dunjun
 {
-	RenderTexture::~RenderTexture()
+	void destroyRenderTexture(RenderTexture& rt)
 	{
-		if(fbo)
-			glDeleteFramebuffersEXT(1, &fbo);
+		if(rt.fbo)
+			glDeleteFramebuffersEXT(1, &rt.fbo);
+
+		destroyTexture(rt.colorTexture);
+		destroyTexture(rt.depthTexture);
 	}
 
-	bool RenderTexture::create(u32 w, u32 h, TextureType t, TextureFilter minMagFilter, TextureWrapMode wrapMode)
+	bool createRenderTexture(RenderTexture& rt, 
+							 u32 w, u32 h, 
+							 RenderTexture::TextureType t, 
+							 TextureFilter minMagFilter, 
+							 TextureWrapMode wrapMode)
 	{
-		if(w == width && h == height && t == type)
+		if(w == rt.width && h == rt.height && t == rt.type)
 			return true;
 
-		type = t;
-		width = w;
-		height = h;
+		rt.type = t;
+		rt.width = w;
+		rt.height = h;
 		
-		if(!fbo)
-			glGenFramebuffersEXT(1, &fbo);
+		//if(!rt.fbo)
+			glGenFramebuffersEXT(1, &rt.fbo);
 
-		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
+		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, rt.fbo);
+		defer(glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, rt.fbo));
+
+		defer(glBindTexture(GL_TEXTURE_2D, 0));
 
 		//GLuint depthRenderBuffer = 0;
 		//
@@ -37,30 +47,30 @@ namespace Dunjun
 		//							 GL_RENDERBUFFER_EXT, 
 		//							 depthRenderBuffer);
 
-		if (type & TextureType::Color)
+		if (rt.type & RenderTexture::TextureType::Color)
 		{
-			if(!colorTexture.handle)
-				glGenTextures(1, &colorTexture.handle);
+			if(!rt.colorTexture.handle)
+				glGenTextures(1, &rt.colorTexture.handle);
 
-			glBindTexture(GL_TEXTURE_2D, (u32)colorTexture.handle);
+			glBindTexture(GL_TEXTURE_2D, (u32)rt.colorTexture.handle);
 
 			// light
-			if(type & TextureType::Light)
+			if(rt.type & RenderTexture::TextureType::Light)
 			{
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F,
-						(s32)width, (s32)height,
+						(s32)rt.width, (s32)rt.height,
 						0, GL_RGBA, GL_FLOAT, 0);
 			}
 			else
 			{
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, 
-						 (s32)width, (s32)height,
+						 (s32)rt.width, (s32)rt.height,
 						 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
 			}
 
 
-			colorTexture.width = width;
-			colorTexture.height = height;
+			rt.colorTexture.width = rt.width;
+			rt.colorTexture.height = rt.height;
 
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, (GLenum)minMagFilter);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, (GLenum)minMagFilter);
@@ -69,20 +79,20 @@ namespace Dunjun
 
 			glFramebufferTextureEXT(GL_FRAMEBUFFER_EXT, 
 									GL_COLOR_ATTACHMENT0_EXT, 
-									colorTexture.handle, 0);
+									rt.colorTexture.handle, 0);
 		}
-		if (type & TextureType::Depth)
+		if (rt.type & RenderTexture::TextureType::Depth)
 		{
-			if (!depthTexture.handle)
-				glGenTextures(1, &depthTexture.handle);
+			if (!rt.depthTexture.handle)
+				glGenTextures(1, &rt.depthTexture.handle);
 
-			glBindTexture(GL_TEXTURE_2D, (u32)depthTexture.handle);
+			glBindTexture(GL_TEXTURE_2D, (u32)rt.depthTexture.handle);
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, 
-						(s32)width, (s32)height,
+						(s32)rt.width, (s32)rt.height,
 						0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
 
-			depthTexture.width = width;
-			depthTexture.height = height;
+			rt.depthTexture.width = rt.width;
+			rt.depthTexture.height = rt.height;
 
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, (GLenum)minMagFilter);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, (GLenum)minMagFilter);
@@ -91,37 +101,45 @@ namespace Dunjun
 
 			glFramebufferTextureEXT(GL_FRAMEBUFFER_EXT,
 				GL_DEPTH_ATTACHMENT_EXT,
-				depthTexture.handle, 0);
+				rt.depthTexture.handle, 0);
 		}
 
-		std::vector<GLenum> drawBuffers;
+		u32 drawBuffersLength = 0;
+		GLenum drawBuffers[2];
 
-		if (type & TextureType::Color || type & TextureType::Light)
-			drawBuffers.emplace_back(GL_COLOR_ATTACHMENT0_EXT);
-		if (type & TextureType::Depth)
-			drawBuffers.emplace_back(GL_DEPTH_ATTACHMENT_EXT);
+		if (rt.type & RenderTexture::TextureType::Color || rt.type & RenderTexture::TextureType::Light)
+			drawBuffers[drawBuffersLength++] = GL_COLOR_ATTACHMENT0_EXT;
+		if (rt.type & RenderTexture::TextureType::Depth)
+			drawBuffers[drawBuffersLength++] = GL_DEPTH_ATTACHMENT_EXT;
 		
 
-		glDrawBuffers(drawBuffers.size(), &drawBuffers[0]);
+		glDrawBuffers(drawBuffersLength, &drawBuffers[0]);
 
 		if(glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT) != GL_FRAMEBUFFER_COMPLETE_EXT )
 		{
-			glBindTexture(GL_TEXTURE_2D, 0);
-			glBindFramebuffer(GL_FRAMEBUFFER_EXT, 0);
+			//glBindTexture(GL_TEXTURE_2D, 0);
+			//glBindFramebuffer(GL_FRAMEBUFFER_EXT, 0);
 			return false;
 
 		}
-		glBindTexture(GL_TEXTURE_2D, 0);
-		glBindFramebuffer(GL_FRAMEBUFFER_EXT, 0);
+		//glBindTexture(GL_TEXTURE_2D, 0);
+		//glBindFramebuffer(GL_FRAMEBUFFER_EXT, 0);
 		return true;
 
 	}
 
-	void RenderTexture::bind(const RenderTexture* rt)
+	void bindRenderTexture(const RenderTexture* rt)
 	{
 		if(!rt)
+		{
 			glFlush();
+			glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+		}
+		else
+		{
+			glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, rt->fbo);
+		}
 
-		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, rt != nullptr ? rt->fbo : 0);
+		//glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, rt != nullptr ? rt->fbo : 0);
 	}
 } // end Dunjun

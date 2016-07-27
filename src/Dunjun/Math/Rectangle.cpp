@@ -21,10 +21,10 @@ namespace Dunjun
 
 	bool Rectangle::contains(const Vector2& point) const
 	{
-		f32 minX = std::min(x, x + width);
-		f32 maxX = std::max(x, x + width);
-		f32 minY = std::min(y, y + height);
-		f32 maxY = std::max(y, y + height);
+		f32 minX = Math::min(x, x + width);
+		f32 maxX = Math::max(x, x + width);
+		f32 minY = Math::min(y, y + height);
+		f32 maxY = Math::max(y, y + height);
 
 		return (point.x >= minX) && (point.x < maxX) && (point.y >= minY) && (point.y < maxY);
 	}
@@ -37,21 +37,21 @@ namespace Dunjun
 
 	bool Rectangle::intersects(const Rectangle& rectangle, Rectangle& intersection) const
 	{
-		f32 r1MinX = std::min(x, x + width);
-		f32 r1MaxX = std::max(x, x + width);
-		f32 r1MinY = std::min(y, y + height);
-		f32 r1MaxY = std::max(y, y + height);
+		f32 r1MinX = Math::min(x, x + width);
+		f32 r1MaxX = Math::max(x, x + width);
+		f32 r1MinY = Math::min(y, y + height);
+		f32 r1MaxY = Math::max(y, y + height);
+					
+		f32 r2MinX = Math::min(rectangle.x, rectangle.x + rectangle.width);
+		f32 r2MaxX = Math::max(rectangle.x, rectangle.x + rectangle.width);
+		f32 r2MinY = Math::min(rectangle.y, rectangle.y + rectangle.height);
+		f32 r2MaxY = Math::max(rectangle.y, rectangle.y + rectangle.height);
 
-		f32 r2MinX = std::min(rectangle.x, rectangle.x + rectangle.width);
-		f32 r2MaxX = std::max(rectangle.x, rectangle.x + rectangle.width);
-		f32 r2MinY = std::min(rectangle.y, rectangle.y + rectangle.height);
-		f32 r2MaxY = std::max(rectangle.y, rectangle.y + rectangle.height);
-
-		f32 x1 = std::max(r1MinX, r2MinX);
-		f32 x2 = std::min(r1MaxX, r2MaxX);
-		
-		f32 y1 = std::max(r1MinY, r2MinY);
-		f32 y2 = std::min(r1MaxY, r2MaxY);
+		f32 x1 = Math::max(r1MinX, r2MinX);
+		f32 x2 = Math::min(r1MaxX, r2MaxX);
+				 
+		f32 y1 = Math::max(r1MinY, r2MinY);
+		f32 y2 = Math::min(r1MaxY, r2MaxY);
 
 		// if intersection is valid(positive non zero area)
 		if((x1 < x2) && (y1 < y2))

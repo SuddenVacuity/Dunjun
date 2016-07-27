@@ -1,7 +1,7 @@
 #ifndef DUNJUN_SYSTEM_RINGBUFFER_HPP
 #define DUNJUN_SYSTEM_RINGBUFFER_HPP
 
-#include <Dunjun/System/Containers.hpp>
+#include <Dunjun/System/Containers/HashMap.hpp>
 
 namespace Dunjun
 {

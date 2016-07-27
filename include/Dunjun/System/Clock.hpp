@@ -13,11 +13,15 @@ namespace Dunjun
 	public:
 		Time startTime = Time::now();
 
+		// returns time since the clock was started or last restarted
 		inline Time getElapsedTime() const
 		{
 			return Time::now() - startTime;
 		}
 
+		// restarts the clock
+		// set start time to current time
+		// returns elapsed time since previous start time
 		inline Time restart()
 		{
 			//Time now = Input::getTime();

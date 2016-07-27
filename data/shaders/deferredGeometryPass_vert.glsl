@@ -1,6 +1,6 @@
 #version 120
 
-#include <_head_transform.glsl>
+#include _head_transform.glsl
 
 attribute vec3 a_position; // vertex position
 attribute vec2 a_texCoord; // vertex texture coordinates

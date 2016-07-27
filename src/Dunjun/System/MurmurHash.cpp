@@ -5,7 +5,7 @@
 namespace Dunjun
 {
 #if defined(DUNJUN_64_BIT)
-	u64 murmurVoidHash64(const void* key, s32 length, u64 seed)
+	u64 murmurHash64(const void* key, s32 length, u64 seed)
 	{
 		const u64 m = 0xc6a4a7935bd1e995ULL;
 		const s32 r = 47;
@@ -50,7 +50,7 @@ namespace Dunjun
 
 
 #elif defined(DUNJUN_32_BIT)
-	u64 murmurVoidHash64(const void* key, s32 length, u64 seed)
+	u64 murmurHash64(const void* key, s32 length, u64 seed)
 	{
 		const u32 m = 0x5bd1e995;
 		const s32 r = 24;

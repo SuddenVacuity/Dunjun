@@ -4,50 +4,12 @@
 namespace Dunjun
 {
 	// Functions
-	void Camera::lookAt(const Vector3& position, const Vector3& up)
+
+	void Camera::cameraLookAt(const Vector3& target, const Vector3& up)
 	{
-		transform.orientation = conjugate(Math::lookAt<Quaternion>(transform.position, position, up));
-		//transform.orientation = conjugate(matrix4ToQuaternion(Dunjun::lookAt<Matrix4>(transform.position, position, up)));
+		transform.orientation = conjugate(Math::lookAtQuaternion(transform.position, target, up));
 	}
 
-	void Camera::offsetOrientation(const Radian& yaw, const Radian& pitch)
-	{
-		const Quaternion yawRot = angleAxis(yaw, {0, 1, 0}); // absolute up
-		const Quaternion pitchRot = angleAxis(pitch, right()); // relative right
-
-		transform.orientation = yawRot * pitchRot * transform.orientation;
-	}
-
-	// move camera functions
-	// must be normalized
-	Vector3 Camera::forward() const
-	{
-		return transform.orientation * Vector3{0, 0, -1};
-	}
-	Vector3 Camera::backward() const
-	{
-		return transform.orientation * Vector3{0, 0, 1};
-	}
-
-	Vector3 Camera::right() const
-	{
-		return transform.orientation * Vector3{1, 0, 0};
-	}
-	Vector3 Camera::left() const
-	{
-		return transform.orientation * Vector3{-1, 0, 0};
-	}
-
-	Vector3 Camera::up() const
-	{
-		return transform.orientation * Vector3{ 0, 1, 0};
-	}
-	Vector3 Camera::down() const
-	{
-		return transform.orientation * Vector3{0, -1, 0};
-	}
-	
-	//
 	// helper functions
 	Matrix4 Camera::getMatrix() const
 	{
@@ -76,7 +38,7 @@ namespace Dunjun
 						 -distance, distance);
 		}
 		else
-			std::runtime_error("No ProjectionType [-getProjcetion()-]\n");
+			std::runtime_error("No ProjectionType Camera::getProjcetion()\n");
 
 		return proj;
 	}

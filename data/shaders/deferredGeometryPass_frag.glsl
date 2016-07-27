@@ -1,8 +1,8 @@
 #version 120
 
-#include <_head_material.glsl>
+#include _head_material.glsl
 
-#include <_head_transform.glsl>
+#include _head_transform.glsl
 
 uniform vec3 u_cameraPosition;
 uniform Transform u_transform; // transform function

@@ -1,7 +1,7 @@
 #ifndef DUNJUN_SYSTEM_QUEUE_HPP
 #define DUNJUN_SYSTEM_QUEUE_HPP
 
-#include <Dunjun/System/Containers.hpp>
+#include <Dunjun/System/Containers/Array.hpp>
 
 namespace Dunjun
 {

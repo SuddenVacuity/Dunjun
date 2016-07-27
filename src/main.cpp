@@ -48,7 +48,7 @@ int main(int argc, char** argv)
 	std::cout << "Material POD - "		<< std::is_pod<Dunjun::Material>() << std::endl;
 	std::cout << "Mesh POD - "			<< std::is_pod<Dunjun::Mesh>() << std::endl;
 	std::cout << "MeshData POD - "		<< std::is_pod<Dunjun::MeshData>() << std::endl;
-	std::cout << "ModelAsset POD - "	<< std::is_pod<Dunjun::ModelAsset>() << std::endl;
+	//std::cout << "ModelAsset POD - "	<< std::is_pod<Dunjun::ModelAsset>() << std::endl;
 	std::cout << "RenderTexture POD - " << std::is_pod<Dunjun::RenderTexture>() << std::endl;
 	std::cout << "ShaderProgram POD - " << std::is_pod<Dunjun::ShaderProgram>() << std::endl;
 	std::cout << "Texture POD - "		<< std::is_pod<Dunjun::Texture>() << std::endl;

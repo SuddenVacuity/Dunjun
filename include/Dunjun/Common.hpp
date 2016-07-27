@@ -1,7 +1,7 @@
 #ifndef DUNJUN_COMMON_HPP // ifndef checks if this macro has been defined
 #define DUNJUN_COMMON_HPP // if not then define it
 
-#include <Dunjun/System/Types.hpp>
+#include <Dunjun/System/MurmurHash.hpp>
 
 // undef these for internal math library
 #ifdef min
@@ -12,36 +12,6 @@
 #undef max
 #endif
 
-#include <algorithm>
-#include <array> // SceneNode.hpp
-#include <bitset> // SceneNode.hpp
-#include <cassert>
-#include <chrono>
-//#include <cmath> replaced by internal math library
-#include <cstdarg>
-//#include <cstdint> no longer needed by Types.hpp
-#include <cstdio>
-#include <cstdlib>
-#include <cstring> // Allocator Containers
-#include <deque> // SceneNode.hpp
-#include <functional>
-#include <fstream>
-#include <iostream>
-#include <iterator> // Renderer.cpp
-#include <limits>
-#include <map>
-#include <memory>
-#include <ostream>
-#include <random>
-#include <sstream>
-#include <stack>
-#include <stdexcept>
-#include <string>
-#include <thread>
-//#include <typeindex> // SceneNode.hpp
-//#include <typeinfo> // SceneNode.hpp
-#include <unordered_map> // ResourceHolder.hpp
-#include <vector>
 
 namespace Dunjun
 {
@@ -76,58 +46,9 @@ namespace Dunjun
 	inline T pseudo_cast(const U& x)
 	{
 		T to = T(0);
-		std::memcpy(&to, &x, ((sizeof(T) < sizeof(U)) ? sizeof(T) : sizeof(U)));
+		memcpy(&to, &x, ((sizeof(T) < sizeof(U)) ? sizeof(T) : sizeof(U)));
 		return to;
 	}
-	/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-	)				.
-	)					DEFER FUNCTIONS TO END OF SCOPE
-	)
-	)				.
-	)					.
-	)
-	)				.
-	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
-
-	namespace Impl
-	{
-		template <typename Fn>
-		struct Defer
-		{
-			Defer(Fn&& fn)
-				: fn(std::forward<Fn>(fn))
-			{
-			}
-
-			~Defer() 
-			{ 
-				fn(); 
-			}
-
-			Fn fn;
-		};
-
-		template <typename Fn>
-		Defer<Fn> deferFn(Fn&& fn)
-		{
-			return Defer<Fn>(std::forward<Fn>(fn)); 
-		}
-
-	} // end Impl
-
-#define Defer_1(x, y) x##y
-#define Defer_2(x, y) Defer_1(x, y)
-#define Defer_3(x) Defer_2(x, __COUNTER__)
-#define defer(code) auto Defer_3(_defer_) = Impl::deferFn([&](){code;});
-
-/*/	Example for defer
- *	FILE* f{open("test.txt", "r")}
- *	if (f == nullptr)
- *		return;
- *	defer(fclose(f)); 
-/*/
-
-
 
 	// Cross-Platform version of sprintf that uses a local persist buffer
 	// If more than 1024 characters are needed, a std::stringstream may be needed
@@ -146,7 +67,7 @@ namespace Dunjun
 		va_end(v);
 		s_buf[1023] = '\0';
 
-		return {s_buf, strlen(s_buf)};
+		return {s_buf, len(s_buf)};
 	}
 
 	//std::string resourcePath();
@@ -158,7 +79,12 @@ namespace Dunjun
 	//	std::runtime_error(str.c_str());
 	//}
 
-	// len() currently unused
+	inline size_t len(const char* str)
+	{
+		if (str)
+			return strlen(str);
+		return 0;
+	}
 	template <typename T>
 	inline size_t len(const T& t)
 	{
@@ -195,14 +121,14 @@ namespace Dunjun
 		Information,
 	};
 
-	bool showSimpleMessageBox(MessageBoxType type, 
-							  const std::string& title, 
-							  const std::string& message);
+	bool showSimpleMessageBox(const String& message = "An error occurred.",
+							  const String& title = "Error",
+							  MessageBoxType type = MessageBoxType::Error);
 
 	namespace BaseDirectories
 	{
-		extern const std::string Shaders;
-		extern const std::string Texture;
+		char* const Textures  = "data/textures/";
+		char* const Shaders = "data/shaders/";
 	} // end BaseDirectories
 } // END namespace Dunjun
 

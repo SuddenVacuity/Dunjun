@@ -105,6 +105,28 @@ Matrix4 quaternionToMatrix4(const Quaternion& q);
 // NOTE: assumes matrix is only a rotational matrix and has no shear applied (scale)
 Quaternion matrix4ToQuaternion(const Matrix4& m);
 
+
+// positive values go counterclock-wise
+Quaternion offsetOrientation(const Quaternion& orientation, const Radian& yaw, const Radian& pitch);
+
+// returns vector multiplied by orientation
+Vector3 forwardVector(const Quaternion& orientation);
+// returns vector multiplied by orientation
+Vector3 backwardVector(const Quaternion& orientation);
+
+// returns vector multiplied by orientation
+Vector3 rightVector(const Quaternion& orientation);
+// returns vector multiplied by orientation
+Vector3 leftVector(const Quaternion& orientation);
+
+// returns vector multiplied by orientation
+Vector3 upVector(const Quaternion& orientation);
+// returns vector multiplied by orientation
+Vector3 downVector(const Quaternion& orientation);
+
+
+
+
 } // end Dunjun
 
 #endif

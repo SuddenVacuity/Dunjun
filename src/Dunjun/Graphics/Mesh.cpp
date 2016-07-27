@@ -81,7 +81,7 @@ namespace Dunjun
 	{
 		//if(generated)
 		//	return;
-		Mesh mesh;
+		Mesh mesh{};
 		mesh.drawType = data.drawType;
 		mesh.drawCount = (s32)len(data.indices);
 
@@ -148,7 +148,7 @@ namespace Dunjun
 
 		// get the draw info from ModelAsset asset
 		//glDrawArrays(asset->drawType, asset->drawStart, asset->drawCount); // (mode to draw in, first vertex, total vertices)
-		glDrawElements((GLenum)mesh.drawType, mesh.drawCount, GL_UNSIGNED_INT, nullptr);
+		glDrawElements((s32)mesh.drawType, mesh.drawCount, GL_UNSIGNED_INT, nullptr);
 
 
 	}

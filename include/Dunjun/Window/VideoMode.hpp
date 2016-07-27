@@ -15,7 +15,7 @@ namespace Dunjun
 		VideoMode(u32 modeWidth, u32 modeHeight, u32 modeBitsPerPixel = 24);
 
 		GLOBAL VideoMode getDesktopMode();
-		GLOBAL const std::vector<VideoMode>& getFullscreenModes();
+		GLOBAL const Array<VideoMode>& getFullscreenModes();
 
 		bool isValid() const;
 	};

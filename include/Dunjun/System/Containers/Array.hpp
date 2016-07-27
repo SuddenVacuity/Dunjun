@@ -46,17 +46,18 @@ namespace Dunjun
 	template <typename T>
 	T& front(Array<T>& a);
 	template <typename T>
-	const T* front(const Array<T>& a);
+	const T& front(const Array<T>& a);
 	// Returns a pointer to the last item in the array
 	template <typename T>
 	T& back(Array<T>& a);
 	template <typename T>
-	const T* back(const Array<T>& a);
+	const T& back(const Array<T>& a);
 
+	// shinks capacity to match data length
+	template <typename T>
+	void shrinkToFit(Array<T>& a);
 	// Changes array length to 0
 	// Does not change capacity or zero old values
-	template <typename T>
-	void trim(Array<T>& a);
 	template <typename T>
 	void clear(Array<T>& a);
 
@@ -184,7 +185,7 @@ namespace Dunjun
 		return a.m_data[0];
 	}
 	template <typename T>
-	inline const T* front(const Array<T>& a)
+	inline const T& front(const Array<T>& a)
 	{
 		assert(a.m_length > 0 && "Array<T> Array[0] does not exist");
 		return a.m_data[0];
@@ -196,14 +197,14 @@ namespace Dunjun
 		return a.m_data[a.m_length - 1];
 	}
 	template <typename T>
-	inline const T* back(const Array<T>& a)
+	inline const T& back(const Array<T>& a)
 	{
 		assert(a.m_length > 0 && "Array<T> Array has no members");
 		return a.m_data[a.m_length - 1];
 	}
 	/////////////////////////////////
 	template <typename T>
-	inline void trim(Array<T>& a)
+	inline void shrinkToFit(Array<T>& a)
 	{
 		setCapacity(a, a.m_length);
 	}

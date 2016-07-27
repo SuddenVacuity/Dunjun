@@ -1,7 +1,7 @@
 #ifndef DUNJUN_SYSTEM_TYPES_HPP
 #define DUNJUN_SYSTEM_TYPES_HPP
 
-#include <Dunjun/System/Config.hpp>
+#include <Dunjun/System/stdIncludes.hpp>
 
 #include <cstddef>	// added for s16/f16 type structs at end of file
 #include <cstring>	// added for s16/f16 type structs at end of file
@@ -44,7 +44,19 @@ namespace Dunjun
 	using b8 = bool;
 	using b32 = s32; // define this as 32 bit for it to be dword alignde
 
-	using usize = std::size_t;
+#if defined(DUNJUN_32_BIT)
+	using uSize_t = u32;
+	using sSize_t = s32;
+#elif  defined(DUNJUN_64_BIT)
+	using uSize_t = u64;
+	using sSize_t = s64;
+#else
+#error Types.hpp : Unknown bit size
+#endif
+
+	static_assert(sizeof(uSize_t) == sizeof(size_t), "uSize_t is not thre same size as size_t");
+	static_assert(sizeof(sSize_t) == sizeof(uSize_t), "sSize_t is not the same size as uSize_t");
+
 	using uintptr = uintptr_t;
 	using intptr = intptr_t;
 
@@ -157,9 +169,59 @@ namespace Dunjun
 		return{ static_cast<f32>(a) / static_cast<f32>(b) };
 		}
 
+	/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	)				.
+	)					DEFER FUNCTIONS TO END OF SCOPE
+	)
+	)				.
+	)					.
+	)
+	)				.
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+
+	namespace Impl
+	{
+		template <typename Fn>
+		struct Defer
+		{
+			Defer(Fn&& fn)
+				: fn(std::forward<Fn>(fn))
+			{
+			}
+
+			~Defer()
+			{
+				fn();
+			}
+
+			Fn fn;
+		};
+
+		template <typename Fn>
+		Defer<Fn> deferFn(Fn&& fn)
+		{
+			return Defer<Fn>(std::forward<Fn>(fn));
+		}
+
+	} // end Impl
+
+#define Defer_1(x, y) x##y
+#define Defer_2(x, y) Defer_1(x, y)
+#define Defer_3(x) Defer_2(x, __COUNTER__)
+#define defer(code) auto Defer_3(_defer_) = Impl::deferFn([&](){code;});
+
+	  // defer runs a function at the end of scope
+	  /*/	Example for defer
+	  *	FILE* file{open("test.txt", "r")}
+	  *	if (file == nullptr)
+	  *		return;
+	  *	defer(fclose(file)); <- this will run at end of scope
+	  /*/
 
 
-}
+
+
+} // end Dunjun
 
 
 #endif

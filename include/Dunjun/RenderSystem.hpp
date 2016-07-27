@@ -1,11 +1,7 @@
 #ifndef DUNJUN_RENDERSYSTEM_HPP
 #define DUNJUN_RENDERSYSTEM_HPP
 
-#include <Dunjun/RenderComponent.hpp>
-#include <Dunjun/System/Containers.hpp>
-//#include <Dunjun/Entity.hpp>
 #include <Dunjun/SceneGraph.hpp>
-#include <Dunjun/Scene/Lighting.hpp>
 
 namespace Dunjun
 {
@@ -45,12 +41,12 @@ namespace Dunjun
 		const Camera* camera;
 
 		RenderSystem(Allocator& a, SceneGraph& sg);
-		~RenderSystem() = default;
+		~RenderSystem();
 
 		void allocate(u32 capacity);
 
-		ComponentId create(EntityId id, const RenderComponent& component);
-		void destroy(ComponentId id);
+		ComponentId addComponent(EntityId id, const RenderComponent& component);
+		void removeComponent(ComponentId id);
 
 		ComponentId getComponentId(EntityId id);
 		bool isValid(ComponentId id) const;
@@ -64,18 +60,22 @@ namespace Dunjun
 		void deferredFinalPass();
 
 	private:
-		const Texture* currentTexture;
+		const Texture* currentTexture[32];
+
+		RenderSystem(const RenderSystem&) = delete;
+		RenderSystem& operator=(const RenderSystem&) = delete;
 
 		inline void renderAmbientLight();
 		inline void renderDirectionalLights();
 		inline void renderPointLights();
 		inline void renderSpotLights();
 
-		inline bool isCurrentShaders(const ShaderProgram* shaders);
-		inline bool isCurrentTexture(const Texture* texture);
+		//inline bool isCurrentShaders(const ShaderProgram* shaders);
+		//inline bool isCurrentTexture(const Texture* texture);
 
 		//void setShaders(const ShaderProgram* shaders);
 		bool setTexture(const Texture* texture, u32 position);
+
 	};
 } // end Dunjun
 

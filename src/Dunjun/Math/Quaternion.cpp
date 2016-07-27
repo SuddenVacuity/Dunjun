@@ -182,11 +182,11 @@ namespace Dunjun
 
 	Vector3 axis(const Quaternion& q)
 	{
-		f32 s2 = 1.0f - q.w * q.w; // 1 - sqrt(cos(theta)) = sqrt(sin(theta))
-		if (s2 <-0)
-			return {0, 0, 1};
+		const f32 s2 = 1.0f - q.w * q.w; // 1 - sqrt(cos(theta)) = sqrt(sin(theta))
+		if (s2 <= 0.0f)
+			return Vector3{0, 0, 1};
 
-		f32 invs2 = 1.0f / Math::sqrt(s2);
+		const f32 invs2 = 1.0f / Math::sqrt(s2);
 
 		return Vector3{q.x, q.y, q.z} * invs2;
 	}
@@ -273,10 +273,10 @@ namespace Dunjun
 	// NOTE: assumes matrix is only a rotational matrix and has no skew applied (scale)
 	Quaternion matrix4ToQuaternion(const Matrix4& m)
 	{
-		f32 fourXSquaredMinus1 = m.data[0].data[0] - m.data[1].data[1] - m.data[2].data[2];
-		f32 fourYSquaredMinus1 = m.data[1].data[1] - m.data[0].data[0] - m.data[2].data[2];
-		f32 fourZSquaredMinus1 = m.data[2].data[2] - m.data[0].data[0] - m.data[1].data[1];
-		f32 fourWSquaredMinus1 = m.data[0].data[0] + m.data[1].data[1] + m.data[2].data[2];
+		const f32 fourXSquaredMinus1 = m.data[0].data[0] - m.data[1].data[1] - m.data[2].data[2];
+		const f32 fourYSquaredMinus1 = m.data[1].data[1] - m.data[0].data[0] - m.data[2].data[2];
+		const f32 fourZSquaredMinus1 = m.data[2].data[2] - m.data[0].data[0] - m.data[1].data[1];
+		const f32 fourWSquaredMinus1 = m.data[0].data[0] + m.data[1].data[1] + m.data[2].data[2];
 
 		int biggestIndex = 0;
 		f32 fourBiggestSquaredMinus1 = fourWSquaredMinus1;
@@ -299,8 +299,8 @@ namespace Dunjun
 			biggestIndex = 3;
 		}
 
-		f32 biggestVal = Math::sqrt(fourBiggestSquaredMinus1 + 1.0f) * 0.5f;
-		f32 mult = 0.25f / biggestVal;
+		const f32 biggestVal = Math::sqrt(fourBiggestSquaredMinus1 + 1.0f) * 0.5f;
+		const f32 mult = 0.25f / biggestVal;
 
 		Quaternion q;
 
@@ -362,5 +362,75 @@ namespace Dunjun
 
 		return y * p * r;
 	}
+
+	Quaternion offsetOrientation(const Quaternion orientation, const Quaternion& offset, const Radian& yaw, const Radian& pitch)
+	{
+		const Quaternion yawRot = angleAxis(yaw, { 0, 1, 0 }); // absolute up
+		const Quaternion pitchRot = angleAxis(pitch, rightVector(orientation)); // relative right
+
+		return yawRot * pitchRot * offset;
+	}
+
+
+	// must be normalized
+	// returns vector multiplied by orientation
+	// while moving in 3d space this will return a vector3
+	// that will cause you to move forward relative to current orientation
+	Vector3 forwardVector(const Quaternion& orientation)
+	{
+		return orientation * Vector3{ 0, 0, -1 };
+	}
+	// must be normalized
+	// returns vector multiplied by orientation
+	// while moving in 3d space this will return a vector3
+	// that will cause you to move backward relative to current orientation
+	Vector3 backwardVector(const Quaternion& orientation)
+	{
+		return orientation * Vector3{ 0, 0, 1 };
+	}
+
+	// must be normalized
+	// returns vector multiplied by orientation
+	// while moving in 3d space this will return a vector3
+	// that will cause you to move right relative to current orientation
+	Vector3 rightVector(const Quaternion& orientation)
+	{
+		return orientation * Vector3{ 1, 0, 0 };
+	}
+	// must be normalized
+	// returns vector multiplied by orientation
+	// while moving in 3d space this will return a vector3
+	// that will cause you to move left relative to current orientation
+	Vector3 leftVector(const Quaternion& orientation)
+	{
+		return orientation * Vector3{ -1, 0, 0 };
+	}
+
+	// must be normalized
+	// returns vector multiplied by orientation
+	// while moving in 3d space this will return a vector3
+	// that will cause you to move up relative to current orientation
+	Vector3 upVector(const Quaternion& orientation)
+	{
+		return orientation * Vector3{ 0, 1, 0 };
+	}
+	// must be normalized
+	// returns vector multiplied by orientation
+	// while moving in 3d space this will return a vector3
+	// that will cause you to move down relative to current orientation
+	Vector3 downVector(const Quaternion& orientation)
+	{
+		return orientation * Vector3{ 0, -1, 0 };
+	}
+
+
+
+
+
+
+
+
+
+
 
 } // end Dunjun

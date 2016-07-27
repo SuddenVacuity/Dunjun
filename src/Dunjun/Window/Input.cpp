@@ -19,8 +19,8 @@ namespace Dunjun
 		GLOBAL f64 g_scrollX = 0;
 		GLOBAL f64 g_scrollY = 0;
 
-		GLOBAL std::array<SDL_GameController*, Gamepad_MaxCount> g_gamepadHandles;
-		GLOBAL std::array<SDL_Haptic*, Gamepad_MaxCount> g_rumbleHandles;
+		GLOBAL SDL_GameController*g_gamepadHandles[Gamepad_MaxCount] = {};
+		GLOBAL SDL_Haptic* g_rumbleHandles[Gamepad_MaxCount] = {};
 	
 		void setUp() // set up gamepads
 		{
@@ -35,11 +35,12 @@ namespace Dunjun
 					break;
 
 				std::cout << "Adding gamepad: " << gamepadIndex << ::std::endl;
-
+				
+				// add gamepad to list
 				g_gamepadHandles[gamepadIndex] = SDL_GameControllerOpen(joystickIndex);
 
+				// handle rumble
 				SDL_Joystick* joystickHandle = SDL_GameControllerGetJoystick(g_gamepadHandles[gamepadIndex]);
-
 				g_rumbleHandles[gamepadIndex] = SDL_HapticOpenFromJoystick(joystickHandle);
 
 				if (SDL_HapticRumbleSupported(g_rumbleHandles[gamepadIndex]) != true)
@@ -63,8 +64,8 @@ namespace Dunjun
 				gamepadIndex++;
 			}
 
-			setStickyKeys(true); // sticky assumes the button is held until it is checked again
-			setStickyMouseButtons(true);
+			//setStickyKeys(true); // sticky assumes the button is held until it is checked again
+			//setStickyMouseButtons(true);
 		}
 
 		void cleanup()
@@ -80,6 +81,12 @@ namespace Dunjun
 				if(gamepad)
 					SDL_GameControllerClose(gamepad);
 			}
+
+			for(SDL_Haptic* rumble : g_rumbleHandles)
+			{
+				if(rumble)
+					SDL_HapticClose(rumble);
+			}
 		}
 
 		/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -92,25 +99,25 @@ namespace Dunjun
 		)				.
 		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-		void setCursorMode(CursorMode mode)
-		{
-			//if (mode == CursorMode::Normal)
-			//	glfwSetInputMode(Window::getHandle(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-			//if (mode == CursorMode::Hidden)
-			//	glfwSetInputMode(Window::getHandle(), GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
-			//if (mode == CursorMode::Disabled)
-			//	glfwSetInputMode(Window::getHandle(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-		}
+		//void setCursorMode(CursorMode mode)
+		//{
+		//	//if (mode == CursorMode::Normal)
+		//	//	glfwSetInputMode(Window::getHandle(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+		//	//if (mode == CursorMode::Hidden)
+		//	//	glfwSetInputMode(Window::getHandle(), GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+		//	//if (mode == CursorMode::Disabled)
+		//	//	glfwSetInputMode(Window::getHandle(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+		//}
 
-		void setStickyKeys(bool stickyKeys)
-		{
-			//glfwSetInputMode(Window::getHandle(), GLFW_STICKY_KEYS, stickyKeys);
-		}
+		//void setStickyKeys(bool stickyKeys)
+		//{
+		//	//glfwSetInputMode(Window::getHandle(), GLFW_STICKY_KEYS, stickyKeys);
+		//}
 
-		void setStickyMouseButtons(bool stickyButtons)
-		{
-			//glfwSetInputMode(Window::getHandle(), GLFW_STICKY_MOUSE_BUTTONS, stickyButtons);
-		}
+		//void setStickyMouseButtons(bool stickyButtons)
+		//{
+		//	//glfwSetInputMode(Window::getHandle(), GLFW_STICKY_MOUSE_BUTTONS, stickyButtons);
+		//}
 
 		/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 		)				.
@@ -243,7 +250,7 @@ namespace Dunjun
 
 			const u8* state = SDL_GetKeyboardState(nullptr);
  
-			return state[code];
+			return state[code] != 0;
 		}
 
 		/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -285,12 +292,12 @@ namespace Dunjun
 
 		void setCursorPosition(const Vector2& pos, const Window& relativeTo)
 		{
-			SDL_WarpMouseInWindow(relativeTo.handle, pos.x, pos.y);
+			SDL_WarpMouseInWindow(relativeTo.getSDLHandle(), pos.x, pos.y);
 		}
 
 		bool isMouseButtonPressed(MouseButton button)
 		{
-			return SDL_GetMouseState(nullptr, nullptr) & SDL_BUTTON((int)button);
+			return (SDL_GetMouseState(nullptr, nullptr) & SDL_BUTTON((int)button)) != 0;
 		}
 
 		// get scroll wheel movement
@@ -341,10 +348,10 @@ namespace Dunjun
 				return static_cast<f32>(value) / 32768.0f;
 			}
 
-			return 0;
+			return 0.0f;
 		}
 
-		std::string getGamepadName(u32 gamepadId)
+		String getGamepadName(u32 gamepadId)
 		{
 			return SDL_GameControllerName(g_gamepadHandles[gamepadId]);
 		}
@@ -357,16 +364,29 @@ namespace Dunjun
 				SDL_HapticRumblePlay(g_rumbleHandles[gamepadId], strength, duration.asMilliseconds());
 			}
 		}
+		/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+		)				.
+		)					CLIPBOARD
+		)
+		)				.
+		)					.
+		)
+		)				.
+		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-		std::string getClipboardString()
+		bool hasClipboardString()
 		{
-			//return glfwGetClipboardString(Window::getHandle());
-			return "";
+			return SDL_HasClipboardText() == SDL_TRUE;
 		}
 
-		void setClipboardString(const std::string& str)
+		String getClipboardString()
 		{
-			//glfwSetClipboardString(Window::getHandle(), str.c_str());
+			return {SDL_GetClipboardText()};
+		}
+
+		void setClipboardString(const String& str)
+		{
+			SDL_SetClipboardText(cString(str));
 		}
 
 	} // end Input

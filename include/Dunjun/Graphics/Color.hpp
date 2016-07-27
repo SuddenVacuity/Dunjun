@@ -1,7 +1,7 @@
 #ifndef DUNJUN_GRAPHICS_COLOR_HPP
 #define DUNJUN_GRAPHICS_COLOR_HPP
 
-#include <Dunjun/Graphics/RenderTexture.hpp>
+#include <Dunjun/Graphics/Texture.hpp>
 
 namespace Dunjun
 {

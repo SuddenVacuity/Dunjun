@@ -19,14 +19,14 @@ namespace Math
 	// angle is in radians
 	Matrix4 perspective(const Radian& fovy, f32 aspect, f32 zNear, f32 zFar);
 	Matrix4 infinitePerspective(const Radian& fovy, f32 aspect, f32 zNear);
+	
+	Matrix4 lookAtMatrix4(const Vector3& eye,
+						  const Vector3& center,
+						  const Vector3& up);
 
-	template <class T>
-	T lookAt(const Vector3& eye, const Vector3& center, const Vector3& up);
-	template <>
-	Matrix4 lookAt<Matrix4>(const Vector3& eye, const Vector3& center, const Vector3& up);
-	template <>
-	Quaternion lookAt<Quaternion>(const Vector3& eye, const Vector3& center, const Vector3& up);
-
+	Quaternion lookAtQuaternion(const Vector3& eye,
+							 const Vector3& center,
+							 const Vector3& up);
 } // end Math
 } // end Dunjun
 #endif

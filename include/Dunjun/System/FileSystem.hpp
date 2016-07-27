@@ -1,19 +1,15 @@
 #ifndef DUNJUN_SYSTEM_FILESYSTEM_HPP
 #define DUNJUN_SYSTEM_FILESYSTEM_HPP
 
-#include <Dunjun/System/Containers/Array.hpp>
-#include <Dunjun/System/Containers/Queue.hpp>
-
-//#include <Dunjun/System/MurmurHash.hpp>
-#include <Dunjun/System/Containers/HashMap.hpp>
+#include <Dunjun/Common.hpp>
 
 namespace Dunjun
 {
 	namespace FileSystem
 	{
-		std::string getBasePath();
-		std::string getPreferencesPath(const std::string organization, const std::string application);
-		std::string getFileDirectory(const std::string& filepath);
+		String getBasePath();
+		String getPreferencesPath(const String& organization, const String& application);
+		String getFileDirectory(const String& filepath);
 	} // end FileSystem
 } // end Dunjun
 

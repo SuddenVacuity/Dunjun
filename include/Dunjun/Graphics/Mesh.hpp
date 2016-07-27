@@ -5,8 +5,6 @@
 
 namespace Dunjun
 {
-	class SceneRenderer;
-
 	enum class AttribLocation : u32
 	{
 		Position = 0,

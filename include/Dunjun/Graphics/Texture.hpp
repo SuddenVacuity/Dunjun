@@ -31,19 +31,23 @@ namespace Dunjun
 		s32 width;
 		s32 height;
 
-		GLOBAL void bind(const Texture* tex, u32 position);
+		//GLOBAL void bind(const Texture* tex, u32 position);
 	};
 
-	void destroyTexture(Texture& texture);
 
-	Texture loadTextureFromFile(const char* filename,
+	Texture loadTextureFromFile(const String& filename,
 								TextureFilter minMagFilter = TextureFilter::Linear,
-								TextureWrapMode wrapMode = TextureWrapMode::ClampToEdge);
+								TextureWrapMode wrapMode = TextureWrapMode::Repeat);
 
 	Texture loadTextureFromImage(const Image& image,
 								 TextureFilter minMagFilter = TextureFilter::Linear,
-								 TextureWrapMode wrapMode = TextureWrapMode::ClampToEdge);
-}
+								 TextureWrapMode wrapMode = TextureWrapMode::Repeat);
+
+
+	void destroyTexture(Texture& texture);
+	void bindTexture(const Texture* tex, uSize_t position);
+
+} // end Dunjun
 
 
 #endif

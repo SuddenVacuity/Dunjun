@@ -97,7 +97,7 @@ namespace Math
 		assert(Math::abs(aspect - std::numeric_limits<f32>::epsilon()) > 0.0f
 			   && "Math::perspective 'fovy' is 0/inf"); // make sure aspect ratio is greater than 0
 
-		Matrix4 result = Matrix4::Identity0;
+		Matrix4 result = {};
 
 		const f32 range = Math::tan(fovy / 2.0f);
 
@@ -132,7 +132,7 @@ namespace Math
 		const f32 bottom = -range;
 		const f32 top = range;
 
-		Matrix4 result = Matrix4::Identity0;
+		Matrix4 result = {};
 
 		result.data[0].data[0] = (2.0f * zNear) / (right - left);
 		result.data[1].data[1] = (2.0f * zNear) / (top - bottom);
@@ -143,8 +143,7 @@ namespace Math
 		return result;
 	}
 
-	template<>
-	Matrix4 Math::lookAt<Matrix4>(const Vector3& eye, const Vector3& center, const Vector3& up)
+	Matrix4 lookAtMatrix4(const Vector3& eye, const Vector3& center, const Vector3& up)
 	{
 		const Vector3 f(normalize(center - eye));
 		const Vector3 s(normalize(cross(f, up)));
@@ -171,16 +170,15 @@ namespace Math
 		return result;
 	}
 
-	template <>
-	Quaternion Math::lookAt<Quaternion>(const Vector3& eye, const Vector3& center, const Vector3& up)
+	Quaternion lookAtQuaternion(const Vector3& eye, const Vector3& center, const Vector3& up)
 	{
 		//const Vector3& pos = transform.position;
 
 		if (length(center - eye) < 0.001f)
-			return Quaternion(); // ignore as you can't look at where you are
+			return Quaternion::Identity; // ignore as you can't look at where you are
 
 		// TODO: fix quaternion lookat so that it doesn't use matrix4
-		return matrix4ToQuaternion(lookAt<Matrix4>(eye, center, up));
+		return matrix4ToQuaternion(lookAtMatrix4(eye, center, up));
 
 		//const Vector3 f(normalize(center - eye));
 		//const Vector3 s(normalize(cross(f, up)));

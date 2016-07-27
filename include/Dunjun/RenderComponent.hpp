@@ -1,8 +1,7 @@
 #ifndef DUNJUN_RENDERCOMPONENT_HPP
 #define DUNJUN_RENDERCOMPONENT_HPP
 
-#include <Dunjun/Graphics/Mesh.hpp>
-#include <Dunjun/Graphics/Material.hpp>
+#include <Dunjun/ResourceHolder_objects.hpp>
 
 namespace Dunjun
 {

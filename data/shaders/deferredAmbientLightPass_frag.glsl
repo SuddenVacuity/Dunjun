@@ -1,6 +1,6 @@
 #version 120
 
-#include <_head_light.glsl>
+#include _head_light.glsl
 
 uniform BaseLight u_light;
 

@@ -9,7 +9,7 @@ namespace Dunjun
 	class TempAllocator : public Allocator
 	{
 	public:
-		TempAllocator(Allocator& backing = defaultAllocator());
+		TempAllocator(Allocator& backing = defaultScratchAllocator());
 		~TempAllocator();
 
 		void* allocate(size_t size, size_t align = DefaultAlign);
@@ -28,8 +28,13 @@ namespace Dunjun
 		size_t m_chunkSize;
 
 		u8 m_buffer[Size];
+
 	}; // end TempAllocator
 
+	// NOTE: Please use on the premade sizes for the TempAllocator<> to reduce
+	// unneeded template instantiation. If you need more than 4K, do _not_ use a
+	// TempAllocator! Try using the `defaultScratchAllocator()` or just the
+	// `defaultAllocator()`.
 	using TempAllocator64   = TempAllocator<64>;
 	using TempAllocator128  = TempAllocator<128>;
 	using TempAllocator256  = TempAllocator<256>;

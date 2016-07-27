@@ -115,25 +115,21 @@ namespace Dunjun
 		//
 		//}; // end anon struct
 
-		SDL_Window* handle;
-		SDL_GLContext glContext;
-		Clock clock;
-		Time frameTimeLimit;
 
-		Vector2 currentPosition = { 0, 0 };
-		Vector2 currentSize = { 0, 0 };
+		s32 currentPosition[2] = { 0, 0 };
+		s32 currentSize[2] = { 0, 0 };
 		f32 currentAspectRatio = 0.0f;
 
 		Window();
 
-		explicit Window(const std::string& title, 
+		explicit Window(const String& title, 
 						VideoMode mode,
 						u32 style = Style::Default,
 						const GLContextSettings& context = GLContextSettings());
 
-		virtual ~Window();
+		~Window();
 
-		void create(const std::string& title,
+		void create(const String& title,
 					VideoMode mode,
 					u32 style = Style::Default,
 					const GLContextSettings& context = GLContextSettings());
@@ -147,18 +143,30 @@ namespace Dunjun
 		Vector2 getSize() const;
 		Window& setSize(const Vector2& size);
 
-		const char* getTitle() const;
-		Window& setTitle(const char* title);
+		String getTitle() const;
+		Window& setTitle(const String& title);
+
 		Window& setVisible(bool visible);
 		Window& setVerticalSyncEnabled(bool enabled);
 		Window& setFramerateLimit(u32 limit);
 
-		void display();
+		Window& setFullscreen(bool fullscreen);
+		bool isFullscreen() const;
 
 		bool pollEvent(Event& event);
 		bool waitEvent(Event& event);
 
+		void display();
+
 		void makeGLContextCurrent() const;
+
+		SDL_Window* getSDLHandle() const { return m_handle; }
+
+	private:
+		SDL_Window* m_handle = nullptr;
+		SDL_GLContext m_glContext = {};
+		Clock m_clock = {};
+		Time m_frameTimeLimit = Time::Zero;
 	};
 
 } // end Dunjun
