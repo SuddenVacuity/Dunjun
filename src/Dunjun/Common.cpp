@@ -30,11 +30,7 @@ namespace Dunjun
 
 		if(type == MessageBoxType::Error)
 		{
-			#ifdef DUNJUN_DEBUG_MODE
-			char* createAccessViolation = 0;
-			*createAccessViolation = 0;
-			#endif
-
+			STOP
 			std::exit(EXIT_FAILURE);
 		}
 

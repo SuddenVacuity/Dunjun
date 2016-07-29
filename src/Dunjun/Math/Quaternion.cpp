@@ -363,12 +363,12 @@ namespace Dunjun
 		return y * p * r;
 	}
 
-	Quaternion offsetOrientation(const Quaternion orientation, const Quaternion& offset, const Radian& yaw, const Radian& pitch)
+	Quaternion offsetOrientation(const Quaternion& orientation, const Radian& yaw, const Radian& pitch)
 	{
 		const Quaternion yawRot = angleAxis(yaw, { 0, 1, 0 }); // absolute up
 		const Quaternion pitchRot = angleAxis(pitch, rightVector(orientation)); // relative right
 
-		return yawRot * pitchRot * offset;
+		return yawRot * pitchRot * orientation;
 	}
 
 

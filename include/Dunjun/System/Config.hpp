@@ -5,8 +5,6 @@
 //		SYSTEM OS
 ///////////////////////
 
-#define DUNJUN_DEBUG_MODE
-
 #if defined(_WIN32) || defined(_WIN64)
 // windows
 	#define DUNJUN_SYSTEM_WINDOWS
@@ -62,6 +60,7 @@
 
 #if defined(_MSC_VER)
 	// Microsoft Visual Studio
+	#pragma comment(lib, "winmm.lib") // used in Time.cpp
 	#define DUNJUN_COMPILER_MSVC
 #elif defined(__clang__)
 	// Clang
@@ -71,8 +70,17 @@
 	#defined DUNJUN_COMPILER_GNU_GCC
 #endif
 
+///////////////////////
+//       DEBUG
+///////////////////////
 
+#define DUNJUN_DEBUG_MODE
 
+#ifdef DUNJUN_DEBUG_MODE
+	#define STOP {char* createAccessViolation = 0; *createAccessViolation = 0;}
+#else
+	#define STOP // create access violation in debug mode only
+#endif
 
 
 #endif

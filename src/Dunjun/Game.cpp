@@ -35,6 +35,206 @@ namespace Dunjun
 	{
 		/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 		)				.
+		)					IMPORT CONFIG FILE
+		)
+		)				.
+		)					.
+		)
+		)				.
+		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+
+		enum ConfigType
+		{
+			ConfigType_Unknown,
+
+			ConfigType_Uint,
+			ConfigType_Sint,
+			ConfigType_Float,
+			ConfigType_Bool,
+			ConfigType_String,
+		};
+
+		struct ConfigData
+		{
+			Array<u32> uints;
+			Array<s32> sints;
+			Array<f32> floats;
+			Array<b8> bools;
+
+			uSize_t stringCount;
+			String strings[1024];
+
+			// this tracks the data type and position in the array
+			struct Variable
+			{
+				u32 id;
+				ConfigType type;
+			};
+
+			HashMap<Variable> map;
+
+			ConfigData();
+			~ConfigData() = default;
+		};
+
+		ConfigData::ConfigData()
+			: uints(defaultAllocator())
+			, sints(defaultAllocator())
+			, floats(defaultAllocator())
+			, bools(defaultAllocator())
+			, stringCount(0)
+			, strings()
+			, map(defaultAllocator())
+		{
+		}
+
+		bool addToConfigFile_uint(ConfigData& data, const String& name, const String& value)
+		{
+			ConfigData::Variable var = {};
+			var.type = ConfigType_Uint;
+			var.id = 0;
+
+			if(len(data.uints) > 0)
+				var.id = len(data.uints) - 1;
+
+			set(data.map, murmurStringHash64(name), var);
+
+			u32 v = 344;
+
+			append(data.uints, v);
+
+			return true;
+		}
+
+		bool addToConfigFile_sint(ConfigData& data, const String& name, const String& value)
+		{
+
+			return true;
+		}
+
+		bool addToConfigFile_float(ConfigData& data, const String& name, const String& value)
+		{
+
+			return true;
+		}
+
+		bool addToConfigFile_bool(ConfigData& data, const String& name, const String& value)
+		{
+
+			return true;
+		}
+
+		bool addToConfigFile_string(ConfigData& data, const String& name, const String& value)
+		{
+
+			return true;
+		}
+
+
+		INTERNAL void configTest()
+		{
+			String filepath = "data/defaultSettings.opt";
+
+			std::fstream file;
+			file.open(cString(filepath), std::ios::in | std::ios::binary);
+			defer(file.close());
+
+			if(!file.is_open())
+				showSimpleMessageBox("config file failed to open: " + filepath);
+
+			uSize_t lineNum = 0;
+			String line;
+			while(file.good())
+			{
+				defer(lineNum++);
+
+				getline(file, line);
+				line = Strings::trimSpace(line);
+
+				uSize_t lineLen = len(line);
+
+				// check for a comment at the beginning of the line
+				if(line[0] == '/' && line[1] == '/')
+					lineLen = 0;
+
+				// if line is empty continue
+				if(lineLen == 0)
+					continue;
+
+				sSize_t definitionPos = -1; // value
+				sSize_t declarationPos = -1; // name
+
+				// read the line
+				for(sSize_t i = 0; i < lineLen; i++)
+				{
+					// check for comments
+					if (line[i] == '/' && i != lineLen)
+					{
+						if(line[i + 1] == '/')
+						{
+							// set lineLen to ignore all comment text
+							lineLen = i;
+							break;
+						}
+					}
+
+
+					// check for tokens
+					if(line[i] == ':' && declarationPos == -1)
+						declarationPos = i;
+					else if(line[i] == '=' && definitionPos == -1)
+						definitionPos = i;
+				}
+
+				// check if tokens were found
+				if(declarationPos == -1 || definitionPos == -1)
+				{
+					showSimpleMessageBox("Parsing Error in config file:\n" + 
+										 filepath + "\n\n" + line, 
+										 "Parsing Error", MessageBoxType::Warning);
+					continue;
+				}
+
+				// seperate each portion into seperate strings
+				String type =  substring(line, 0, declarationPos);
+				String name =  substring(line, declarationPos + 1, definitionPos);
+				String value = substring(line, definitionPos + 1, lineLen);
+
+				// remove whitespace
+				type  = Strings::toLowerCase(Strings::trimSpace(type));
+				name  = Strings::trimSpace(name);
+				value = Strings::trimSpace(value);
+
+				ConfigData configData = {};
+
+				if (type == "u_int")
+					addToConfigFile_uint(configData, name, value);
+				else if (type == "s_int")
+					addToConfigFile_sint(configData, name, value);
+				else if (type == "float")
+					addToConfigFile_float(configData, name, value);
+				else if (type == "bool")
+					addToConfigFile_bool(configData, name, value);
+				else if (type == "string")
+					addToConfigFile_string(configData, name, value);
+				else
+				{
+					showSimpleMessageBox("Unknown data type in config file:\n" + 
+										 filepath + "\n\n" + line, 
+										 "Unknown Type", MessageBoxType::Warning);
+					continue;
+				}
+
+			}
+
+
+
+
+
+		}
+
+		/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+		)				.
 		)					.
 		)
 		)				OpenGL INIT
@@ -457,15 +657,17 @@ namespace Dunjun
 
 			f32 wt = 1.0f * Time::now().asSeconds();
 			f32 a = 2.0f;
-			//pos.orientation = conjugate(Quaternion::Identity);
 
 			Transform pos = sg.getLocalTransform(crateNode);
 			pos.position.y = a * Math::sin(Radian(wt));
-			//pos.orientation = angleAxis(Degree(50 * wt), { 1, 0, 0 });
-			//pos.scale = Vector3{1.2f, 1.2f, 1.2f } + Vector3{0.4f, 0.4f, 0.4f } * Math::sin(Radian(wt));
+			pos.scale = Vector3{ 1.2f, 1.2f, 1.2f } + Vector3{ 0.4f, 0.4f, 0.4f } * Math::sin(Radian(wt));
+			pos.orientation = offsetOrientation(pos.orientation,
+												Degree(360.0f * dt.asSeconds()),
+												Degree(10.0f * dt.asSeconds()));
+
 			sg.setLocalTransform(crateNode, pos);
 
-			Transform pos2 = sg.getGlobalTransform(playerNode);
+			Transform pos2 = sg.getLocalTransform(playerNode);
 			pos2.position.x = 1.0f * a * Math::cos(Radian(wt));
 			sg.setLocalTransform(playerNode, pos2);
 
@@ -515,7 +717,6 @@ namespace Dunjun
 
 			EntityId crate = g_world->crate = es.addEntity(ComponentName | ComponentRender);
 			EntityId player = g_world->player = es.addEntity(ComponentName | ComponentRender);
-
 			EntityId floor = es.addEntity(ComponentName | ComponentRender);
 			EntityId wall1 = es.addEntity(ComponentName | ComponentRender);
 			EntityId wall2 = es.addEntity(ComponentName | ComponentRender);
@@ -526,21 +727,18 @@ namespace Dunjun
 
 			Transform crateTransform = Transform::Identity;
 
-			crateTransform.position = {0, 0, 0,};
+			crateTransform.position = {0, 0, 0};
 			crateTransform.orientation = angleAxis(Degree(-90), { 1, 0, 0 });
 			crateTransform.scale = {1, 1, 1};
 
-
-			auto crateNode = g_world->crate;
-			auto playerNode = g_world->player;
-			
 			sg.addNode(crate, crateTransform);
 			sg.addNode(player, Transform::Identity);
 
-			sg.linkNodes(crateNode, playerNode);
+			sg.linkNodes(crate, player);
 
 			{
 				Transform wallTransform = Transform::Identity;
+
 				wallTransform.position = {0, 0, -4};
 				wallTransform.scale = {8, 8, 8};
 				sg.addNode(wall1, wallTransform);
@@ -594,8 +792,9 @@ namespace Dunjun
 
 		void init()
 		{
-
 			Memory::init();
+			showSimpleMessageBox("derp test");
+			configTest();
 
 			std::cout << "\n\n\n";
 

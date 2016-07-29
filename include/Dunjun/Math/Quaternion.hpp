@@ -107,7 +107,8 @@ Quaternion matrix4ToQuaternion(const Matrix4& m);
 
 
 // positive values go counterclock-wise
-Quaternion offsetOrientation(const Quaternion& orientation, const Radian& yaw, const Radian& pitch);
+Quaternion offsetOrientation(const Quaternion& orientation, 
+							 const Radian& yaw, const Radian& pitch);
 
 // returns vector multiplied by orientation
 Vector3 forwardVector(const Quaternion& orientation);

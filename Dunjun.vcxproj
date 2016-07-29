@@ -263,6 +263,7 @@
     <ClInclude Include="include\Dunjun\SceneGraph.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="data\defaultSettings.opt" />
     <None Include="data\shaders\deferredFinalPass_frag.glsl" />
     <None Include="data\shaders\deferredSpotLightPass_frag.glsl" />
     <None Include="data\shaders\light_head.glsl" />

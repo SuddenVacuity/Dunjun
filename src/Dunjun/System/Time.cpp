@@ -64,15 +64,29 @@ namespace Dunjun
 	{
 		auto now = std::chrono::high_resolution_clock::now().time_since_epoch();
 
-		return microseconds(std::chrono::duration_cast
-			<std::chrono::microseconds>(now).count());
+		return microseconds(std::chrono::duration_cast<std::chrono::microseconds>(now).count());
 	}
 
 #endif
 
 	void Time::sleep(Time time)
 	{
+#if defined(DUNJUN_COMPILER_MSVC)
+		// get supported time resolutions
+		TIMECAPS tc;
+		timeGetDevCaps(&tc, sizeof(TIMECAPS));
+
+		// set the time resolution to the minimum for the sleep call
+		timeBeginPeriod(tc.wPeriodMin);
+
+		// wait
+		::Sleep(time.asMilliseconds());
+
+		// reset the timer resolution back to the system default
+		timeBeginPeriod(tc.wPeriodMin);
+#else
 		std::this_thread::sleep_for(std::chrono::microseconds(time.asMicroseconds()));
+#endif
 	}
 
 	//

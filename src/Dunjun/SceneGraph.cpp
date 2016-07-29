@@ -33,7 +33,7 @@ namespace Dunjun
 		newData.capacity = capacity;
 		newData.buffer = allocator.allocate(bytes);
 
-		// assign pointers to buffer data accunting for extra capacity
+		// assign pointers to buffer data accounting for extra capacity
 		newData.entityId	= (EntityId*)(newData.buffer);
 		newData.local		= (Transform*)(newData.entityId	+ capacity);
 		newData.global		= (Transform*)(newData.local	+ capacity);
@@ -189,6 +189,7 @@ namespace Dunjun
 	void SceneGraph::transformChild(NodeId id, const Transform& parentTransform)
 	{
 		data.global[id] = parentTransform * data.local[id];
+
 		NodeId child = data.firstChild[id];
 
 		while(isValid(child))
@@ -217,7 +218,7 @@ namespace Dunjun
 		if (isValid(parent))
 			parentTransform = data.global[parent];
 
-		data.local[id] = parentTransform / data.global[id];
+		data.local[id] = data.global[id] / parentTransform;
 
 		transformChild(id, parentTransform);
 	}
@@ -236,23 +237,13 @@ namespace Dunjun
 
 	void SceneGraph::setLocalTransform(NodeId id, const Transform& t)
 	{
-		// TODO: find out why this is needed
-		// changing data.local anywhere else causes problems
-		Transform transform = t;
-		//transform.orientation = conjugate(Quaternion::Identity);
-
-		data.local[id] = transform;
+		data.local[id] = t;
 		updateLocal(id);
 	}
 
 	void SceneGraph::setGlobalTransform(NodeId id, const Transform& t)
 	{
-		// TODO: find out why this is needed
-		// scale is ending up with negative values
-		Transform transform = t;
-		//transform.orientation = conjugate(Quaternion::Identity);
-
-		data.global[id] = transform;
+		data.global[id] = t;
 		updateGlobal(id);
 	}
 
