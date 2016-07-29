@@ -133,7 +133,7 @@ namespace Dunjun
 
 		INTERNAL void configTest()
 		{
-			String filepath = "data/defaultSettings.opt";
+			String filepath = "data/defaultSettings.op";
 
 			std::fstream file;
 			file.open(cString(filepath), std::ios::in | std::ios::binary);

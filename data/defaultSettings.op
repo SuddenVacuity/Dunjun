@@ -1,0 +1,18 @@
+
+
+
+// u_int
+// s_int
+// float
+// bool
+// string
+
+
+
+u_int  : windowWidth  = 854			 // comment goes here
+u_int  : windowHeight = 480// does this get ignored??????
+bool   : fullscreen   = 0
+
+s_int  : var1 = -13
+float  : var2 = 58.34
+string : var3 = "asdf"

@@ -333,6 +333,6 @@
     <None Include="data\shaders\_head_transform.glsl" />
     <None Include="data\shaders\deferredSpotLightPass_frag.glsl" />
     <None Include="data\shaders\deferredFinalPass_frag.glsl" />
-    <None Include="data\defaultSettings.opt" />
+    <None Include="data\defaultSettings.op" />
   </ItemGroup>
 </Project>
