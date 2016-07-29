@@ -12,7 +12,10 @@
 u_int  : windowWidth  = 854			 // comment goes here
 u_int  : windowHeight = 480// does this get ignored??????
 bool   : fullscreen   = 0
+bool   : valFalse     = fALsE
 
 s_int  : var1 = -13
 float  : var2 = 58.34
-string : var3 = "asdf"
+string : var3 = "kjhkhg"
+string : var3 = "ykyjhfuykjtfhbd" // same name should not be added
+u_int  : var3 = 6666 // same name should not be added

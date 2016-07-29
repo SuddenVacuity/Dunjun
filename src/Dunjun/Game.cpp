@@ -61,13 +61,13 @@ namespace Dunjun
 			Array<f32> floats;
 			Array<b8> bools;
 
-			uSize_t stringCount;
+			uSize_t stringsLength;
 			String strings[1024];
 
 			// this tracks the data type and position in the array
 			struct Variable
 			{
-				u32 id;
+				u32 index;
 				ConfigType type;
 			};
 
@@ -82,54 +82,165 @@ namespace Dunjun
 			, sints(defaultAllocator())
 			, floats(defaultAllocator())
 			, bools(defaultAllocator())
-			, stringCount(0)
+			, stringsLength(0)
 			, strings()
 			, map(defaultAllocator())
 		{
 		}
 
+		ConfigData::Variable getConfigDataVariable(const ConfigData& data, const String& name)
+		{
+			return get(data.map, murmurStringHash64(name), {0, ConfigType::ConfigType_Unknown});
+		}
+
 		bool addToConfigFile_uint(ConfigData& data, const String& name, const String& value)
 		{
+			uSize_t i = 0;
+			if(value[0] == '+')
+				i = 1;
+
+			for(/**/; i < len(value); i++)
+			{
+				if(!Strings::isNumeric(value[i]))
+					return false;
+			}
+
+			if(has(data.map, murmurStringHash64(name)))
+			{
+				std::cerr << name << " already exists\n";
+				return false;
+			}
+			
+			u32 uint = atoi(cString(value));
+
 			ConfigData::Variable var = {};
 			var.type = ConfigType_Uint;
-			var.id = 0;
+			var.index = 0;
 
 			if(len(data.uints) > 0)
-				var.id = len(data.uints) - 1;
+				var.index = len(data.uints) - 1;
 
 			set(data.map, murmurStringHash64(name), var);
-
-			u32 v = 344;
-
-			append(data.uints, v);
+			append(data.uints, uint);
 
 			return true;
 		}
 
 		bool addToConfigFile_sint(ConfigData& data, const String& name, const String& value)
 		{
+			uSize_t i = 0;
+			if (value[0] == '+' || value[0] == '-')
+				i = 1;
+
+			for (/**/; i < len(value); i++)
+			{
+				if (!Strings::isNumeric(value[i]))
+					return false;
+			}
+
+			if (has(data.map, murmurStringHash64(name)))
+			{
+				std::cerr << name << " already exists\n";
+				return false;
+			}
+
+
+			s32 sint = atoi(cString(value));
+
+			ConfigData::Variable var = {};
+			var.type = ConfigType_Sint;
+			var.index = 0;
+
+			if (len(data.sints) > 0)
+				var.index = len(data.sints) - 1;
+
+			set(data.map, murmurStringHash64(name), var);
+			append(data.sints, sint);
 
 			return true;
 		}
 
 		bool addToConfigFile_float(ConfigData& data, const String& name, const String& value)
 		{
+			f32 f;
+
+			if(sscanf_s(cString(value), "%f", &f) != 1)
+				return false; // value is not a float
+
+			if (has(data.map, murmurStringHash64(name)))
+			{
+				std::cerr << name << " already exists\n";
+				return false;
+			}
+
+			ConfigData::Variable var = {};
+			var.type = ConfigType_Float;
+			var.index = 0;
+
+			if (len(data.floats) > 0)
+				var.index = len(data.floats) - 1;
+
+			set(data.map, murmurStringHash64(name), var);
+			append(data.floats, f);
 
 			return true;
 		}
 
 		bool addToConfigFile_bool(ConfigData& data, const String& name, const String& value)
 		{
+			b8 b;
+
+			if(value == '1' || Strings::toLowerCase(value) == "true")
+				b = true;
+			else if(value == '0' || Strings::toLowerCase(value) == "false")
+				b = false;
+			else
+				return false; // add value failed
+
+			if (has(data.map, murmurStringHash64(name)))
+			{
+				std::cerr << name << " already exists\n";
+				return false;
+			}
+
+			ConfigData::Variable var = {};
+			var.type = ConfigType_Bool;
+			var.index = 0;
+
+			if (len(data.bools) > 0)
+				var.index = len(data.bools) - 1;
+
+			set(data.map, murmurStringHash64(name), var);
+			append(data.bools, b);
 
 			return true;
 		}
 
 		bool addToConfigFile_string(ConfigData& data, const String& name, const String& value)
 		{
+			// check for quotation marks 
+			// and that data is long enough to contain at least one char
+			if(!(value[0] == '\"' && value[len(value) - 1] ==  '\"') || len(value) <= 2)
+				return false; // add value failed
+
+			if (has(data.map, murmurStringHash64(name)))
+			{
+				std::cerr << name << " already exists\n";
+				return false;
+			}
+
+			ConfigData::Variable var = {};
+			var.type = ConfigType_String;
+			var.index = data.stringsLength;
+
+			set(data.map, murmurStringHash64(name), var);
+
+			// start +1 and end -1 to remove quotation marks
+			data.strings[var.index] = substring(value, 1, len(value) - 1);
+			data.stringsLength++;
 
 			return true;
 		}
-
 
 		INTERNAL void configTest()
 		{
@@ -141,6 +252,8 @@ namespace Dunjun
 
 			if(!file.is_open())
 				showSimpleMessageBox("config file failed to open: " + filepath);
+
+			ConfigData configData = {};
 
 			uSize_t lineNum = 0;
 			String line;
@@ -205,31 +318,70 @@ namespace Dunjun
 				name  = Strings::trimSpace(name);
 				value = Strings::trimSpace(value);
 
-				ConfigData configData = {};
+				bool succeeded;
 
 				if (type == "u_int")
-					addToConfigFile_uint(configData, name, value);
+					succeeded = addToConfigFile_uint(configData, name, value);
 				else if (type == "s_int")
-					addToConfigFile_sint(configData, name, value);
+					succeeded = addToConfigFile_sint(configData, name, value);
 				else if (type == "float")
-					addToConfigFile_float(configData, name, value);
+					succeeded = addToConfigFile_float(configData, name, value);
 				else if (type == "bool")
-					addToConfigFile_bool(configData, name, value);
+					succeeded = addToConfigFile_bool(configData, name, value);
 				else if (type == "string")
-					addToConfigFile_string(configData, name, value);
+					succeeded = addToConfigFile_string(configData, name, value);
 				else
 				{
+					succeeded = false;
 					showSimpleMessageBox("Unknown data type in config file:\n" + 
 										 filepath + "\n\n" + line, 
 										 "Unknown Type", MessageBoxType::Warning);
 					continue;
 				}
 
-			}
+				if(succeeded == false)
+					continue;
+				
+				// get data through its hash
+				ConfigData::Variable v = getConfigDataVariable(configData, name);
+				switch(v.type)
+				{
+				default: std::cout << "Unlisted value - Should never get here\n"; break;
+				case ConfigType::ConfigType_Unknown: std::cout << "Unknown Type - Should never get here\n"; break;
+				case ConfigType::ConfigType_Uint:	 std::cout << type + "  : "  + name + " " << configData.uints[v.index] << std::endl;   break;
+				case ConfigType::ConfigType_Sint:	 std::cout << type + "  : "  + name + " " << configData.sints[v.index] << std::endl;   break;
+				case ConfigType::ConfigType_Float:	 std::cout << type + "  : "  + name + " " << configData.floats[v.index] << std::endl;  break;
+				case ConfigType::ConfigType_Bool:	 std::cout << type + "   : " + name + " " << configData.bools[v.index] << std::endl;   break;
+				case ConfigType::ConfigType_String:	 std::cout << type + " : "   + name + " " << configData.strings[v.index] << std::endl; break;
+				}
+				
+			} // end while(file.good())
 
+			// confirm data was added
+			std::cout << "\n\nOutput all data\n";
+			const char* boolNames[] = { "false", "true" };
 
+			std::cout << "\nuints:\n";
+			for (u32 u : configData.uints)
+				std::cout << u << "\n";
 
+			std::cout << "\nsints:\n";
+			for (s32 s : configData.sints)
+				std::cout << s << "\n";
 
+			std::cout << "\nfloats:\n";
+			for (f32 f : configData.floats)
+				std::cout << f << "\n";
+
+			std::cout << "\nbools:\n";
+			for (b8 b : configData.bools)
+				std::cout << boolNames[b] << "\n";
+
+			std::cout << "\nstrings:\n";
+			for (u32 i = 0; i < configData.stringsLength; i++)
+				std::cout << cString(configData.strings[i]) << "\n";
+
+			STOP
 
 		}
 
@@ -793,7 +945,7 @@ namespace Dunjun
 		void init()
 		{
 			Memory::init();
-			showSimpleMessageBox("derp test");
+
 			configTest();
 
 			std::cout << "\n\n\n";

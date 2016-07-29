@@ -57,6 +57,7 @@ int main(int argc, char** argv)
 	//std::cout << "GBuffer POD - " << std::is_pod<Dunjun::GBuffer>() << std::endl;
 	//std::cout << "GBuffer POD - " << std::is_pod<Dunjun::GBuffer>() << std::endl;
 
+	std::cout << "\n\n";
 
 	Dunjun::Game::init();
 	Dunjun::Game::run();
