@@ -1,21 +1,62 @@
-
-
-
-// u_int
-// s_int
-// float
-// bool
-// string
+///////////////////////////////////////////////////////////////////////////////
+//
+// add // for one line comments that ignore all text until the end of the line
+// TODO: use [] for multiline comments
+//
+// each value must be one a single line
+// type, name and value must be seperated by tokens
+// whitespace between items does not matter
+// ex) type : name = value
+//
+// type: u_int   = unsigned integer
+//       s_int   = signed integer
+//       float   = floating point number
+//       bool    = boolean
+//       string  = const char*
+//
+// name: can be a-z, A-Z and 0-9
+//       cannot begin with a number
+//       names must be unique
+//
+// value: must match data type
+//
+//
+// EXAMPLE INPUT
+//
+// u_int  : uintName1	 = 80
+// u_int  : uintName2	 = +80
+//
+// s_int  : sintName1	 = 25
+// s_int  : sintName2	 = +25
+// s_int  : sintName3	 = -25
+//
+// float  : floatName1	 = 1.4855
+// float  : floatName2	 = +1.4855
+// float  : floatName3	 = -1.4855
+//
+// bool	  : boolName1	 = 1
+// bool	  : boolName2	 = false // not case sensitive
+//
+// string : stringName1	 = "letters" // strings must have quotation marks
+// 		
 
 
 
 u_int  : windowWidth  = 854			 // comment goes here
 u_int  : windowHeight = 480// does this get ignored??????
-bool   : fullscreen   = 0
+
+bool   : fullscreen   = 1
 bool   : valFalse     = fALsE
 
 s_int  : var1 = -13
-float  : var2 = 58.34
-string : var3 = "kjhkhg"
-string : var3 = "ykyjhfuykjtfhbd" // same name should not be added
+s_int  : sint1 = -100
+s_int  : sint2 = 5
+
+float  : var2 = -58.34
+float  : float1 = 85.112
+
+string : testString = "this is"
+string : var3 = "totally not jibberish"
+string : var3 = "mjwolyc olq xzsktkwgf" // same name should not be added
+
 u_int  : var3 = 6666 // same name should not be added

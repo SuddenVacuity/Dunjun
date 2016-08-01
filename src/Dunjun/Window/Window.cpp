@@ -67,11 +67,6 @@ namespace Dunjun
 						u32 style,
 						const GLContextSettings& context)
 	{
-		// destroy the original window
-		// possibly need to make it this->close();
-
-		//assert((size.x > 0 && size.y > 0) && "Window::create width and height must be greater that 0");
-
 		close();
 
 		if(style & Style::Fullscreen)

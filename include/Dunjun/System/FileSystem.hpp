@@ -1,7 +1,7 @@
 #ifndef DUNJUN_SYSTEM_FILESYSTEM_HPP
 #define DUNJUN_SYSTEM_FILESYSTEM_HPP
 
-#include <Dunjun/Common.hpp>
+#include <Dunjun/System/ImportConfigData.hpp>
 
 namespace Dunjun
 {

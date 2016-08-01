@@ -77,9 +77,11 @@
 #define DUNJUN_DEBUG_MODE
 
 #ifdef DUNJUN_DEBUG_MODE
-	#define STOP {char* createAccessViolation = 0; *createAccessViolation = 0;}
+	#define STOP {char* AccessViolation = 0; *AccessViolation = 0;} // create access violation for debugging
+	#define NSTOP {char remove_N;} // change STOP to this to prevent access violation
 #else
-	#define STOP // create access violation in debug mode only
+	#define STOP // blank outside debug mode
+	#define NSTOP // blank outside debug mode
 #endif
 
 
