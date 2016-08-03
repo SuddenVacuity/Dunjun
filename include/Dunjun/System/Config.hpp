@@ -58,9 +58,11 @@
 //	   COMPILIER
 ///////////////////////
 
+
 #if defined(_MSC_VER)
 	// Microsoft Visual Studio
 	#pragma comment(lib, "winmm.lib") // used in Time.cpp
+	#define _CRT_SECURE_NO_WARNINGS // to be able to use sscanf()
 	#define DUNJUN_COMPILER_MSVC
 #elif defined(__clang__)
 	// Clang

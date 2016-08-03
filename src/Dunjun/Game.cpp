@@ -48,12 +48,21 @@ namespace Dunjun
 		{
 			ConfigData configData = loadConfigDataFromFile("data/defaultSettings.op");
 
-			ConfigData::Entry e = getConfigDataVariable(configData, "var3");
-			if(e.type == ConfigType::ConfigType_String)
-				std::cout << "" << configData.strings[e.index];
+			std::cout << "\nGetting ConfigData from Memory" <<
+						 "\n==============================\n\n";
+
+			String getString = getFromConfigData_string(configData, "NotWindow.var3", "derp");
+				
+			b8 getBool = getFromConfigData_bool(configData, "valFalse", true);
+
+			u32 GetUint = getFromConfigData_uint(configData, "Window.windowWidth", 0);
+
+			String GetDoesntExist = getFromConfigData_string(configData, "thisDoesNotExist.varDoesntExist", "it really didnt' exist");
 
 			std::cout << "\n\n";
 
+			if(0)
+			{
 			// confirm data was added
 			std::cout << "\n\nOutput all data\n";
 			const char* boolNames[] = { "false", "true" };
@@ -77,6 +86,7 @@ namespace Dunjun
 			std::cout << "\nstrings:\n";
 			for (u32 i = 0; i < configData.stringsLength; i++)
 				std::cout << cString(configData.strings[i]) << "\n";
+			}
 		}
 
 		/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -640,8 +650,6 @@ namespace Dunjun
 		{
 			Memory::init();
 
-			importConfiguration();
-
 			std::cout << "\n\n\n";
 
 			if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_GAMECONTROLLER | 
@@ -654,7 +662,15 @@ namespace Dunjun
 				std::exit(EXIT_FAILURE);
 			}
 
-			g_window.create("Loading...", {854, 480});
+			// import form config files
+			ConfigData configData = loadConfigDataFromFile("data/defaultSettings.op");
+
+			VideoMode vm = {};
+			vm.width = getFromConfigData_uint(configData, "Window.width", 854);
+			vm.height = getFromConfigData_uint(configData, "Window.height", 480);
+			vm.bitsPerPixel = getFromConfigData_uint(configData, "Window.bitsPerPixel", 16);
+
+			g_window.create("Loading...", vm);
 			g_window.setFramerateLimit(FrameLimit);
 
 			glewInit();
@@ -714,6 +730,8 @@ namespace Dunjun
 			std::cout << "\n\n\n\n" << std::endl;
 			std::cout << "Press Tab to open the Console." << std::endl;
 
+			uSize_t frames = 0;
+
 			while (g_running) // create a loop that works until the window closes
 			{
 				//Window::pollEvents();
@@ -726,7 +744,7 @@ namespace Dunjun
 				accumulator += dt;
 
 				// limit accumulator size
-				if (accumulator >= milliseconds(1200))
+				if (accumulator > milliseconds(1200))
 					accumulator = milliseconds(1200);
 
 				// render update

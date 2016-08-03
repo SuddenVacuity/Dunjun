@@ -14,7 +14,7 @@ namespace Dunjun
 	{
 	}
 
-	ConfigData::Entry getConfigDataVariable(const ConfigData& data, const String& name)
+	ConfigData::Entry getConfigDataEntry(const ConfigData& data, const String& name)
 	{
 		return get(data.map, murmurStringHash64(name), { 0, ConfigType::ConfigType_Unknown });
 	}
@@ -35,6 +35,8 @@ namespace Dunjun
 
 		uSize_t lineNum = 0;
 		String line;
+		String section = {};
+
 		while (file.good())
 		{
 			defer(lineNum++);
@@ -46,7 +48,7 @@ namespace Dunjun
 
 			// check for a comment at the beginning of the line
 			if (line[0] == '/' && line[1] == '/')
-				lineLen = 0;
+				continue;
 
 			// if line is empty continue
 			if (lineLen == 0)
@@ -55,7 +57,7 @@ namespace Dunjun
 			sSize_t definitionPos = -1; // value
 			sSize_t declarationPos = -1; // name
 
-										 // read the line
+			// read the line
 			for (sSize_t i = 0; i < lineLen; i++)
 			{
 				// check for comments
@@ -63,25 +65,62 @@ namespace Dunjun
 				{
 					if (line[i + 1] == '/')
 					{
-						// set lineLen to ignore all comment text
+						// set lineLen to where comment begins to ignore comment
 						lineLen = i;
 						break;
 					}
 				}
 
-				// check for tokens
+				// check for config section markers []
+				if(line[0] == '[')
+				{
+					// remove any space that could be between ] and a removed comment
+					line = Strings::trimSpace(line);
+					lineLen = len(line);
+					if(lineLen > 1 && line[lineLen - 1] == ']')
+					{
+
+						//if(lineLen == 2)
+						//	section = "GLOBAL";
+						//else
+							section = Strings::trim(line, "[]");
+
+						// set tokens as non-existing
+						declarationPos = -2;
+						definitionPos = -2;
+
+						break;
+					}
+					else
+					{
+						std::cout << "\nconfig section error\n\n";
+						break;
+					}
+				} // end check for config section markers []
+
+				// check that tokens were defined
 				if (line[i] == ':' && declarationPos == -1)
 					declarationPos = i;
 				else if (line[i] == '=' && definitionPos == -1)
 					definitionPos = i;
+			} // end read line
+
+			// check if tokens were found
+			// -1 means they were never defined
+			if(declarationPos == -1 || definitionPos == -1)
+			{
+				showSimpleMessageBox("Parsing Error in config file:\n" +
+									 filepath + "\n\n" + line,
+									 "Parsing Error", MessageBoxType::Warning);
+
+				continue;
 			}
 
 			// check if tokens were found
-			if (declarationPos == -1 || definitionPos == -1)
+			// both -2 means a section tag was found
+			if (declarationPos == -2 && definitionPos == -2)
 			{
-				showSimpleMessageBox("Parsing Error in config file:\n" +
-					filepath + "\n\n" + line,
-					"Parsing Error", MessageBoxType::Warning);
+				std::cout << "\n" + line + "\n";
 				continue;
 			}
 
@@ -91,22 +130,27 @@ namespace Dunjun
 			String value = substring(line, definitionPos + 1, lineLen);
 
 			// remove whitespace
-			type = Strings::toLowerCase(Strings::trimSpace(type));
+			type = Strings::trimSpace(type);
 			name = Strings::trimSpace(name);
 			value = Strings::trimSpace(value);
 
+			// add section prefix
+			if (section != "")
+				name = section + "." + name;
+
 			bool succeeded;
 
+			// organize by type
 			if (type == "u_int")
-				succeeded = addToConfigFile_uint(configData, name, value);
+				succeeded = addToConfigData_uint(configData, name, value);
 			else if (type == "s_int")
-				succeeded = addToConfigFile_sint(configData, name, value);
+				succeeded = addToConfigData_sint(configData, name, value);
 			else if (type == "float")
-				succeeded = addToConfigFile_float(configData, name, value);
+				succeeded = addToConfigData_float(configData, name, value);
 			else if (type == "bool")
-				succeeded = addToConfigFile_bool(configData, name, value);
+				succeeded = addToConfigData_bool(configData, name, value);
 			else if (type == "string")
-				succeeded = addToConfigFile_string(configData, name, value);
+				succeeded = addToConfigData_string(configData, name, value);
 			else
 			{
 				succeeded = false;
@@ -119,17 +163,17 @@ namespace Dunjun
 			if (succeeded == false)
 				continue;
 
-			// get data through its hash
-			ConfigData::Entry v = getConfigDataVariable(configData, name);
+			// get data through its hash and print to console
+			ConfigData::Entry v = getConfigDataEntry(configData, name);
 			switch (v.type)
 			{
 			default: std::cout << "Unlisted value - Should never get here\n"; break;
 			case ConfigType::ConfigType_Unknown: std::cout << "Unknown Type - Should never get here\n"; break;
-			case ConfigType::ConfigType_Uint:	 std::cout << type + "  : " + name + " " << configData.uints[v.index] << std::endl; break;
-			case ConfigType::ConfigType_Sint:	 std::cout << type + "  : " + name + " " << configData.sints[v.index] << std::endl; break;
-			case ConfigType::ConfigType_Float:	 std::cout << type + "  : " + name + " " << configData.floats[v.index] << std::endl; break;
-			case ConfigType::ConfigType_Bool:	 std::cout << type + "   : " + name + " " << configData.bools[v.index] << std::endl; break;
-			case ConfigType::ConfigType_String:	 std::cout << type + " : " + name + " \"" << configData.strings[v.index] << "\"" << std::endl; break;
+			case ConfigType::ConfigType_Uint:	 std::cout << type + "  : " + name + " = " << configData.uints[v.index] << std::endl; break;
+			case ConfigType::ConfigType_Sint:	 std::cout << type + "  : " + name + " = " << configData.sints[v.index] << std::endl; break;
+			case ConfigType::ConfigType_Float:	 std::cout << type + "  : " + name + " = " << configData.floats[v.index] << std::endl; break;
+			case ConfigType::ConfigType_Bool:	 std::cout << type + "   : " + name + " = " << configData.bools[v.index] << std::endl; break;
+			case ConfigType::ConfigType_String:	 std::cout << type + " : " + name + " = \"" << configData.strings[v.index] << "\"" << std::endl; break;
 			}
 
 		} // end while(file.good())
@@ -166,7 +210,7 @@ namespace Dunjun
 
 	/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	)				.
-	)					VALUE TYPE CONVERSIONS
+	)					ADD DATA VALUE TYPE CONVERSIONS
 	)
 	)				.
 	)					.
@@ -175,7 +219,7 @@ namespace Dunjun
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
 
-	bool addToConfigFile_uint(ConfigData& data, const String& name, const String& value)
+	bool addToConfigData_uint(ConfigData& data, const String& name, const String& value)
 	{
 		uSize_t i = 0;
 
@@ -191,6 +235,7 @@ namespace Dunjun
 		{
 			if (!Strings::isNumeric(value[i]))
 			{
+
 				std::cerr << "WARNING: " << name + " is not a number\n";
 				return false; // add value failed
 			}
@@ -206,7 +251,6 @@ namespace Dunjun
 
 		ConfigData::Entry e = {};
 		e.type = ConfigType_Uint;
-		e.index = 0;
 
 		if (len(data.uints) > 0)
 			e.index = len(data.uints);
@@ -217,7 +261,7 @@ namespace Dunjun
 		return true;
 	}
 
-	bool addToConfigFile_sint(ConfigData& data, const String& name, const String& value)
+	bool addToConfigData_sint(ConfigData& data, const String& name, const String& value)
 	{
 		uSize_t i = 0;
 		if (value[0] == '+' || value[0] == '-')
@@ -242,7 +286,6 @@ namespace Dunjun
 
 		ConfigData::Entry e = {};
 		e.type = ConfigType_Sint;
-		e.index = 0;
 
 		if (len(data.sints) > 0)
 			e.index = len(data.sints);
@@ -253,11 +296,11 @@ namespace Dunjun
 		return true;
 	}
 
-	bool addToConfigFile_float(ConfigData& data, const String& name, const String& value)
+	bool addToConfigData_float(ConfigData& data, const String& name, const String& value)
 	{
 		f32 f;
 
-		if (sscanf_s(cString(value), "%f", &f) != 1)
+		if (sscanf(cString(value), "%f", &f) != 1)
 		{
 			std::cerr << "WARNING: " << name + " is not a float\n";
 			return false; // value is not a float
@@ -271,7 +314,6 @@ namespace Dunjun
 
 		ConfigData::Entry e = {};
 		e.type = ConfigType_Float;
-		e.index = 0;
 
 		if (len(data.floats) > 0)
 			e.index = len(data.floats);
@@ -282,7 +324,7 @@ namespace Dunjun
 		return true;
 	}
 
-	bool addToConfigFile_bool(ConfigData& data, const String& name, const String& value)
+	bool addToConfigData_bool(ConfigData& data, const String& name, const String& value)
 	{
 		b8 b;
 
@@ -304,7 +346,6 @@ namespace Dunjun
 
 		ConfigData::Entry e = {};
 		e.type = ConfigType_Bool;
-		e.index = 0;
 
 		if (len(data.bools) > 0)
 			e.index = len(data.bools);
@@ -315,7 +356,7 @@ namespace Dunjun
 		return true;
 	}
 
-	bool addToConfigFile_string(ConfigData& data, const String& name, const String& value)
+	bool addToConfigData_string(ConfigData& data, const String& name, const String& value)
 	{
 		// chech that data is long enough to contain quotation marks
 		if (len(value) <= 2)
@@ -349,6 +390,98 @@ namespace Dunjun
 
 		return true;
 	}
+/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+)				.
+)					GET DATA
+)
+)				.
+)					.
+)
+)				.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+
+	u32 getFromConfigData_uint(const ConfigData& data, const String& name, const u32& defaultValue)
+	{
+		ConfigData::Entry e = getConfigDataEntry(data, name);
+
+		if(e.type == ConfigType::ConfigType_Uint)
+		{
+			const u32 found = data.uints[e.index];
+			std::cout << "u_int  : " + name + " = " << found << "\n";
+			return found;
+		}
+
+		std::cout << "DEFAULT: " + name + "\n";
+		
+		return defaultValue;
+	}
+
+	s32 getFromConfigData_sint(const ConfigData& data, const String& name, const s32& defaultValue)
+	{
+		ConfigData::Entry e = getConfigDataEntry(data, name);
+
+		if (e.type == ConfigType::ConfigType_Sint)
+		{
+			const s32 found = data.sints[e.index];
+			std::cout << "s_int  : " + name + " = " << found << "\n";
+			return found;
+		}
+
+		std::cout << "DEFAULT: " + name + "\n";
+
+		return defaultValue;
+	}
+
+	f32 getFromConfigData_float(const ConfigData& data, const String& name, const f32& defaultValue)
+	{
+		ConfigData::Entry e = getConfigDataEntry(data, name);
+
+		if (e.type == ConfigType::ConfigType_Float)
+		{
+			const f32 found = data.floats[e.index];
+			std::cout << "float  : " + name + " = " << found << "\n";
+			return found;
+		}
+
+		std::cout << "DEFAULT: " + name + "\n";
+
+		return defaultValue;
+	}
+
+	b8 getFromConfigData_bool(const ConfigData& data, const String& name, const b8& defaultValue)
+	{
+		ConfigData::Entry e = getConfigDataEntry(data, name);
+
+		if (e.type == ConfigType::ConfigType_Bool)
+		{
+			const b8 found = data.bools[e.index];
+			std::cout << "bool   : " + name + " = " << found << "\n";
+			return found;
+		}
+
+		std::cout << "DEFAULT: " + name + "\n";
+
+		return defaultValue;
+	}
+
+	String getFromConfigData_string(const ConfigData& data, const String& name, const String& defaultValue)
+	{
+		ConfigData::Entry e = getConfigDataEntry(data, name);
+
+		if (e.type == ConfigType::ConfigType_String)
+		{
+			const String found = data.strings[e.index];
+			std::cout << "string : " + name + " = \"" << found << "\"\n";
+			return found;
+		}
+
+		std::cout << "DEFAULT: " + name + "\n";
+		
+		return defaultValue;
+	}
+
+
+
 
 
 } // end Dunjun

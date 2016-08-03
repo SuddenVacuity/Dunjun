@@ -48,7 +48,7 @@ namespace Dunjun
 		bool parseFloat(String str, f32& f)
 		{ 
 			f32 out;
-			if(sscanf_s(cString(str), "%f", out) != 1)
+			if(sscanf(cString(str), "%f", &out) != 1)
 				return false;
 
 			f = out;
@@ -57,7 +57,7 @@ namespace Dunjun
 		bool parseFloat(String str, f64& f)
 		{
 			f64 out;
-			if (sscanf_s(cString(str), "%g", out) != 1)
+			if (sscanf(cString(str), "%g", &out) != 1)
 				return false;
 
 			f = out;
@@ -91,7 +91,7 @@ namespace Dunjun
 		{
 			// TODO: handle Base
 			s8 out;
-			if (sscanf_s(cString(str), "%d", out) != 1)
+			if (sscanf(cString(str), "%d", &out) != 1)
 				return false;
 
 			s = out;
@@ -101,7 +101,7 @@ namespace Dunjun
 		{
 			// TODO: handle Base
 			s16 out;
-			if (sscanf_s(cString(str), "%d", out) != 1)
+			if (sscanf(cString(str), "%d", &out) != 1)
 				return false;
 
 			s = out;
@@ -111,7 +111,7 @@ namespace Dunjun
 		{
 			// TODO: handle Base
 			s32 out;
-			if (sscanf_s(cString(str), "%d", out) != 1)
+			if (sscanf(cString(str), "%d", &out) != 1)
 				return false;
 
 			s = out;
@@ -121,7 +121,7 @@ namespace Dunjun
 		{
 			// TODO: handle Base
 			s64 out;
-			if (sscanf_s(cString(str), "%lld", out) != 1)
+			if (sscanf(cString(str), "%lld", &out) != 1)
 				return false;
 
 			s = out;
@@ -132,7 +132,7 @@ namespace Dunjun
 		{
 			// TODO: handle Base
 			u8 out;
-			if (sscanf_s(cString(str), "%u", out) != 1)
+			if (sscanf(cString(str), "%u", &out) != 1)
 				return false;
 
 			u = out;
@@ -142,7 +142,7 @@ namespace Dunjun
 		{
 			// TODO: handle Base
 			u16 out;
-			if (sscanf_s(cString(str), "%u", out) != 1)
+			if (sscanf(cString(str), "%u", &out) != 1)
 				return false;
 
 			u = out;
@@ -152,7 +152,7 @@ namespace Dunjun
 		{
 			// TODO: handle Base
 			u32 out;
-			if (sscanf_s(cString(str), "%u", out) != 1)
+			if (sscanf(cString(str), "%u", &out) != 1)
 				return false;
 
 			u = out;
@@ -162,15 +162,11 @@ namespace Dunjun
 		{
 			// TODO: handle Base
 			u64 out;
-			if (sscanf_s(cString(str), "%llu", out) != 1)
+			if (sscanf(cString(str), "%llu", &out) != 1)
 				return false;
 
 			u = out;
 			return true;
 		}
-
-
-
-
 	} // end StrConv
 } // end Dunjun

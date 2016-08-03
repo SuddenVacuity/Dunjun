@@ -31,6 +31,8 @@ main.cpp
 
 #ifndef DEBUG_ALT_MAIN
 
+// NOTE: ignore SDL main()
+#undef main
 int main(int argc, char** argv)
 {
 	std::cout << "Vector2 POD - " << std::is_pod<Dunjun::Vector2>() << std::endl;

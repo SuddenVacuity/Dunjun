@@ -40,18 +40,24 @@
 // string : stringName1	 = "letters" // strings must have quotation marks
 // 		
 
-
-
-u_int  : windowWidth  = 854			 // comment goes here
-u_int  : windowHeight = 480// does this get ignored??????
-
-bool   : fullscreen   = 1
+// Global Space
+// section tag line must only have section tags
+[]
+bool   : logging = true
 bool   : valFalse     = fALsE
 
 s_int  : var1 = -13
 s_int  : sint1 = -100
 s_int  : sint2 = 5
 
+[Window]
+u_int  : posX = 0
+u_int  : posY = 0
+u_int  : width  = 854			 // comment goes here
+u_int  : height = 480// does this get ignored??????
+bool   : fullscreen = 1
+
+[NotWindow]
 float  : var2 = -58.34
 float  : float1 = 85.112
 
