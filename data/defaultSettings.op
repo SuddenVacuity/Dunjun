@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // add // for one line comments that ignore all text until the end of the line
-// TODO: use [] for multiline comments
+// surround text with [] to create a namespace
+// namespace sections must be the only thing on their line
 //
 // each value must be one a single line
 // type, name and value must be seperated by tokens
@@ -20,41 +21,52 @@
 //
 // value: must match data type
 //
-//
 // EXAMPLE INPUT
 //
-// u_int  : uintName1	 = 80
-// u_int  : uintName2	 = +80
-//
+// // global namespace
 // s_int  : sintName1	 = 25
 // s_int  : sintName2	 = +25
 // s_int  : sintName3	 = -25
 //
+// // Integer namespace
+// [Integer]
+// u_int  : uintName1	 = 80
+// u_int  : uintName2	 = +80
+//
+// // back to global namespace
+// []
 // float  : floatName1	 = 1.4855
 // float  : floatName2	 = +1.4855
 // float  : floatName3	 = -1.4855
 //
+// // Boolean namespace
+// [Boolean]
 // bool	  : boolName1	 = 1
 // bool	  : boolName2	 = false // not case sensitive
 //
+// // String namespace
+// [String]
 // string : stringName1	 = "letters" // strings must have quotation marks
 // 		
+///////////////////////////////////////////////////////////////////////////////
 
-// Global Space
-// section tag line must only have section tags
+////////////////////////////////
+//    Default Config Data     //
+////////////////////////////////
+
 []
 bool   : logging = true
-bool   : valFalse     = fALsE
+bool   : valFalse = fALsE
 
-s_int  : var1 = -13
+s_int  : var1  = -13
 s_int  : sint1 = -100
 s_int  : sint2 = 5
 
 [Window]
-u_int  : posX = 0
-u_int  : posY = 0
-u_int  : width  = 854			 // comment goes here
-u_int  : height = 480// does this get ignored??????
+u_int  : posX   = 0
+u_int  : posY   = 0
+u_int  : width  = 854
+u_int  : height = 480
 bool   : fullscreen = 1
 
 [NotWindow]

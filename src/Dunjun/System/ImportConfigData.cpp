@@ -22,7 +22,7 @@ namespace Dunjun
 	ConfigData loadConfigDataFromFile(const String& filepath)
 	{
 		//String filepath = "data/defaultSettings.op";
-		std::cout << "Importing Config File: " + filepath + "\n\n";
+		std::cout << "Start Importing Config File: " + filepath + "\n";
 
 		std::fstream file;
 		file.open(cString(filepath), std::ios::in | std::ios::binary);
@@ -203,7 +203,7 @@ namespace Dunjun
 		//	std::cout << cString(configData.strings[i]) << "\n";
 
 		NSTOP
-		std::cout << "\nFinish Importing Config File: " + filepath + "\n\n";
+		std::cout << "\nFinished Importing Config File: " + filepath + "\n\n";
 
 		return configData;
 	}

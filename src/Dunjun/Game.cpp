@@ -35,62 +35,6 @@ namespace Dunjun
 	{
 		/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 		)				.
-		)					IMPORT CONFIG FILE
-		)
-		)				.
-		)					.
-		)
-		)				.
-		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
-
-
-		INTERNAL void importConfiguration()
-		{
-			ConfigData configData = loadConfigDataFromFile("data/defaultSettings.op");
-
-			std::cout << "\nGetting ConfigData from Memory" <<
-						 "\n==============================\n\n";
-
-			String getString = getFromConfigData_string(configData, "NotWindow.var3", "derp");
-				
-			b8 getBool = getFromConfigData_bool(configData, "valFalse", true);
-
-			u32 GetUint = getFromConfigData_uint(configData, "Window.windowWidth", 0);
-
-			String GetDoesntExist = getFromConfigData_string(configData, "thisDoesNotExist.varDoesntExist", "it really didnt' exist");
-
-			std::cout << "\n\n";
-
-			if(0)
-			{
-			// confirm data was added
-			std::cout << "\n\nOutput all data\n";
-			const char* boolNames[] = { "false", "true" };
-
-			std::cout << "\nuints:\n";
-			for (u32 u : configData.uints)
-				std::cout << u << "\n";
-
-			std::cout << "\nsints:\n";
-			for (s32 s : configData.sints)
-				std::cout << s << "\n";
-
-			std::cout << "\nfloats:\n";
-			for (f32 f : configData.floats)
-				std::cout << f << "\n";
-
-			std::cout << "\nbools:\n";
-			for (b8 b : configData.bools)
-				std::cout << boolNames[b] << "\n";
-
-			std::cout << "\nstrings:\n";
-			for (u32 i = 0; i < configData.stringsLength; i++)
-				std::cout << cString(configData.strings[i]) << "\n";
-			}
-		}
-
-		/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-		)				.
 		)					.
 		)
 		)				OpenGL INIT
@@ -650,8 +594,6 @@ namespace Dunjun
 		{
 			Memory::init();
 
-			std::cout << "\n\n\n";
-
 			if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_GAMECONTROLLER | 
 						SDL_INIT_HAPTIC | SDL_INIT_JOYSTICK) != 0)
 			{
@@ -665,10 +607,22 @@ namespace Dunjun
 			// import form config files
 			ConfigData configData = loadConfigDataFromFile("data/defaultSettings.op");
 
+			// test getConfigData
+			{
+			std::cout << "\nGetting ConfigData from Memory" <<
+						 "\n==============================\n\n";
+
+			String getString = getFromConfigData_string(configData, "NotWindow.var3", "derp");
+			b8 getBool = getFromConfigData_bool(configData, "valFalse", true);
+			String GetDoesntExist = getFromConfigData_string(configData, "thisDoesNotExist.varDoesntExist", "it really didnt' exist");
+			}
+
 			VideoMode vm = {};
 			vm.width = getFromConfigData_uint(configData, "Window.width", 854);
 			vm.height = getFromConfigData_uint(configData, "Window.height", 480);
 			vm.bitsPerPixel = getFromConfigData_uint(configData, "Window.bitsPerPixel", 16);
+
+			std::cout << "\n";
 
 			g_window.create("Loading...", vm);
 			g_window.setFramerateLimit(FrameLimit);
