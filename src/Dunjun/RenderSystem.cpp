@@ -156,6 +156,9 @@ namespace Dunjun
 		//	return false;
 		//});
 
+		glEnable(GL_TEXTURE_2D);
+		glEnable(GL_DEPTH_TEST);
+
 		ShaderProgram& shaders = g_shaderHolder.get("deferredGeometryPass");
 
 		bindGBuffer(&gBuffer);
@@ -361,6 +364,8 @@ namespace Dunjun
 
 		createRenderTexture(finalTexture, gBuffer.width, gBuffer.height, RenderTexture::Color);
 		
+		bindTexture(nullptr, 0);
+		bindTexture(nullptr, 1);
 		bindTexture(&gBuffer.textures[GBuffer::Diffuse], 0);
 		bindTexture(&lightingBuffer.colorTexture, 1);
 		

@@ -117,7 +117,7 @@ namespace Dunjun
 
 
 		s32 currentPosition[2] = { 0, 0 };
-		s32 currentSize[2] = { 0, 0 };
+		f32 currentSize[2] = { 0, 0 };
 		f32 currentAspectRatio = 0.0f;
 
 		Window();

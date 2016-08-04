@@ -42,6 +42,7 @@ namespace Dunjun
 		: m_handle(nullptr)
 		, m_glContext()
 		, m_frameTimeLimit(Time::Zero)
+		, m_clock()
 	{
 	}
 
@@ -52,7 +53,9 @@ namespace Dunjun
 		: m_handle(nullptr)
 		, m_glContext()
 		, m_frameTimeLimit(Time::Zero)
+		, m_clock()
 	{
+		m_clock.startTime = Time::now();
 		create(title, mode, style, context);
 	}
 
@@ -226,8 +229,9 @@ namespace Dunjun
 	{
 		SDL_GL_SwapWindow(m_handle);
 
-		if (m_frameTimeLimit != Time::Zero &&
-			m_frameTimeLimit > m_clock.getElapsedTime())
+		//if (m_frameTimeLimit != Time::Zero &&
+		//	m_frameTimeLimit > m_clock.getElapsedTime())
+		//if (m_frameTimeLimit != Time::Zero)
 		{
 			Time::sleep(m_frameTimeLimit - m_clock.getElapsedTime());
 			m_clock.restart();

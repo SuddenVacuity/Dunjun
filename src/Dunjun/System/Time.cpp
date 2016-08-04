@@ -71,6 +71,8 @@ namespace Dunjun
 
 	void Time::sleep(Time time)
 	{
+		if(time.asMicroseconds() <= 0)
+			return;
 #if defined(DUNJUN_COMPILER_MSVC)
 		// get supported time resolutions
 		TIMECAPS tc;

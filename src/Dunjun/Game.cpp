@@ -15,7 +15,7 @@ namespace Dunjun
 	namespace
 	{
 		GLOBAL const Time TIME_STEP = seconds(1.0f / 60.0f);
-		GLOBAL const u32 FrameLimit = 60;
+		GLOBAL const u32 FrameLimit = 288;
 		GLOBAL bool g_running = true;
 	} // end anon namespace
 
@@ -40,6 +40,9 @@ namespace Dunjun
 	GLOBAL Material g_material_stone;
 	GLOBAL Material g_material_brick;
 	GLOBAL Material g_material_terrain;
+
+	// out texture
+	GLOBAL const Texture* g_currentOutputTexture = nullptr;
 
 	namespace Game
 	{
@@ -476,7 +479,7 @@ namespace Dunjun
 
 		INTERNAL void update(Time dt)
 		{
-			g_world->update(dt);
+			//g_world->update(dt);
 
 			SceneGraph& sg = g_world->sceneGraph;
 			SceneGraph::NodeId crateNode = sg.getNodeId(g_world->crate);
@@ -525,16 +528,94 @@ namespace Dunjun
 		)				.
 		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
+		INTERNAL Vector2 absoluteSize(const Window& window, f32 width, f32 height)
+		{
+			const Vector2 size = { g_window.currentSize[0], g_window.currentSize[1] };
+			return {width / size.x, height / size.y};
+		}
+
+		INTERNAL Vector2 absolutePosition(const Window& window, f32 width, f32 height)
+		{
+			const Vector2 size = { g_window.currentSize[0], g_window.currentSize[1] };
+			const f32 posX = (2.0f * width / size.x);
+			const f32 posY = (2.0f * height / size.y);
+			return { posX, posY };
+		}
+
+		INTERNAL void drawSprite(const Window& window, const Rectangle& rec, ShaderProgram& shaders, const Texture* tex)
+		{
+			shaders.setUniform("u_scale", absoluteSize(window, rec.width, rec.height));
+			shaders.setUniform("u_position", absolutePosition(window, rec.x, rec.y));
+
+			shaders.setUniform("u_tex", 0);
+			bindTexture(tex, 0);
+
+			drawMesh(g_meshHolder.get("quad"));
+		}
+
+		INTERNAL void renderUi()
+		{
+			ShaderProgram& shaders = g_shaderHolder.get("texturePass");
+			shaders.use();
+			defer(shaders.stopUsing());
+			glDisable(GL_DEPTH_TEST);
+
+			const Vector2 size = { g_window.currentSize[0], g_window.currentSize[1] };
+			const f32 aspect = g_window.currentAspectRatio;
+
+			Vector2 UiSize = {100, 100};
+
+			Rectangle rec = Rectangle();
+			rec.x = ((UiSize.x / 2) * aspect) - (size.x / 2);
+			rec.y = ((UiSize.y / 2) + UiSize.y * (GBuffer::Count)) - (size.y / 2);
+			rec.width = UiSize.x * aspect;
+			rec.height = UiSize.y;
+
+			int i = 0;
+			for(/**/;i < GBuffer::Count; i++)
+			{
+				drawSprite(g_window, rec, shaders, &g_world->renderSystem.gBuffer.textures[i]);
+				rec.y -= UiSize.y;
+			}
+			drawSprite(g_window, rec, shaders,&g_world->renderSystem.lightingBuffer.colorTexture);
+
+
+		}
+
 		INTERNAL void render()
 		{
-			g_world->renderSystem.fbSize.x = g_window.getSize().x;
-			g_world->renderSystem.fbSize.y = g_window.getSize().y;
+			//g_world->renderSystem.fbSize.x = g_window.getSize().x;
+			//g_world->renderSystem.fbSize.y = g_window.getSize().y;
 
-			glViewport(0, 0, g_window.getSize().x, g_window.getSize().y);
+			RenderSystem& rs = g_world->renderSystem;
+
+			if (g_currentOutputTexture == nullptr)
+				g_currentOutputTexture = &rs.finalTexture.colorTexture;
+
+			g_window.setSize(g_window.getSize());
+			rs.fbSize = { g_window.currentSize[0], g_window.currentSize[1]};
+
+			rs.resetAllPointers();
+			g_world->camera.viewportAspectRatio = g_window.currentAspectRatio;
+			rs.camera = &g_world->camera;
+			rs.render();
+
+			glViewport(0, 0, g_window.currentSize[0], g_window.currentSize[1]);
 			glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			{
+				ShaderProgram& shaders = g_shaderHolder.get("texturePass");
+				shaders.use();
+				defer(shaders.stopUsing());
+				glDisable(GL_DEPTH_TEST);
 
-			g_world->render();
+				drawSprite(g_window, Rectangle(0, 0, rs.fbSize.x, rs.fbSize.y), 
+						   shaders, g_currentOutputTexture);
+			}
+
+			renderUi();
+
+			//g_world->render();
 		}
 
 		/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -549,6 +630,12 @@ namespace Dunjun
 
 		INTERNAL void initWorld()
 		{
+			g_world->camera.transform.position = {0, 1, 3};
+			g_world->camera.transform.orientation = conjugate(Math::lookAtQuaternion(g_world->camera.transform.position, Vector3::Zero));
+			g_world->camera.fieldOfView = Degree(90);
+			g_world->camera.projectionType = ProjectionType::Perspective;
+			
+
 			EntitySystem& es = g_world->entitySystem;
 			SceneGraph& sg = g_world->sceneGraph;
 			RenderSystem& rs = g_world->renderSystem;
