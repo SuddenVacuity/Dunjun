@@ -22,7 +22,8 @@ vec4 calculatePointLight(vec3 surfaceToLight, float distanceToLight, vec3 normal
 						 u_light.attenuation.quadratic * distanceToLight * distanceToLight);
 	attenuation = 1.0f / attenuation;
 
-	attenuation *= square(1 - clamp(square(square(distanceToLight / u_light.range)), 0.0f, 1.0f));
+	//attenuation *= square(1 - clamp(square(square(distanceToLight / u_light.range)), 0.0f, 1.0f));
+	attenuation *= clamp(square(1.0 - (square(distanceToLight / u_light.range))), 0, 1);
 
 	vec4 diffuse = vec4(0.0f);
 
@@ -38,7 +39,7 @@ void main()
 	vec3 normalEncoded = texture2D(u_normal, v_texCoord).xyz;
 	float depth = texture2D(u_depth, v_texCoord).r;
 
-	vec3 position = calculatePositionFromDepth(v_texCoord, depth, u_cameraInverse);
+	vec3 position = calculatePositionFromDepth(v_texCoord, gl_FragCoord.w, depth, u_cameraInverse);
 	vec3 normal = normalize(2.0f * normalEncoded - vec3(1.0f));
 
 	vec3 surfaceToLight = normalize(u_light.position - position);
@@ -47,4 +48,5 @@ void main()
 	vec4 lightColor = calculatePointLight(surfaceToLight, distanceToLight, normal);
 
 	gl_FragColor = vec4(lightColor.rgb, 1.0f);
+	//gl_FragColor = lightColor;
 }

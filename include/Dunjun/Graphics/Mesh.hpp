@@ -11,6 +11,7 @@ namespace Dunjun
 		TexCoord = 1,
 		Color = 2,
 		Normal = 3,
+		Tangent = 4,
 	};
 
 	enum class DrawType : GLenum

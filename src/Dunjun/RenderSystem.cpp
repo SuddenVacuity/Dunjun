@@ -181,11 +181,14 @@ namespace Dunjun
 				const Transform& transform = sceneGraph.getGlobalTransform(nodeId);
 
 				shaders.setUniform("u_material.diffuseMap", (u32)0); // shaderprogram.cpp
+				shaders.setUniform("u_material.normalMap", (u32)1); // shaderprogram.cpp
+
 				shaders.setUniform("u_material.diffuseColor", material.diffuseColor); // shaderprogram.cpp
 				shaders.setUniform("u_material.specularColor", material.specularColor); // shaderprogram.cpp
 				shaders.setUniform("u_material.specularExponent", material.specularExponent); // shaderprogram.cpp
-				
+
 				setTexture(material.diffuseMap, 0);
+				setTexture(material.normalMap, 1);
 				shaders.setUniform("u_transform", transform); // shaderprogram.cpp
 
 				drawMesh(component.mesh);

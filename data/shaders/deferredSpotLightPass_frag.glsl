@@ -49,7 +49,7 @@ void main()
 	vec3 normalEncoded = texture2D(u_normal, v_texCoord).xyz;
 	float depth = texture2D(u_depth, v_texCoord).r;
 
-	vec3 position = calculatePositionFromDepth(v_texCoord, depth, u_cameraInverse);
+	vec3 position = calculatePositionFromDepth(v_texCoord, gl_FragCoord.w, depth, u_cameraInverse);
 	vec3 normal = normalize(2.0f * normalEncoded - vec3(1.0f));
 
 	vec3 surfaceToLight = normalize(u_light.pointLight.position - position);
@@ -59,5 +59,6 @@ void main()
 	vec4 lightColor = calculateSpotLight(lightToSurfaceAngle, surfaceToLight, distanceToLight, normal);
 
 	gl_FragColor = vec4(lightColor.rgb, 1.0f);
+	//gl_FragColor = lightColor;
 }
 

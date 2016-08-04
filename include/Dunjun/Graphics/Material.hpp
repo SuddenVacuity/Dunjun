@@ -39,8 +39,12 @@ namespace Dunjun
 		*/
 		MaterialType type = MaterialType::Default;
 
+		// TODO: remove pointers and use id's
 		Dunjun::Texture* diffuseMap = nullptr;
 		Color diffuseColor = ColorLib::White;
+
+		Dunjun::Texture* normalMap = nullptr;
+		Color normalColor = ColorLib::White;
 
 		Color specularColor = ColorLib::White;
 		f32 specularExponent = 80.0f;

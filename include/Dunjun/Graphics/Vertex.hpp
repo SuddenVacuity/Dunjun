@@ -11,19 +11,23 @@ namespace Dunjun
 		Vector2 texCoord;
 		Color color;
 		Vector3 normal;
+		Vector3 tangent;
+
 
 		GLOBAL const Vertex Identity;
 
-		Vertex() = default;
+		//Vertex() = default;
 		
-		Vertex(const Vector3& position, 
-			   const Vector2& texCoord, 
-			   const Color& color, 
-			   const Vector3& normal)
+		Vertex(const Vector3& position = Vector3::Zero,
+			   const Vector2& texCoord = Vector2::Zero,
+			   const Color& color = ColorLib::White,
+			   const Vector3& normal = Vector3::Zero,
+			   const Vector3& tangent = Vector3::Zero)
 			: position(position)
 			, texCoord(texCoord)
 			, color(color)
 			, normal(normal)
+			, tangent(tangent)
 		{
 		}
 	};

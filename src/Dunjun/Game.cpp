@@ -22,14 +22,24 @@ namespace Dunjun
 	GLOBAL World* g_world;
 
 	// textures
-	GLOBAL Texture g_defaultTexture;
-	GLOBAL Texture g_dunjunTextTexture;
-	GLOBAL Texture g_stoneTexture;
-	GLOBAL Texture g_terrainTexture;
+	GLOBAL Texture g_texDiffuse_default;
+	GLOBAL Texture g_texNormal_default;
 
-	GLOBAL Material g_dunjunTextMaterial;
-	GLOBAL Material g_stoneMaterial;
-	GLOBAL Material g_terrainMaterial;
+	GLOBAL Texture g_texDiffuse_dunjunText;
+
+	GLOBAL Texture g_texDiffuse_stone;
+
+	GLOBAL Texture g_texDiffuse_brick;
+	GLOBAL Texture g_texNormal_brick;
+
+	GLOBAL Texture g_texDiffuse_terrain;
+
+	// materials
+	GLOBAL Material g_material_default;
+	GLOBAL Material g_material_dunjunText;
+	GLOBAL Material g_material_stone;
+	GLOBAL Material g_material_brick;
+	GLOBAL Material g_material_terrain;
 
 	namespace Game
 	{
@@ -45,8 +55,8 @@ namespace Dunjun
 
 		void glInit()
 		{
-			//glEnable(GL_CULL_FACE);
-			//glCullFace(GL_BACK);
+			glEnable(GL_CULL_FACE);
+			glCullFace(GL_BACK);
 			glEnable(GL_DEPTH_TEST);
 			glDepthFunc(GL_LESS);
 		}
@@ -96,22 +106,39 @@ namespace Dunjun
 
 		INTERNAL void loadMaterials()
 		{
-			// load textures
-			g_defaultTexture = loadTextureFromFile("data/textures/default.jpg");
-			g_dunjunTextTexture = loadTextureFromFile("data/textures/dunjunText.jpg");
-			g_stoneTexture = loadTextureFromFile("data/textures/stone.png");
-			g_terrainTexture = loadTextureFromFile("data/textures/terrain.png", TextureFilter::Nearest);
+			// load diffuse textures
+			g_texDiffuse_default = loadTextureFromFile("data/textures/default.png");
+			g_texDiffuse_dunjunText = loadTextureFromFile("data/textures/dunjunText.jpg");
+			g_texDiffuse_stone = loadTextureFromFile("data/textures/stone.png");
+			g_texDiffuse_terrain = loadTextureFromFile("data/textures/terrain.png", TextureFilter::Nearest);
+			g_texDiffuse_brick = loadTextureFromFile("data/textures/bricks.jpg");
 
+			// load normal maps
+			g_texNormal_default = loadTextureFromFile("data/textures/default_normal.jpg");
+			g_texNormal_brick = loadTextureFromFile("data/textures/bricks_normal.png");
 
-			g_dunjunTextMaterial = Material{};
-			g_dunjunTextMaterial.diffuseMap = &g_dunjunTextTexture;
+			// create materials
+			g_material_default = Material{};
+			g_material_default.diffuseMap = &g_texDiffuse_default;
+			g_material_default.normalMap  = &g_texNormal_default;
 
-			g_stoneMaterial = Material{};
-			g_stoneMaterial.diffuseMap = &g_stoneTexture;
+			g_material_dunjunText = Material{};
+			g_material_dunjunText.diffuseMap = &g_texDiffuse_dunjunText;
+			g_material_dunjunText.normalMap  = &g_texNormal_default;
 
-			g_terrainMaterial = Material{};
-			g_terrainMaterial.diffuseMap = &g_terrainTexture;
+			g_material_brick = Material{};
+			g_material_brick.diffuseMap = &g_texDiffuse_brick;
+			g_material_brick.normalMap  = &g_texNormal_brick;
 
+			g_material_stone = Material{};
+			g_material_stone.diffuseMap = &g_texDiffuse_stone;
+			g_material_stone.normalMap  = &g_texNormal_default;
+
+			g_material_terrain = Material{};
+			g_material_terrain.diffuseMap = &g_texDiffuse_terrain;
+			g_material_terrain.normalMap  = &g_texNormal_default;
+
+			std::cout << "";
 		}
 
 		// sprite vertex info, vbo and ibo
@@ -123,14 +150,14 @@ namespace Dunjun
 				// Here is where you add vertice information
 				//
 				Vertex vertices[] = { // define vertexes for a triangle
-									  //  x	    y	  z		  s	    t	       r	 g	   b	 a		normals				// for triangle strips organize vertexes in a backwards Z
-					{ { +1.0f,  1.0f, 0.0f },{ 1.0f, 1.0f },{ 0xFF,0xFF,0xFF,0xFF },{ 0, 0, 0 } },	// 0 vertex         1 ---- 0        
-					{ { -1.0f,  1.0f, 0.0f },{ 0.0f, 1.0f },{ 0xFF,0xFF,0xFF,0xFF },{ 0, 0, 0 } },	// 1 vertex           \             
-					{ { +1.0f, -1.0f, 0.0f },{ 1.0f, 0.0f },{ 0xFF,0xFF,0xFF,0xFF },{ 0, 0, 0 } },	// 2 vertex              \           
-					{ { -1.0f, -1.0f, 0.0f },{ 0.0f, 0.0f },{ 0xFF,0xFF,0xFF,0xFF },{ 0, 0, 0 } },	// 3 vertex         3 -----2       
+					//		  x		 y	   z		 s	   t		// for triangle strips organize vertexes in a backwards Z
+					Vertex({ +1.0f,  1.0f, 0.0f }, { 1.0f, 1.0f }),	// 0 vertex         1 ---- 0        
+					Vertex({ -1.0f,  1.0f, 0.0f }, { 0.0f, 1.0f }),	// 1 vertex           \             
+					Vertex({ +1.0f, -1.0f, 0.0f }, { 1.0f, 0.0f }),	// 2 vertex              \           
+					Vertex({ -1.0f, -1.0f, 0.0f }, { 0.0f, 0.0f }),	// 3 vertex         3 -----2       
 				};
 
-				u32 indices[] = { 0, 1, 2, 1, 3, 2 }; // vertex draw order for GL_TRIANGLES
+				u32 indices[] = { 3, 2, 0, 0, 1, 3 }; // vertex draw order for GL_TRIANGLES
 
 													  // get number of entries
 				u32 numVertices = sizeof(vertices) / sizeof(vertices[0]);
@@ -160,14 +187,14 @@ namespace Dunjun
 				// Here is where you add vertice information
 				//
 				Vertex vertices[] = { // define vertexes for a triangle
-					//  x	    y	  z		  s	    t	       r	 g	   b	 a		normals				// for triangle strips organize vertexes in a backwards Z
-					{ { +0.5f,  0.5f, 0.0f },{ 1.0f, 1.0f },{ 0xFF,0xFF,0xFF,0xFF }, { 0, 0, 0 } },	// 0 vertex         1 ---- 0        
-					{ { -0.5f,  0.5f, 0.0f },{ 0.0f, 1.0f },{ 0xFF,0xFF,0xFF,0xFF }, { 0, 0, 0 } },	// 1 vertex           \             
-					{ { +0.5f, -0.5f, 0.0f },{ 1.0f, 0.0f },{ 0xFF,0xFF,0xFF,0xFF }, { 0, 0, 0 } },	// 2 vertex              \           
-					{ { -0.5f, -0.5f, 0.0f },{ 0.0f, 0.0f },{ 0xFF,0xFF,0xFF,0xFF }, { 0, 0, 0 } },	// 3 vertex         3 -----2       
+					//		  x		 y	   z		 s	   t		// for triangle strips organize vertexes in a backwards Z
+					Vertex({ +0.5f,  0.5f, 0.0f },{ 1.0f, 1.0f }),	// 0 vertex         1 ---- 0        
+					Vertex({ -0.5f,  0.5f, 0.0f },{ 0.0f, 1.0f }),	// 1 vertex           \             
+					Vertex({ +0.5f, -0.5f, 0.0f },{ 1.0f, 0.0f }),	// 2 vertex              \           
+					Vertex({ -0.5f, -0.5f, 0.0f },{ 0.0f, 0.0f }),	// 3 vertex         3 -----2       
 				};
 			
-				u32 indices[] = { 0, 1, 2, 1, 3, 2 }; // vertex draw order for GL_TRIANGLES
+				u32 indices[] = { 3, 2, 0, 0, 1, 3 }; // vertex draw order for GL_TRIANGLES
 			
 				// get number of entries
 				u32 numVertices = sizeof(vertices) / sizeof(vertices[0]);
@@ -196,14 +223,14 @@ namespace Dunjun
 				// Here is where you add vertice information
 				//
 				Vertex vertices[] = { // define vertexes for a triangle
-									  //  x	    y	  z		  s	    t	       r	 g	   b	 a		normals				// for triangle strips organize vertexes in a backwards Z
-					{ { +0.5f,  0.5f, 0.0f },{ 1.0f, 1.0f },{ 0xFF,0xFF,0xFF,0xFF },{ 0, 0, 0 } },	// 0 vertex         1 ---- 0        
-					{ { -0.5f,  0.5f, 0.0f },{ 0.0f, 1.0f },{ 0xFF,0xFF,0xFF,0xFF },{ 0, 0, 0 } },	// 1 vertex           \             
-					{ { +0.5f, -0.5f, 0.0f },{ 1.0f, 0.0f },{ 0xFF,0xFF,0xFF,0xFF },{ 0, 0, 0 } },	// 2 vertex              \           
-					{ { -0.5f, -0.5f, 0.0f },{ 0.0f, 0.0f },{ 0xFF,0xFF,0xFF,0xFF },{ 0, 0, 0 } },	// 3 vertex         3 -----2       
+					//		  x		 y	   z		 s	   t		// for triangle strips organize vertexes in a backwards Z
+					Vertex({ +0.5f,  0.5f, 0.0f },{ 1.0f, 1.0f }),	// 0 vertex         1 ---- 0        
+					Vertex({ -0.5f,  0.5f, 0.0f },{ 0.0f, 1.0f }),	// 1 vertex           \             
+					Vertex({ +0.5f, -0.5f, 0.0f },{ 1.0f, 0.0f }),	// 2 vertex              \           
+					Vertex({ -0.5f, -0.5f, 0.0f },{ 0.0f, 0.0f }),	// 3 vertex         3 -----2       
 				};
 
-				u32 indices[] = { 0, 1, 2, 1, 3, 2 }; // vertex draw order for GL_TRIANGLES
+				u32 indices[] = { 3, 2, 0, 0, 1 ,3 }; // vertex draw order for GL_TRIANGLES
 
 													  // get number of entries
 				u32 numVertices = sizeof(vertices) / sizeof(vertices[0]);
@@ -458,8 +485,11 @@ namespace Dunjun
 			f32 wt = 1.0f * Time::now().asSeconds();
 			f32 a = 2.0f;
 
+			f32 moveSin = a * Math::sin(Radian(wt));
+			f32 moveCos = a * Math::cos(Radian(wt));
+
 			Transform pos = sg.getLocalTransform(crateNode);
-			pos.position.y = a * Math::sin(Radian(wt));
+			pos.position.y = moveSin;
 			pos.scale = Vector3{ 1.2f, 1.2f, 1.2f } + Vector3{ 0.4f, 0.4f, 0.4f } * Math::sin(Radian(wt));
 			pos.orientation = offsetOrientation(pos.orientation,
 												Degree(360.0f * dt.asSeconds()),
@@ -468,8 +498,19 @@ namespace Dunjun
 			sg.setLocalTransform(crateNode, pos);
 
 			Transform pos2 = sg.getLocalTransform(playerNode);
-			pos2.position.x = 1.0f * a * Math::cos(Radian(wt));
+			pos2.position.x = moveCos;
 			sg.setLocalTransform(playerNode, pos2);
+
+			Camera& c = g_world->camera;
+			c.transform.position.x = moveCos;
+			c.transform.position.z = moveSin;
+
+			c.transform.orientation = conjugate(Math::lookAtQuaternion(c.transform.position, Vector3::Zero));
+
+
+
+
+
 
 			std::cout << "";
 		}
@@ -558,29 +599,36 @@ namespace Dunjun
 			
 			}
 			{
-				rs.addComponent(crate, { g_meshHolder.get("sprite"), g_dunjunTextMaterial });
-				rs.addComponent(player, { g_meshHolder.get("sprite"), g_dunjunTextMaterial });
-				rs.addComponent(floor, { g_meshHolder.get("surface"), g_stoneMaterial });
-				rs.addComponent(wall1, { g_meshHolder.get("surface"), g_stoneMaterial });
-				rs.addComponent(wall2, { g_meshHolder.get("surface"), g_stoneMaterial });
-				rs.addComponent(wall3, { g_meshHolder.get("surface"), g_stoneMaterial });
+				rs.addComponent(crate, { g_meshHolder.get("sprite"), g_material_dunjunText });
+				rs.addComponent(player, { g_meshHolder.get("sprite"), g_material_dunjunText });
+				rs.addComponent(floor, { g_meshHolder.get("surface"), g_material_brick });
+				rs.addComponent(wall1, { g_meshHolder.get("surface"), g_material_stone });
+				rs.addComponent(wall2, { g_meshHolder.get("surface"), g_material_stone });
+				rs.addComponent(wall3, { g_meshHolder.get("surface"), g_material_stone });
 			}
 			{
 				DirectionalLight light;
 
-				light.direction = { -0.0f, -1.0f, -0.2f };
+				light.direction = { -0.0f, +0.2f, -0.8f };
 				light.color = ColorLib::Orange;
-				light.intensity = 1.0f;
+				light.intensity = 0.12f;
 				light.colorIntensity = calculateLightIntensities(light.color, light.intensity);
 				light.brightness = ColorLib::calculateBrightness(light.colorIntensity);
 				append(rs.directionalLights, light);
 			}
+
+			for(u32 i = 0; i < 10; i++)
 			{
 				PointLight light;
 
-				light.color = ColorLib::Blue;
-				light.position = Vector3{0, 0, -10.5f};
-				light.intensity = 100.0f;
+				Random r;
+				f32 x = r.getFloat(-3.5, 3.5f);
+				f32 y = r.getFloat(0.5f, 4);
+				f32 z = r.getFloat(-3.5, 3.5f);
+
+				light.color = ColorLib::White;
+				light.position = Vector3{x, y, z};
+				light.intensity = 3.0f;
 				light.colorIntensity = calculateLightIntensities(light.color, light.intensity);
 				light.brightness = ColorLib::calculateBrightness(light.colorIntensity);
 				light.range = calculateLightRange(light.intensity, light.color, light.attenuation);
@@ -639,6 +687,7 @@ namespace Dunjun
 			// load assets
 			loadShaders();
 			loadMaterials();
+
 			loadSpriteAsset();
 
 			g_world = defaultAllocator().makeNew<World>();

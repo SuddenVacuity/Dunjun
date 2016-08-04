@@ -22,11 +22,11 @@ namespace Math
 	
 	Matrix4 lookAtMatrix4(const Vector3& eye,
 						  const Vector3& center,
-						  const Vector3& up);
+						  const Vector3& up = {0, 1, 0});
 
 	Quaternion lookAtQuaternion(const Vector3& eye,
-							 const Vector3& center,
-							 const Vector3& up);
+							    const Vector3& center,
+							    const Vector3& up = {0, 1, 0});
 } // end Math
 } // end Dunjun
 #endif

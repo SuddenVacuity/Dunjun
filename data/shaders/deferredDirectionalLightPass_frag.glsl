@@ -31,4 +31,5 @@ void main()
 	vec4 lightColor = calculateDirectionalLight(u_light, normal);
 
 	gl_FragColor = vec4(lightColor.rgb, 1.0f);
+	//gl_FragColor = lightColor;
 }
