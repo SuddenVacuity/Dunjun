@@ -174,6 +174,7 @@
     <ClCompile Include="src\Dunjun\Game.cpp" />
     <ClCompile Include="src\Dunjun\Graphics\GBuffer.cpp" />
     <ClCompile Include="src\Dunjun\Graphics\Image.cpp" />
+    <ClCompile Include="src\Dunjun\System\Logger.cpp" />
     <ClCompile Include="src\Dunjun\System\MurmurHash.cpp" />
     <ClCompile Include="src\Dunjun\System\String.cpp" />
     <ClCompile Include="src\Dunjun\System\StringConversions.cpp" />
@@ -206,6 +207,7 @@
     <ClInclude Include="include\Dunjun\debug\Preprocessor.hpp" />
     <ClInclude Include="include\Dunjun\Entity.hpp" />
     <ClInclude Include="include\Dunjun\Graphics\Camera.hpp" />
+    <ClInclude Include="include\Dunjun\GUI\GUI.hpp" />
     <ClInclude Include="include\Dunjun\Memory\Allocator.hpp" />
     <ClInclude Include="include\Dunjun\Memory\Memory.hpp" />
     <ClInclude Include="include\Dunjun\Memory\TempAllocator.hpp" />
@@ -222,6 +224,7 @@
     <ClInclude Include="include\Dunjun\System\Containers\HashMap.hpp" />
     <ClInclude Include="include\Dunjun\System\Containers\Queue.hpp" />
     <ClInclude Include="include\Dunjun\System\Containers\RingBuffer.hpp" />
+    <ClInclude Include="include\Dunjun\System\Logger.hpp" />
     <ClInclude Include="include\Dunjun\System\stdIncludes.hpp" />
     <ClInclude Include="include\Dunjun\System\String.hpp" />
     <ClInclude Include="include\Dunjun\System\StringConversions.hpp" />

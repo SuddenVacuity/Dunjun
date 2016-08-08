@@ -229,13 +229,18 @@ namespace Dunjun
 	{
 		SDL_GL_SwapWindow(m_handle);
 
-		//if (m_frameTimeLimit != Time::Zero &&
-		//	m_frameTimeLimit > m_clock.getElapsedTime())
-		//if (m_frameTimeLimit != Time::Zero)
+		if (m_frameTimeLimit != Time::Zero &&
+			m_frameTimeLimit > m_clock.getElapsedTime())
 		{
 			Time::sleep(m_frameTimeLimit - m_clock.getElapsedTime());
 			m_clock.restart();
 		}
+
+		//if (m_frameTimeLimit != Time::Zero)
+		//{
+		//	Time::sleep(m_frameTimeLimit - m_clock.getElapsedTime());
+		//	m_clock.restart();
+		//}
 	}
 
 	INTERNAL Input::Key convertFromSDL_ScanCode(u32 code)
@@ -375,7 +380,7 @@ namespace Dunjun
 				event.type = Event::Resized;
 				event.size.width = e.window.data1;
 				event.size.height = e.window.data2; 
-				std::cout << "Event - Window Resized" << std::endl;
+				//std::cout << "Event - Window Resized" << std::endl;
 			}
 			if (e.window.event == SDL_WINDOWEVENT_CLOSE)
 			{

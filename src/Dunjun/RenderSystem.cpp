@@ -164,6 +164,7 @@ namespace Dunjun
 		bindGBuffer(&gBuffer);
 		defer(bindGBuffer(nullptr));
 		{
+			glClearColor(0, 0, 0, 0);
 			glViewport(0, 0, gBuffer.width, gBuffer.height);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -183,8 +184,8 @@ namespace Dunjun
 				const Material& material = component.material;
 				const Transform& transform = sceneGraph.getGlobalTransform(nodeId);
 
-				shaders.setUniform("u_material.diffuseMap", (u32)0); // shaderprogram.cpp
-				shaders.setUniform("u_material.normalMap", (u32)1); // shaderprogram.cpp
+				shaders.setUniform("u_material.diffuseMap", (s32)0); // shaderprogram.cpp
+				shaders.setUniform("u_material.normalMap", (s32)1); // shaderprogram.cpp
 
 				shaders.setUniform("u_material.diffuseColor", material.diffuseColor); // shaderprogram.cpp
 				shaders.setUniform("u_material.specularColor", material.specularColor); // shaderprogram.cpp
@@ -215,7 +216,7 @@ namespace Dunjun
 			//	draw(inst.asset->mesh);
 			//}
 
-			glFlush();
+			//glFlush();
 		}
 	}
 	
@@ -238,6 +239,7 @@ namespace Dunjun
 			glDepthMask(false);
 			defer(glDepthMask(true));
 
+			glEnable(GL_TEXTURE_2D);
 			glEnable(GL_BLEND);
 			defer(glDisable(GL_BLEND));
 

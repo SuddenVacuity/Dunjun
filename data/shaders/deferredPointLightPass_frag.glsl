@@ -2,7 +2,6 @@
 
 #include _head_light.glsl
 
-uniform sampler2D u_diffuse;
 uniform sampler2D u_specular;
 uniform sampler2D u_normal;
 uniform sampler2D u_depth;
@@ -22,8 +21,8 @@ vec4 calculatePointLight(vec3 surfaceToLight, float distanceToLight, vec3 normal
 						 u_light.attenuation.quadratic * distanceToLight * distanceToLight);
 	attenuation = 1.0f / attenuation;
 
-	//attenuation *= square(1 - clamp(square(square(distanceToLight / u_light.range)), 0.0f, 1.0f));
-	attenuation *= clamp(square(1.0 - (square(distanceToLight / u_light.range))), 0, 1);
+	attenuation *= square(1 - clamp(square(square(distanceToLight / u_light.range)), 0.0f, 1.0f));
+	//attenuation *= clamp(square(1.0 - (square(distanceToLight / u_light.range))), 0, 1);
 
 	vec4 diffuse = vec4(0.0f);
 
@@ -47,6 +46,6 @@ void main()
 
 	vec4 lightColor = calculatePointLight(surfaceToLight, distanceToLight, normal);
 
-	gl_FragColor = vec4(lightColor.rgb, 1.0f);
-	//gl_FragColor = lightColor;
+	//gl_FragColor = vec4(lightColor.rgb, 1.0f);
+	gl_FragColor = lightColor;
 }

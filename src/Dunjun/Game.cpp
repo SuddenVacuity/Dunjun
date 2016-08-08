@@ -1,5 +1,5 @@
 
-
+#include <Dunjun/System/Logger.hpp>
 #include <Dunjun/Game.hpp>
 
 namespace Dunjun
@@ -12,11 +12,15 @@ namespace Dunjun
 	//};
 	GLOBAL Window g_window;
 
+	GLOBAL Logger g_logger;
+	GLOBAL FILE* g_logFile;
+
 	namespace
 	{
 		GLOBAL const Time TIME_STEP = seconds(1.0f / 60.0f);
 		GLOBAL const u32 FrameLimit = 288;
 		GLOBAL bool g_running = true;
+		GLOBAL u32 logLevel = 1;
 	} // end anon namespace
 
 	GLOBAL World* g_world;
@@ -78,31 +82,38 @@ namespace Dunjun
 		INTERNAL void loadShaders()
 		{
 			u32 shaderCounter = 0;
-			std::cout << "Loading shader " << shaderCounter++;
+			logPrint(g_logger, "Loading shader %d", shaderCounter++);
 			g_shaderHolder.insertFromFile("default", "default_vert.glsl", 
 													 "default_frag.glsl");
-			std::cout << " " << shaderCounter++;
+			logPrint(g_logger, "Loading shader %d", shaderCounter++);
 			g_shaderHolder.insertFromFile("texturePass", "texPass_vert.glsl", 
 														 "texPass_frag.glsl");
-			std::cout << " " << shaderCounter++;
+			logPrint(g_logger, "Loading shader %d", shaderCounter++);
 			g_shaderHolder.insertFromFile("deferredGeometryPass", "deferredGeometryPass_vert.glsl", 
 																  "deferredGeometryPass_frag.glsl");
-			std::cout << " " << shaderCounter++;
+			logPrint(g_logger, "Loading shader %d", shaderCounter++);
 			g_shaderHolder.insertFromFile("deferredDirectionalLight", "deferredLightPass_vert.glsl",
 																	  "deferredDirectionalLightPass_frag.glsl");
-			std::cout << " " << shaderCounter++;
+
+
+			setLoggerColor(g_logger, LogFlag::LogFlag_ColorText_Cyan, LogFlag::LogFlag_ColorBackground_Grey);
+
+			logPrint(g_logger, "Loading shader %d", shaderCounter++);
 			g_shaderHolder.insertFromFile("deferredAmbientLight", "deferredLightPass_vert.glsl", 
 																  "deferredAmbientLightPass_frag.glsl");
-			std::cout << " " << shaderCounter++;
+			logPrint(g_logger, "Loading shader %d", shaderCounter++);
 			g_shaderHolder.insertFromFile("deferredPointLight", "deferredLightPass_vert.glsl",
 																"deferredPointLightPass_frag.glsl");
-			std::cout << " " << shaderCounter++;
+
+			setLoggerColor(g_logger, LogFlag::LogFlag_ColorText_Red, LogFlag::LogFlag_ColorBackground_Black);
+
+			logPrint(g_logger, "Loading shader %d", shaderCounter++);
 			g_shaderHolder.insertFromFile("deferredSpotLight", "deferredLightPass_vert.glsl",
 															   "deferredSpotLightPass_frag.glsl");
 
 
 
-			std::cout << " " << shaderCounter++ << std::endl;
+			logPrint(g_logger, "Loading shader %d", shaderCounter++);
 			g_shaderHolder.insertFromFile("deferredFinalPass", "deferredLightPass_vert.glsl",
 															   "deferredFinalPass_frag.glsl");
 		}
@@ -729,6 +740,13 @@ namespace Dunjun
 		{
 			Memory::init();
 
+			std::remove("log.txt");
+			g_logFile = fopen("log.txt", "a+");
+
+			setLogger(g_logger, g_logFile, "[INFO]", 
+					  LogFlag::LogFlag_PresetDefault | LogFlag::LogFlag_SaveToFile);
+
+
 			if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_GAMECONTROLLER | 
 						SDL_INIT_HAPTIC | SDL_INIT_JOYSTICK) != 0)
 			{
@@ -857,14 +875,6 @@ namespace Dunjun
 				render();
 				g_window.display();
 
-
-				// framerate limiter
-				//const Time framelimitTime = MaxFrameTime - frameClock.getElapsedTime();
-				//
-				//if (framelimitTime > Time::Zero)
-				//	Time::sleep(framelimitTime);
-				//frameClock.restart();
-
 			} // end while(g_running)
 		}
 
@@ -875,6 +885,7 @@ namespace Dunjun
 			Input::cleanup();
 			g_window.close();
 			SDL_Quit();
+			fclose(g_logFile);
 			Memory::shutdown();
 
 			std::exit(EXIT_SUCCESS);
