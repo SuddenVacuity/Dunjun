@@ -42,25 +42,26 @@ main.cpp
 #undef main
 int main(int argc, char** argv)
 {
-	std::cout << "Vector2 POD - " << std::is_pod<Dunjun::Vector2>() << std::endl;
-	std::cout << "Vector3 POD - " << std::is_pod<Dunjun::Vector3>() << std::endl;
-	std::cout << "Vector4 POD - " << std::is_pod<Dunjun::Vector4>() << std::endl;
-	std::cout << "Matrix4 POD - " << std::is_pod<Dunjun::Matrix4>() << std::endl;
-	std::cout << "Quaternion POD - " << std::is_pod<Dunjun::Quaternion>() << std::endl;
+	std::cout << std::is_pod<Dunjun::Vector2>()		  << " - Vector2 POD"		<< std::endl;
+	std::cout << std::is_pod<Dunjun::Vector3>()		  << " - Vector3 POD"		<< std::endl;
+	std::cout << std::is_pod<Dunjun::Vector4>()		  << " - Vector4 POD"		<< std::endl;
+	std::cout << std::is_pod<Dunjun::Matrix4>()		  << " - Matrix4 POD"		<< std::endl;
+	std::cout << std::is_pod<Dunjun::Quaternion>()	  << " - Quaternion POD"	<< std::endl;
 	std::cout << "\n";
-	std::cout << "Vertex POD - "		<< std::is_pod<Dunjun::Vertex>() << std::endl;
-	std::cout << "Transform POD - "		<< std::is_pod<Dunjun::Transform>() << std::endl;
-	std::cout << "Camera POD - "		<< std::is_pod<Dunjun::Camera>() << std::endl;
-	std::cout << "Color POD - "			<< std::is_pod<Dunjun::Color>() << std::endl;
-	std::cout << "GBuffer POD - "		<< std::is_pod<Dunjun::GBuffer>() << std::endl;
-	std::cout << "Image POD - "			<< std::is_pod<Dunjun::Image>() << std::endl;
-	std::cout << "Material POD - "		<< std::is_pod<Dunjun::Material>() << std::endl;
-	std::cout << "Mesh POD - "			<< std::is_pod<Dunjun::Mesh>() << std::endl;
-	std::cout << "MeshData POD - "		<< std::is_pod<Dunjun::MeshData>() << std::endl;
-	//std::cout << "ModelAsset POD - "	<< std::is_pod<Dunjun::ModelAsset>() << std::endl;
-	std::cout << "RenderTexture POD - " << std::is_pod<Dunjun::RenderTexture>() << std::endl;
-	std::cout << "ShaderProgram POD - " << std::is_pod<Dunjun::ShaderProgram>() << std::endl;
-	std::cout << "Texture POD - "		<< std::is_pod<Dunjun::Texture>() << std::endl;
+	std::cout << std::is_pod<Dunjun::Vertex>()		  << " - Vertex POD"		<< std::endl;
+	std::cout << std::is_pod<Dunjun::Transform>()	  << " - Transform POD"		<< std::endl;
+	std::cout << std::is_pod<Dunjun::Camera>()		  << " - Camera POD"		<< std::endl;
+	std::cout << std::is_pod<Dunjun::Color>()		  << " - Color POD"			<< std::endl;
+	std::cout << std::is_pod<Dunjun::GBuffer>()		  << " - GBuffer POD"		<< std::endl;
+	std::cout << std::is_pod<Dunjun::Image>()		  << " - Image POD"			<< std::endl;
+	std::cout << std::is_pod<Dunjun::Material>()	  << " - Material POD"		<< std::endl;
+	std::cout << std::is_pod<Dunjun::Mesh>()		  << " - Mesh POD"			<< std::endl;
+	std::cout << std::is_pod<Dunjun::MeshData>()	  << " - MeshData POD"		<< std::endl;
+	std::cout << std::is_pod<Dunjun::RenderTexture>() << " - RenderTexture POD"	<< std::endl;
+	std::cout << std::is_pod<Dunjun::ShaderProgram>() << " - ShaderProgram POD"	<< std::endl;
+	std::cout << std::is_pod<Dunjun::Texture>()		  << " - Texture POD"		<< std::endl;
+	std::cout << std::is_pod<Dunjun::Logger>()		  << " - Logger POD"		<< std::endl;
+	std::cout << std::is_pod<Dunjun::ConfigData>()	  << " - ConfigData POD"	<< std::endl;
 	//std::cout << "\n";
 	//std::cout << "GBuffer POD - " << std::is_pod<Dunjun::GBuffer>() << std::endl;
 	//std::cout << "GBuffer POD - " << std::is_pod<Dunjun::GBuffer>() << std::endl;

@@ -85,6 +85,12 @@ namespace Dunjun
 			return strlen(str);
 		return 0;
 	}
+	inline size_t len(char* str)
+	{
+		if (str)
+			return strlen(str);
+		return 0;
+	}
 	template <typename T>
 	inline size_t len(const T& t)
 	{
@@ -130,6 +136,32 @@ namespace Dunjun
 		char* const Textures  = "data/textures/";
 		char* const Shaders = "data/shaders/";
 	} // end BaseDirectories
+
+/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+)				.
+)					.
+)
+)				.
+)					.
+)
+)				.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+	
+		namespace OSVersion
+		{
+			const u16 WINDOWS_2000	= 0x0500; // _WIN32_WINNT_WIN2K
+			const u16 WINDOWS_ME	= 0x0490; // unknown
+			const u16 WINDOWS_XP	= 0x0501; // _WIN32_WINNT_XP
+			const u16 WINDOWS_XP64	= 0x0502; // _WIN32_WINNT_WS03
+			const u16 WINDOWS_VISTA = 0x0600; // _WIN32_WINNT_VISTA
+			const u16 WINDOWS_7		= 0x0601; // _WIN32_WINNT_WIN7
+			const u16 WINDOWS_8		= 0x0602; // _WIN32_WINNT_WIN8
+			const u16 WINDOWS_8_1	= 0x0603; // _WIN32_WINNT_WINBLUE
+			const u16 WINDOWS_10	= 0x1000; // unknown
+		}
+
+	const char* getSystemOS();
+
 } // END namespace Dunjun
 
 #endif

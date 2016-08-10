@@ -1,7 +1,7 @@
 #ifndef DUNJUN_SYSTEM_IMPORTCONFIGDATA_HPP
 #define DUNJUN_SYSTEM_IMPORTCONFIGDATA_HPP
 
-#include <Dunjun/Common.hpp>
+#include <Dunjun/System/Logger.hpp>
 
 
 namespace Dunjun

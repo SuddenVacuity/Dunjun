@@ -10,7 +10,7 @@ namespace Dunjun
 	template <typename T>
 	struct Array
 	{
-		Allocator* m_allocator;
+		Allocator& m_allocator;
 		size_t m_length;
 		size_t m_capacity;
 		T* m_data;

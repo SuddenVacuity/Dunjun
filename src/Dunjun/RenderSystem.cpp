@@ -279,8 +279,6 @@ namespace Dunjun
 
 		for (const DirectionalLight& light : directionalLights)
 		{
-			//Vector3 colorIntensity = calculateLightIntensities(light.color, light.intensity);
-
 			shaders.setUniform("u_light.base.intensities", light.colorIntensity); // shaderprogram.cpp
 
 			shaders.setUniform("u_light.direction", normalize(light.direction));
@@ -305,22 +303,16 @@ namespace Dunjun
 
 		for (const PointLight& light : pointLights)
 		{
-			//light.range = calculateLightRange(light.intensity, light.color, light.attenuation);
-
-			Vector3 colorIntensity = calculateLightIntensities(light.color, light.intensity);
-			f32 range = calculateLightRange(light.intensity, light.color, light.attenuation);
-
-			shaders.setUniform("u_light.base.intensities", colorIntensity); // shaderprogram.cpp
+			shaders.setUniform("u_light.base.intensities", light.colorIntensity); // shaderprogram.cpp
 
 			shaders.setUniform("u_light.position", light.position); // shaderprogram.cpp
-			shaders.setUniform("u_light.range", range); // shaderprogram.cpp
+			shaders.setUniform("u_light.range", light.range); // shaderprogram.cpp
 
 			shaders.setUniform("u_light.attenuation.constant", light.attenuation.constant); // shaderprogram.cpp
 			shaders.setUniform("u_light.attenuation.linear", light.attenuation.linear); // shaderprogram.cpp
 			shaders.setUniform("u_light.attenuation.quadratic", light.attenuation.quadratic); // shaderprogram.cpp
 
 			drawMesh(g_meshHolder.get("quad"));
-
 		}
 	}
 
@@ -340,17 +332,13 @@ namespace Dunjun
 
 		for (const SpotLight& light : spotLights)
 		{
-			Vector3 colorIntensity = calculateLightIntensities(light.color, light.intensity);
-			f32 range = calculateLightRange(light.intensity, light.color, light.attenuation);
-
-
 			shaders.setUniform("u_light.coneAngle", static_cast<f32>(light.coneAngle)); // shaderprogram.cpp
 			shaders.setUniform("u_light.direction", light.direction); // shaderprogram.cpp
 
-			shaders.setUniform("u_light.pointLight.base.intensities", colorIntensity); // shaderprogram.cpp
+			shaders.setUniform("u_light.pointLight.base.intensities", light.colorIntensity); // shaderprogram.cpp
 
 			shaders.setUniform("u_light.pointLight.position", light.position); // shaderprogram.cpp
-			shaders.setUniform("u_light.pointLight.range", range); // shaderprogram.cpp
+			shaders.setUniform("u_light.pointLight.range", light.range); // shaderprogram.cpp
 
 			shaders.setUniform("u_light.pointLight.attenuation.constant", light.attenuation.constant); // shaderprogram.cpp
 			shaders.setUniform("u_light.pointLight.attenuation.linear", light.attenuation.linear); // shaderprogram.cpp
@@ -387,7 +375,6 @@ namespace Dunjun
 			shaders.setUniform("u_lighting", 1);
 		
 			drawMesh(g_meshHolder.get("quad"));
-		
 		}
 	}
 

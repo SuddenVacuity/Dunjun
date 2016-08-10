@@ -1,7 +1,7 @@
 #ifndef DUNJUN_SYSTEM_LOGGER_HPP
 #define DUNJUN_SYSTEM_LOGGER_HPP
 
-#include <Dunjun/System/Types.hpp>
+#include <Dunjun/Common.hpp>
 
 namespace Dunjun
 {
@@ -26,8 +26,10 @@ namespace Dunjun
 		LogFlag_ColorText_Yellow  = 2048,
 		LogFlag_ColorText_White   = 4096,
 		LogFlag_ColorText_Black   = 8192,
+
+		LogFlag_Text_NewLine	  = 16384,
 																						
-		LogFlag_PresetDefault = LogFlag_Date | LogFlag_Time | LogFlag_PrintToTerminal,	
+		LogFlag_PresetDefault = LogFlag_Date | LogFlag_Time | LogFlag_PrintToTerminal | LogFlag_Text_NewLine,	
 	};																					
 																						
 																						
@@ -38,7 +40,9 @@ namespace Dunjun
 		const char* prefix;																
 	};																					
 																						  
-	void logPrint(const Logger& log, const char* fmt, ...);
+	void logPrint(const Logger& logger, const char* fmt, ...);
+	void logSection(const Logger& logger, const char* sectionName);
+
 	void setLogger(Logger& logger, FILE* file, const char* prefix, u32 flags);
 
 	void setLoggerColor(Logger& logger, const LogFlag& textColor, const LogFlag& backgroundColor);

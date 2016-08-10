@@ -154,7 +154,7 @@ namespace Dunjun
 		if(end > len(s))
 			end = len(s);
 
-		String out = "";
+		String out = s.data.m_allocator;
 		uSize_t l = end - begin;
 		reserve(out, l);
 

@@ -23,11 +23,14 @@ namespace Strings
 
 	// concatenates the elements of array to create a single string
 	// the seperator sep is placed between elements in the resulting string
-	String join(const Array<String>& array, const String& sep);
+	String join(const Array<char*>& array, const String& sep);
 
 	// slices s into all sbustrings seperated by sep and returns an array
 	// of the bubstrings between those seprators
-	void split(const String& s, const String& sep, Array<String>& out);
+	void split(const String& s, const String& sep, Array<char*>& out);
+
+	// deallocates all strings in array<char*>
+	void deallocateCStringArray(Array<char*>& a);
 
 	// returns lowercase version of s
 	String toLowerCase(const String& s);

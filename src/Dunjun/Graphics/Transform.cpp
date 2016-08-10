@@ -11,16 +11,15 @@ namespace Dunjun
 		Transform ws = Transform::Identity;
 		// correct order: scale >> rotate >> translate
 
-		Vector3 newScale = ps.orientation * ls.scale;
+		Vector3 absScale = ps.orientation * ls.scale;
 
-		newScale.x = Math::abs(newScale.x);
-		newScale.y = Math::abs(newScale.y);
-		newScale.z = Math::abs(newScale.z);
+		absScale.x = Math::abs(absScale.x);
+		absScale.y = Math::abs(absScale.y);
+		absScale.z = Math::abs(absScale.z);
 
-		
-		ws.position = ps.position + ps.scale * (ps.orientation * ls.position); // <-- This is correct
+		ws.position = ps.position + ps.orientation * (ps.scale * ls.position); // <-- This is correct
 		ws.orientation = ps.orientation * ls.orientation;
-		ws.scale = ps.scale * newScale;
+		ws.scale = ps.scale * absScale;
 		//ws.scale = ps.scale * (conjugate(ps.orientation) * ls.scale);
 
 		return ws;

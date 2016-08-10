@@ -79,9 +79,18 @@ namespace Dunjun
 			return len(s) >= len(suffix) && substring(s, len(s) - len(suffix), len(s)) == suffix;
 		}
 
+		INTERNAL char* copyStringToCString(const String& str, Allocator& a)
+		{
+			const char* cStr = cString(str);
+			const uSize_t l = len(str) + 1;
+			char* out = (char*)a.allocate(l);
+			memcpy(out, cStr, l);
+			return out;
+		}
+
 		// concatenates the elements of array to create a single string
 		// the seperator sep is placed between elements in the resulting string
-		String join(const Array<String>& array, const String& sep)
+		String join(const Array<char*>& array, const String& sep)
 		{
 			const sSize_t aLen = len(array);
 			if(aLen == 0)
@@ -107,8 +116,10 @@ namespace Dunjun
 
 		// slices s into all sbustrings seperated by sep and returns an array
 		// of the bubstrings between those seprators
-		void split(const String& s, const String& sep, Array<String>& out)
+		void split(const String& s, const String& sep, Array<char*>& out)
 		{
+			Allocator& a = out.m_allocator;
+
 			if (sep == "")
 			{
 				const uSize_t n = len(s);
@@ -116,7 +127,7 @@ namespace Dunjun
 				resize(out, n);
 
 				for (uSize_t i = 0; i < n; i++)
-					out[i] = s[i];
+					out[i] = copyStringToCString(s[i], a);
 
 				return;
 			}
@@ -126,7 +137,7 @@ namespace Dunjun
 
 			uSize_t start = 0;
 			uSize_t na = 0;
-			reserve(out, n);
+			resize(out, n);
 
 			const uSize_t lsep = len(sep);
 			const uSize_t ls = len(s);
@@ -135,16 +146,23 @@ namespace Dunjun
 			{
 				if (s[i] == c && (lsep == 1 || substring(s, i, i + lsep) == sep))
 				{
-					out[na] = substring(s, start, i);
+					out[na] = copyStringToCString(substring(s, start, i), a);
 					na++;
 					start = i + lsep;
 					i += lsep - 1;
 				}
 			}
 
-			out[na] = substring(s, start, ls);
+			out[na] = copyStringToCString(substring(s, start, ls), a);
 
 			resize(out, na + 1);
+		}
+
+		void deallocateCStringArray(Array<char*>& a)
+		{
+			Allocator& _a = a.m_allocator;
+			for(char* s : a)
+				_a.deallocate(s);
 		}
 
 		// Generic split: splits after each instance of sep, including sepSave bytes

@@ -21,8 +21,8 @@ vec4 calculatePointLight(vec3 surfaceToLight, float distanceToLight, vec3 normal
 						 u_light.attenuation.quadratic * distanceToLight * distanceToLight);
 	attenuation = 1.0f / attenuation;
 
-	attenuation *= square(1 - clamp(square(square(distanceToLight / u_light.range)), 0.0f, 1.0f));
-	//attenuation *= clamp(square(1.0 - (square(distanceToLight / u_light.range))), 0, 1);
+	//attenuation *= square(1 - clamp(square(square(distanceToLight / u_light.range)), 0.0f, 1.0f));
+	attenuation *= clamp(square(1.0 - (square(distanceToLight / u_light.range))), 0, 1);
 
 	vec4 diffuse = vec4(0.0f);
 

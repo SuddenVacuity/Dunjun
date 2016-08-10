@@ -236,12 +236,12 @@ namespace Dunjun
 
 		if(capacity > 0)
 		{
-			data = (T*)a.m_allocator->allocate(capacity * sizeof(T), alignof(T));
+			data = (T*)a.m_allocator.allocate(capacity * sizeof(T), alignof(T));
 
 			std::memcpy(data, a.m_data, a.m_length * sizeof(T));
 		}
 
-		a.m_allocator->deallocate(a.m_data);
+		a.m_allocator.deallocate(a.m_data);
 		a.m_data = data;
 		a.m_capacity = capacity;
 	}
@@ -277,7 +277,7 @@ namespace Dunjun
 
 	template <typename T>
 	inline Array<T>::Array(Allocator& a)
-		: m_allocator(&a)
+		: m_allocator(a)
 		, m_length(0)
 		, m_capacity(0)
 		, m_data(nullptr)
@@ -288,7 +288,7 @@ namespace Dunjun
 	inline Array<T>::~Array()
 	{
 
-		m_allocator->deallocate(m_data);
+		m_allocator.deallocate(m_data);
 	}
 
 	template <typename T>
@@ -310,7 +310,6 @@ namespace Dunjun
 		const size_t num = other.m_length;
 		resize(*this, num);
 		std::memcpy(m_data, other.m_data, num * sizeof(T));
-		//m_length = num;
 		return *this;
 	}
 

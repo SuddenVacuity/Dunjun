@@ -265,7 +265,7 @@ namespace Dunjun
 		template <typename T>
 		void rehash(HashMap<T>& h, size_t capacity)
 		{
-			HashMap<T> newHash = *h.hashes.m_allocator;
+			HashMap<T> newHash = h.hashes.m_allocator;
 
 			resize(newHash.hashes, capacity);
 			const size_t oldLength = len(h.data);
@@ -281,7 +281,7 @@ namespace Dunjun
 				MultiHash::insert(newHash, e.key, e.value);
 			}
 
-			HashMap<T> empty = *h.hashes.m_allocator;
+			HashMap<T> empty = h.hashes.m_allocator;
 
 			h.~HashMap<T>();
 

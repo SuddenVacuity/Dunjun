@@ -2,6 +2,11 @@
 #include <Dunjun/System/Logger.hpp>
 #include <Dunjun/Game.hpp>
 
+#ifdef DUNJUN_SYSTEM_WINDOWS
+#include <Windows.h>
+#endif
+
+
 namespace Dunjun
 {
 
@@ -516,12 +521,16 @@ namespace Dunjun
 			sg.setLocalTransform(playerNode, pos2);
 
 			Camera& c = g_world->camera;
-			c.transform.position.x = moveCos;
-			c.transform.position.z = moveSin;
-
+			//c.transform.position.x = moveCos * 2;
+			//c.transform.position.z = moveSin * 2;
+			c.transform.position.x = 0;
+			c.transform.position.z = 5;
+			//
 			c.transform.orientation = conjugate(Math::lookAtQuaternion(c.transform.position, Vector3::Zero));
 
-
+			PointLight& pl = g_world->renderSystem.pointLights[0];
+			pl.position.x = moveCos * 1.2;
+			pl.position.z = moveSin * 1.2;
 
 
 
@@ -618,6 +627,10 @@ namespace Dunjun
 				ShaderProgram& shaders = g_shaderHolder.get("texturePass");
 				shaders.use();
 				defer(shaders.stopUsing());
+
+				shaders.setUniform("u_tex", 0);
+				shaders.setUniform("u_scale", Vector3{ 1, 1, 1 });
+
 				glDisable(GL_DEPTH_TEST);
 
 				drawSprite(g_window, Rectangle(0, 0, rs.fbSize.x, rs.fbSize.y), 
@@ -628,6 +641,65 @@ namespace Dunjun
 
 			//g_world->render();
 		}
+		/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+		)				.
+		)					GET SYSTEM INFO
+		)
+		)				.
+		)					.
+		)
+		)				.
+		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+
+		INTERNAL void getSystemInformation()
+		{
+			u32 oldFlags = g_logger.flags;
+			const char* oldPrefix = g_logger.prefix;
+
+			logSection(g_logger, "Start Get System Information");
+
+			g_logger.prefix = "";
+			g_logger.flags -= LogFlag::LogFlag_Date | LogFlag::LogFlag_Time;
+
+			{
+				SDL_version compiled, linked;
+				SDL_VERSION(&compiled);
+				SDL_GetVersion(&linked);
+				logPrint(g_logger, "Compile SDL version %d.%d.%d", compiled.major, compiled.minor, compiled.patch);
+				logPrint(g_logger, "Running SDL version %d.%d.%d", linked.major, linked.minor, linked.patch);
+			}
+			{
+				SDL_Renderer* renderer = SDL_CreateRenderer(g_window.getSDLHandle(), -1, 0);
+				SDL_RendererInfo rendererInfo;
+				SDL_GetRendererInfo(renderer, &rendererInfo);
+				logPrint(g_logger, "Renderer name: %s", rendererInfo.name);
+			}
+
+			logPrint(g_logger, "Graphics Card: %s - %s v%s", glGetString(GL_VENDOR), glGetString(GL_RENDERER), glGetString(GL_VERSION));
+
+
+			logPrint(g_logger, "System Platform: %s", SDL_GetPlatform());
+			logPrint(g_logger, "OS Version: %s", getSystemOS());
+			logPrint(g_logger, "Number of logical cores: %d", SDL_GetCPUCount());
+			logPrint(g_logger, "System RAM: %dMB", SDL_GetSystemRAM());
+			logPrint(g_logger, "GetCurrentVideoDiver: %s", SDL_GetCurrentVideoDriver());
+
+
+
+			u32 count; // shared variable for limiting iterators
+			count = SDL_GetNumVideoDrivers();
+			for (uSize_t i = 0; i < count; i++)
+				logPrint(g_logger, "Video Driver %d: %s", i, SDL_GetVideoDriver(i));
+
+			count = SDL_GetNumVideoDisplays();
+			for (uSize_t i = 0; i < count; i++)
+				logPrint(g_logger, "Display Device %d: %s", i, SDL_GetDisplayName(i));
+
+			g_logger.flags = oldFlags;
+			g_logger.prefix = oldPrefix;
+		}
+
+
 
 		/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 		)				.
@@ -715,18 +787,18 @@ namespace Dunjun
 				append(rs.directionalLights, light);
 			}
 
-			for(u32 i = 0; i < 10; i++)
+			for(u32 i = 0; i < 1; i++)
 			{
 				PointLight light;
 
 				Random r;
-				f32 x = r.getFloat(-3.5, 3.5f);
-				f32 y = r.getFloat(0.5f, 4);
-				f32 z = r.getFloat(-3.5, 3.5f);
+				f32 x = 0; //r.getFloat(-3.5, 3.5f);
+				f32 y = 1; //r.getFloat(0.5f, 4);
+				f32 z = 0; //r.getFloat(-3.5, 3.5f);
 
 				light.color = ColorLib::White;
 				light.position = Vector3{x, y, z};
-				light.intensity = 3.0f;
+				light.intensity = 8.0f;
 				light.colorIntensity = calculateLightIntensities(light.color, light.intensity);
 				light.brightness = ColorLib::calculateBrightness(light.colorIntensity);
 				light.range = calculateLightRange(light.intensity, light.color, light.attenuation);
@@ -735,20 +807,12 @@ namespace Dunjun
 
 		}
 
-
 		void init()
 		{
 			Memory::init();
 
-			std::remove("log.txt");
-			g_logFile = fopen("log.txt", "a+");
-
-			setLogger(g_logger, g_logFile, "[INFO]", 
-					  LogFlag::LogFlag_PresetDefault | LogFlag::LogFlag_SaveToFile);
-
-
-			if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_GAMECONTROLLER | 
-						SDL_INIT_HAPTIC | SDL_INIT_JOYSTICK) != 0)
+			if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_GAMECONTROLLER |
+				SDL_INIT_HAPTIC | SDL_INIT_JOYSTICK) != 0)
 			{
 				std::cerr << "SDL Failed to initialize. Error: ";
 				std::cerr << SDL_GetError;
@@ -756,6 +820,12 @@ namespace Dunjun
 
 				std::exit(EXIT_FAILURE);
 			}
+
+			std::remove("log.txt");
+			g_logFile = fopen("log.txt", "a+");
+
+			setLogger(g_logger, g_logFile, "[INFO]", 
+					  LogFlag::LogFlag_PresetDefault | LogFlag::LogFlag_SaveToFile);
 
 			// import form config files
 			ConfigData configData = loadConfigDataFromFile("data/defaultSettings.op");
@@ -779,6 +849,8 @@ namespace Dunjun
 
 			g_window.create("Loading...", vm);
 			g_window.setFramerateLimit(FrameLimit);
+
+			getSystemInformation();
 
 			glewInit();
 
