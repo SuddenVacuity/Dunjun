@@ -292,6 +292,9 @@
     <None Include="data\shaders\_head_material.glsl" />
     <None Include="data\shaders\_head_transform.glsl" />
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="_TODO.txt" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

@@ -22,7 +22,7 @@ namespace Dunjun
 	ConfigData loadConfigDataFromFile(const String& filepath)
 	{
 		//String filepath = "data/defaultSettings.op";
-		std::cout << "Start Importing Config File: " + filepath + "\n";
+		//std::cout << "Start Importing Config File: " + filepath + "\n";
 
 		std::fstream file;
 		file.open(cString(filepath), std::ios::in | std::ios::binary);
@@ -93,7 +93,8 @@ namespace Dunjun
 					}
 					else
 					{
-						std::cout << "\nconfig section error\n\n";
+						logPrint(g_loggerInfo, "Import Config Section Error");
+						//std::cout << "\nconfig section error\n\n";
 						break;
 					}
 				} // end check for config section markers []
@@ -120,7 +121,8 @@ namespace Dunjun
 			// both -2 means a section tag was found
 			if (declarationPos == -2 && definitionPos == -2)
 			{
-				std::cout << "\n" + line + "\n";
+				logPrint(g_loggerInfo, "%s", cString(line));
+				//std::cout << "\n" + line + "\n";
 				continue;
 			}
 
@@ -167,13 +169,13 @@ namespace Dunjun
 			ConfigData::Entry v = getConfigDataEntry(configData, name);
 			switch (v.type)
 			{
-			default: std::cout << "Unlisted value - Should never get here\n"; break;
-			case ConfigType::ConfigType_Unknown: std::cout << "Unknown Type - Should never get here\n"; break;
-			case ConfigType::ConfigType_Uint:	 std::cout << type + "  : " + name + " = " << configData.uints[v.index] << std::endl; break;
-			case ConfigType::ConfigType_Sint:	 std::cout << type + "  : " + name + " = " << configData.sints[v.index] << std::endl; break;
-			case ConfigType::ConfigType_Float:	 std::cout << type + "  : " + name + " = " << configData.floats[v.index] << std::endl; break;
-			case ConfigType::ConfigType_Bool:	 std::cout << type + "   : " + name + " = " << configData.bools[v.index] << std::endl; break;
-			case ConfigType::ConfigType_String:	 std::cout << type + " : " + name + " = \"" << configData.strings[v.index] << "\"" << std::endl; break;
+			default: logPrint(g_loggerInfo, "Unlisted value - Should never get here"); break;
+			case ConfigType::ConfigType_Unknown: logPrint(g_loggerInfo, "Unknown Type - Should never get here"); break;
+			case ConfigType::ConfigType_Uint:	 logPrint(g_loggerInfo, "%s  : %s = %d",	 cString(type), cString(name), configData.uints[v.index]); break;
+			case ConfigType::ConfigType_Sint:	 logPrint(g_loggerInfo, "%s  : %s = %i",	 cString(type), cString(name), configData.sints[v.index]); break;
+			case ConfigType::ConfigType_Float:	 logPrint(g_loggerInfo, "%s  : %s = %f",	 cString(type), cString(name), configData.floats[v.index]); break;
+			case ConfigType::ConfigType_Bool:	 logPrint(g_loggerInfo, "%s   : %s = %d",	 cString(type), cString(name), configData.bools[v.index]); break;
+			case ConfigType::ConfigType_String:	 logPrint(g_loggerInfo, "%s : %s = \"%s\"", cString(type), cString(name), cString( configData.strings[v.index])); break;
 			}
 
 		} // end while(file.good())
@@ -202,9 +204,6 @@ namespace Dunjun
 		//for (u32 i = 0; i < configData.stringsLength; i++)
 		//	std::cout << cString(configData.strings[i]) << "\n";
 
-		NSTOP
-		std::cout << "\nFinished Importing Config File: " + filepath + "\n\n";
-
 		return configData;
 	}
 
@@ -227,7 +226,8 @@ namespace Dunjun
 			i = 1;
 		else if (value[0] == '-')
 		{
-			std::cerr << "WARNING: " << name + " must be a positive number\n";
+			logPrint(g_loggerInfo, "WARNING: %s value must be a positive number", cString(name));
+			//std::cerr << "WARNING: " << name + " must be a positive number\n";
 			return false; // add value failed
 		}
 
@@ -235,15 +235,16 @@ namespace Dunjun
 		{
 			if (!Strings::isNumeric(value[i]))
 			{
-
-				std::cerr << "WARNING: " << name + " is not a number\n";
+				logPrint(g_loggerInfo, "WARNING: %s value is not a number", cString(name));
+				//std::cerr << "WARNING: " << name + " is not a number\n";
 				return false; // add value failed
 			}
 		}
 
 		if (has(data.map, murmurStringHash64(name)))
 		{
-			std::cerr << "WARNING: " << name << " already exists\n";
+			logPrint(g_loggerInfo, "WARNING: %s already exists", cString(name));
+			//std::cerr << "WARNING: " << name << " already exists\n";
 			return false; // add value failed
 		}
 
@@ -271,14 +272,16 @@ namespace Dunjun
 		{
 			if (!Strings::isNumeric(value[i]))
 			{
-				std::cerr << "WARNING: " << name + " is not a number\n";
+				logPrint(g_loggerInfo, "WARNING: %s value is not a number", cString(name));
+				//std::cerr << "WARNING: " << name + " is not a number\n";
 				return false; // add value failed
 			}
 		}
 
 		if (has(data.map, murmurStringHash64(name)))
 		{
-			std::cerr << "WARNING: " << name << " already exists\n";
+			logPrint(g_loggerInfo, "WARNING: %s already exists", cString(name));
+			//std::cerr << "WARNING: " << name << " already exists\n";
 			return false; // add value failed
 		}
 
@@ -302,13 +305,15 @@ namespace Dunjun
 
 		if (sscanf(cString(value), "%f", &f) != 1)
 		{
-			std::cerr << "WARNING: " << name + " is not a float\n";
+			logPrint(g_loggerInfo, "WARNING: %s value is not a float", cString(name));
+			//std::cerr << "WARNING: " << name + " is not a float\n";
 			return false; // value is not a float
 		}
 
 		if (has(data.map, murmurStringHash64(name)))
 		{
-			std::cerr << "WARNING: " << name << " already exists\n";
+			logPrint(g_loggerInfo, "WARNING: %s already exists", cString(name));
+			//std::cerr << "WARNING: " << name << " already exists\n";
 			return false; // add value failed
 		}
 
@@ -334,13 +339,15 @@ namespace Dunjun
 			b = false;
 		else
 		{
-			std::cerr << "WARNING: " << name + " is not a boolean\n";
+			logPrint(g_loggerInfo, "WARNING: %s is not a boolean value", cString(name));
+			//std::cerr << "WARNING: " << name + " is not a boolean\n";
 			return false; // add value failed
 		}
 
 		if (has(data.map, murmurStringHash64(name)))
 		{
-			std::cerr << "WARNING: " << name << " already exists\n";
+			logPrint(g_loggerInfo, "WARNING: %s already exists", cString(name));
+			//std::cerr << "WARNING: " << name << " already exists\n";
 			return false; // add value failed
 		}
 
@@ -361,20 +368,23 @@ namespace Dunjun
 		// chech that data is long enough to contain quotation marks
 		if (len(value) <= 2)
 		{
-			std::cerr << "WARNING: " << name + " value must have \" \" to be considered a string\n";
+			logPrint(g_loggerInfo, "WARNING: %s value must have \" \" to be considered a string", cString(name));
+			//std::cerr << "WARNING: " << name + " value must have \" \" to be considered a string\n";
 			return false;
 		}
 
 		// check for quotation marks 
 		if (!(value[0] == '\"' && value[len(value) - 1] == '\"'))
 		{
-			std::cerr << "WARNING: " << name + " value must be contained within quotation marks\n";
+			logPrint(g_loggerInfo, "WARNING: %s value must be contained within quotation marks", cString(name));
+			//std::cerr << "WARNING: " << name + " value must be contained within quotation marks\n";
 			return false; // add value failed
 		}
 
 		if (has(data.map, murmurStringHash64(name)))
 		{
-			std::cerr << "WARNING: " << name << " already exists\n";
+			logPrint(g_loggerInfo, "WARNING: %s already exists", cString(name));
+			//std::cerr << "WARNING: " << name << " already exists\n";
 			return false; // add value failed
 		}
 
@@ -407,11 +417,13 @@ namespace Dunjun
 		if(e.type == ConfigType::ConfigType_Uint)
 		{
 			const u32 found = data.uints[e.index];
-			std::cout << "u_int  : " + name + " = " << found << "\n";
+			logPrint(g_loggerInfo, "u_int  : %s = %d", cString(name), found);
+			//std::cout << "u_int  : " + name + " = " << found << "\n";
 			return found;
 		}
 
-		std::cout << "DEFAULT: " + name + "\n";
+		logPrint(g_loggerInfo, "DEFAULT: %s", cString(name));
+		//std::cout << "DEFAULT: " + name + "\n";
 		
 		return defaultValue;
 	}
@@ -423,11 +435,13 @@ namespace Dunjun
 		if (e.type == ConfigType::ConfigType_Sint)
 		{
 			const s32 found = data.sints[e.index];
-			std::cout << "s_int  : " + name + " = " << found << "\n";
+			logPrint(g_loggerInfo, "s_int  : %s = %i", cString(name), found);
+			//std::cout << "s_int  : " + name + " = " << found << "\n";
 			return found;
 		}
 
-		std::cout << "DEFAULT: " + name + "\n";
+		logPrint(g_loggerInfo, "DEFAULT: %s", cString(name));
+		//std::cout << "DEFAULT: " + name + "\n";
 
 		return defaultValue;
 	}
@@ -439,11 +453,13 @@ namespace Dunjun
 		if (e.type == ConfigType::ConfigType_Float)
 		{
 			const f32 found = data.floats[e.index];
-			std::cout << "float  : " + name + " = " << found << "\n";
+			logPrint(g_loggerInfo, "float  : %s = %f", cString(name), found);
+			//std::cout << "float  : " + name + " = " << found << "\n";
 			return found;
 		}
 
-		std::cout << "DEFAULT: " + name + "\n";
+		logPrint(g_loggerInfo, "DEFAULT: %s", cString(name));
+		//std::cout << "DEFAULT: " + name + "\n";
 
 		return defaultValue;
 	}
@@ -455,11 +471,13 @@ namespace Dunjun
 		if (e.type == ConfigType::ConfigType_Bool)
 		{
 			const b8 found = data.bools[e.index];
-			std::cout << "bool   : " + name + " = " << found << "\n";
+			logPrint(g_loggerInfo, "bool   : %s = %d", cString(name), found);
+			//std::cout << "bool   : " + name + " = " << found << "\n";
 			return found;
 		}
 
-		std::cout << "DEFAULT: " + name + "\n";
+		logPrint(g_loggerInfo, "DEFAULT: %s", cString(name));
+		//std::cout << "DEFAULT: " + name + "\n";
 
 		return defaultValue;
 	}
@@ -471,11 +489,13 @@ namespace Dunjun
 		if (e.type == ConfigType::ConfigType_String)
 		{
 			const String found = data.strings[e.index];
-			std::cout << "string : " + name + " = \"" << found << "\"\n";
+			logPrint(g_loggerInfo, "string : %s = \"%s\"", cString(name), cString(found)); // string name = "found"
+			//std::cout << "string : " + name + " = \"" << found << "\"\n";
 			return found;
 		}
 
-		std::cout << "DEFAULT: " + name + "\n";
+		logPrint(g_loggerInfo, "DEFAULT: %s", cString(name));
+		//std::cout << "DEFAULT: " + name + "\n";
 		
 		return defaultValue;
 	}

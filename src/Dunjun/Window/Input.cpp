@@ -34,7 +34,8 @@ namespace Dunjun
 				if(gamepadIndex >= Gamepad_MaxCount)
 					break;
 
-				std::cout << "Adding gamepad: " << gamepadIndex << ::std::endl;
+				logPrint(g_loggerInfo, "Adding Gamepad %d", gamepadIndex);
+				//std::cout << "Adding gamepad: " << gamepadIndex << ::std::endl;
 				
 				// add gamepad to list
 				g_gamepadHandles[gamepadIndex] = SDL_GameControllerOpen(joystickIndex);
@@ -45,21 +46,24 @@ namespace Dunjun
 
 				if (SDL_HapticRumbleSupported(g_rumbleHandles[gamepadIndex]) != true)
 				{
-					std::cout << "Input::setUp() " << "Gamepad " << gamepadIndex <<
-						" -Rumble device not supported-SDL(" <<
-						SDL_GetError() << ")" << std::endl;
+					logPrint(g_loggerError, "Input::setup() Gamepad %d - Rumble device not supported-SDL(%s)", gamepadIndex, SDL_GetError());
+					//std::cout << "Input::setUp() " << "Gamepad " << gamepadIndex <<
+					//	" -Rumble device not supported-SDL(" <<
+					//	SDL_GetError() << ")" << std::endl;
 				}
 				if (SDL_HapticRumbleInit(g_rumbleHandles[gamepadIndex]) == -1);
 				{
-					std::cout << "Input::setUp() " << "Gamepad " << gamepadIndex <<
-						" -Rumble initialization failed-SDL(" <<
-						SDL_GetError() << ")" << std::endl;
+					logPrint(g_loggerError, "Input::setup() Gamepad %d - Rumble initialization failed-SDL(%s)", gamepadIndex, SDL_GetError());
+					//std::cout << "Input::setUp() " << "Gamepad " << gamepadIndex <<
+					//	" -Rumble initialization failed-SDL(" <<
+					//	SDL_GetError() << ")" << std::endl;
 
 					SDL_HapticClose(g_rumbleHandles[gamepadIndex]);
 					g_rumbleHandles[gamepadIndex] = nullptr;
 				}
 
-				std::cout << "Gamepad " << gamepadIndex << " Added\n" << std::endl;
+				logPrint(g_loggerEvent, "Gamepad %d Added", gamepadIndex);
+				//std::cout << "Gamepad " << gamepadIndex << " Added\n" << std::endl;
 
 				gamepadIndex++;
 			}

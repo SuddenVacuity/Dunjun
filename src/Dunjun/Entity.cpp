@@ -83,9 +83,9 @@ namespace Dunjun
 		camera.viewportAspectRatio = renderSystem.fbSize.x / renderSystem.fbSize.y;
 		renderSystem.render();
 
-		//glViewport(0, 0, renderSystem.fbSize.x, renderSystem.fbSize.y);
-		//glClearColor(0, 0, 0, 0);
-		//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glViewport(0, 0, renderSystem.fbSize.x, renderSystem.fbSize.y);
+		glClearColor(0, 0, 0, 0);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		{
 			ShaderProgram& shaders = g_shaderHolder.get("texturePass");
 

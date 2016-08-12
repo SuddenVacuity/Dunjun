@@ -17,8 +17,6 @@ namespace Dunjun
 	//};
 	GLOBAL Window g_window;
 
-	GLOBAL Logger g_logger;
-	GLOBAL FILE* g_logFile;
 
 	namespace
 	{
@@ -26,6 +24,12 @@ namespace Dunjun
 		GLOBAL const u32 FrameLimit = 288;
 		GLOBAL bool g_running = true;
 		GLOBAL u32 logLevel = 1;
+
+		GLOBAL bool useConsole = false;		   // TODO: move these to UI manager
+		GLOBAL bool checkForCommand = false;   // TODO: move these to UI manager
+		// consoleText reference is created in Game::run()
+		GLOBAL String* consoleText;			   // TODO: move these to UI manager
+
 	} // end anon namespace
 
 	GLOBAL World* g_world;
@@ -86,54 +90,62 @@ namespace Dunjun
 		// File path for shader files and define and bind attributes
 		INTERNAL void loadShaders()
 		{
-			u32 shaderCounter = 0;
-			logPrint(g_logger, "Loading shader %d", shaderCounter++);
+			u32 counter = 0;
+			logPrint(g_loggerModel, "Loading shader %d", counter++);
 			g_shaderHolder.insertFromFile("default", "default_vert.glsl", 
 													 "default_frag.glsl");
-			logPrint(g_logger, "Loading shader %d", shaderCounter++);
+			logPrint(g_loggerModel, "Loading shader %d", counter++);
 			g_shaderHolder.insertFromFile("texturePass", "texPass_vert.glsl", 
 														 "texPass_frag.glsl");
-			logPrint(g_logger, "Loading shader %d", shaderCounter++);
+			logPrint(g_loggerModel, "Loading shader %d", counter++);
 			g_shaderHolder.insertFromFile("deferredGeometryPass", "deferredGeometryPass_vert.glsl", 
 																  "deferredGeometryPass_frag.glsl");
-			logPrint(g_logger, "Loading shader %d", shaderCounter++);
+			logPrint(g_loggerModel, "Loading shader %d", counter++);
 			g_shaderHolder.insertFromFile("deferredDirectionalLight", "deferredLightPass_vert.glsl",
 																	  "deferredDirectionalLightPass_frag.glsl");
 
-
-			setLoggerColor(g_logger, LogFlag::LogFlag_ColorText_Cyan, LogFlag::LogFlag_ColorBackground_Grey);
-
-			logPrint(g_logger, "Loading shader %d", shaderCounter++);
+			logPrint(g_loggerModel, "Loading shader %d", counter++);
 			g_shaderHolder.insertFromFile("deferredAmbientLight", "deferredLightPass_vert.glsl", 
 																  "deferredAmbientLightPass_frag.glsl");
-			logPrint(g_logger, "Loading shader %d", shaderCounter++);
+			logPrint(g_loggerModel, "Loading shader %d", counter++);
 			g_shaderHolder.insertFromFile("deferredPointLight", "deferredLightPass_vert.glsl",
 																"deferredPointLightPass_frag.glsl");
 
-			setLoggerColor(g_logger, LogFlag::LogFlag_ColorText_Red, LogFlag::LogFlag_ColorBackground_Black);
-
-			logPrint(g_logger, "Loading shader %d", shaderCounter++);
+			logPrint(g_loggerModel, "Loading shader %d", counter++);
 			g_shaderHolder.insertFromFile("deferredSpotLight", "deferredLightPass_vert.glsl",
 															   "deferredSpotLightPass_frag.glsl");
 
 
 
-			logPrint(g_logger, "Loading shader %d", shaderCounter++);
+			logPrint(g_loggerModel, "Loading shader %d", counter++);
 			g_shaderHolder.insertFromFile("deferredFinalPass", "deferredLightPass_vert.glsl",
 															   "deferredFinalPass_frag.glsl");
 		}
 
 		INTERNAL void loadMaterials()
 		{
+			u32 counter = 0;
 			// load diffuse textures
+			logPrint(g_loggerModel, "Loading diffuse texture %d", counter++);
 			g_texDiffuse_default = loadTextureFromFile("data/textures/default.png");
+
+			logPrint(g_loggerModel, "Loading diffuse texture %d", counter++);
 			g_texDiffuse_dunjunText = loadTextureFromFile("data/textures/dunjunText.jpg");
+
+			logPrint(g_loggerModel, "Loading diffuse texture %d", counter++);
 			g_texDiffuse_stone = loadTextureFromFile("data/textures/stone.png");
+
+			logPrint(g_loggerModel, "Loading diffuse texture %d", counter++);
 			g_texDiffuse_terrain = loadTextureFromFile("data/textures/terrain.png", TextureFilter::Nearest);
+
+			logPrint(g_loggerModel, "Loading diffuse texture %d", counter++);
 			g_texDiffuse_brick = loadTextureFromFile("data/textures/bricks.jpg");
 
+			counter = 0;
 			// load normal maps
+			logPrint(g_loggerModel, "Loading normal texture %d", counter++);
 			g_texNormal_default = loadTextureFromFile("data/textures/default_normal.jpg");
+			logPrint(g_loggerModel, "Loading normal texture %d", counter++);
 			g_texNormal_brick = loadTextureFromFile("data/textures/bricks_normal.png");
 
 			// create materials
@@ -277,6 +289,279 @@ namespace Dunjun
 
 		/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 		)				.
+		)					CHECK FOR CONSOLE COMMAND
+		)
+		)				.
+		)					.
+		)
+		)				.
+		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+
+
+		INTERNAL void checkForConsoleCommand()
+		{
+			if(!checkForCommand)
+				return;
+
+			String ConsoleCommand = Strings::toUpperCase(*consoleText);
+			logPrint(g_loggerConsole, "Input: %s", cString(ConsoleCommand));
+			std::cout << "\n";
+
+			if (ConsoleCommand == "HELP")
+			{
+				std::cout << "\n" << std::endl;
+				std::cout << "Commands suck for now.\n--------------------" << std::endl;
+
+				//std::cout << "GamePad::Left Stick = Move camera" << std::endl;
+				//std::cout << "GamePad::Right Stick = Turn camera" << std::endl;
+				//std::cout << "GamePad::D-Pad Move = sprite" << std::endl;
+				//std::cout << "GamePad::Shoulder Buttons = Move camera up/down" << std::endl;
+				//std::cout << "GamePad::X = Test vibration" << std::endl;
+				//std::cout << "GamePad::B = Render Texture on sprite" << std::endl;
+				//std::cout << "GamePad::A = Move Light to current Camera location" << std::endl;
+				std::cout << "\n";
+				//std::cout << "Keyboard::ArrowKeys = Move sprite" << std::endl;
+				//std::cout << "Keyboard::L/R Ctrl = Move sprite up/down" << std::endl;
+				std::cout << "\n";
+				std::cout << "[SYSTEM] = Show system information" << std::endl;
+				//std::cout << "[REGEN] = Regenerate level with culling" << std::endl;
+				//std::cout << "[REGENNC] = Regenerate level without culling" << std::endl;
+				std::cout << "[LTCHRED] = Test ColorLib::removeChannelRed on point lights" << std::endl;
+				std::cout << "[LTCHGRN] = Test ColorLib::removeChannelGreen on point lights" << std::endl;
+				std::cout << "[LTCHBLU] = Test ColorLib::removeChannelBlue on point lights" << std::endl;
+				std::cout << "[LTGREYS] = Test ColorLib::greyScale on point lights" << std::endl;
+				std::cout << "[LTRESET] = Set light to default values" << std::endl;
+				std::cout << "[DIR] = Return views cardinal direction and vertical angle" << std::endl;
+				//std::cout << "[ROOMS] = Return number of rooms currently rendering" << std::endl;
+				std::cout << "[HELP] = Show help" << std::endl;
+				std::cout << "[QUIT] = Close Program" << std::endl;
+				//std::cout << "Keyboard::T = Test multiply transforms" << std::endl;
+				//std::cout << "Keyboard::R = Reset sprite position, orientation and scale" << std::endl;
+				//std::cout << "Keyboard::L = Change to orthographic camera" << std::endl;
+				//std::cout << "Keyboard::K = Change to perspective camera" << std::endl;
+
+
+			}
+			else if (ConsoleCommand == "TODO")
+			{
+				std::cout << "stuff" << std::endl;
+			}
+			// room visibility test
+			//else if (ConsoleCommand == "ROOMS")
+			//{
+			//	std::cout << "Rendering " << level->roomsRendered << " Rooms" << std::endl;
+			//}
+			//// room visibility test
+			else if (ConsoleCommand == "CHAR")
+			{
+				for (int i = 0; i < 255; i++)
+				{
+					// skip the beep
+					if (i == 7)
+						continue;
+
+					std::cout << "char# " << i << " - " << (char)i << std::endl;
+				}
+
+			}
+			// room visibility test
+			else if (ConsoleCommand == "SYSTEM")
+			{
+				std::cout << "Using Grapics Card:\n-------------------" << std::endl;
+				std::cout << glGetString(GL_VENDOR) << std::endl;
+				std::cout << glGetString(GL_RENDERER) << std::endl;
+				std::cout << "Version: " << glGetString(GL_VERSION) << std::endl;
+
+				std::cout << "\n\n";
+			}
+			// return direction
+			else if (ConsoleCommand == "DIR")
+			{
+				Vector3 f = forwardVector(g_world->camera.transform.orientation);
+
+				s32 angle = f.y * 90;
+
+				String direction;
+
+				if (f.x > 0) // right side
+				{
+					if (f.z > 0) // right-bottom quadrant
+					{
+						if (f.x > f.z)
+							direction = "East";
+						else
+							direction = "South";
+					}
+					else // right-top quadrant
+					{
+						if (f.x > -f.z)
+							direction = "East";
+						else
+							direction = "North";
+					}
+				}
+				else // left side
+				{
+					if (f.z > 0) // left-bottom quadrant
+					{
+						if (-f.x > f.z)
+							direction = "West";
+						else
+							direction = "South";
+					}
+					else // left-top quadrant
+					{
+						if (f.z > f.x)
+							direction = "West";
+						else
+							direction = "North";
+					}
+				}
+
+				std::cout << "You are facing " << direction << " and looking " << angle << " degrees vertically.\n";
+
+			}
+			// cout test iterator
+			else if (ConsoleCommand == "ITERATOR")
+			{
+				std::cout << "Test Iterator 0: " << testIterator_5[0] << std::endl;
+				std::cout << "Test Iterator 1: " << testIterator_5[1] << std::endl;
+				std::cout << "Test Iterator 2: " << testIterator_5[2] << std::endl;
+				std::cout << "Test Iterator 3: " << testIterator_5[3] << std::endl;
+				std::cout << "Test Iterator 4: " << testIterator_5[4] << std::endl;
+			}
+			// level regeneration
+			//else if (ConsoleCommand == "REGEN")
+			//{
+			//		toggleCulling = true;
+			//		SceneNode* level = sceneGraph.findChildByName("level");
+			//		sceneGraph.detachChild(*level);
+			//	
+			//		{ // test level generation
+			//			auto level = make_unique<Level>();
+			//	
+			//			level->material = &context.materialHolder->get("dunjunText");
+			//			level->name = "level";
+			//	
+			//			level->generate();
+			//	
+			//			this->level = level.get();
+			//	
+			//			sceneGraph.attachChild(std::move(level));
+			//		}
+			//}
+			// regenerate world without culling
+			//else if (ConsoleCommand == "REGENNC")
+			//{
+			//		toggleCulling = false;
+			//	
+			//		SceneNode* level = sceneGraph.findChildByName("level");
+			//		sceneGraph.detachChild(*level);
+			//	
+			//		{ // test level generation
+			//			auto level = make_unique<Level>();
+			//	
+			//			level->material = &context.materialHolder->get("dunjunText");
+			//			level->name = "level";
+			//	
+			//			level->generate();
+			//	
+			//			this->level = level.get();
+			//	
+			//			sceneGraph.attachChild(std::move(level));
+			//		}
+			//}
+			// remove red from point lights
+			else if (ConsoleCommand == "LTCHRED")
+			{
+				for (PointLight& light : g_world->renderSystem.pointLights)
+				{
+					light.color = ColorLib::removeChannelRed(light.color);
+					light.colorIntensity = calculateLightIntensities(light.color, light.intensity);
+				}
+			}
+			// remove green from point lights
+			else if (ConsoleCommand == "LTCHGRN")
+			{
+				for (PointLight& light : g_world->renderSystem.pointLights)
+				{
+					light.color = ColorLib::removeChannelGreen(light.color);
+					light.colorIntensity = calculateLightIntensities(light.color, light.intensity);
+				}
+			}
+			// remove blue from point lights
+			else if (ConsoleCommand == "LTCHBLU")
+			{
+				for (PointLight& light : g_world->renderSystem.pointLights)
+				{
+					light.color = ColorLib::removeChannelBlue(light.color);
+					light.colorIntensity = calculateLightIntensities(light.color, light.intensity);
+				}
+			}
+			// make point lights greyscale
+			else if (ConsoleCommand == "LTGREYS")
+			{
+				for (PointLight& light : g_world->renderSystem.pointLights)
+				{
+					light.color = ColorLib::greyScale(light.brightness);
+					light.colorIntensity = calculateLightIntensities(light.color, light.intensity);
+				}
+			}
+			// reset point lights to default
+			else if (ConsoleCommand == "LTRESET")
+			{
+				u32 n = 0;
+				for (PointLight& light : g_world->renderSystem.pointLights)
+				{
+					switch (n)
+					{
+					default: break;
+					case 0:
+					{
+						light.color = ColorLib::White;
+						light.colorIntensity = calculateLightIntensities(light.color, light.intensity);
+						break;
+					}
+					case 1:
+					{
+						light.color = ColorLib::Red;
+						light.colorIntensity = calculateLightIntensities(light.color, light.intensity);
+						break;
+					}
+					case 2:
+					{
+						light.color = ColorLib::Blue;
+						light.colorIntensity = calculateLightIntensities(light.color, light.intensity);
+						break;
+					}
+					case 3:
+					{
+						light.color = ColorLib::Green;
+						light.colorIntensity = calculateLightIntensities(light.color, light.intensity);
+						break;
+					}
+					}
+					n++;
+				}
+
+			}
+			else if (ConsoleCommand == "QUIT")
+			{
+				//g_window->close();
+				g_running = false;
+				return;
+			}
+			else
+			{
+				logPrint(g_loggerConsole, "Invalid command");
+			}
+
+			*consoleText = "";
+			checkForCommand = false;
+		}
+
+		/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+		)				.
 		)					.
 		)
 		)				HANDLE INPUT
@@ -317,79 +602,87 @@ namespace Dunjun
 						g_running = false;
 						break;
 					}
-				//	// console
-				//	if (g_world->useConsole == true)
-				//	{
-				//		// exit console
-				//		if (Input::isKeyPressed(Input::Key::Tab))
-				//		{
-				//			g_world->useConsole = false;
-				//		}
-				//
-				//		// check for a command
-				//		if (Input::isKeyPressed(Input::Key::Return))
-				//			g_world->checkForCommand = true;
-				//
-				//		if (Input::isKeyPressed(Input::Key::Space))
-				//			g_world->consoleBuffer.append(" ");
-				//
-				//		// Erase letters
-				//		if (Input::isKeyPressed(Input::Key::Backspace))
-				//			if (g_world->consoleText.size() > 0)
-				//				g_world->consoleText.erase(g_world->consoleText.size() - 1);
-				//
-				//		if (Input::isKeyPressed(Input::Key::Delete))
-				//		{
-				//			g_world->consoleText.clear();
-				//			g_world->consoleBuffer.clear();
-				//		}
-				//
-				//		// TODO: press up or down to cycle previous commands
-				//		if (Input::isKeyPressed(Input::Key::Up))
-				//			g_world->consoleText.append(" ");
-				//		if (Input::isKeyPressed(Input::Key::Down))
-				//			g_world->consoleText.append(" ");
-				//
-				//		//////////////////////////////////
-				//		//								//
-				//		//		   ADD LETTERS			//
-				//		//								//
-				//		//////////////////////////////////
-				//
-				//		for (int i = 0; i < 26; i++)
-				//		{
-				//			std::string s = ""; // can't initialize as i or cast in .append()
-				//
-				//			if (event.key.capsLock == true || event.key.shift == true)
-				//				s = i + 65; // capital letters
-				//			else
-				//				s = i + 97; // lower case letters
-				//
-				//			if (Input::isKeyPressed(Input::Key(i)))
-				//				if ((g_world->consoleBuffer.find(s) == g_world->consoleBuffer.npos)) // only add if letter is not already in buffer
-				//					g_world->consoleBuffer.append(s);
-				//		}
-				//
-				//		if (1)
-				//		{
-				//			// TODO: make this only happen when a key is released and while no keys are pressed
-				//			// SDL UP/DOWN events don't seem to work for this
-				//			// buffer is added twice when this happens here
-				//			g_world->consoleText.append(g_world->consoleBuffer);
-				//			g_world->consoleBuffer.clear();
-				//		}
-				//
-				//		std::cout << "\n\nType in a command and press enter. [HELP] [QUIT]" << std::endl;
-				//		std::cout << ">> [" << g_world->consoleText << "." << g_world->consoleBuffer << "]" << std::endl;
-				//
-				//	}
-				//	// normal input
-				//	else
-				//	{
-				//		if (Input::isKeyPressed(Input::Key::Tab))
-				//			g_world->useConsole = true;
-				//	}
-				//	break;
+					// console
+					if (useConsole == true)
+					{
+						String consoleBuffer = "";
+						// exit console
+						if (Input::isKeyPressed(Input::Key::Tab))
+						{
+							logPrint(g_loggerConsole, "Console Closed");
+							useConsole = false;
+						}
+				
+						// check for a command
+						if (Input::isKeyPressed(Input::Key::Return))
+							checkForCommand = true;
+				
+						if (Input::isKeyPressed(Input::Key::Space))
+							append(consoleBuffer, " ");
+				
+						// Erase letters
+						if (Input::isKeyPressed(Input::Key::Backspace))
+							if (len(*consoleText) > 0)
+								popBack(*consoleText);
+				
+						if (Input::isKeyPressed(Input::Key::Delete))
+						{
+							consoleBuffer = "";
+							*consoleText = "";
+						}
+				
+						// TODO: press up or down to cycle previous commands
+						if (Input::isKeyPressed(Input::Key::Up))
+							append(consoleBuffer, " ");
+						if (Input::isKeyPressed(Input::Key::Down))
+							append(consoleBuffer, " ");
+				
+						//////////////////////////////////
+						//								//
+						//		   ADD LETTERS			//
+						//								//
+						//////////////////////////////////
+				
+						for (int i = 0; i < 26; i++)
+						{
+							char s = 0; // can't initialize as i or cast in .append()
+				
+							if (event.key.capsLock == true || event.key.shift == true)
+								s = i + 65; // capital letters
+							else
+								s = i + 97; // lower case letters
+				
+							if (Input::isKeyPressed(Input::Key(i)))
+								if (!Strings::contains(consoleBuffer, s)) // only add if letter is not already in buffer
+									append(consoleBuffer, s);
+						}
+
+						if (consoleBuffer != "")
+						{
+							// TODO: make this only happen when a key is released and while no keys are pressed
+							// SDL UP/DOWN events don't seem to work for this
+							// buffer is added twice when this happens here
+
+							*consoleText = *consoleText + consoleBuffer;
+							 
+							consoleBuffer = "";
+							shrinkToFit(consoleBuffer);
+						}
+
+						std::cout << "\n\nType in a command and press enter. [HELP] [QUIT]" << std::endl;
+						std::cout << ">> [" << *consoleText << "." << consoleBuffer << "]" << std::endl;
+				
+					}
+					// normal input
+					else
+					{
+						if (Input::isKeyPressed(Input::Key::Tab))
+						{
+							logPrint(g_loggerConsole, "Console Opened");
+							useConsole = true;
+						}
+					}
+					break;
 				}
 
 				/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -424,6 +717,8 @@ namespace Dunjun
 			  )
 			  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
+			checkForConsoleCommand();
+
 			if (!g_window.isOpen() || // check if window was closed
 				Input::isKeyPressed(Input::Key::Escape)) // checks if the escape key is pressed in window
 			{
@@ -438,48 +733,6 @@ namespace Dunjun
 
 			if(Input::isKeyPressed(Input::Key::D))
 			{
-				Vector3 f = forwardVector(g_world->camera.transform.orientation);
-
-				s32 angle = f.y * 90;
-
-				std::string direction;
-
-				if (f.x > 0) // right side
-				{
-					if (f.z > 0) // right-bottom quadrant
-					{
-						if (f.x > f.z)
-							direction = "East";
-						else
-							direction = "South";
-					}
-					else // right-top quadrant
-					{
-						if (f.x > -f.z)
-							direction = "East";
-						else
-							direction = "North";
-					}
-				}
-				else // left side
-				{
-					if (f.z > 0) // left-bottom quadrant
-					{
-						if (-f.x > f.z)
-							direction = "West";
-						else
-							direction = "South";
-					}
-					else // left-top quadrant
-					{
-						if (f.z > f.x)
-							direction = "West";
-						else
-							direction = "North";
-					}
-				}
-
-				std::cout << "You are facing " << direction << " and looking " << angle << " degrees vertically." << std::endl;
 			}
 		}
 
@@ -532,9 +785,6 @@ namespace Dunjun
 			pl.position.x = moveCos * 1.2;
 			pl.position.z = moveSin * 1.2;
 
-
-
-
 			std::cout << "";
 		}
 
@@ -580,7 +830,7 @@ namespace Dunjun
 			defer(shaders.stopUsing());
 			glDisable(GL_DEPTH_TEST);
 
-			const Vector2 size = { g_window.currentSize[0], g_window.currentSize[1] };
+			const Vector2 size = g_window.currentSize;
 			const f32 aspect = g_window.currentAspectRatio;
 
 			Vector2 UiSize = {100, 100};
@@ -591,15 +841,13 @@ namespace Dunjun
 			rec.width = UiSize.x * aspect;
 			rec.height = UiSize.y;
 
-			int i = 0;
-			for(/**/;i < GBuffer::Count; i++)
+			
+			for(u32 i = 0; i < GBuffer::Count; i++)
 			{
 				drawSprite(g_window, rec, shaders, &g_world->renderSystem.gBuffer.textures[i]);
 				rec.y -= UiSize.y;
 			}
 			drawSprite(g_window, rec, shaders,&g_world->renderSystem.lightingBuffer.colorTexture);
-
-
 		}
 
 		INTERNAL void render()
@@ -613,14 +861,15 @@ namespace Dunjun
 				g_currentOutputTexture = &rs.finalTexture.colorTexture;
 
 			g_window.setSize(g_window.getSize());
-			rs.fbSize = { g_window.currentSize[0], g_window.currentSize[1]};
+			rs.fbSize = g_window.currentSize;
+
 
 			rs.resetAllPointers();
 			g_world->camera.viewportAspectRatio = g_window.currentAspectRatio;
 			rs.camera = &g_world->camera;
 			rs.render();
 
-			glViewport(0, 0, g_window.currentSize[0], g_window.currentSize[1]);
+			glViewport(0, 0, g_window.currentSize.x, g_window.currentSize.y);
 			glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 			{
@@ -653,50 +902,41 @@ namespace Dunjun
 
 		INTERNAL void getSystemInformation()
 		{
-			u32 oldFlags = g_logger.flags;
-			const char* oldPrefix = g_logger.prefix;
-
-			logSection(g_logger, "Start Get System Information");
-
-			g_logger.prefix = "";
-			g_logger.flags -= LogFlag::LogFlag_Date | LogFlag::LogFlag_Time;
+			logSection(g_loggerInfo, "Get System Information");
 
 			{
 				SDL_version compiled, linked;
 				SDL_VERSION(&compiled);
 				SDL_GetVersion(&linked);
-				logPrint(g_logger, "Compile SDL version %d.%d.%d", compiled.major, compiled.minor, compiled.patch);
-				logPrint(g_logger, "Running SDL version %d.%d.%d", linked.major, linked.minor, linked.patch);
+				logPrint(g_loggerInfo, "Compile SDL version %d.%d.%d", compiled.major, compiled.minor, compiled.patch);
+				logPrint(g_loggerInfo, "Running SDL version %d.%d.%d", linked.major, linked.minor, linked.patch);
 			}
 			{
 				SDL_Renderer* renderer = SDL_CreateRenderer(g_window.getSDLHandle(), -1, 0);
 				SDL_RendererInfo rendererInfo;
 				SDL_GetRendererInfo(renderer, &rendererInfo);
-				logPrint(g_logger, "Renderer name: %s", rendererInfo.name);
+				logPrint(g_loggerInfo, "Renderer name: %s", rendererInfo.name);
 			}
 
-			logPrint(g_logger, "Graphics Card: %s - %s v%s", glGetString(GL_VENDOR), glGetString(GL_RENDERER), glGetString(GL_VERSION));
+			logPrint(g_loggerInfo, "Graphics Card: %s - %s v%s", glGetString(GL_VENDOR), glGetString(GL_RENDERER), glGetString(GL_VERSION));
 
 
-			logPrint(g_logger, "System Platform: %s", SDL_GetPlatform());
-			logPrint(g_logger, "OS Version: %s", getSystemOS());
-			logPrint(g_logger, "Number of logical cores: %d", SDL_GetCPUCount());
-			logPrint(g_logger, "System RAM: %dMB", SDL_GetSystemRAM());
-			logPrint(g_logger, "GetCurrentVideoDiver: %s", SDL_GetCurrentVideoDriver());
+			logPrint(g_loggerInfo, "System Platform: %s", SDL_GetPlatform());
+			logPrint(g_loggerInfo, "OS Version: %s", getSystemOS());
+			logPrint(g_loggerInfo, "Number of logical cores: %d", SDL_GetCPUCount());
+			logPrint(g_loggerInfo, "System RAM: %dMB", SDL_GetSystemRAM());
+			logPrint(g_loggerInfo, "GetCurrentVideoDiver: %s", SDL_GetCurrentVideoDriver());
 
 
 
 			u32 count; // shared variable for limiting iterators
 			count = SDL_GetNumVideoDrivers();
 			for (uSize_t i = 0; i < count; i++)
-				logPrint(g_logger, "Video Driver %d: %s", i, SDL_GetVideoDriver(i));
+				logPrint(g_loggerInfo, "Video Driver %d: %s", i, SDL_GetVideoDriver(i));
 
 			count = SDL_GetNumVideoDisplays();
 			for (uSize_t i = 0; i < count; i++)
-				logPrint(g_logger, "Display Device %d: %s", i, SDL_GetDisplayName(i));
-
-			g_logger.flags = oldFlags;
-			g_logger.prefix = oldPrefix;
+				logPrint(g_loggerInfo, "Display Device %d: %s", i, SDL_GetDisplayName(i));
 		}
 
 
@@ -811,33 +1051,81 @@ namespace Dunjun
 		{
 			Memory::init();
 
+			// init loggers
+			{
+				std::remove("log.txt");
+				g_logFile = fopen("log.txt", "a+");
+
+				setLogger(g_loggerDebug, g_logFile, "[DEBUG]",
+					LogFlag::LogFlag_SaveToFile |
+					LogFlag::LogFlag_Time |
+					LogFlag::LogFlag_Date |
+					LogFlag::LogFlag_Text_NewLine |
+					LogFlag::LogFlag_Disable);
+				setLogger(g_loggerError, g_logFile, "[ERROR]",
+					LogFlag::LogFlag_PrintToTerminal |
+					LogFlag::LogFlag_SaveToFile |
+					LogFlag::LogFlag_Time |
+					LogFlag::LogFlag_Date |
+					LogFlag::LogFlag_ColorText_Red |
+					LogFlag::LogFlag_Text_NewLine);
+				setLogger(g_loggerInfo, g_logFile, "[INFO]",
+					LogFlag::LogFlag_PrintToTerminal |
+					LogFlag::LogFlag_SaveToFile |
+					LogFlag::LogFlag_Text_NewLine);
+				setLogger(g_loggerModel, g_logFile, "[MODEL]",
+					LogFlag::LogFlag_PrintToTerminal |
+					LogFlag::LogFlag_SaveToFile |
+					LogFlag::LogFlag_ColorText_Cyan |
+					LogFlag::LogFlag_Text_NewLine);
+				setLogger(g_loggerConsole, g_logFile, "[CONSOLE]",
+					LogFlag::LogFlag_PrintToTerminal |
+					LogFlag::LogFlag_SaveToFile |
+					LogFlag::LogFlag_ColorText_Green |
+					LogFlag::LogFlag_Text_NewLine);
+				setLogger(g_loggerWindow, g_logFile, "[WINDOW]",
+					LogFlag::LogFlag_SaveToFile |
+					LogFlag::LogFlag_Text_NewLine);
+				setLogger(g_loggerInput, g_logFile, "[INPUT]",
+					LogFlag::LogFlag_SaveToFile |
+					LogFlag::LogFlag_Text_NewLine);
+				setLogger(g_loggerEvent, g_logFile, "[EVENT]",
+					LogFlag::LogFlag_PrintToTerminal |
+					LogFlag::LogFlag_SaveToFile |
+					LogFlag::LogFlag_ColorText_Yellow |
+					LogFlag::LogFlag_Text_NewLine);
+				setLogger(g_loggerRender, g_logFile, "[RENDER]",
+					LogFlag::LogFlag_SaveToFile |
+					LogFlag::LogFlag_Text_NewLine);
+				setLogger(g_loggerGame, g_logFile, "[GAME]",
+					LogFlag::LogFlag_PrintToTerminal |
+					LogFlag::LogFlag_SaveToFile |
+					LogFlag::LogFlag_ColorText_Magenta |
+					LogFlag::LogFlag_Text_NewLine);
+			}
+
 			if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_GAMECONTROLLER |
 				SDL_INIT_HAPTIC | SDL_INIT_JOYSTICK) != 0)
 			{
-				std::cerr << "SDL Failed to initialize. Error: ";
-				std::cerr << SDL_GetError;
-				std::cerr << std::endl;
+				//std::cerr << "SDL Failed to initialize. Error: ";
+				//std::cerr << SDL_GetError;
+				//std::cerr << std::endl;
+				logPrint(g_loggerError, "SDL Failed to initialize: %s", SDL_GetError);
 
 				std::exit(EXIT_FAILURE);
 			}
 
-			std::remove("log.txt");
-			g_logFile = fopen("log.txt", "a+");
-
-			setLogger(g_logger, g_logFile, "[INFO]", 
-					  LogFlag::LogFlag_PresetDefault | LogFlag::LogFlag_SaveToFile);
-
 			// import form config files
+			logSection(g_loggerInfo, "Import Config File to Memory");
 			ConfigData configData = loadConfigDataFromFile("data/defaultSettings.op");
 
 			// test getConfigData
 			{
-			std::cout << "\nGetting ConfigData from Memory" <<
-						 "\n==============================\n\n";
+				logSection(g_loggerInfo, "Get ConfigData from Memory");
 
-			String getString = getFromConfigData_string(configData, "NotWindow.var3", "derp");
-			b8 getBool = getFromConfigData_bool(configData, "valFalse", true);
-			String GetDoesntExist = getFromConfigData_string(configData, "thisDoesNotExist.varDoesntExist", "it really didnt' exist");
+				String getString = getFromConfigData_string(configData, "NotWindow.var3", "derp");
+				b8 getBool = getFromConfigData_bool(configData, "valFalse", true);
+				String GetDoesntExist = getFromConfigData_string(configData, "thisDoesNotExist.varDoesntExist", "it really didnt' exist");
 			}
 
 			VideoMode vm = {};
@@ -848,7 +1136,7 @@ namespace Dunjun
 			std::cout << "\n";
 
 			g_window.create("Loading...", vm);
-			g_window.setFramerateLimit(FrameLimit);
+			g_window.setFramerateLimit(0);
 
 			getSystemInformation();
 
@@ -862,9 +1150,9 @@ namespace Dunjun
 			Input::setCursorPosition({ 0, 0 });
 
 			// load assets
+			logSection(g_loggerInfo, "Load Assets");
 			loadShaders();
 			loadMaterials();
-
 			loadSpriteAsset();
 
 			g_world = defaultAllocator().makeNew<World>();
@@ -912,6 +1200,11 @@ namespace Dunjun
 
 			uSize_t frames = 0;
 
+			// consoleText must be created after Memory::init()
+			// and needs to persist throughout while(g_running)
+			String consoleTextRef = "";
+			consoleText = &consoleTextRef;
+
 			while (g_running) // create a loop that works until the window closes
 			{
 				//Window::pollEvents();
@@ -935,8 +1228,9 @@ namespace Dunjun
 					update(TIME_STEP);
 				}
 
-				if (tc.update(milliseconds(500)) && 
-				   (g_running == true))
+				render();
+
+				if (tc.update(milliseconds(500)))
 				{
 					// dynamic window title
 					g_window.setTitle(stringFormat("Dunjun - %.3f ms - %d fps",
@@ -944,7 +1238,6 @@ namespace Dunjun
 												   (u32)tc.tickRate).c_str());
 				}
 
-				render();
 				g_window.display();
 
 			} // end while(g_running)
@@ -952,7 +1245,6 @@ namespace Dunjun
 
 		void cleanUp()
 		{
-			//defaultAllocator().makeDelete<World>(g_world);
 			defaultAllocator().makeDelete(g_world);
 			Input::cleanup();
 			g_window.close();

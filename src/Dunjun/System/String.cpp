@@ -84,6 +84,11 @@ namespace Dunjun
 	{
 		return append(s.data, &other.data[0], len(other.data));
 	}
+
+	void popBack(String& s)
+	{
+		popBack(s.data);
+	}
 	
 	char* begin(String& s)
 	{

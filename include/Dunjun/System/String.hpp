@@ -33,6 +33,8 @@ namespace Dunjun
 	size_t append(String& s, const char* cStr);
 	size_t append(String& s, const String& other);
 
+	void popBack(String& s);
+
 	char* begin(String& s);
 	const char* begin(const String& s);
 	char* end(String& s);

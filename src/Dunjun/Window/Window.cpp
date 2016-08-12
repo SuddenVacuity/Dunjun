@@ -76,7 +76,8 @@ namespace Dunjun
 		{
 			if(fullscreenWindow)
 			{
-				std::cerr << "Creating two fullscreen windows is not allowed!" << std::endl;
+				//std::cerr << "Creating two fullscreen windows is not allowed!" << std::endl;
+				logPrint(g_loggerError, "Creating two fullscreen windows is not allowed!");
 				style &= ~Style::Fullscreen;
 			}
 			else
@@ -84,12 +85,14 @@ namespace Dunjun
 				// check fullscreen dimenstions are valid
 				if (!mode.isValid())
 				{
-					std::cerr << "VideoMode " << mode.width << "x" << mode.height << "x" << mode.bitsPerPixel <<
-								 " is not valid." << std::endl;
+					//std::cerr << "VideoMode " << mode.width << "x" << mode.height << "x" << mode.bitsPerPixel <<
+					//			 " is not valid." << std::endl;
+					logPrint(g_loggerWindow, "Videomode %dx%dx%d is not valid.", mode.width, mode.height, mode.bitsPerPixel);
 
 					mode = VideoMode::getFullscreenModes()[0];
 
-					std::cerr << "Switching to VideoMode " << mode.width << "x" << mode.height << "x" << mode.bitsPerPixel << std::endl;
+					//std::cerr << "Switching to VideoMode " << mode.width << "x" << mode.height << "x" << mode.bitsPerPixel << std::endl;
+					logPrint(g_loggerWindow, "Switching to videomode %dx%dx%d", mode.width, mode.height, mode.bitsPerPixel);
 						
 				}
 
@@ -229,18 +232,15 @@ namespace Dunjun
 	{
 		SDL_GL_SwapWindow(m_handle);
 
-		if (m_frameTimeLimit != Time::Zero &&
-			m_frameTimeLimit > m_clock.getElapsedTime())
+		if (m_frameTimeLimit != Time::Zero)
 		{
-			Time::sleep(m_frameTimeLimit - m_clock.getElapsedTime());
-			m_clock.restart();
+			Time frameTime = m_clock.getElapsedTime();
+
+			if(m_frameTimeLimit > frameTime)
+				Time::sleep(m_frameTimeLimit - frameTime);
 		}
 
-		//if (m_frameTimeLimit != Time::Zero)
-		//{
-		//	Time::sleep(m_frameTimeLimit - m_clock.getElapsedTime());
-		//	m_clock.restart();
-		//}
+		m_clock.restart();
 	}
 
 	INTERNAL Input::Key convertFromSDL_ScanCode(u32 code)
@@ -385,24 +385,29 @@ namespace Dunjun
 			if (e.window.event == SDL_WINDOWEVENT_CLOSE)
 			{
 				event.type = Event::Closed;
-				std::cout << "Event - Window Closed" << std::endl;
+				logPrint(g_loggerWindow, "Window Closed");
+				//std::cout << "Event - Window Closed" << std::endl;
 			}
 			if (e.window.event == SDL_WINDOWEVENT_FOCUS_GAINED)
 			{
 				event.type = Event::GainedFocus;
-				std::cout << "Event - Window Gained Focus" << std::endl;
+				logPrint(g_loggerWindow, "Window Gained Focus");
+				//std::cout << "Event - Window Gained Focus" << std::endl;
 			}
 			if (e.window.event == SDL_WINDOWEVENT_FOCUS_LOST)
 			{
 				event.type = Event::LostFocus;
-				std::cout << "Event - Window Lost Focus" << std::endl;
+
+				logPrint(g_loggerWindow, "Window Lost Focus");
+				//std::cout << "Event - Window Lost Focus" << std::endl;
 			}
 			if (e.window.event == SDL_WINDOWEVENT_MOVED)
 			{
 				event.type = Event::Moved;
 				event.move.x = e.window.data1;
 				event.move.y = e.window.data2;
-				std::cout << "Event - Window Moved" << std::endl;
+				logPrint(g_loggerWindow, "Window Moved");
+				//std::cout << "Event - Window Moved" << std::endl;
 			}
 			return;
 		}
@@ -434,7 +439,8 @@ namespace Dunjun
 
 			event.mouseMove.x = e.button.x;
 			event.mouseMove.y = e.button.y;
-			std::cout << "Event - Mouse Button Pressed: " << (int)e.button.button << std::endl;
+			logPrint(g_loggerInput, "Mouse Button Pressed: %d", (int)e.button.button);
+			//std::cout << "Event - Mouse Button Pressed: " << (int)e.button.button << std::endl;
 			return;
 		}
 
@@ -446,7 +452,8 @@ namespace Dunjun
 
 			event.mouseMove.x = e.button.x;
 			event.mouseMove.y = e.button.y;
-			std::cout << "Event - Mouse Button Released: " << (int)e.button.button << std::endl;
+			logPrint(g_loggerInput, "Mouse Button Released: %d", (int)e.button.button);
+			//std::cout << "Event - Mouse Button Released: " << (int)e.button.button << std::endl;
 			return;
 		}
 
@@ -455,7 +462,8 @@ namespace Dunjun
 			event.type = Event::MouseWheelScrolled;
 			event.mouseScrollWheel.deltaX = e.wheel.x;
 			event.mouseScrollWheel.deltaY = e.wheel.y;
-			std::cout << "Event - Mouse Wheel Scrolled:" << std::endl;
+			logPrint(g_loggerInput, "Mouse Wheel Scrolled");
+			//std::cout << "Event - Mouse Wheel Scrolled:" << std::endl;
 			return;
 		}
 
@@ -487,7 +495,8 @@ namespace Dunjun
 				event.key.capsLock = true;
 			if (mod & KMOD_NUM)
 				event.key.numLock = true;
-			std::cout << "Event - Key Pressed:" << (int)e.button.button << std::endl;
+			logPrint(g_loggerInput, "Key Pressed: %d", (int)e.button.button);
+			//std::cout << "Event - Key Pressed:" << (int)e.button.button << std::endl;
 			return;
 		}
 
@@ -509,7 +518,8 @@ namespace Dunjun
 				event.key.capsLock = true;
 			if (mod & KMOD_NUM)
 				event.key.numLock = true;
-			std::cout << "Event - Key Released: " << (int)e.button.button << std::endl;
+			logPrint(g_loggerInput, "Key Released: %d", (int)e.button.button);
+			//std::cout << "Event - Key Released: " << (int)e.button.button << std::endl;
 			return;
 		}
 
@@ -528,7 +538,8 @@ namespace Dunjun
 			event.type = Event::GamepadButtonPressed;
 			event.gamepadButton.id = e.button.which;
 			event.gamepadButton.button = (Input::GamepadButton)e.cbutton.button;
-			std::cout << "Event - Gamepad Button Pressed:" << (int)e.cbutton.button << std::endl;
+			logPrint(g_loggerInput, "Gamepad Button Pressed: %d", (int)e.button.button);
+			//std::cout << "Event - Gamepad Button Pressed:" << (int)e.cbutton.button << std::endl;
 			return;
 		}
 
@@ -537,7 +548,8 @@ namespace Dunjun
 			event.type = Event::GamepadButtonReleased;
 			event.gamepadButton.id = e.button.which;
 			event.gamepadButton.button = (Input::GamepadButton)e.cbutton.button;
-			std::cout << "Event - Gamepad Button Released:" << (int)e.cbutton.button << std::endl;
+			logPrint(g_loggerInput, "Gamepad Button Released: %d", (int)e.button.button);
+			//std::cout << "Event - Gamepad Button Released:" << (int)e.cbutton.button << std::endl;
 			return;
 		}
 
@@ -545,7 +557,8 @@ namespace Dunjun
 		{
 			event.type = Event::GamepadAdded;
 			event.gamepad.id = e.cdevice.which;
-			std::cout << "Event - Gamepad Device Added: " << (int)e.cdevice.which << std::endl;
+			logPrint(g_loggerEvent, "Gamepad Device Added: %d", (int)e.cdevice.which);
+			//std::cout << "Event - Gamepad Device Added: " << (int)e.cdevice.which << std::endl;
 			return;
 		}
 
@@ -553,7 +566,8 @@ namespace Dunjun
 		{
 			event.type = Event::GamepadRemoved;
 			event.gamepad.id = e.cdevice.which;
-			std::cout << "Event - Gamepad Device Removed: " << (int)e.cdevice.which << std::endl;
+			logPrint(g_loggerEvent, "Gamepad Device Removed: %d", (int)e.cdevice.which);
+			//std::cout << "Event - Gamepad Device Removed: " << (int)e.cdevice.which << std::endl;
 			return;
 		}
 
@@ -561,7 +575,8 @@ namespace Dunjun
 		{
 			event.type = Event::GamepadRemapped;
 			event.gamepad.id = e.cdevice.which;
-			std::cout << "Event - Gamepad Device Remapped: " << (int)e.cdevice.which << std::endl;
+			logPrint(g_loggerEvent, "Gamepad Device Remapped: %d", (int)e.cdevice.which);
+			//std::cout << "Event - Gamepad Device Remapped: " << (int)e.cdevice.which << std::endl;
 			return;
 		}
 		

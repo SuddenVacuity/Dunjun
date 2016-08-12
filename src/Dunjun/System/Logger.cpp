@@ -8,6 +8,18 @@
 
 namespace Dunjun
 {
+
+	Logger g_loggerDebug;
+	Logger g_loggerError;
+	Logger g_loggerInfo;
+	Logger g_loggerEvent;
+	Logger g_loggerWindow;
+	Logger g_loggerInput;
+	Logger g_loggerConsole;
+	Logger g_loggerModel;
+	Logger g_loggerRender;
+	Logger g_loggerGame;
+
 	INTERNAL void logSetConsoleColor(const u32& logFlags)
 	{
 #if defined(DUNJUN_SYSTEM_WINDOWS)
@@ -157,7 +169,7 @@ namespace Dunjun
 		else
 			strcpy(s_buffer, " ");
 
-		const char* sep = "=============================================";
+		const char* sep = "========================================================";
 		uSize_t lname = strlen(sectionName);
 		uSize_t lsep = strlen(sep);
 
@@ -179,40 +191,35 @@ namespace Dunjun
 			strcpy(s_buffer, "");
 		}
 
-		// add name
-		strncat(s_buffer, sectionName, lname);
-		strncat(s_buffer, " ", 1);
-
 		// get extra data to be printed
 		{
 			time_t rawTime = {};
 			struct tm* timeInfo = nullptr;
 
-			if (logger.flags & LogFlag::LogFlag_Date | logger.flags & LogFlag::LogFlag_Time)
+			// collect data in buffer
 			{
 				time(&rawTime);
 				timeInfo = localtime(&rawTime);
-			}
 
-			// collect data in buffer
-			if (logger.flags & LogFlag::LogFlag_Date)
-			{
+				// date
 				LOCAL_PERSIST char s_dateBuffer[13] = {};
 				_snprintf(s_dateBuffer, 13, "%04d-%02d-%02d ",
 					1900 + timeInfo->tm_year, timeInfo->tm_mon + 1, timeInfo->tm_mday);
 
 				strncat(s_buffer, s_dateBuffer, 13);
-			}
 
-			if (logger.flags & LogFlag::LogFlag_Time)
-			{
+				// time
 				LOCAL_PERSIST char s_timeBuffer[13] = {};
 				_snprintf(s_timeBuffer, 13, "%02d:%02d:%02d ",
 					timeInfo->tm_hour, timeInfo->tm_min, timeInfo->tm_sec);
-
+				
 				strncat(s_buffer, s_timeBuffer, 13);
 			}
 		} // end get extra data to be printed
+
+		 // add name
+		strncat(s_buffer, ">> ", 3);
+		strncat(s_buffer, sectionName, lname);
 
 		// add new line
 		if (logger.flags & LogFlag::LogFlag_Text_NewLine)

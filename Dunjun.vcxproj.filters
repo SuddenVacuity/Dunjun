@@ -356,4 +356,7 @@
     <None Include="data\shaders\deferredFinalPass_frag.glsl" />
     <None Include="data\defaultSettings.op" />
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="_TODO.txt" />
+  </ItemGroup>
 </Project>

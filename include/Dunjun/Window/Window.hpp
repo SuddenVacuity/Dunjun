@@ -1,7 +1,7 @@
 #ifndef  DUNJUN_WINDOW_WINDOW_HPP
 #define  DUNJUN_WINDOW_WINDOW_HPP
 
-#include <Dunjun/System/TickCounter.hpp>
+#include <Dunjun/Window/GLContextSettings.hpp>
 
 namespace Dunjun
 {
@@ -116,8 +116,8 @@ namespace Dunjun
 		//}; // end anon struct
 
 
-		s32 currentPosition[2] = { 0, 0 };
-		f32 currentSize[2] = { 0, 0 };
+		Vector2 currentPosition = { 0, 0 };
+		Vector2 currentSize = { 0, 0 };
 		f32 currentAspectRatio = 0.0f;
 
 		Window();

@@ -1,0 +1,249 @@
+
+
+
+
+	[ ] = not implemented
+	[x] = complete
+	[.] = complete ... for now
+	[~] = in progress
+	[e] = external library
+
+RENDERING
+	[e] Image Loader
+	[~] Texture
+		[ ] 1D
+		[x] 2D
+		[ ] 3D
+		[ ] cubemap
+	[~] Material
+		[x] diffuse
+		[x] normal
+		[ ] specular
+		[ ] light emissive
+		[ ] ambient occlusion
+	[.] Vertex
+		[x] position
+		[x] texture coordinates
+		[x] color
+		[x] normals
+		[x] tangent
+	[.] Mesh
+	[x] ModelInstance(InstanceData)
+	[x] Transform
+		[x] position, orientation, scale
+		[x] operator overloads
+	[~] Camera
+		[x] rgba
+		[ ] hsl
+		[ ] hsv
+		[ ] husl?
+	[ ] Physically-Based Rendering System
+		[ ] Normal - Opaque Textured
+		[ ] Transparent - partly transparent
+		[ ] TransparentCutOut - binary visible/not visible regions
+		[ ] Self-Illuminated - Light emitting parts
+		[ ] Reflective - Reflect an environment(cubemap)
+	[.] Lights
+		[x] ambient
+		[x] directional
+		[x] point
+		[x] spot
+	[.] Shaders
+		[.] deferred geometry
+		[.] deferred ambient
+		[.] deferred directional
+		[.] deferred point
+		[.] deferred spot
+	[~] Primitive objects
+		[~] plane
+		[ ] cube
+		[ ] sphere
+		[ ] etc
+	[ ] Fog
+	[ ] Ambient Occlusion
+	[ ] Real-Time Global Illumination
+	[ ] Font System
+		[ ] RTT effects
+	[ ] Post Processing Effects
+	[ ] SMAA
+
+WORLD/SCENE ARCHITECTURE
+	[x] SceneNode
+		[.] SceneRenderer
+	[x] NodeComponent
+	[ ] Lights as nodes
+	[ ] Manage Scene
+
+PHYSICS
+	[ ] Multithreaded
+	[ ] Rigidbodies
+	[ ] Colliders
+	[ ] Joints
+	[ ] Character Controllers
+
+OPTIMIZATION
+	[ ] Multithreaded
+	[x] cone culling
+	[ ] SceneRenderer
+		[ ] sort objects by material then shader
+	[ ] frustrum culling
+	[.] deferred rendering
+		[ ] profiler
+	[ ] Level Of Detail
+
+UI
+	[ ] Canvas
+	[ ] Basic Layout
+	[ ] Visual Components
+	[ ] Iteration Components
+	[ ] Animation
+	[ ] Rich Text / Markdown support
+
+AUDIO
+	[ ] Streaming
+	[ ] Loading
+	[ ] Mixing
+	[ ] Hierachical Mixers
+	[ ] Transitions
+
+SYSTEM
+	[.] Typedef basic types
+		[x] u8/u16/u32/u64
+		[x] s8/s16/s32/s64
+		[x] b8/b32
+		[ ] frac8/frac16/frac32
+	[x] Custom Allocators
+		[x] Array
+		[x] Hash
+			[x] Murmur hash
+	[x] String Class
+		[x] remove last character
+	[.] Windows
+	[ ] OS X
+	[ ] Linux
+	[x] Time type
+	[x] Clock
+	[x] Tick Counter
+	[ ] Command/Task System
+	[ ] State Machines
+	[ ] Configuration Files
+	[x] Resource Holder
+	[ ] Tag-Based Asset Loader/Manager
+	[ ] Streaming Assets
+	[ ] HiDPI - OS X
+
+LOGGING
+	[x] Print to teminal
+	[x] Save to File
+	[.] Color settings
+		[x] Windows
+		[ ] OS X
+		[ ] Linux
+	[x] spacing settings
+	[x] time and date
+	[ ] elapsed time since last debug call in ms
+	[x] logging levels
+		[x] info
+		[x] debug
+
+
+CONFIG OPTIONS
+	[ ] Graphical Settings
+		[ ] Anitaliasing (SMAA)
+		[ ] Anisotropic Filtering
+		[ ] Post-Processing Effects
+		[ ] Fog
+		[ ] Number of objects
+		[ ] Render Distance
+		[ ] Gamma
+		[ ] Brightness
+		[ ] Color Correction
+		[ ] Field of View
+		[ ] Vertical Sync
+		[ ] Model Detail
+		[ ] Texture Detail
+		[ ] Shadow Detail
+		[ ] Water Detail
+		[ ] Resolution
+	[ ] Audio Settings
+		[ ] Speaker Setup
+		[ ] Volume Levels
+		[ ] Quality
+	[ ] Window Settings
+		[ ] Video Mode
+		[ ] Display mode
+			[ ] Fullscreen
+			[ ] Windowed
+			[ ] Borderless Window
+
+WINDOW
+	[e] Event System
+	[x] GLContext
+	[x] Window class
+		[x] Windowed
+		[x] Fullscreen
+		[ ] ToggleFullscreen
+	[x] VideoMode
+
+INPUT
+	[x] Keyboard
+	[x] Mouse
+	[~] Contoller
+		[x] Buttons
+		[x] Axis
+		[ ] Rumble
+	[ ] Key Mapping
+	[x] ClipBoard
+	[~] console
+		[x] basic input
+		[~] FIX: prevent letters being added again each frame
+		[ ] type checking
+
+ANIMATION
+	[ ] Texture
+	[ ] Mesh
+		[ ] Inverse Kinematices
+		[ ] Key-Frame based Animation
+
+MATH
+	[.] VectorN - N = {2, 3, 4}
+		[ ] VectorN - T = {s32, u32, f32} (f32 to be default)
+	[x] Vector Functions
+	[x] Matrix4
+	[x] Quaternion
+	[x] Constants
+	[x] Random
+	[ ] Line
+	[x] Rectangle
+	[ ] Circle?
+	[ ] Cube
+	[ ] Sphere?
+	[x] Unit
+	[x] Angles: Degree & Radian
+	[.] Functions
+		[x] Common
+			[x] TRIG
+			[x] HYPB
+			[.] etc
+		[x] Interpolation
+			[x] LERP
+			[x] SLERP
+			[x] SQUAD
+			[.] etc
+		[x] Transformation
+			[x] Translate
+			[x] Scale
+			[x] Rotate
+
+Other
+	[ ] AI
+		[ ] Path Finding
+		[ ] preset behaviors
+		[ ] goal based desicion making
+
+Scripting
+	[ ] Internal scripting language
+
+
+
+
