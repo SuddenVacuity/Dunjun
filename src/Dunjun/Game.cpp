@@ -305,11 +305,10 @@ namespace Dunjun
 
 			String ConsoleCommand = Strings::toUpperCase(*consoleText);
 			logPrint(g_loggerConsole, "Input: %s", cString(ConsoleCommand));
-			std::cout << "\n";
 
 			if (ConsoleCommand == "HELP")
 			{
-				std::cout << "\n" << std::endl;
+				std::cout << "\n";
 				std::cout << "Commands suck for now.\n--------------------" << std::endl;
 
 				//std::cout << "GamePad::Left Stick = Move camera" << std::endl;
@@ -344,16 +343,19 @@ namespace Dunjun
 			}
 			else if (ConsoleCommand == "TODO")
 			{
+				std::cout << "\n";
 				std::cout << "stuff" << std::endl;
 			}
 			// room visibility test
 			//else if (ConsoleCommand == "ROOMS")
 			//{
+			//	std::cout << "\n";
 			//	std::cout << "Rendering " << level->roomsRendered << " Rooms" << std::endl;
 			//}
 			//// room visibility test
 			else if (ConsoleCommand == "CHAR")
 			{
+				std::cout << "\n";
 				for (int i = 0; i < 255; i++)
 				{
 					// skip the beep
@@ -367,6 +369,7 @@ namespace Dunjun
 			// room visibility test
 			else if (ConsoleCommand == "SYSTEM")
 			{
+				std::cout << "\n";
 				std::cout << "Using Grapics Card:\n-------------------" << std::endl;
 				std::cout << glGetString(GL_VENDOR) << std::endl;
 				std::cout << glGetString(GL_RENDERER) << std::endl;
@@ -377,6 +380,7 @@ namespace Dunjun
 			// return direction
 			else if (ConsoleCommand == "DIR")
 			{
+				std::cout << "\n";
 				Vector3 f = forwardVector(g_world->camera.transform.orientation);
 
 				s32 angle = f.y * 90;
@@ -424,6 +428,7 @@ namespace Dunjun
 			// cout test iterator
 			else if (ConsoleCommand == "ITERATOR")
 			{
+				std::cout << "\n";
 				std::cout << "Test Iterator 0: " << testIterator_5[0] << std::endl;
 				std::cout << "Test Iterator 1: " << testIterator_5[1] << std::endl;
 				std::cout << "Test Iterator 2: " << testIterator_5[2] << std::endl;
@@ -433,6 +438,7 @@ namespace Dunjun
 			// level regeneration
 			//else if (ConsoleCommand == "REGEN")
 			//{
+			//		std::cout << "\n";
 			//		toggleCulling = true;
 			//		SceneNode* level = sceneGraph.findChildByName("level");
 			//		sceneGraph.detachChild(*level);
@@ -453,6 +459,7 @@ namespace Dunjun
 			// regenerate world without culling
 			//else if (ConsoleCommand == "REGENNC")
 			//{
+			//		std::cout << "\n";
 			//		toggleCulling = false;
 			//	
 			//		SceneNode* level = sceneGraph.findChildByName("level");
@@ -474,6 +481,7 @@ namespace Dunjun
 			// remove red from point lights
 			else if (ConsoleCommand == "LTCHRED")
 			{
+				std::cout << "\n";
 				for (PointLight& light : g_world->renderSystem.pointLights)
 				{
 					light.color = ColorLib::removeChannelRed(light.color);
@@ -483,6 +491,7 @@ namespace Dunjun
 			// remove green from point lights
 			else if (ConsoleCommand == "LTCHGRN")
 			{
+				std::cout << "\n";
 				for (PointLight& light : g_world->renderSystem.pointLights)
 				{
 					light.color = ColorLib::removeChannelGreen(light.color);
@@ -492,6 +501,7 @@ namespace Dunjun
 			// remove blue from point lights
 			else if (ConsoleCommand == "LTCHBLU")
 			{
+				std::cout << "\n";
 				for (PointLight& light : g_world->renderSystem.pointLights)
 				{
 					light.color = ColorLib::removeChannelBlue(light.color);
@@ -501,6 +511,7 @@ namespace Dunjun
 			// make point lights greyscale
 			else if (ConsoleCommand == "LTGREYS")
 			{
+				std::cout << "\n";
 				for (PointLight& light : g_world->renderSystem.pointLights)
 				{
 					light.color = ColorLib::greyScale(light.brightness);
@@ -510,6 +521,7 @@ namespace Dunjun
 			// reset point lights to default
 			else if (ConsoleCommand == "LTRESET")
 			{
+				std::cout << "\n";
 				u32 n = 0;
 				for (PointLight& light : g_world->renderSystem.pointLights)
 				{
@@ -553,7 +565,7 @@ namespace Dunjun
 			}
 			else
 			{
-				logPrint(g_loggerConsole, "Invalid command");
+				logPrint(g_loggerConsole, "\nInvalid command");
 			}
 
 			*consoleText = "";
@@ -645,10 +657,10 @@ namespace Dunjun
 				
 						for (int i = 0; i < 26; i++)
 						{
-							char s = 0; // can't initialize as i or cast in .append()
+							char s = 0;
 				
 							if (event.key.capsLock == true || event.key.shift == true)
-								s = i + 65; // capital letters
+								s = i + 65; // upper case letters
 							else
 								s = i + 97; // lower case letters
 				
@@ -751,41 +763,201 @@ namespace Dunjun
 			//g_world->update(dt);
 
 			SceneGraph& sg = g_world->sceneGraph;
-			SceneGraph::NodeId crateNode = sg.getNodeId(g_world->crate);
-			SceneGraph::NodeId playerNode = sg.getNodeId(g_world->player);
 
 			f32 wt = 1.0f * Time::now().asSeconds();
 			f32 a = 2.0f;
 
-			f32 moveSin = a * Math::sin(Radian(wt));
-			f32 moveCos = a * Math::cos(Radian(wt));
+			f32 moveSin = Math::sin(Radian(wt));
+			f32 moveCos = Math::cos(Radian(wt));
 
-			Transform pos = sg.getLocalTransform(crateNode);
-			pos.position.y = moveSin;
-			pos.scale = Vector3{ 1.2f, 1.2f, 1.2f } + Vector3{ 0.4f, 0.4f, 0.4f } * Math::sin(Radian(wt));
-			pos.orientation = offsetOrientation(pos.orientation,
-												Degree(360.0f * dt.asSeconds()),
-												Degree(10.0f * dt.asSeconds()));
+			{
+				SceneGraph::NodeId crateNode = sg.getNodeId(g_world->crate);
+				SceneGraph::NodeId playerNode = sg.getNodeId(g_world->player);
 
-			sg.setLocalTransform(crateNode, pos);
 
-			Transform pos2 = sg.getLocalTransform(playerNode);
-			pos2.position.x = moveCos;
-			sg.setLocalTransform(playerNode, pos2);
+				if (Input::isGamepadButtonPressed(0, Input::GamepadButton::DpadDown))
+				{
+					std::cout << "Controller 1 is working!\n";
+				}
+				if (Input::isGamepadButtonPressed(1, Input::GamepadButton::DpadDown))
+				{
+					std::cout << "Controller 2 is working!\n";
+				}
 
-			Camera& c = g_world->camera;
-			//c.transform.position.x = moveCos * 2;
-			//c.transform.position.z = moveSin * 2;
-			c.transform.position.x = 0;
-			c.transform.position.z = 5;
-			//
-			c.transform.orientation = conjugate(Math::lookAtQuaternion(c.transform.position, Vector3::Zero));
+				if(Input::isKeyPressed(Input::Key::LShift))
+				{
+					Transform pos = sg.getLocalTransform(crateNode);
+					//pos.position.y = moveSin * 5.0f * dt.asSeconds();
+					//pos.scale = Vector3{ 1.2f, 1.2f, 1.2f } + Vector3{ 0.4f, 0.4f, 0.4f } * Math::sin(Radian(wt));
+					//pos.orientation = offsetOrientation(pos.orientation,
+					//									Degree(360.0f * dt.asSeconds()),
+					//									Degree(10.0f * dt.asSeconds()));
 
-			PointLight& pl = g_world->renderSystem.pointLights[0];
-			pl.position.x = moveCos * 1.2;
-			pl.position.z = moveSin * 1.2;
 
-			std::cout << "";
+					if (Input::isKeyPressed(Input::Key::Left))
+					{
+						if (Input::isKeyPressed(Input::Key::W))
+							pos.position.x -= 10 * dt.asSeconds();
+						if (Input::isKeyPressed(Input::Key::E))
+							pos.orientation = offsetOrientation(pos.orientation, Degree(360.0f * dt.asSeconds()), Degree(0));
+						if(Input::isKeyPressed(Input::Key::R))
+							pos.scale += Vector3{ 10 * dt.asSeconds(), 0, 0 };
+
+					}
+					if (Input::isKeyPressed(Input::Key::Right))
+					{
+						if (Input::isKeyPressed(Input::Key::W))
+							pos.position.x += 10 * dt.asSeconds();
+						if (Input::isKeyPressed(Input::Key::E))
+							pos.orientation = offsetOrientation(pos.orientation, -Degree(360.0f * dt.asSeconds()), Degree(0));
+						if (Input::isKeyPressed(Input::Key::R))
+							pos.scale -= Vector3{ 10 * dt.asSeconds(), 0, 0 };
+					}
+					if (Input::isKeyPressed(Input::Key::Up))
+					{
+						if (Input::isKeyPressed(Input::Key::W))
+							pos.position.z -= 10 * dt.asSeconds();
+						if (Input::isKeyPressed(Input::Key::E))
+							pos.orientation = offsetOrientation(pos.orientation, Degree(0), Degree(360.0f * dt.asSeconds()));
+						if (Input::isKeyPressed(Input::Key::R))
+							pos.scale += Vector3{ 0, 10 * dt.asSeconds(), 0 };
+					}
+					if (Input::isKeyPressed(Input::Key::Down))
+					{
+						if (Input::isKeyPressed(Input::Key::W))
+							pos.position.z += 10 * dt.asSeconds();
+						if (Input::isKeyPressed(Input::Key::E))
+							pos.orientation = offsetOrientation(pos.orientation, Degree(0), -Degree(360.0f * dt.asSeconds()));
+						if (Input::isKeyPressed(Input::Key::R))
+							pos.scale -= Vector3{ 0, 10 * dt.asSeconds(), 0 };
+					}
+
+					sg.setLocalTransform(crateNode, pos);
+				}
+
+				f32 leftAxis = Input::getGamepadAxis(0, Input::GamepadAxis::LeftX);
+				if (leftAxis > 0.3f)
+				{
+					std::cout << "Looking: " << g_world->camera.transform.orientation << std::endl;
+					g_world->camera.transform.orientation = offsetOrientation(g_world->camera.transform.orientation, Degree(0), Degree(360.0f * dt.asSeconds()));
+				}
+
+				if(Input::isKeyPressed(Input::Key::RShift))
+				{
+					Transform pos = sg.getLocalTransform(playerNode);
+					//pos2.position.x = moveCos * 5.0f * dt.asSeconds();
+
+
+					if (Input::isKeyPressed(Input::Key::Left))
+					{
+						if (Input::isKeyPressed(Input::Key::W))
+							pos.position.x -= 10 * dt.asSeconds();
+						if (Input::isKeyPressed(Input::Key::E))
+							pos.orientation = offsetOrientation(pos.orientation, Degree(360.0f * dt.asSeconds()), Degree(0));
+						if (Input::isKeyPressed(Input::Key::R))
+							pos.scale += Vector3{ 10 * dt.asSeconds(), 0, 0 };
+
+					}
+					if (Input::isKeyPressed(Input::Key::Right))
+					{
+						if (Input::isKeyPressed(Input::Key::W))
+							pos.position.x += 10 * dt.asSeconds();
+						if (Input::isKeyPressed(Input::Key::E))
+							pos.orientation = offsetOrientation(pos.orientation, -Degree(360.0f * dt.asSeconds()), Degree(0));
+						if (Input::isKeyPressed(Input::Key::R))
+							pos.scale -= Vector3{ 10 * dt.asSeconds(), 0, 0 };
+					}
+					if (Input::isKeyPressed(Input::Key::Up))
+					{
+						if (Input::isKeyPressed(Input::Key::W))
+							pos.position.z -= 10 * dt.asSeconds();
+						if (Input::isKeyPressed(Input::Key::E))
+							pos.orientation = offsetOrientation(pos.orientation, Degree(0), Degree(360.0f * dt.asSeconds()));
+						if (Input::isKeyPressed(Input::Key::R))
+							pos.scale += Vector3{ 0, 10 * dt.asSeconds(), 0 };
+					}
+					if (Input::isKeyPressed(Input::Key::Down))
+					{
+						if (Input::isKeyPressed(Input::Key::W))
+							pos.position.z += 10 * dt.asSeconds();
+						if (Input::isKeyPressed(Input::Key::E))
+							pos.orientation = offsetOrientation(pos.orientation, Degree(0), -Degree(360.0f * dt.asSeconds()));
+						if (Input::isKeyPressed(Input::Key::R))
+							pos.scale -= Vector3{ 0, 10 * dt.asSeconds(), 0 };
+					}
+
+					sg.setLocalTransform(playerNode, pos);
+				}
+			}
+
+			{
+				Camera& c = g_world->camera;
+				//c.transform.position.x = moveCos * 2;
+				//c.transform.position.z = moveSin * 2;
+				c.transform.position.x = 0;
+				c.transform.position.z = 5;
+				//
+				c.transform.orientation = conjugate(Math::lookAtQuaternion(c.transform.position, Vector3::Zero));
+			}
+
+			{
+				PointLight& pl = g_world->renderSystem.pointLights[0];
+
+				if (Input::isKeyPressed(Input::Key::Left))
+					pl.position.x -= 10 * dt.asSeconds();
+				if (Input::isKeyPressed(Input::Key::Right))
+					pl.position.x += 10 * dt.asSeconds();
+				if (Input::isKeyPressed(Input::Key::Up))
+					pl.position.z -= 10 * dt.asSeconds();
+				if (Input::isKeyPressed(Input::Key::Down))
+					pl.position.z += 10 * dt.asSeconds();
+
+				if (Input::isKeyPressed(Input::Key::S))
+				{
+					logPrint(g_loggerInfo, "Test change hue with RGBtoHSL");
+					Vector3 hsl = ColorLib::RGBtoHSL(pl.color);
+
+					std::cout << "\nEnter Hue value (0.0~5.9999)";
+					std::cin >> hsl.x;
+					std::cout << "\nEnter saturation value (0.0~1.0)";
+					std::cin >> hsl.y;
+					std::cout << "\nEnter lightness value (0.0~1.0)";
+					std::cin >> hsl.z;
+
+					Color color = ColorLib::HSLtoRGB(hsl.x, hsl.y, hsl.z);
+
+					printf("\n\npl.color {%d, %d, %d, %d} color {%d, %d, %d, %d}\n",
+							pl.color.r, pl.color.g, pl.color.b, pl.color.a,
+							color.r, color.g, color.b, color.a);
+
+					hsl = ColorLib::RGBtoHSL(color);
+					printf("\n\nRGBtoHSL() hue %f, saturation %f, lightness %f}\n", hsl.x, hsl.y, hsl.z);
+
+					pl.color = color;
+					pl.colorIntensity = calculateLightIntensities(pl.color, pl.intensity);
+					pl.brightness = ColorLib::calculateBrightness(pl.colorIntensity);
+				}
+				if (Input::isKeyPressed(Input::Key::A))
+				{
+					logPrint(g_loggerInfo, "Reset Point Light Color");
+					pl.color = ColorLib::Yellow;
+					pl.colorIntensity = calculateLightIntensities(pl.color, pl.intensity);
+					pl.brightness = ColorLib::calculateBrightness(pl.colorIntensity);
+				}
+
+
+
+				if (Input::isKeyPressed(Input::Key::B))
+				{
+					Vector3 hsl = ColorLib::RGBtoHSL(pl.color);
+					Color color = ColorLib::HSLtoRGB(hsl.x, hsl.y, hsl.z);
+
+					u32 stop = 0;
+				}
+			}
+
+
+
 		}
 
 		/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -865,14 +1037,18 @@ namespace Dunjun
 
 
 			rs.resetAllPointers();
+
 			g_world->camera.viewportAspectRatio = g_window.currentAspectRatio;
+
 			rs.camera = &g_world->camera;
+
 			rs.render();
 
 			glViewport(0, 0, g_window.currentSize.x, g_window.currentSize.y);
 			glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 			{
+
 				ShaderProgram& shaders = g_shaderHolder.get("texturePass");
 				shaders.use();
 				defer(shaders.stopUsing());
@@ -884,10 +1060,12 @@ namespace Dunjun
 
 				drawSprite(g_window, Rectangle(0, 0, rs.fbSize.x, rs.fbSize.y), 
 						   shaders, g_currentOutputTexture);
+
 			}
 
 			renderUi();
 
+			std::cout << "";
 			//g_world->render();
 		}
 		/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1021,7 +1199,7 @@ namespace Dunjun
 
 				light.direction = { -0.0f, +0.2f, -0.8f };
 				light.color = ColorLib::Orange;
-				light.intensity = 0.12f;
+				light.intensity = 0.0f;
 				light.colorIntensity = calculateLightIntensities(light.color, light.intensity);
 				light.brightness = ColorLib::calculateBrightness(light.colorIntensity);
 				append(rs.directionalLights, light);
@@ -1038,7 +1216,7 @@ namespace Dunjun
 
 				light.color = ColorLib::White;
 				light.position = Vector3{x, y, z};
-				light.intensity = 8.0f;
+				light.intensity = 100.0f;
 				light.colorIntensity = calculateLightIntensities(light.color, light.intensity);
 				light.brightness = ColorLib::calculateBrightness(light.colorIntensity);
 				light.range = calculateLightRange(light.intensity, light.color, light.attenuation);
@@ -1102,6 +1280,11 @@ namespace Dunjun
 					LogFlag::LogFlag_SaveToFile |
 					LogFlag::LogFlag_ColorText_Magenta |
 					LogFlag::LogFlag_Text_NewLine);
+				setLogger(g_loggerGraphics, g_logFile, "[GRAPHICS]",
+					LogFlag::LogFlag_PrintToTerminal |
+					LogFlag::LogFlag_SaveToFile |
+					LogFlag::LogFlag_ColorText_White |
+					LogFlag::LogFlag_Text_NewLine);
 			}
 
 			if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_GAMECONTROLLER |
@@ -1151,8 +1334,11 @@ namespace Dunjun
 
 			// load assets
 			logSection(g_loggerInfo, "Load Assets");
+
 			loadShaders();
+
 			loadMaterials();
+
 			loadSpriteAsset();
 
 			g_world = defaultAllocator().makeNew<World>();
@@ -1223,12 +1409,17 @@ namespace Dunjun
 				// render update
 				while (accumulator >= TIME_STEP)
 				{
+
 					accumulator -= TIME_STEP;
+
 					handleRealtimeInput(); // input handler
+
 					update(TIME_STEP);
+
+					render();
+
 				}
 
-				render();
 
 				if (tc.update(milliseconds(500)))
 				{

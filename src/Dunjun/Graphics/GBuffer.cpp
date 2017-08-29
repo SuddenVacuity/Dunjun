@@ -18,7 +18,7 @@ namespace Dunjun
 		b.width = w;
 		b.height = h;
 
-		//if(!b.fbo)
+		if(!b.fbo)
 			glGenFramebuffersEXT(1, &b.fbo);
 
 		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, b.fbo);
@@ -98,14 +98,30 @@ namespace Dunjun
 
 	void bindGBuffer(const GBuffer* b)
 	{
+		glCheckError();
+
 		if(!b)
 		{
+			glCheckError();
+
 			glFlush();
+			glCheckError();
+
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+			glCheckError();
+
+			glCheckError();
+
 		}
 		else
 		{
+			glCheckError();
+
 			glBindFramebuffer(GL_FRAMEBUFFER, b->fbo);
+			glCheckError();
+
+			glCheckError();
+
 		}
 
 		//glBindFramebuffer(GL_FRAMEBUFFER, b != nullptr ? b->fbo : 0);

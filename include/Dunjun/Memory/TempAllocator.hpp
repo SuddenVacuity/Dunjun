@@ -9,7 +9,7 @@ namespace Dunjun
 	class TempAllocator : public Allocator
 	{
 	public:
-		TempAllocator(Allocator& backing = defaultScratchAllocator());
+		TempAllocator(Allocator& backing = defaultAllocator());
 		~TempAllocator();
 
 		void* allocate(size_t size, size_t align = DefaultAlign);

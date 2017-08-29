@@ -493,4 +493,5 @@ namespace Dunjun
 
 			setUniform(name, r, g, b, a);
 		}
+
 } // end Dunjun

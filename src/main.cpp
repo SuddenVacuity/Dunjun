@@ -70,7 +70,9 @@ int main(int argc, char** argv)
 	std::cout << "\n\n";
 
 	Dunjun::Game::init();
+
 	Dunjun::Game::run();
+
 	Dunjun::Game::cleanUp();
 
 	return 0;

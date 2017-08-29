@@ -5,7 +5,7 @@
 
 namespace Dunjun
 {
-	GLOBAL const u32 COLOR_DEPTH = 256;
+	GLOBAL const u32 COLOR_DEPTH = (u8)(-1);
 
 	struct Color // must come before render
 	{
@@ -35,173 +35,46 @@ namespace Dunjun
 
 	namespace ColorLib
 	{
-		namespace
-		{
+		GLOBAL const Vector3 BRIGHTNESS_COEFFICIENT = { 0.241f, 0.691f, 0.068f }; // default weight for calculating percieved brightness
+		GLOBAL const Vector4 BRIGHTNESS_MAXVALUE = { COLOR_DEPTH * COLOR_DEPTH * BRIGHTNESS_COEFFICIENT.r,
+													 COLOR_DEPTH * COLOR_DEPTH * BRIGHTNESS_COEFFICIENT.g,
+													 COLOR_DEPTH * COLOR_DEPTH * BRIGHTNESS_COEFFICIENT.b,
+													 Math::sqrt( COLOR_DEPTH * COLOR_DEPTH * BRIGHTNESS_COEFFICIENT.r +
+																 COLOR_DEPTH * COLOR_DEPTH * BRIGHTNESS_COEFFICIENT.g +
+																 COLOR_DEPTH * COLOR_DEPTH * BRIGHTNESS_COEFFICIENT.b ) };
+
 		// returns u8 0-255 value
 		//
 		// Vector3 should be float value 0-1
 		// Color should be ColorLib::Color
-		u8 calculateBrightness(const Vector3& colorIntesities, const Vector3& weight = {0.241f, 0.691f, 0.068f})
-		{
-			// if all are 0 return 0
-			if(colorIntesities.r == 0 && colorIntesities.g == 0 && colorIntesities.b == 0)
-				return 0;
-
-			return Math::sqrt((((colorIntesities.r * COLOR_DEPTH) * (colorIntesities.r * COLOR_DEPTH)) * weight.r) +
-							  (((colorIntesities.g * COLOR_DEPTH) * (colorIntesities.g * COLOR_DEPTH)) * weight.g) +
-							  (((colorIntesities.b * COLOR_DEPTH) * (colorIntesities.b * COLOR_DEPTH)) * weight.b)) - 1;
-		}
+		u8 calculateBrightness(const Vector3& colorIntesities, const Vector3& weight = BRIGHTNESS_COEFFICIENT);
 
 		// returns 0-255 value
-		u8 calculateBrightness(const Color& color, const Vector3& weight = {0.241f, 0.691f, 0.068f})
-		{
-			if(color.r == 0 && color.g == 0 && color.b == 0)
-				return 0.0f;
+		u8 calculateBrightness(const Color& color, const Vector3& weight = BRIGHTNESS_COEFFICIENT);
 
-			return Math::sqrt(((color.r * color.r) * weight.r) +
-							  ((color.g * color.g) * weight.g) +
-							  ((color.b * color.b) * weight.b));
-		}
+		// hue 0 = red, 1 = yellow, 2 = green, 3 = cyan, 4 = blue, 5 = magenta
+		// saturation 0~1 -- 0 = grey, 1 = full color
+		// lightness 0~1 -- 0 = black, 0.5 = normal, 1 = white
+		Color HSLtoRGB(const f32& hue, const f32& saturation = 1.0f, const f32& lightness = 0.5f);
+
+		Vector3 RGBtoHSL(const Color& color);
+
 		// Mix two colors evenly.
-		Color mix(Color c1, Color c2)
-		{
-			return{ static_cast<u8>((c1.r + c2.r) / 2),
-					static_cast<u8>((c1.g + c2.g) / 2),
-					static_cast<u8>((c1.b + c2.b) / 2),
-					static_cast<u8>((c1.a + c2.a) / 2) };
-		}
+		Color mix(Color c1, Color c2);
 
 		// Mix two colors by ratio.
 		// Ratio range: 0.0f, 1.0f
 		// less effiecient than evenly mixing
 		// use when many mixes would be needed to reach desired result
-		Color mix(Color c1, Color c2, f32 ratio)
-		{
-			assert(!(ratio < Constants::ZERO || ratio > Constants::ONE));
+		Color mix(Color c1, Color c2, f32 ratio);
 
-			f32 r2 = 1.0f - ratio;
+		Color removeChannelRed(const Color& color);
 
-			return{ static_cast<u8>((ratio * c1.r + r2 * c2.r) / 2),
-					static_cast<u8>((ratio * c1.g + r2 * c2.g) / 2),
-					static_cast<u8>((ratio * c1.b + r2 * c2.b) / 2),
-					static_cast<u8>((ratio * c1.a + r2 * c2.a) / 2) };
-		}
+		Color removeChannelGreen(const Color& color);
 
-		Color removeChannelRed(const Color& color)
-		{
-			Color c = color;
+		Color removeChannelBlue(const Color& color);
 
-			// TODO: make it possible to divide removed color unevenly between other colors
-			c.g += c.r / 2;
-			c.b += c.r / 2;
-
-			c.r = 0;
-
-			u8 biggest = c.r;
-
-			if (c.g > c.r)
-				biggest = c.g;
-			if (c.b > c.g)
-				biggest = c.b;
-
-			if (c.r != 0)
-				c.r = (biggest / c.r) * (COLOR_DEPTH - 1);
-													 
-			if (c.g != 0)							 
-				c.g = (biggest / c.g) * (COLOR_DEPTH - 1);
-													 
-			if (c.b != 0)							 
-				c.b = (biggest / c.b) * (COLOR_DEPTH - 1);
-
-			return {static_cast<u8>(c.r),
-					static_cast<u8>(c.g),
-					static_cast<u8>(c.b)};
-		}
-
-		Color removeChannelGreen(const Color& color)
-		{
-			Color c = color;
-
-			// TODO: make it possible to divide removed color unevenly between other colors
-			c.r += c.g / 2;
-			c.b += c.g / 2;
-
-			c.g = 0;
-
-			u8 biggest = c.r;
-
-			if (c.g > c.r)
-				biggest = c.g;
-			if (c.b > c.g)
-				biggest = c.b;
-
-			if (c.r != 0)
-				c.r = (biggest / c.r) * (COLOR_DEPTH - 1);
-
-			if (c.g != 0)
-				c.g = (biggest / c.g) * (COLOR_DEPTH - 1);
-
-			if (c.b != 0)
-				c.b = (biggest / c.b) * (COLOR_DEPTH - 1);
-
-			return {static_cast<u8>(c.r),
-					static_cast<u8>(c.g),
-					static_cast<u8>(c.b)};
-		}
-
-		Color removeChannelBlue(const Color& color)
-		{
-			Color c = color;
-
-			// TODO: make it possible to divide removed color unevenly between other colors
-			c.r += c.b / 2;
-			c.g += c.b / 2;
-
-			c.b = 0;
-
-			u8 biggest = c.r;
-
-			if (c.g > c.r)
-				biggest = c.g;
-			if (c.b > c.g)
-				biggest = c.b;
-
-			if (c.r != 0)
-				c.r = (biggest / c.r) * (COLOR_DEPTH - 1);
-
-			if (c.g != 0)
-				c.g = (biggest / c.g) * (COLOR_DEPTH - 1);
-
-			if (c.b != 0)
-				c.b = (biggest / c.b) * (COLOR_DEPTH - 1);
-
-			return {static_cast<u8>(c.r),
-					static_cast<u8>(c.g),
-					static_cast<u8>(c.b)};
-		}
-
-		Color greyScale(const f32& brightness)
-		{
-			Color c = Color{0xFF, 0xFF, 0xFF, 0xFF};
-
-			c.r = brightness;
-			c.g = brightness;
-			c.b = brightness;
-				    
-			return c;
-		}
-
-		Color greyScale(const Color& color)
-		{
-			f32 brightness = calculateBrightness(color);
-			Color c = Color{0xFF, 0xFF, 0xFF, 0xFF};
-
-			c.r = brightness;
-			c.g = brightness;
-			c.b = brightness;
-
-			return c;
-		}
+		Color greyScale(const f32& brightness);
 
 	const Color White{0xFF, 0xFF, 0xFF, 0xFF};
 	const Color Grey {0x7F, 0x7F, 0x7F, 0xFF};
@@ -227,7 +100,6 @@ namespace Dunjun
 	const Color Berry = mix(Blue, White);	   // 0x7F7FFF FF
 											   // 
 	const Color Brown = mix(Orange, Black);	   // 0x7F4000 FF
-	} // end anon namespace
 	} // end ColorLib
 } // end Dunjun
 

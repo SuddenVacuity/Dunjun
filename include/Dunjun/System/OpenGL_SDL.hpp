@@ -39,4 +39,9 @@
 
 #include <SDL/SDL.h>
 
+namespace Dunjun
+{
+	void glCheckError();
+}
+
 #endif

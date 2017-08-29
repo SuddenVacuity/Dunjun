@@ -24,8 +24,8 @@ namespace Dunjun
 		rt.type = t;
 		rt.width = w;
 		rt.height = h;
-		
-		//if(!rt.fbo)
+
+		if(!rt.fbo)
 			glGenFramebuffersEXT(1, &rt.fbo);
 
 		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, rt.fbo);
@@ -99,6 +99,7 @@ namespace Dunjun
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, (GLenum)wrapMode);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, (GLenum)wrapMode);
 
+
 			glFramebufferTextureEXT(GL_FRAMEBUFFER_EXT,
 				GL_DEPTH_ATTACHMENT_EXT,
 				rt.depthTexture.handle, 0);
@@ -142,4 +143,5 @@ namespace Dunjun
 
 		//glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, rt != nullptr ? rt->fbo : 0);
 	}
+
 } // end Dunjun

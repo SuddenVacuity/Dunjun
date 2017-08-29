@@ -16,6 +16,7 @@ RENDERING
 		[ ] 3D
 		[ ] cubemap
 	[~] Material
+		[ ] shader flags
 		[x] diffuse
 		[x] normal
 		[ ] specular
@@ -28,7 +29,10 @@ RENDERING
 		[x] normals
 		[x] tangent
 	[.] Mesh
-	[x] ModelInstance(InstanceData)
+		[x] vertices
+		[x] indices
+	[~] ModelInstance(InstanceData)
+		[ ] center
 	[x] Transform
 		[x] position, orientation, scale
 		[x] operator overloads

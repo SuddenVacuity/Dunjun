@@ -7,6 +7,8 @@ uniform vec3 u_cameraPosition;
 uniform Transform u_transform; // transform function
 
 uniform Material u_material;
+uniform sampler2D u_diffuseMap;
+uniform sampler2D u_normalMap;
 
 varying vec3 v_position_ws; // world space
 
@@ -17,7 +19,7 @@ varying mat3 v_tbNormalInv;
 
 void main()
 {
-	vec4 texColor = texture2D(u_material.diffuseMap, v_texCoord).rgba; // get the color from texture coordinates to add to v_color
+	vec4 texColor = texture2D(u_diffuseMap, v_texCoord).rgba; // get the color from texture coordinates to add to v_color
 
 	if(texColor.a < 0.5) // check alpha value
 		discard;
@@ -25,7 +27,7 @@ void main()
 	vec3 surfaceColor = u_material.diffuseColor.rgb * texColor.rgb * v_color;
 
 	// TODO: check if these need to be normalized here
-	vec3 normal = normalize((255.0f / 128.0f) * texture2D(u_material.normalMap, v_texCoord).xyz - vec3(1.0f, 1.0f, 1.0f));
+	vec3 normal = normalize((255.0f / 128.0f) * texture2D(u_normalMap, v_texCoord).xyz - vec3(1.0f, 1.0f, 1.0f));
 	normal = v_tbNormalInv * normal;
 
 	gl_FragData[0].rgb = surfaceColor.rgb;

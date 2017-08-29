@@ -58,6 +58,7 @@ namespace Dunjun
 	extern Logger g_loggerModel;
 	extern Logger g_loggerRender;
 	extern Logger g_loggerGame;
+	extern Logger g_loggerGraphics;
 
 	void logPrint(const Logger& logger, const char* fmt, ...);
 	void logSection(const Logger& logger, const char* sectionName);

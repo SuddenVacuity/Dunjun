@@ -37,9 +37,6 @@ namespace Dunjun
 
 	void bindRenderTexture(const RenderTexture* rt);
 
-
-
-
 } // end Dunjun
 
 #endif

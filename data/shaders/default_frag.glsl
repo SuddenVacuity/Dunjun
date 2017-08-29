@@ -10,6 +10,7 @@ uniform vec3 u_cameraPosition;
 uniform Transform u_transform; // transform function
 
 uniform Material u_material;
+uniform sampler2D u_diffuseMap;
 
 uniform PointLight u_light;
 
@@ -22,7 +23,7 @@ varying vec3 v_normal;
 
 void main()
 {
-	vec4 texColor = texture2D(u_material.diffuseMap, v_texCoord).rgba; // get the color from texture coordinates to add to v_color
+	vec4 texColor = texture2D(u_diffuseMap, v_texCoord).rgba; // get the color from texture coordinates to add to v_color
 
 	if(texColor.a < 0.5) // check alpha value
 		discard;

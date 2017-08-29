@@ -4,10 +4,12 @@
 
 struct Material
 {
-	sampler2D diffuseMap;
+	// sampler2D are causing 'structure' error
+	//sampler2D diffuseMap;
 	vec4 diffuseColor;
 
-	sampler2D normalMap;
+	// sampler2D are causing 'structure' error
+	//sampler2D normalMap;
 
 	vec4 specularColor;
 	float specularExponent;

@@ -132,7 +132,9 @@ namespace Dunjun
 		createGBuffer(gBuffer, fbSize.x, fbSize.y);
 
 		deferredGeometryPass();
+
 		deferredLightPass();
+
 		deferredFinalPass();
 	}
 
@@ -184,8 +186,8 @@ namespace Dunjun
 				const Material& material = component.material;
 				const Transform& transform = sceneGraph.getGlobalTransform(nodeId);
 
-				shaders.setUniform("u_material.diffuseMap", (s32)0); // shaderprogram.cpp
-				shaders.setUniform("u_material.normalMap", (s32)1); // shaderprogram.cpp
+				shaders.setUniform("u_diffuseMap", (s32)0); // shaderprogram.cpp
+				shaders.setUniform("u_normalMap", (s32)1); // shaderprogram.cpp
 
 				shaders.setUniform("u_material.diffuseColor", material.diffuseColor); // shaderprogram.cpp
 				shaders.setUniform("u_material.specularColor", material.specularColor); // shaderprogram.cpp
@@ -222,6 +224,7 @@ namespace Dunjun
 	
 	void RenderSystem::deferredLightPass()
 	{
+
 		createRenderTexture(lightingBuffer, gBuffer.width, gBuffer.height, RenderTexture::Light);
 
 		bindTexture(&gBuffer.textures[GBuffer::Diffuse], 0);

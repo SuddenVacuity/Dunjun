@@ -331,9 +331,18 @@ namespace Dunjun
 		{
 			SDL_GameController* gamepad = g_gamepadHandles[gamepadId];
 
-			if(gamepad && SDL_GameControllerGetAttached(gamepad))
-				return SDL_GameControllerGetButton(gamepad, (SDL_GameControllerButton)button) != 0;
 
+			std::cout << "";
+
+			if(gamepad && SDL_GameControllerGetAttached(gamepad))
+			{
+				Uint8 a = SDL_GameControllerGetButton(gamepad, (SDL_GameControllerButton)button);
+
+				return a != 0;
+			}
+
+
+			std::cout << "";
 			return false;
 		}
 
@@ -351,7 +360,6 @@ namespace Dunjun
 
 				return static_cast<f32>(value) / 32768.0f;
 			}
-
 			return 0.0f;
 		}
 

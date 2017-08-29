@@ -19,6 +19,7 @@ namespace Dunjun
 	Logger g_loggerModel;
 	Logger g_loggerRender;
 	Logger g_loggerGame;
+	Logger g_loggerGraphics;
 
 	INTERNAL void logSetConsoleColor(const u32& logFlags)
 	{
